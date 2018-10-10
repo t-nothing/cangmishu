@@ -1,0 +1,1 @@
+*/5 * * * * cd /var/www/html/nt && php aci/index.php cli/Tracking in_resque

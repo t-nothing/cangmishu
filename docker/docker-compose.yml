@@ -1,0 +1,88 @@
+version: '3'
+
+services:
+
+### Applications Code Container #############################
+
+    # web:
+    #   image: debian:jessie
+    #   volumes:
+    #     - ./www:/var/www
+
+### PHP-FPM Container #######################################
+
+    php-fpm:
+      build:
+        context: ./php
+      volumes:
+        - ../www:/var/www/html
+      expose:
+        - "9000"
+      depends_on:
+        - mysql
+        - redis
+
+### PHP-CLI Container #######################################
+
+    php-cli:
+      build:
+        context: ./php_cli
+      volumes:
+        - ../www:/var/www/html
+      depends_on:
+        - mysql
+        - redis
+      tty: true
+
+### Nginx Server Container ##################################
+
+    nginx:
+      build:
+        context: ./nginx
+      volumes:
+          - ../www:/var/www/html
+          - ../static:/var/www/static
+      ports:
+          - "${NGINX_HTTP_PORT}:80"
+          - "${NGINX_HTTPS_PORT}:443"
+      depends_on:
+          - php-fpm
+
+### MySQL Container #########################################
+
+    mysql:
+      image: mysql:5.7
+      volumes:
+        - ../www:/var/www/html
+        - mysql-data:/var/lib/mysql
+      ports:
+        - "${MYSQL_PORT}:3306"
+      environment:
+        - MYSQL_ROOT_PASSWORD=123456
+
+### PHPMyAdmin Container #########################################
+
+    phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      ports:
+        - "${PHPMYADMIN_PORT}:80"
+      links:
+          - mysql:db
+
+### Redis Container #########################################
+
+    redis:
+      image: redis:3.2.11
+      ports:
+        - "${REDIS_PORT}:6379"
+      volumes:
+        - ./data/redis:/data
+
+### Volumes Setup ###########################################
+
+volumes:
+  mysql-data:
+networks:
+  default:
+    external:
+      name: ${USER_NETWORK}
