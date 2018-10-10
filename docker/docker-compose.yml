@@ -7,7 +7,7 @@ services:
     # web:
     #   image: debian:jessie
     #   volumes:
-    #     - ./www:/var/www
+    #     - ./src:/var/www
 
 ### PHP-FPM Container #######################################
 
@@ -15,7 +15,7 @@ services:
       build:
         context: ./php
       volumes:
-        - ../www:/var/www/html
+        - ../src:/var/www/html
       expose:
         - "9000"
       depends_on:
@@ -28,7 +28,7 @@ services:
       build:
         context: ./php_cli
       volumes:
-        - ../www:/var/www/html
+        - ../src:/var/www/html
       depends_on:
         - mysql
         - redis
@@ -40,7 +40,7 @@ services:
       build:
         context: ./nginx
       volumes:
-          - ../www:/var/www/html
+          - ../src:/var/www/html
           - ../static:/var/www/static
       ports:
           - "${NGINX_HTTP_PORT}:80"
@@ -53,7 +53,7 @@ services:
     mysql:
       image: mysql:5.7
       volumes:
-        - ../www:/var/www/html
+        - ../src:/var/www/html
         - mysql-data:/var/lib/mysql
       ports:
         - "${MYSQL_PORT}:3306"
