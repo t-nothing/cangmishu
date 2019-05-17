@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="nle-php-coding-standard">
-    <description>nle-tech php coding standard</description>
-    <rule ref="PSR2">
-        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
-    </rule>
-    <!-- your rule sets -->
-</ruleset>
