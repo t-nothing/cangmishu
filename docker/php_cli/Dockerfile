@@ -1,4 +1,4 @@
-FROM php:7.1-cli
+FROM php:7.1.16-cli
 
 ENV TZ=Asia/Shanghai
 
@@ -7,9 +7,11 @@ RUN apt-get update && apt-get install -y \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng12-dev \
-    && docker-php-ext-install -j$(nproc) iconv mcrypt mysqli pdo_mysql pcntl\
+        zlib1g-dev \
+    && docker-php-ext-install -j$(nproc) iconv mcrypt mysqli pdo_mysql pcntl \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install zip
 
 RUN pecl install -o -f redis \
 &&  rm -rf /tmp/pear \
@@ -25,7 +27,10 @@ COPY ./simsun.ttc /usr/share/fonts/
 
 RUN chmod +x /usr/local/bin/wkhtmltopdf
 
-WORKDIR /var/www/html/WMS-API-V2/src/
+WORKDIR /var/www/html
 
-CMD ["sh", "-c","php artisan queue:work --tries=3 --timeout=60 --queue=emails"]
-CMD ["sh", "-c","php artisan queue:work --tries=3 --timeout=60 --queue=wms2"]
+COPY ./start-queue.sh /usr/local/bin
+
+RUN chmod +x /usr/local/bin/start-queue.sh
+
+CMD ["sh", "-c","sh start-queue.sh"]
