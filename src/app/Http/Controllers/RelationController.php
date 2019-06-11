@@ -49,6 +49,7 @@ class RelationController extends  Controller
 
     public function destroy(BaseRequests $request)
     {
+//        dd($request->all(),Auth::ownerId());
         $this->validate($request,[
             'group_id' =>[
                 'required','integer','min:0',
@@ -60,10 +61,17 @@ class RelationController extends  Controller
             ]
         ]);
 
-        if(UserGroupRel::where('user_id', $request->user_id)->where('group_id', $request->group_id)->delete()){
+        $rel = UserGroupRel::where('user_id', $request->user_id)->where('group_id', $request->group_id)->first();
+        if(!$rel){
+            return formatRet(500,'未在此分组中找到该员工');
+        }
+
+        if($rel->delete()){
             return formatRet(0);
-        };
-        return formatRet(500,'删除失败');
+        }else{
+            return formatRet(500,'删除失败');
+        }
+
     }
 
 }

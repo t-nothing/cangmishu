@@ -2,14 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\ProductStock;
-use App\Models\ProductSku;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
-
 class Batch extends Model
 {
-    use SoftDeletes;
 
     const STATUS_PREPARE    = 1;// 待入库
     const STATUS_PROCEED    = 2;// 入库中
@@ -23,7 +17,7 @@ class Batch extends Model
     
     protected $table = 'batch';
 
-    protected  $fillable = ['type_id','warehouse_id','batch_code','plan_time','over_time','distributor_id','remark','confirmation_number'];
+    protected  $fillable = ['type_id','warehouse_id','batch_code','plan_time','over_time','distributor_id','remark','confirmation_number','owner_id'];
     protected $guarded  =[];
     /**
      * The attributes that should be mutated to dates.

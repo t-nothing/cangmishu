@@ -48,6 +48,7 @@ class UpdateProductRequest extends BaseRequests
             'specs.*.name_en'           => 'required|string|max:255',
             'specs.*.net_weight'        => 'present|numeric',
             'specs.*.gross_weight'      => 'present|numeric',
+            'specs.*.is_warning'        => 'required|boolean',
         ];
     }
 }

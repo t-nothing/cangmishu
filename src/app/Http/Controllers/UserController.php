@@ -51,11 +51,23 @@ class UserController extends  Controller
             'password'=>'required|max:255|confirmed',
             'password_confirmation' => 'required|max:255',
         ]);
-
+        app('log')->info('user',['request'=>$request->all(),'user_id'=>$user_id]);
         $user = User::find($user_id);
-        if($user_id != Auth::id()){
-            return formatRet('无权修改');
+        if(!$user){
+            return formatRet(500,"请选择用户");
         }
+        app('log')->info('user',$user->toArray());
+        $auth = Auth::user();
+        if($user->boss_id !=0){
+            if($user->boss_id !=$auth->id){
+                return formatRet(500,"无权修改");
+            }
+        }else{
+            if($user->id != $auth->id){
+                return formatRet(500,"无权修改");
+            }
+        }
+
         $user->password = Hash::make($request->password);
         if (! $user->save()) {
             return formatRet(500,'操作失败');
@@ -67,6 +79,7 @@ class UserController extends  Controller
     public function updateInfo(BaseRequests $request,$user_id){
         $this->validate($request, [
             'nickname'=>'required|string|max:255',
+//            'avatar'=>'required|string|max:255',
         ]);
 
         $user = User::find($user_id);
@@ -74,6 +87,7 @@ class UserController extends  Controller
             return formatRet('无权修改');
         }
         $user->nickname = $request->nickname;
+//        $user->avatar = $request->avatar;
         if (! $user->save()) {
             return formatRet(500,'操作失败');
         }

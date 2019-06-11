@@ -23,6 +23,7 @@ class WarehouseLocationController extends Controller
             ->when($request->filled('is_enabled'),function($query) use($request){
                 $query->where('is_enabled', $request->is_enabled);
             })
+            ->with(['warehouseArea:id,name_cn,name_en'])
             ->paginate($request->input('page_size',10));
 
         return formatRet(0, '', $features->toArray());
@@ -34,6 +35,7 @@ class WarehouseLocationController extends Controller
         try{
             $data = $request->all();
             $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
+            app('log')->info('新增仓库货位', $data);
             WarehouseLocation::create($data);
             return formatRet(0);
         }catch (\Exception $e){

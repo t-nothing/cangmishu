@@ -45,6 +45,7 @@ class ProductStock extends Model
      */
     protected $appends = [
         'relevance_code_barcode',
+        'product_name_cn'
     ];
 
     protected  $fillable =['owner_id','spec_id','relevance_code','need_num','remark','distributor_id','distributor_code','warehouse_id','status','sku','ean'];
@@ -143,6 +144,27 @@ class ProductStock extends Model
     | Attributes
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * @return string
+     */
+    public function getProductNameCnAttribute()
+    {
+        return isset($this->spec->product)
+            ? $name = $this->spec->product['name_cn'] . '(' . $this->name_cn . ')'
+            : '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductNameEnAttribute()
+    {
+        return isset($this->spec->product)
+            ? $name = $this->spec->product['name_en'] . '(' . $this->name_en . ')'
+            : '';
+    }
+
 
     /**
      * @return string

@@ -39,12 +39,15 @@ class OrderService
         $order = new Order();
         $order->owner_id       = $user_id;
         $order->order_type     = $data->order_type;
-        $order->delivery_date  = $data->delivery_date;
+        if($data->filled('delivery_date')){
+            $order->delivery_date  = $data->delivery_date;
+        };
         if($data->filled('delivery_type')){
             $order->delivery_type  = $data->input('delivery_type');
         }
         $order->warehouse_id   = $data->warehouse_id;
         $order->status         = Order::STATUS_DEFAULT;
+        $order->remark         = $data->input("remark","");
 
         // 收件人信息
         $receiver = ReceiverAddress::find($data->receiver_id);

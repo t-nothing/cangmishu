@@ -48,6 +48,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
+
         if($request->wantsJson() ||$request->expectsJson()){
             $e =  $this->prepareException($e);
             switch ($e){

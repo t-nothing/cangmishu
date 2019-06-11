@@ -110,25 +110,6 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles()
-    {
-        return $this->hasManyThrough('App\Models\Role', 'App\Models\WarehouseEmployee', 'user_id', 'role_id');
-    }
-
-    public function rolePrivileges()
-    {
-        return $this->hasManyThrough('App\Models\RolePrivilege', 'App\Models\WarehouseEmployee', 'user_id', 'role_id');
-    }
-
-    public function myBoss()
-    {
-        return $this->belongsTo('App\Models\UserEmployee', 'user_id', 'id');
-    }
-
-    public function myEmployees()
-    {
-        return $this->hasMany('App\Models\UserEmployee', 'boss_id', 'id');
-    }
 
     public function groups()
     {

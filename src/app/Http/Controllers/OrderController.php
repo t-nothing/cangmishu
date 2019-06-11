@@ -64,7 +64,7 @@ class OrderController extends Controller
                 [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
         });
 
-        $orders = $order->latest()->paginate($request->input('page_size',10),['id','created_at','send_phone','receiver_phone','send_fullname','receiver_fullname','delivery_date','warehouse_id','order_type','delivery_type'])->toArray();
+        $orders = $order->latest()->paginate($request->input('page_size',10),['id','created_at','send_phone','receiver_phone','send_fullname','receiver_fullname','delivery_date','warehouse_id','order_type','delivery_type','status','express_num'])->toArray();
         foreach ($orders['data'] as $k => $v) {
             $sum = 0;
             if (!empty($v['order_items'])) {
@@ -194,7 +194,7 @@ class OrderController extends Controller
                     'shelf_num' =>$v['stock']->shelf_num
                 ];
             }
-            $order->update(['status' => Order::STATUS_WAITING,'verify_status'=>2]);
+            $order->update(['status' => Order::STATUS_WAITING,'verify_status'=>2,'delivery_data'=>time()]);
             // 记录出库单拣货完成的时间
             OrderHistory::addHistory($order, Order::STATUS_DEFAULT);
             OrderHistory::addHistory($order, Order::STATUS_PICKING);
@@ -224,6 +224,7 @@ class OrderController extends Controller
 
     public function updateStatus(BaseRequests $request,$order_id)
     {
+        app('log')->info('request',$request->all());
         app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
         $this->validate($request,[
             'warehouse_id' =>  [

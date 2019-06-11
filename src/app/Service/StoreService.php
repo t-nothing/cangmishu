@@ -36,7 +36,7 @@ class StoreService
     public  function putOn(ProductStock $stock,$warehouse_id, $code){
 
         if (! $location = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $code)->where('is_enabled',1)->first()) {
-            return eRet(500, '货位不存在或未启用('.$code.')');
+            return eRet('货位不存在或未启用('.$code.')');
         }
 
         $stock->warehouse_location_id = $location->id;
@@ -58,7 +58,7 @@ class StoreService
         $stock->load(['batch', 'spec.product.category']);
 
         if (! $stock->batch->canStockIn()) {
-            return eRet(500, 'id为'.$data['stock_id']."的入库单已完成");
+            return eRet('id为'.$data['stock_id']."的入库单状态不是待入库或入库中");
         }
         $category = $stock->spec->product->category;
         if ($category) {

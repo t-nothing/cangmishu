@@ -162,8 +162,8 @@ class ProductStockController extends  Controller
                     $data['data'][$k]['warehouse_id'],
                     $data['data'][$k]['product_id'],
                     $data['data'][$k]['owner_id'],
-                    $data['data'][$k]['name_cn'],
-                    $data['data'][$k]['name_en'],
+//                    $data['data'][$k]['name_cn'],
+//                    $data['data'][$k]['name_en'],
                     $data['data'][$k]['product']
                 );
             }
@@ -469,30 +469,30 @@ class ProductStockController extends  Controller
             $stock->where('sku', $request->code);
         }
 
-        if ($stock) {
-            $stocks = $stock->get();
-        }
+        $stocks= $stock->paginate();
 
-        if (! $stocks->toArray()) {
-            if ($location) {
-                return formatRet(500, '货位 '.$request->code. ' 暂无库存记录');
-            } else {
-                return formatRet(500, '什么也没有找到，扫别的试试？');
-            }
-        }
-
-        $data = [];
+        $re= [];
         foreach ($stocks as $s) {
-            $data[] = [
+            $re[] = [
+                'ean' => $s->ean,
                 'stock_id' => $s->id,
                 'sku' => $s->sku,
                 'product_name' => $s->spec->product_name,
                 'shelf_num' => $s->shelf_num,
-                'shelf_num_waiting'=>$s->shelf_num_waiting
+                'shelf_num_waiting'=>$s->shelf_num_waiting,
+                'relevance_code' =>$s->relevance_code,
+                'location_code'=>$s->location->code,
+                'product_batch_num'=>$s->product_batch_num,
+                'best_before_date'=>$s->best_before_date,
+                'remark'=>$s->remark,
+                'expiration_date'=>$s->expiration_date->toDateString(),
             ];
         }
 
-        return formatRet(0, '成功', $data);
+        $result = $stocks->toArray();
+        unset($result['data']);
+        $result['data'] = $re;
+        return formatRet(0, '成功', $result);
     }
 
 
@@ -522,7 +522,7 @@ class ProductStockController extends  Controller
             ->findOrFail($request->stock_id);
         $stock->append(['to_be_verify', 'shelf_num_waiting']);
         return formatRet(0, '', [
-            'stock' => $stock,
+            'stock' => $stock->toArray(),
         ]);
     }
 
@@ -603,6 +603,26 @@ class ProductStockController extends  Controller
             return formatRet(500, '失败');
         }
         return formatRet(0);
+    }
+
+
+    public  function  getInfoBySku(BaseRequests $request, $sku)
+    {
+        app('log')->info('查看库存详情', $request->input());
+
+        $this->validate($request, [
+            'warehouse_id'            =>[
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where('owner_id',Auth::ownerId())
+            ]
+        ]);
+
+        $stock = ProductStock::where('sku',$sku)->where('warehouse_id',$request->input('warehouse_id'))->first();
+        if(!$stock){
+            return formatRet(0,'sku不存在');
+        }
+        return formatRet(0,'成功',$stock->toArray());
+
     }
 
 }

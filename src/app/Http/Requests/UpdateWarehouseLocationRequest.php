@@ -33,7 +33,7 @@ class UpdateWarehouseLocationRequest extends BaseRequests
             ],
             'warehouse_area_id' => [
                 'required','integer','min:1',
-                Rule::exists('warehouse_location','id')->where(function($q){
+                Rule::exists('warehouse_area','id')->where(function($q){
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],

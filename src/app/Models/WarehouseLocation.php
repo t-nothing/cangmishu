@@ -12,7 +12,7 @@ class WarehouseLocation extends Model
         'updated_at',
     ];
 
-    protected  $fillable =['warehouse_id','warehouse_area_id','code','is_enabled','passage','row','col','floor','remark'];
+    protected  $fillable =['warehouse_id','warehouse_area_id','code','is_enabled','passage','row','col','floor','remark','owner_id','capacity'];
     protected $guarded =[];
 
     /**

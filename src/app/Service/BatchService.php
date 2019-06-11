@@ -54,7 +54,7 @@ class BatchService
         if (isset($request['remark'])) {
             $data['remark'] = $request['remark'];
         }
-        $warehouse = Warehouse::find($request->input('warehouse_id'));
+        $warehouse = Warehouse::find($request['warehouse_id']);
         $data['batch_code'] = $this->batchCode($warehouse);
 
         $batch = Batch::create($data);

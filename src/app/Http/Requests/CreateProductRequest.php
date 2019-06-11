@@ -53,6 +53,7 @@ class CreateProductRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
+            'specs.*.is_warning' =>'required|boolean'
         ];
     }
 }

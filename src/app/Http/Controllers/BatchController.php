@@ -7,6 +7,7 @@ use App\Http\Requests\CreateBatchRequest;
 use App\Http\Requests\CreateShelfRequest;
 use App\Http\Requests\UpdateBatchRequest;
 use App\Models\Batch;
+use App\Models\ProductStock;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use PDF;
@@ -15,6 +16,7 @@ class BatchController extends Controller
 {
     public function index(BaseRequests $request)
     {
+        app('log')->info('查询入库单',$request->all());
         $this->validate($request,[
             'warehouse_id' => [
                 'required','integer','min:1',
@@ -72,7 +74,6 @@ class BatchController extends Controller
         app('db')->beginTransaction();
         try{
             $data = $request->all();
-            $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
             app('batch')->create($data);
             app('db')->commit();
             return formatRet(0);
@@ -109,11 +110,19 @@ class BatchController extends Controller
         app('log')->info('删除入库单', ['id'=>$batch_id]);
 
         $batch = Batch::find($batch_id);
+
+        if(!$batch){
+            return formatRet(500,'入库单不存在或已被删除');
+        }
+        if($batch->status != Batch::STATUS_PREPARE ){
+            return formatRet(500,'不允许删除');
+        }
         if($batch->owner_id != Auth::ownerId()){
             return formatRet(500,'没有权限');
         }
         try{
           $batch->delete();
+          ProductStock::where('batch_id',$batch_id)->delete();
           return formatRet(0,'success');
         }catch (\Exception $e){
             app('db')->rollback();
@@ -147,16 +156,16 @@ class BatchController extends Controller
     {
         app('log')->info('入库上架', $request->all());
         app('db')->beginTransaction();
-        try{
+//        try{
             $data = $request->stock;
             app('store')->InAndPutOn($request->warehouse_id,$data,$request->batch_id);
             app('db')->commit();
             return formatRet(0);
-        }catch (\Exception $e){
-            app('db')->rollback();
-            app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"入库上架失败");
-        }
+//        }catch (\Exception $e){
+//            app('db')->rollback();
+//            app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
+//            return formatRet(500,"入库上架失败");
+//        }
     }
 
     public function download(BaseRequests $request, $batch_id)
@@ -183,6 +192,35 @@ class BatchController extends Controller
     }
 
 
+    public  function  show (BaseRequests $request,$batch_id)
+    {
+        app('log')->info('查询入库单详情',$request->all());
+        $this->validate($request,[
+            'warehouse_id' => [
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where(function($q){
+                    $q->where('owner_id',Auth::ownerId());
+                })
+            ]
+        ]);
 
+        $batch = Batch::where('warehouse_id',$request->warehouse_id)->where('owner_id',Auth::ownerId())
+            ->with([
+                'warehouse:id,name_cn',
+                'batchType:id,name',
+                'distributor:id,name_cn,name_en',
+                'stocks'
+            ])
+            ->where('id',$batch_id)
+            ->first();
+        if(!$batch){
+            return formatRet(500,"入库单不存在");
+        }
+        $batch->append('batch_code_barcode');
+//        $stock =
+        unset($batch['batch_products']);
+        return formatRet(0,"成功",$batch->toArray());
+
+    }
 
 }

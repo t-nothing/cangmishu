@@ -16,8 +16,8 @@ class WarningController extends  Controller
     {
         $warning_email = Auth::user()->warning_email;
         $default_warning_stock =  Auth::user()->default_warning_stock;
-        $warning_data = UserCategoryWarning::with(['category'])->where('user_id',Auth::ownerId())->get();
-        return formatRet(0,'',compact('warning_email','default_warning_stock','warning_data'));
+        $warning_data = UserCategoryWarning::with(['category:id,name_cn'])->where('user_id',Auth::ownerId())->get();
+        return formatRet(0,'',compact('warning_email','warning_data','default_warning_stock'));
     }
 
     //@author lym

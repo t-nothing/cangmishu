@@ -67,4 +67,16 @@ class ReceiverAddressController extends Controller
             return formatRet(500,"删除收件人地址失败");
         }
     }
+
+    public function  show(BaseRequests $request, $address_id)
+    {
+
+        app('log')->info('查看收件人地址', ['id' => $address_id]);
+
+        $address = ReceiverAddress::where('owner_id',Auth::ownerId())->find($address_id);
+        if(!$address){
+            return formatRet(500,"地址不存在");
+        }
+        return formatRet(0,"成功",$address->toArray());
+    }
 }

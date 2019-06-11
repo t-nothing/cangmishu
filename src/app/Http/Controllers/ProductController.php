@@ -25,7 +25,7 @@ class ProductController extends Controller
      */
     public function index(IndexProductRequest $request)
     {
-        $product = Product::with(['category:name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id'])
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id'])
             ->ofWarehouse($request->warehouse_id)
             ->where('owner_id',app('auth')->ownerId())
             ->latest('updated_at');
@@ -124,6 +124,7 @@ class ProductController extends Controller
                    'name_en'        => $spec['name_en'],
                    'net_weight'     => $spec['net_weight'],
                    'gross_weight'   => $spec['gross_weight'],
+                   'is_warning'     => $spec['is_warning']
                ];
                 ProductSpec::updateOrCreate(['relevance_code'=>$spec['relevance_code']],$data);
            }
@@ -187,8 +188,29 @@ class ProductController extends Controller
             app('log')->error('货品导入失败', ["msg" => $exception->getMessage()]);
             return formatRet(500, '导入失败');
         }
-
     }
 
+    public  function  show(BaseRequests $request,$product_id)
+    {
+        app('log')->error('查看详情', ["product_id" => $product_id]);
+        $this->validate($request,[
+            'warehouse_id' => [
+                'required','min:1',
+                Rule::exists('warehouse','id')->where('owner_id',app('auth')->ownerId())
+            ]
+        ]);
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id'])
+            ->ofWarehouse($request->warehouse_id)
+            ->where('owner_id', app('auth')->ownerId())
+            ->where('id', $product_id)
+            ->first();
+        if(!$product){
+            $product= [];
+        }else{
+            $product= $product->toArray();
+        }
+        return formatRet(0, "成功", $product);
+
+    }
 
 }

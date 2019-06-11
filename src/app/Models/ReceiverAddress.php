@@ -9,7 +9,7 @@ class ReceiverAddress extends Model
 {
     use SoftDeletes;
     protected $table ="receiver_address";
-    protected  $fillable =['fullname','phone','country','province', 'city','district','address'];
+    protected  $fillable =['fullname','phone','country','province', 'city','district','address','owner_id'];
     protected $guarded = [];
 
     public function fromDateTime($value)

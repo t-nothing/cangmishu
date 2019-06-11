@@ -178,8 +178,10 @@ class UserService{
             $userCategoryData = [
                 'user_id' => $user->id,
                 'category_id' => $category->id,
-                'warning_stock'  => 50
+                'warning_stock'  => env("DEFAULT_WARNING_STOCK",50)
             ];
+            $user->default_warning_stock = env("DEFAULT_WARNING_STOCK",50);
+            $user->save();
 
             //用户分类预警新增
             $userCategory::create($userCategoryData);
@@ -207,5 +209,4 @@ class UserService{
 
         return $user;
     }
-
 }

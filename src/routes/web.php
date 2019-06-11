@@ -12,25 +12,37 @@
 */
 
 Route::get('/', function () {
+//
+//   $a ="email:1245@163.com
+//name:测试甲
+//nickname:甲
+//password:123456
+//password_confirmation:123456
+//remark:甲
+//phone:123456789";
+//
+//
+//   $b=explode("\n",$a);
+//   $res = [];
+//   foreach ($b as $v){
+//       $re = explode(":",$v);
+//       echo $re[1];
+//        $res[$re[0]] = $re[1];
+//   }
 
-   $a ="email:1245@163.com
-name:测试甲
-nickname:甲
-password:123456
-password_confirmation:123456
-remark:甲
-phone:123456789";
-
-
-   $b=explode("\n",$a);
-   $res = [];
-   foreach ($b as $v){
-       $re = explode(":",$v);
-       echo $re[1];
-        $res[$re[0]] = $re[1];
-   }
-
-   dd(json_encode($res,JSON_UNESCAPED_UNICODE));
+//    $a="currency=EUR&description=test&method=v3.CreateRefund&notify_url=https://dev-api.cangmishu.com/&refund_amount=0.1&refund_currency=EUR&time=1558492188000&trade_id=c6db6ab0-a29d-9fac-f964-7b9953087503&user=info@yabandmedia.com";
+//    $a="function=precreate&mid=481200001&timestamp=1487849674744&sign=613e58bade6ad38&trade_no=117022408474255807&trade_status=TRADE_SUCCESS&amount=20&currency=EUR&forex_rate=7.1406";
+//    $b=explode("&",$a);
+//
+//   $res = [];
+//   foreach ($b as $v){
+//        $re= explode("=",$v);
+//        $res[$re[0]] =$re[1];
+//   }
+//    $a= [["mid"=>"123456789","token"=>"123456789"]];
+//   dd($res);
+    $uid = md5(time().uniqid());
+    dd($uid);
 
 });
 
@@ -38,7 +50,37 @@ phone:123456789";
 Route::post('/login', 'AuthController@login');
 Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
+Route::prefix('test')->group(function () {
+    //yaband
+    Route::post('/redirect','TestController@test');
 
+    Route::post('/pay','TestController@pay');
+    Route::post('/query','TestController@query');
+    Route::post('/refund','TestController@refund');
+    Route::post('/cancel','TestController@cancel');
+    Route::post('/yaband/notify/pay','TestController@YaBandPayNotify');
+    Route::post('/yaband/notify/refund','TestController@YaBandRefundNotify');
+    Route::post('/notifyPay','TestController@notifyPay');
+
+    //
+    Route::post('/twopaynow/qr/pay','QRController@pay');
+    Route::post('/twopaynow/qr/query','QRController@query');
+    Route::post('/twopaynow/qr/refund','QRController@refund');
+    Route::post('/twopaynow/qr/cancel','QRController@cancel');
+    Route::post('/twopaynow/qr/notify','QRController@Notify');
+    Route::post('/twopaynow/notifyPay','QRController@notifyPay');
+
+
+    Route::post('/twopaynow/wp/pay','WPController@pay');
+    Route::post('/twopaynow/wp/query','WPController@query');
+    Route::post('/twopaynow/wp/refund','WPController@refund');
+    Route::post('/twopaynow/wp/cancel','WPController@cancel');
+//    Route::post('/twopaynow/wp/yaband/notify/pay','WPController@YaBandPayNotify');
+
+
+    Route::post('/twopaynow//notifyPay','TestController@notifyPay');
+
+});
 
 Route::middleware(['auth:jwt'])->group(function () {
 
@@ -87,6 +129,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //入库单分类
     Route::get('/batchType', 'BatchTypeController@index');
+    Route::get('/batchType/{batch_id}', 'BatchTypeController@show');
     Route::post('/batchType', 'BatchTypeController@store');
     Route::put('/batchType/{type_id}', 'BatchTypeController@update');
     Route::delete('/batchType/{type_id}', 'BatchTypeController@destroy');
@@ -102,12 +145,14 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/senderAddress', 'SenderAddressController@store');
     Route::put('/senderAddress/{address_id}', 'SenderAddressController@update');
     Route::delete('/senderAddress/{address_id}', 'SenderAddressController@destroy');
+    Route::get('/senderAddress/{address_id}', 'SenderAddressController@show');
 
     //收件人地址管理
     Route::get('/receiverAddress', 'ReceiverAddressController@index');
     Route::post('/receiverAddress', 'ReceiverAddressController@store');
     Route::put('/receiverAddress/{address_id}', 'ReceiverAddressController@update');
     Route::delete('/receiverAddress/{address_id}', 'ReceiverAddressController@destroy');
+    Route::get('/receiverAddress/{address_id}', 'ReceiverAddressController@show');
 
     //供应商管理
     Route::get('/distributor', 'DistributorController@index');
@@ -118,6 +163,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //商品
     Route::get('/products', 'ProductController@index');
+    Route::get('/products/{product_id}', 'ProductController@show');
     Route::post('/products', 'ProductController@store');
     Route::put('/products/{product_id}', 'ProductController@update');
     Route::delete('/products/{product_id}', 'ProductController@destroy');
@@ -132,6 +178,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //入库单
     Route::get('/batch', 'BatchController@index');
+    Route::get('/batch/{batch_id}', 'BatchController@show');
     Route::post('/batch', 'BatchController@store');
     Route::put('/batch/{batch_id}', 'BatchController@update');
     Route::delete('/batch/{batch_id}', 'BatchController@destroy');
@@ -151,6 +198,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //库存
     Route::get('/stock/code', 'ProductStockController@getSkus');
+    Route::get('/stock/sku/{sku}', 'ProductStockController@getInfoBySku');
     Route::put('/stock/{stock_id}', 'ProductStockController@update');
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
     Route::get('/stock/spec/log/{stock_id}', 'ProductStockController@getLogsForSpec');

@@ -16,7 +16,7 @@ use App\Models\SenderAddress;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class SenderAddressController
+class SenderAddressController extends  Controller
 {
     public function index(BaseRequests $request)
     {
@@ -33,11 +33,14 @@ class SenderAddressController
     {
         app('log')->info('添加发件人地址',$request->all());
         $user_id = Auth::ownerId();
+
         DB::beginTransaction();
         try{
             $data = $request->all();
             $data = array_merge($data,['owner_id' =>$user_id]);
-            SenderAddress::create($data);
+            app('log')->info("data",$data);
+            $s = SenderAddress::create($data);
+            app('log')->info('发件人地址',$s->toArray());
             DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
@@ -81,5 +84,15 @@ class SenderAddressController
             app('log')->info('仓秘书删除发件人地址失败',['msg' =>$e->getMessage()]);
             return formatRet(500,"删除发件人地址失败");
         }
+    }
+
+    public function  show(BaseRequests $request, $address_id)
+    {
+        app('log')->info('查看收件人地址', ['id' => $address_id]);
+        $address = SenderAddress::where('owner_id',Auth::ownerId())->find($address_id);
+        if(!$address){
+            return formatRet(500,"地址不存在");
+        }
+        return formatRet(0,"成功",$address->toArray());
     }
 }

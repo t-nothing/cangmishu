@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BaseRequests;
 use App\Http\Requests\CreateCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Models\UserCategoryWarning;
 use App\Rules\PageSize;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -33,12 +36,25 @@ class CategoryController extends Controller
     public function store(CreateCategoryRequest $request)
     {
         app('log')->info('新增货品分类', $request->all());
+        DB::beginTransaction();
         try{
             $data = $request->all();
             $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
-            Category::create($data);
+            $category = Category::create($data);
+
+            //新增库存报警
+            $owner = User::find(Auth::ownerId());
+            $warn_stock= $owner->default_warning_stock;
+            $userCategoryData = [
+                'user_id' => Auth::ownerId(),
+                'category_id' => $category->id,
+                'warning_stock'  => $warn_stock
+            ];
+            UserCategoryWarning::create($userCategoryData);
+            DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
+            DB::rollBack();
             app('log')->error('新增货品分类失败',['msg' =>$e->getMessage()]);
             return formatRet(500,"新增货品分类失败");
         }
@@ -70,6 +86,7 @@ class CategoryController extends Controller
         }
         try{
             Category::where('id',$category_id)->delete();
+            UserCategoryWarning::where('category_id',$category_id)->forceDelete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('删除货品分类失败',['msg' =>$e->getMessage()]);
