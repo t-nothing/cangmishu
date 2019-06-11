@@ -12,37 +12,6 @@
 */
 
 Route::get('/', function () {
-//
-//   $a ="email:1245@163.com
-//name:测试甲
-//nickname:甲
-//password:123456
-//password_confirmation:123456
-//remark:甲
-//phone:123456789";
-//
-//
-//   $b=explode("\n",$a);
-//   $res = [];
-//   foreach ($b as $v){
-//       $re = explode(":",$v);
-//       echo $re[1];
-//        $res[$re[0]] = $re[1];
-//   }
-
-//    $a="currency=EUR&description=test&method=v3.CreateRefund&notify_url=https://dev-api.cangmishu.com/&refund_amount=0.1&refund_currency=EUR&time=1558492188000&trade_id=c6db6ab0-a29d-9fac-f964-7b9953087503&user=info@yabandmedia.com";
-//    $a="function=precreate&mid=481200001&timestamp=1487849674744&sign=613e58bade6ad38&trade_no=117022408474255807&trade_status=TRADE_SUCCESS&amount=20&currency=EUR&forex_rate=7.1406";
-//    $b=explode("&",$a);
-//
-//   $res = [];
-//   foreach ($b as $v){
-//        $re= explode("=",$v);
-//        $res[$re[0]] =$re[1];
-//   }
-//    $a= [["mid"=>"123456789","token"=>"123456789"]];
-//   dd($res);
-    $uid = md5(time().uniqid());
-    dd($uid);
 
 });
 
@@ -50,37 +19,6 @@ Route::get('/', function () {
 Route::post('/login', 'AuthController@login');
 Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
-Route::prefix('test')->group(function () {
-    //yaband
-    Route::post('/redirect','TestController@test');
-
-    Route::post('/pay','TestController@pay');
-    Route::post('/query','TestController@query');
-    Route::post('/refund','TestController@refund');
-    Route::post('/cancel','TestController@cancel');
-    Route::post('/yaband/notify/pay','TestController@YaBandPayNotify');
-    Route::post('/yaband/notify/refund','TestController@YaBandRefundNotify');
-    Route::post('/notifyPay','TestController@notifyPay');
-
-    //
-    Route::post('/twopaynow/qr/pay','QRController@pay');
-    Route::post('/twopaynow/qr/query','QRController@query');
-    Route::post('/twopaynow/qr/refund','QRController@refund');
-    Route::post('/twopaynow/qr/cancel','QRController@cancel');
-    Route::post('/twopaynow/qr/notify','QRController@Notify');
-    Route::post('/twopaynow/notifyPay','QRController@notifyPay');
-
-
-    Route::post('/twopaynow/wp/pay','WPController@pay');
-    Route::post('/twopaynow/wp/query','WPController@query');
-    Route::post('/twopaynow/wp/refund','WPController@refund');
-    Route::post('/twopaynow/wp/cancel','WPController@cancel');
-//    Route::post('/twopaynow/wp/yaband/notify/pay','WPController@YaBandPayNotify');
-
-
-    Route::post('/twopaynow//notifyPay','TestController@notifyPay');
-
-});
 
 Route::middleware(['auth:jwt'])->group(function () {
 

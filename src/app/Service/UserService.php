@@ -16,6 +16,7 @@ use App\Models\Category;
 use App\Models\UserCategoryWarning;
 use App\Models\OrderType;
 use App\Models\Distributor;
+use Illuminate\Support\Facades\Storage;
 
 
 class UserService{
@@ -33,7 +34,16 @@ class UserService{
 
             $user->email    = $request->email;
             $user->password = Hash::make($request->password);
+            $nickname = explode("@",$request->email);
+            $user->nickname = $nickname[0];
             $user->save();
+
+            $disk = Storage::disk('asset');
+            if(!$disk->exists("storage/app/public/imgs/default_avatar.png")){
+                $disk->copy("resources/assets/images/default_avatar.png","storage/app/public/imgs/default_avatar.png");
+            }
+            $avatar = Storage::disk('local')->url("imgs/default_avatar.png");
+            $user->avatar = $avatar;
             $user->setActivated();
 
             #创建一个默认仓库

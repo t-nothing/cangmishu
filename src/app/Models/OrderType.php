@@ -2,19 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 class OrderType extends Model
 {
-    use SoftDeletes;
-
     protected $table = 'order_type';
 
     protected $hidden = [
         'deleted_at',
     ];
 
-    protected  $fillable= ['name','is_enabled'];
+    protected  $fillable= ['name','is_enabled','owner_id'];
     protected  $guarded = [];
     /*
     |--------------------------------------------------------------------------
@@ -27,9 +23,9 @@ class OrderType extends Model
         return $this->belongsTo('App\Models\WarehouseArea', 'area_id', 'id');
     }
 
-    public function batches()
+    public function orders()
     {
-    	return $this->hasMany('App\Models\Batch', 'type_id', 'id');
+        return $this->hasMany('App\Models\Order', 'order_type', 'id');
     }
 
     public function owner()

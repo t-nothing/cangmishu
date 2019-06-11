@@ -61,12 +61,17 @@ class OrderTypeController extends Controller
     public function destroy($order_type_id)
     {
         app('log')->info('删除出库单分类',['id'=>$order_type_id]);
-        $batch = OrderType::find($order_type_id);
-        if(!$batch){
+        $type = OrderType::find($order_type_id);
+        if(!$type){
             return formatRet(500,"出库单分类不存在");
         }
-        if ($batch->owner_id != Auth::ownerId()){
+        if ($type->owner_id != Auth::ownerId()){
             return formatRet(500,"没有权限");
+        }
+
+        $count = $type->orders->count();
+        if($count >0){
+            return formatRet(500,"此入库单分类下存在入库单，不允许删除");
         }
         try{
             OrderType::where('id',$order_type_id)->delete();

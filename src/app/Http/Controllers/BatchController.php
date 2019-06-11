@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateBatchRequest;
 use App\Models\Batch;
 use App\Models\ProductStock;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use PDF;
 
@@ -31,7 +32,6 @@ class BatchController extends Controller
             'keywords'          => 'string|max:255',
             'distributor_id'    => 'integer',
         ]);
-
         $batchs =   Batch::with([
             'warehouse:id,name_cn',
             'batchType:id,name',
@@ -39,11 +39,11 @@ class BatchController extends Controller
         ])
             ->ofWarehouse($request->input('warehouse_id'))
             ->where('owner_id',Auth::ownerId())
-            ->when($request->filled('cre_b'),function ($q) use ($request){
-                return $q->where('created_at', '>', strtotime($request->input('cre_b')));
+            ->when($request->filled('created_at_b'),function ($q) use ($request){
+                return $q->where('created_at', '>', strtotime($request->input('created_at_b')));
             })
-            ->when($request->filled('cre_e'),function ($q) use ($request){
-                return $q->where('created_at', '<', strtotime($request->input('cre_e')));
+            ->when($request->filled('created_at_e'),function ($q) use ($request){
+                return $q->where('created_at', '<', strtotime($request->input('created_at_e')));
             })
             ->when($request->filled('status'),function ($q) use ($request){
                 return $q->where('status', $request->input('status'));
@@ -60,6 +60,8 @@ class BatchController extends Controller
            ->latest()->paginate($request->input('page_size',10));
 
             $re = $batchs->toArray();
+
+//
             $data = collect($re['data'])->map(function($v){
                 unset($v['batch_products']);
                 return $v;

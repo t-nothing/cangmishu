@@ -69,11 +69,16 @@ class BatchTypeController extends Controller
     {
         app('log')->info('删除入库单分类',['id' =>$batch_type_id]);
         $batch = BatchType::find($batch_type_id);
+
         if(!$batch){
             return formatRet(500,"入库单分类不存在");
         }
         if ($batch->owner_id != Auth::ownerId()){
             return formatRet(500,"没有权限");
+        }
+        $count = $batch->batches->count();
+        if($count >0){
+            return formatRet(500,"此入库单分类下存在入库单，不允许删除");
         }
         try{
             BatchType::where('id',$batch_type_id)->delete();

@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BatchType extends Model
 {
-    use SoftDeletes;
 
     protected $table = 'batch_type';
 
@@ -20,7 +18,7 @@ class BatchType extends Model
         'deleted_at',
     ];
 
-    protected  $fillable = ['name','is_enabled'];
+    protected  $fillable = ['name','is_enabled','owner_id'];
 
     protected  $guarded = [];
     /*
