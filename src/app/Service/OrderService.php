@@ -71,6 +71,7 @@ class OrderService
         $order->send_fullname = $sender->fullname;
         $order->send_phone    = $sender->phone;
 
+        $order->out_sn = Order::generateOutSn();
         $order->express_num = $data->express_num;
         $order->save();
         OrderHistory::addHistory($order, Order::STATUS_DEFAULT);

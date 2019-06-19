@@ -23,9 +23,9 @@ class OrderItem extends Model
         'send_date' => 'date:Y-m-d H:i:s',
     ];
 
-//    protected $appends = [
-//        'product_name',
-//    ];
+    protected $appends = [
+        'relevance_code_barcode',
+    ];
 
     // public function productStock()
     // {
@@ -96,6 +96,13 @@ class OrderItem extends Model
 
         return $name;
     }
+
+    public function getRelevanceCodeBarcodeAttribute()
+    {
+        return 'data:image/png;base64,' . app("DNS1D")->getBarcodePNG($this->relevance_code, "C128");
+    }
+
+
 
     /*
     |--------------------------------------------------------------------------

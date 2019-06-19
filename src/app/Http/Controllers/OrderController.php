@@ -41,7 +41,7 @@ class OrderController extends Controller
                 })
             ]
         ]);
-        $order = Order::with(['orderItems:id,relevance_code,amount,name_cn,order_id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])
+        $order = Order::with(['orderItems:id,relevance_code,amount,name_cn,order_id,product_stock_id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])
             ->ofWarehouse($request->warehouse_id)
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
@@ -64,19 +64,38 @@ class OrderController extends Controller
                 [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
         });
 
-        $orders = $order->latest()->paginate($request->input('page_size',10),['id','created_at','send_phone','receiver_phone','send_fullname','receiver_fullname','delivery_date','warehouse_id','order_type','delivery_type','status','express_num'])->toArray();
-        foreach ($orders['data'] as $k => $v) {
+        $orders = $order->latest()->paginate($request->input('page_size',10),['id','created_at','send_phone','receiver_phone','send_fullname','receiver_fullname','delivery_date','warehouse_id','order_type','delivery_type','status','express_num','out_sn','remark']);
+
+        foreach ($orders  as $k => $v) {
             $sum = 0;
-            if (!empty($v['order_items'])) {
-                foreach ($v['order_items'] as $k1 => $v1) {
-                    $sum += $v1['amount'];
-                }
+            foreach ($v->orderItems as $k1 => $v1) {
+                $sum += $v1->amount;
             }
-            $orders['data'][$k]['sum'] = $sum;
+            $v->append(['out_sn_barcode']);
+            $v->sum = $sum;
         }
 
-        return formatRet(0, '', $orders);
+        return formatRet(0, '', $orders->toArray());
     }
+
+    public function show(BaseRequests $request, $order_id)
+    {
+        $order = Order::find($order_id);
+        if(!$order){
+            return formatRet("500",'找不到该出库单');
+        }
+        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num','orderItems.stock:id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->append(['out_sn_barcode']);
+
+        $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+        $order = $order->toArray();
+
+       return formatRet(0,"成功",$order);
+    }
+
+
+
+
 
 
     public function store(CreateOrderRequest $request)
@@ -129,7 +148,8 @@ class OrderController extends Controller
         $owner_id = Auth::ownerId();
         $order = Order::find($request->order_id);
         $items = $request->input('items');
-
+        $order->delivery_date = $request->input('delivery_date');
+        $order->save();
         $item_in_rq = array_pluck($request->items, 'order_item_id');
         $item_in_db = $order->orderItems->pluck('id')->toArray();
         sort($item_in_rq);
@@ -181,7 +201,7 @@ class OrderController extends Controller
             foreach ($pick_stock as $v){
                 $v['item']->product_stock_id = $v['stock']->id;
                 $v['item']->pick_num = $v['pick_num'];
-                $v['item']->vaerify_num = $v['pick_num'];
+                $v['item']->verify_num = $v['pick_num'];
                 $v['item']->save();
                 $v['stock']->decrement('shelf_num', $v['pick_num']);
                 // 添加记录

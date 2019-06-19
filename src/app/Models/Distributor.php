@@ -10,7 +10,7 @@ class Distributor extends Model
     protected $table ="distributor";
     protected $fillable =['user_id','name_cn','name_en'];
     protected $guarded = [];
-
+    protected  $appends=['name'];
 
     public function owner()
     {
@@ -20,4 +20,23 @@ class Distributor extends Model
     public function  ScopeWhose($query, $owner_id){
         return $query->where('user_id',$owner_id);
     }
+
+
+
+    public function getNameAttribute()
+    {
+        $lang = app('translator')->getLocale();
+        if(in_array($lang,['en','cn','zh-CN'])){
+            if(in_array($lang,['cn','zh-CN'])){
+                $lang = "cn";
+            }
+        }else{
+            $lang = "cn";
+        }
+        $name = "name_".$lang;
+        return $this->$name;
+    }
 }
+
+
+

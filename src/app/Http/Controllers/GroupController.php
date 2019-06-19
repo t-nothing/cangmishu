@@ -39,6 +39,7 @@ class GroupController extends  Controller
         if(!$group){
             return formatRet(500,'未找到分组');
         }
+
         $modules = $group->modules()->pluck('modules.id')->toArray();
         $group->load(['warehouse:id,name_cn,name_en']);
         $group = $group->toArray();
@@ -49,6 +50,7 @@ class GroupController extends  Controller
         $authorize =[];
 
         $authorize['modules']= Modules::get(['id','name']);
+
         $authorize['warehouse'] = Warehouse::where('owner_id',$this->user->id)->get(['id','name_cn','name_en']);
 
         return formatRet(0,"",compact('group', 'authorize'));

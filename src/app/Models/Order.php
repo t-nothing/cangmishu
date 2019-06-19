@@ -40,7 +40,7 @@ class Order extends Model
         'delivery_date' => 'date:Y-m-d',
     ];
 
-    protected  $fillable =['warehouse_id','order_type','delivery_date','delivery_type','status','receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','receiver_fullname','receiver_phone','send_country','send_province','send_city','send_postcode','send_district','send_address','send_fullname','send_phone','express_num'];
+    protected  $fillable =['warehouse_id','order_type','delivery_date','delivery_type','status','receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','receiver_fullname','receiver_phone','send_country','send_province','send_city','send_postcode','send_district','send_address','send_fullname','send_phone','express_num','out_sn'];
 
     protected $guarded = [];
 
@@ -169,6 +169,13 @@ class Order extends Model
 
         return $name;
     }
+
+
+    public function getOutSnBarcodeAttribute()
+    {
+        return 'data:image/png;base64,' . app("DNS1D")->getBarcodePNG($this->out_sn, "C128");
+    }
+
 
     /**
      * @return boolean
@@ -346,5 +353,13 @@ class Order extends Model
         app('cache')->forever($redis_key, $this->toNumber($mask_code));
 
         return $this->toCode(app('cache')->increment($redis_key));
+    }
+
+
+    public  Static function  generateOutSn()
+    {
+        $code = uniqid().time().rand(1,100);
+        $code = base64_encode($code);
+        return strtoupper(substr($code,0,3)).time().rand(1,10);
     }
 }

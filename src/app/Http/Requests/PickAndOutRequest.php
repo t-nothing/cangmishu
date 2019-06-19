@@ -14,6 +14,7 @@ class PickAndOutRequest extends BaseRequests
      */
     public function authorize()
     {
+        app('log')->info('一键出库',$this->all());
       return true;
     }
 
@@ -33,6 +34,7 @@ class PickAndOutRequest extends BaseRequests
                         ->where('warehouse_id',$this->warehouse_id);
                 })
             ],
+            'delivery_date'               => 'required|string|date_format:Y-m-d',
             'warehouse_id'              => [
                 'required','integer','min:1',
                 Rule::exists('warehouse','id')->where(function($q){

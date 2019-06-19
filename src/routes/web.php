@@ -13,6 +13,7 @@
 
 Route::get('/', function () {
 
+
 });
 
 
@@ -132,6 +133,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/order/data/{order_id}', 'OrderController@updateData');
     Route::delete('/order/{order_id}', 'OrderController@destroy');
     Route::post('/order/out', 'OrderController@pickAndOut');
+    Route::get('/order/{order_id}', 'OrderController@show');
 
 
     //库存

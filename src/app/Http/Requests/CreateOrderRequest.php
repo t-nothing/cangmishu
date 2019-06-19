@@ -50,7 +50,6 @@ class CreateOrderRequest extends BaseRequests
             ],
             'goods_data.*.num'            => 'required|integer|min:1',
             // 快递单数据
-            //'delivery_date'               => 'required|string|date_format:Y-m-d',
             //'delivery_type'               => 'int|min:1',
             'express_num'                 => 'string|max:255',
             'receiver_id'                 =>  [
