@@ -38,6 +38,7 @@ class ProductStock extends Model
         'best_before_date' => 'date:Y-m-d',
     ];
 
+
     /**
      * The accessors to append to the model's array form.
      *

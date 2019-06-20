@@ -40,7 +40,7 @@ class StockExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSiz
             $spec->stock_out_times,
             $spec->stock_out_qty,
             $spec->stocks_count,
-            $spec->product->category->feature->name_cn,
+//            $spec->product->category->feature->name_cn,
         ];
     }
 
@@ -61,7 +61,7 @@ class StockExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSiz
 			'出库次数',
 			'出库数量',
 			'SKU数量',
-			'特性',
+//			'特性',
         ];
     }
 }

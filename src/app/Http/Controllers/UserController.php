@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BaseRequests;
 use App\Http\Requests\CreateUserRequest;
 use App\Models\User;
+use App\Models\VerifyCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,12 @@ class UserController extends  Controller
      */
     public function Register(CreateUserRequest $request)
     {
+        $code = $request->input('code');
+        $email = $request->input('email');
+        $verify_code = VerifyCode::where('code',$code)->where('email',$email)->where('expired_at','>',time())->first();
+        if(!$verify_code){
+            return formatRet(500, "验证码已过期或不存在");
+        }
         try {
             $user = app('user')->quickRegister($request);
         } catch (\Exception $e) {
@@ -21,6 +28,18 @@ class UserController extends  Controller
             return formatRet(500, $e->getMessage());
         }
         return formatRet(0, '已保存到系统', $user->toArray());
+    }
+
+    public  function getCode(BaseRequests $request)
+    {
+        $this->validate($request,[
+            'email'=>'required|email'
+        ]);
+
+        $code = app('user')->getCode();
+        app('user')->createUserVerifyCode($code,$request->email);
+        return formatRet("0","发送成功");
+
     }
 
     public function privilege(BaseRequests $request,$user_id)

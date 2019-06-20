@@ -2,6 +2,8 @@
 
 namespace App\Guard;
 
+use App\Mail\UserActivationMail;
+use App\Mail\UserForgetPasswordMail;
 use App\Models\Token;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -364,5 +366,8 @@ class JwtGuard implements Guard
 
         Mail::send($message);
     }
+
+
+
 
 }

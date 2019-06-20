@@ -29,7 +29,7 @@ class GroupController extends  Controller
     }
     public function index(BaseRequests $request)
     {
-        $groups =  app('group')->getGroupsByUser($request->input('page_size',10), $this->user);
+        $groups =  app('group')->getGroupsByUser($request->input('page_size',10), $this->user,$request->input('warehouse_id',""));
         return formatRet(0,"",$groups);
     }
 

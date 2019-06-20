@@ -214,12 +214,12 @@ class OrderController extends Controller
                     'shelf_num' =>$v['stock']->shelf_num
                 ];
             }
-            $order->update(['status' => Order::STATUS_WAITING,'verify_status'=>2,'delivery_data'=>time()]);
+            $order->update(['status' => Order::STATUS_PICK_DONE,'verify_status'=>2,'delivery_data'=>time()]);
             // 记录出库单拣货完成的时间
             OrderHistory::addHistory($order, Order::STATUS_DEFAULT);
-            OrderHistory::addHistory($order, Order::STATUS_PICKING);
             OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-            OrderHistory::addHistory($order, Order::STATUS_WAITING);
+//            OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
+//            OrderHistory::addHistory($order, Order::STATUS_WAITING);
             DB::commit();
         }
         catch (BusinessException $exception){
@@ -262,7 +262,7 @@ class OrderController extends Controller
             return formatRet(500,"没有权限");
         }
 
-        $order->update(['status'=>0]);
+        $order->update(['status'=>Order::STATUS_CANCEL]);
         return formatRet(0,'成功');
     }
 

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 
+use App\Mail\VerifyCodeEmail;
+use App\Models\VerifyCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
@@ -16,6 +18,7 @@ use App\Models\Category;
 use App\Models\UserCategoryWarning;
 use App\Models\OrderType;
 use App\Models\Distributor;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -36,14 +39,9 @@ class UserService{
             $user->password = Hash::make($request->password);
             $nickname = explode("@",$request->email);
             $user->nickname = $nickname[0];
+            $user->avatar = asset("/images/default_avatar.png");
             $user->save();
 
-            $disk = Storage::disk('asset');
-            if(!$disk->exists("storage/app/public/imgs/default_avatar.png")){
-                $disk->copy("resources/assets/images/default_avatar.png","storage/app/public/imgs/default_avatar.png");
-            }
-            $avatar = Storage::disk('local')->url("imgs/default_avatar.png");
-            $user->avatar = $avatar;
             $user->setActivated();
 
             #创建一个默认仓库
@@ -218,5 +216,21 @@ class UserService{
         }
 
         return $user;
+    }
+
+    public function getCode(){
+        $chars='0123456789';
+        mt_srand((double)microtime()*1000000*getmypid());
+        $CheckCode="";
+        while(strlen($CheckCode)<6)
+            $CheckCode.=substr($chars,(mt_rand()%strlen($chars)),1);
+        return $CheckCode;
+    }
+    public function createUserVerifyCode($code ,$email)
+    {
+        VerifyCode::updateOrCreate(['email' => $email], ['code' => $code,'expired_at'=>time()+5*60]);
+        $message = new VerifyCodeEmail($code);
+         Mail::to($email)->send($message);
+
     }
 }

@@ -90,14 +90,9 @@ class Product extends Model
     if (!empty($ids)) {
             $query->orWhereIn('id', $ids);
         }
-    $query ->whereIn('owner_id',app('auth')->ownerId())
+    $query ->where('owner_id',app('auth')->ownerId())
                ->where('name_cn', 'like', '%' . $keywords . '%')
                ->orWhere('name_en', 'like', '%' . $keywords . '%');
-//               ->orWhere('hs_code', 'like', '%' . $keywords . '%')
-//		       ->orWhere('origin', 'like', '%' . $keywords . '%')
-//               ->orWhereHas("specs.stocks",function($q) use ($keywords){
-//                   return $q->where("distributor_code", 'like', '%' . $keywords . '%');
-//               });
 	return $query;
     }
 

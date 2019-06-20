@@ -12,14 +12,15 @@
 */
 
 Route::get('/', function () {
-
-
+    $url =asset("/images/default_avatar.png");
+    dd($url);
 });
 
 
 Route::post('/login', 'AuthController@login');
 Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
+Route::post('/code', 'UserController@getCode');
 
 Route::middleware(['auth:jwt'])->group(function () {
 
@@ -29,10 +30,8 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/user/{user_id}/avatar', 'UserController@avatar');//修改员工头像
     Route::get('/user/{user_id}', 'UserController@show');//获取员工权限
 
-
     //上传图片
     Route::post('/upload/image', 'UploadController@image');
-
 
     //仓库
     Route::get('/warehouses', 'WarehouseController@index');
@@ -143,6 +142,12 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
     Route::get('/stock/spec/log/{stock_id}', 'ProductStockController@getLogsForSpec');
     Route::get('/stock', 'ProductStockController@index');
+    Route::get('/export/sku', 'ProductStockController@exportBySku');
+    Route::get('/export/stock', 'ProductStockController@export');
+
+
+
+
 
     //员工分组管理
     Route::post('/group','GroupController@store'); //新增员工分组

@@ -25,7 +25,8 @@ class ProductController extends Controller
      */
     public function index(IndexProductRequest $request)
     {
-        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id'])
+        app('log')->info('查询列表',$request->all());
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning'])
             ->ofWarehouse($request->warehouse_id)
             ->where('owner_id',app('auth')->ownerId())
             ->latest('updated_at');
@@ -199,7 +200,7 @@ class ProductController extends Controller
                 Rule::exists('warehouse','id')->where('owner_id',app('auth')->ownerId())
             ]
         ]);
-        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id'])
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning'])
             ->ofWarehouse($request->warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->where('id', $product_id)

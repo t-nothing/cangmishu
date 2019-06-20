@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exports\SkuExport;
+use App\Exports\StockExport;
 use App\Http\Requests\BaseRequests;
 use App\Models\Batch;
 use App\Models\ProductSpec;
@@ -9,6 +11,7 @@ use App\Models\ProductStockLog;
 use App\Models\WarehouseLocation;
 use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ProductStockController extends  Controller
@@ -18,6 +21,7 @@ class ProductStockController extends  Controller
      */
     public function index(BaseRequests $request)
     {
+        app('log')->info('拉取库存', $request->all());
         $this->validate($request, [
             'keywords'                => 'string',
             'sku'                     => 'string',
@@ -303,7 +307,7 @@ class ProductStockController extends  Controller
             'option'                  => 'integer|min:1|max:3',
             'warehouse_id'            => [
                 'required','integer','min:1',
-                Rule::exists('warehouse')->where(function($q){
+                Rule::exists('warehouse','id')->where(function($q){
                     $q->where('owner_id',app('auth')->ownerId());
                 })
             ]
@@ -363,6 +367,7 @@ class ProductStockController extends  Controller
 
     }
 
+
     public function exportBySku(BaseRequests $request)
     {
         $this->validate($request, [
@@ -374,7 +379,7 @@ class ProductStockController extends  Controller
             'option'                  => 'integer|min:1|max:3',
             'warehouse_id'            => [
                 'required','integer','min:1',
-                Rule::exists('warehouse')->where(function($q){
+                Rule::exists('warehouse','id')->where(function($q){
                     $q->where('owner_id',app('auth')->ownerId());
                 })
             ]
@@ -485,7 +490,7 @@ class ProductStockController extends  Controller
                 'product_batch_num'=>$s->product_batch_num,
                 'best_before_date'=>$s->best_before_date,
                 'remark'=>$s->remark,
-                'expiration_date'=>$s->expiration_date->toDateString(),
+                'expiration_date'=>$s->expiration_date?$s->expiration_date->toDateString():"",
             ];
         }
 
@@ -536,9 +541,9 @@ class ProductStockController extends  Controller
         $this->validate($request, [
             'stock_num'               => 'required|integer|min:0|max:9999',
             'ean'                     => 'required|string|max:255',
-            'expiration_date'         => 'date_format:Y-m-d',
-            'best_before_date'        => 'date_format:Y-m-d',
-            'production_batch_number' => 'string|max:255',
+            'expiration_date'         => 'sometimes|date_format:Y-m-d',
+            'best_before_date'        => 'sometimes|date_format:Y-m-d',
+            'production_batch_number' => 'sometimes|string|max:255',
             'location_code'           => 'required|string',
             'remark'                  => 'string|max:255',
             'warehouse_id'            =>[

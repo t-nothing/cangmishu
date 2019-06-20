@@ -27,7 +27,7 @@ class CreateUserRequest extends BaseRequests
             'email'    =>  ['required','email',Rule::unique('user','email')],
             'password' => 'required|string|min:6',
             'code'     => 'string|min:6',
-            'warehouse_name' =>  ['required','string','min:4',Rule::unique('warehouse','name_cn')],
+            'warehouse_name' =>  ['required','string','min:4'],
             'warehouse_area' => 'required|numeric',
         ];
     }

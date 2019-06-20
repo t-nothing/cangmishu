@@ -182,7 +182,7 @@ class ProductSpec extends Model
                 ->whose($owner_id)
                 ->where('relevance_code', $this->relevance_code)
                 ->whereHas('order', function ($query) {
-                    $query->where('status', '>=', Order::STATUS_WAITING);
+                    $query->where('status', '>=', Order::STATUS_PICK_DONE);
                 })->count();
 	}
 
@@ -218,7 +218,7 @@ class ProductSpec extends Model
         		->whose($owner_id)
                 ->where('relevance_code', $this->relevance_code)
                 ->whereHas('order', function ($query) {
-                    $query->where('status', '>=', Order::STATUS_WAITING);
+                    $query->where('status', '>=', Order::STATUS_PICK_DONE);
                 })
                 ->sum('verify_num');
 	}

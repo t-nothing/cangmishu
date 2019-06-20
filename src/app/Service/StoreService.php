@@ -45,7 +45,7 @@ class StoreService
         $stock->status                = ProductStock::GOODS_STATUS_ONLINE;
         $stock->save();
         // 添加记录
-        $stock->addLog(ProductStockLog::TYPE_SHELF, $stock->stockin_num);
+        $stock->addLog(ProductStockLog::TYPE_BATCH_SHELF, $stock->stockin_num);
 
         return $stock;
     }
@@ -88,7 +88,7 @@ class StoreService
         $stock->increment('stockin_num', $data['stockin_num']);
         $stock->increment('total_stockin_num', $data['stockin_num']);
         // 添加入库单记录
-        $stock->addLog(ProductStockLog::TYPE_BATCH, $data['stockin_num']);
+//        $stock->addLog(ProductStockLog::TYPE_BATCH, $data['stockin_num']);
 
         return $stock;
     }
