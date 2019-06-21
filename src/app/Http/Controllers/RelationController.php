@@ -38,7 +38,7 @@ class RelationController extends  Controller
             $rel->user_id  = $requests->user_id;
             $rel->group_id = $requests->group_id;
 
-            User::where('id', $requests->user_id)->update(['default_warehouse_id'=>$group->warehouse_id]);
+            User::where('id', $requests->user_id)->update(['default_warehouse_id'=>$group->warehouse_id,'is_activated' =>1]);
 
             if($rel->save()){
                 return formatRet(0);
