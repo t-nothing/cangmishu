@@ -12,8 +12,8 @@
 */
 
 Route::get('/', function () {
-    $url =asset("/images/default_avatar.png");
-    dd($url);
+  $redis= app('redis');
+  dd($redis);
 });
 
 

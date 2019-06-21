@@ -229,7 +229,9 @@ class UserService{
     public function createUserVerifyCode($code ,$email)
     {
         VerifyCode::updateOrCreate(['email' => $email], ['code' => $code,'expired_at'=>time()+5*60]);
-        $message = new VerifyCodeEmail($code);
+        $logo=asset("/images/logo.png");
+        $qrCode =asset("/images/qrCode.png");
+        $message = new VerifyCodeEmail($code,$logo,$qrCode);
          Mail::to($email)->send($message);
 
     }
