@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BaseRequests;
 use App\Models\Groups;
+use App\Models\User;
 use App\Models\UserGroupRel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -36,6 +37,8 @@ class RelationController extends  Controller
             $rel = new UserGroupRel;
             $rel->user_id  = $requests->user_id;
             $rel->group_id = $requests->group_id;
+
+            User::where('id', $requests->user_id)->update(['default_warehouse_id'=>$group->warehouse_id]);
 
             if($rel->save()){
                 return formatRet(0);

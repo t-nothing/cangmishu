@@ -11,6 +11,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model as Models;
 class Model extends  Models
 {
+    protected static $_instance = [];
     public function fromDateTime($value)
     {
         return strtotime($value);
@@ -62,5 +63,19 @@ class Model extends  Models
         }
 
         return $attributes[$key];
+    }
+
+
+    /**
+     * 获得单实例
+     * @return static
+     */
+    public static function getIns(){
+        $class = get_called_class();
+        if (!array_key_exists($class,self::$_instance)) {
+            self::$_instance[$class] = new static();
+            return self::$_instance[$class];
+        }
+        return self::$_instance[$class];
     }
 }

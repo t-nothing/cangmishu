@@ -94,6 +94,7 @@ class EmployeeController extends Controller
             $user->boss_id  = $boss_id;
             $user->remark   = $request->input('remark',"");
             $user->is_activated  = 1;
+            $user->avatar = asset("/images/default_avatar.png");
             $user->save();
             app('db')->commit();
         } catch (\Exception $e) {

@@ -23,6 +23,10 @@ Route::post('/register', 'UserController@register');
 Route::post('/code', 'UserController@getCode');
 
 Route::middleware(['auth:jwt'])->group(function () {
+    Route::get('/home/notice', 'HomePageController@notice');// 首页通知
+    Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
+    Route::get('/home/analyzeTable', 'HomePageController@batchOrOrderCount');// 首页仓库
+
 
     Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
