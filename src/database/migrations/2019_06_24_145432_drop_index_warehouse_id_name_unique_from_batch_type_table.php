@@ -15,7 +15,7 @@ class DropIndexWarehouseIdNameUniqueFromBatchTypeTable extends Migration
     {
         Schema::table('batch_type', function (Blueprint $table) {
             $table->dropIndex("batch_type_warehouse_id_name_unique");
-            $table->unique('owner_id', 'name');
+            $table->unique(['owner_id', 'name']);
         });
     }
 
