@@ -84,16 +84,14 @@ class Product extends Model
      */
     public function scopeHasKeyword($query, $keywords)
     {
-	$ids = ProductSpec::ofWarehouse(app('auth')->warehouse()->id)
-		->where('relevance_code', 'like','%' .$keywords . '%');
-    $ids = $ids->pluck('product_id')->toArray();
-    if (!empty($ids)) {
-            $query->orWhereIn('id', $ids);
-        }
-    $query ->where('owner_id',app('auth')->ownerId())
-               ->where('name_cn', 'like', '%' . $keywords . '%')
-               ->orWhere('name_en', 'like', '%' . $keywords . '%');
-	return $query;
+        $query->where(function($q) use ($keywords){
+             return $q->whereHas('specs',function ($qq) use ($keywords){
+                        $qq->where('relevance_code', 'like','%' .$keywords . '%');
+                    })
+                    ->orwhere('name_cn', 'like', '%' . $keywords . '%')
+                    ->orWhere('name_en', 'like', '%' . $keywords . '%');
+        });
+        return $query;
     }
 
 
