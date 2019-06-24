@@ -231,7 +231,7 @@ class UserService{
         $logo=env("APP_URL")."/images/logo.png";
         $qrCode =env("APP_URL")."/images/qrCode.png";
         $message = new VerifyCodeEmail($code,$logo,$qrCode);
+        $message->onQueue('cangmishu_emails');
          Mail::to($email)->send($message);
-
     }
 }
