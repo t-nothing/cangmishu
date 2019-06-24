@@ -261,10 +261,10 @@ class ProductStock extends Model
     public function addLog($type, $operation_num, $order_sn = '', $sku_total_shelf_num_old = 0, $remark = '')
     {
         switch ($type) {
-            case ProductStockLog::TYPE_BATCH:
+            case ProductStockLog::TYPE_BATCH_SHELF:
                 $order_sn = $this->batch->batch_code;
                 break;
-            case ProductStockLog::TYPE_SHELF:
+            case ProductStockLog::TYPE_OUTPUT:
                 $order_sn = $this->batch->batch_code;
                 break;
             default:
@@ -277,7 +277,7 @@ class ProductStock extends Model
             ->where(function ($query) {
                 $query->enabled()->orWhere(function ($query) {
                     $query->where('status', ProductStock::GOODS_STATUS_PREPARE)->whereHas('batch', function ($query) {
-                        $query->where('status', Batch::STATUS_PROCEED)->orWhere('status', Batch::STATUS_ACCOMPLISH);
+                        $query->where('status', Batch::STATUS_ACCOMPLISH);
                     });
                 });
             })
@@ -289,7 +289,7 @@ class ProductStock extends Model
             ->where(function ($query) {
                 $query->enabled()->orWhere(function ($query) {
                     $query->where('status', ProductStock::GOODS_STATUS_PREPARE)->whereHas('batch', function ($query) {
-                        $query->where('status', Batch::STATUS_PROCEED)->orWhere('status', Batch::STATUS_ACCOMPLISH);
+                        $query->where('status', Batch::STATUS_ACCOMPLISH);
                     });
                 });
             })
@@ -307,18 +307,8 @@ class ProductStock extends Model
             ->enabled()
             ->sum('shelf_num');
         //根据uri判断时桌面端还是手持端
-        $url = explode('/',app('request')->getRequestUri());
-        switch ($url[1]){
-            case 'pc':
-                $source = '桌面端';
-                break;
-            case 'terminal':
-                $source = '手持端';
-                break;
-            default :
-                $source = '';
-        }
-        if(in_array($type,[3,4])){
+
+        if($type == ProductStockLog::TYPE_OUTPUT){
             $log = ProductStockLog::where('order_sn', $order_sn)->where('type_id',$type)->where('product_stock_id',$this->id)->first();
             if(!empty($log)){
                 app('log')->info('重复拣货失败',['log'=>$log]);
@@ -339,7 +329,7 @@ class ProductStock extends Model
             'sku_total_shelf_num'  => $sku_total_shelf_num,
             'sku_total_shelf_num_old' => $sku_total_shelf_num_old,
             'operator'             => app('auth')->id(),
-            'remark'               => $source.' '.$remark,
+            'remark'               => $remark,
         ]);
     }
 
