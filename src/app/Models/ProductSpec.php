@@ -144,8 +144,7 @@ class ProductSpec extends Model
                 ->where('spec_id', $this->id)
                 ->where('status', ProductStock::GOODS_STATUS_PREPARE)
                 ->whereHas('batch', function ($query) {
-                    $query->where('status', Batch::STATUS_PROCEED)
-                          ->orWhere('status', Batch::STATUS_ACCOMPLISH);
+                    $query->where('status', Batch::STATUS_PROCEED);
                 })->sum('total_stockin_num');
 	}
 
@@ -239,6 +238,9 @@ class ProductSpec extends Model
         		->whose($owner_id)
                 ->where('relevance_code', $this->relevance_code)
                 ->where('pick_num',0)
+                ->whereHas('order', function ($query) {
+                    $query->where('status', '==', Order::STATUS_DEFAULT);
+                })
                 ->sum('amount');
 
         return $lock_num;
