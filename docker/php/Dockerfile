@@ -17,7 +17,7 @@ RUN apt-get update  && apt-get install -y \
 		  	libxrender-dev \
     && docker-php-ext-install -j$(nproc) iconv mcrypt mysqli pdo_mysql pcntl\
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd
+    && docker-php-ext-install -j$(nproc) gd \
 	&& docker-php-ext-install zip
 
 RUN pecl install -o -f redis \
