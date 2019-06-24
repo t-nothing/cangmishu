@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Handlers\CodeService;
 use App\Services\BatchService;
 use App\Services\GroupService;
 use App\Services\ModuleService;

@@ -42,6 +42,6 @@ class VerifyCodeEmail extends Mailable implements ShouldQueue
             'logo'=>$this->logo,
             'qrCode'=>$this->qrCode,
         ]
-        )->onQueue('emails');
+        )->onQueue('cangmishu_emails');
     }
 }

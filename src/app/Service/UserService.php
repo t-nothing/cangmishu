@@ -19,7 +19,6 @@ use App\Models\UserCategoryWarning;
 use App\Models\OrderType;
 use App\Models\Distributor;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 
 
 class UserService{
@@ -39,7 +38,7 @@ class UserService{
             $user->password = Hash::make($request->password);
             $nickname = explode("@",$request->email);
             $user->nickname = $nickname[0];
-            $user->avatar = asset("/images/default_avatar.png");
+            $user->avatar = env("APP_URL")."/images/default_avatar.png";
             $user->save();
 
             $user->setActivated();
@@ -229,8 +228,8 @@ class UserService{
     public function createUserVerifyCode($code ,$email)
     {
         VerifyCode::updateOrCreate(['email' => $email], ['code' => $code,'expired_at'=>time()+5*60]);
-        $logo=asset("/images/logo.png");
-        $qrCode =asset("/images/qrCode.png");
+        $logo=env("APP_URL")."/images/logo.png";
+        $qrCode =env("APP_URL")."/images/qrCode.png";
         $message = new VerifyCodeEmail($code,$logo,$qrCode);
          Mail::to($email)->send($message);
 

@@ -39,3 +39,4 @@ COPY ./start-queue.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/start-queue.sh
 
 #CMD ["sh", "-c","sh start-queue.sh"]
+CMD ["sh", "-c", "/usr/local/bin/start-queue.sh 2>&1 > /dev/stdout"]

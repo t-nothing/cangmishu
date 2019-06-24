@@ -84,6 +84,11 @@ class CategoryController extends Controller
         if ($category->owner_id != Auth::ownerId()){
             return formatRet(500,"没有权限");
         }
+
+        $product_count = $category->products()->count();
+        if($product_count){
+            return formatRet(500,"该分类下存在货品，不允许删除");
+        }
         try{
             Category::where('id',$category_id)->delete();
             UserCategoryWarning::where('category_id',$category_id)->forceDelete();
