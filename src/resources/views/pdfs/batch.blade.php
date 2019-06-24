@@ -75,6 +75,9 @@
       padding-left: 65%;
       line-height: 30px;
     }
+    .goods-table .table .text_center {
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -115,27 +118,29 @@
       <p>商品列表</p>
       <table class="table">
         <tr>
-          <th style="text-align:center">#</th>
-          <th style="text-align:center">外部编码</th>
-          <th style="text-align:center">商品信息</th>
-          <th style="text-align:center">预/已入库数量(个)</th>
-          <th style="text-align:center">供应商货号</th>
-          <th style="text-align:center">备注</th>
-          <th style="text-align:center">推荐货位</th>
+          <th class="text_center">#</th>
+          <th class="text_center">SKU</th>
+          <th class="text_center">商品信息</th>
+          <th class="text_center">预/已入库数量(个)</th>
+          <th class="text_center">入库单批次号</th>
+          <th class="text_center">供应商货号</th>
+          <th class="text_center">备注</th>
+          <th class="text_center">推荐货位</th>
         </tr>
         <tbody>
           @forelse ($batch['batch_products'] as $k => $product)
           <tr>
-            <td>{{ $k+1 }}</td>
-            <td>
+            <td class="text_center">{{ $k+1 }}</td>
+            <td class="text_center">
               <img src="{{ $product['relevance_code_barcode'] }}">
               <p>{{ $product['relevance_code'] }}</p>
             </td>
-            <td>{{ $product['spec']['product']['name_cn'] }}({{$product['spec']['name_cn']}})</td>
-            <td>{{ $product['need_num'] }}/{{ $product['total_stockin_num'] }}</td>
-            <td>{{ $product['distributor_code'] }}</td>
-            <td>{{ $product['remark'] }}</td>
-            <td>{{ $product['recommended_location']['code'] }}</td>
+            <td class="text_center">{{ $product['spec']['product']['name_cn'] }}({{$product['spec']['name_cn']}})</td>
+            <td class="text_center">{{ $product['need_num'] }}/{{ $product['total_stockin_num'] }}</td>
+            <td class="text_center">{{ $product['sku'] }}</td>
+            <td class="text_center">{{ $product['distributor_code'] }}</td>
+            <td class="text_center">{{ $product['remark'] }}</td>
+            <td class="text_center">{{ $product['recommended_location']['code'] }}</td>
           </tr>
           @empty
           @endforelse

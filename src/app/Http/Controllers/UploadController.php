@@ -17,7 +17,7 @@ class UploadController extends Controller
         $path = $request->file('image')->storePublicly('/public/'.$file);
 
         $path = Storage::url($path);
-        $url = app('url')->to('/') . $path;
+        $url = env("APP_URL")."/" . $path;
 
         return formatRet(0, '', compact('url'));
     }

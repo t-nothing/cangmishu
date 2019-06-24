@@ -5,7 +5,7 @@ return array(
 
     'pdf' => array(
         'enabled' => true,
-        'binary'  => 'C:\wkhtmltox\bin\wkhtmltopdf',
+        'binary'  => env("SNAPPY"),
         'timeout' => false,
         'options' => array(),
         'env'     => array(),

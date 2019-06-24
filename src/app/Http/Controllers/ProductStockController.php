@@ -619,12 +619,13 @@ class ProductStockController extends  Controller
             'warehouse_id'            =>[
                 'required','integer','min:1',
                 Rule::exists('warehouse','id')->where('owner_id',Auth::ownerId())
-            ]
+            ],
+            'batch_id' => 'required|integer|min:1',
         ]);
 
-        $stock = ProductStock::where('sku',$sku)->where('warehouse_id',$request->input('warehouse_id'))->first();
+        $stock = ProductStock::where('relevance_code',$sku)->where('batch_id',$request->input('batch_id'))->where('warehouse_id',$request->input('warehouse_id'))->first();
         if(!$stock){
-            return formatRet(0,'sku不存在');
+            return formatRet(500,'sku不存在');
         }
         return formatRet(0,'成功',$stock->toArray());
 

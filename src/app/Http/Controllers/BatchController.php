@@ -9,7 +9,6 @@ use App\Http\Requests\UpdateBatchRequest;
 use App\Models\Batch;
 use App\Models\ProductStock;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use PDF;
 
@@ -133,6 +132,25 @@ class BatchController extends Controller
         }
     }
 
+
+
+    public function shelf(CreateShelfRequest $request)
+    {
+        app('log')->info('入库上架', $request->all());
+        app('db')->beginTransaction();
+        try{
+            $data = $request->stock;
+            app('store')->InAndPutOn($request->warehouse_id,$data,$request->batch_id);
+            app('db')->commit();
+            return formatRet(0);
+        }catch (\Exception $e){
+            app('db')->rollback();
+            app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
+            return formatRet(500,"入库上架失败");
+        }
+    }
+
+
     public function pdf($batch_id)
     {
         if (! $batch = Batch::find($batch_id)) {
@@ -154,22 +172,6 @@ class BatchController extends Controller
         ]);
     }
 
-    public function shelf(CreateShelfRequest $request)
-    {
-        app('log')->info('入库上架', $request->all());
-        app('db')->beginTransaction();
-        try{
-            $data = $request->stock;
-            app('store')->InAndPutOn($request->warehouse_id,$data,$request->batch_id);
-            app('db')->commit();
-            return formatRet(0);
-        }catch (\Exception $e){
-            app('db')->rollback();
-            app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"入库上架失败");
-        }
-    }
-
     public function download(BaseRequests $request, $batch_id)
     {
 
@@ -188,6 +190,7 @@ class BatchController extends Controller
         }
 
         $file = $batch->batch_code . '.pdf';
+
         $pdf = PDF::loadView('pdfs.batch', ['batch' => $batch->toArray()]);
         return $pdf->download($file);
 
@@ -219,7 +222,7 @@ class BatchController extends Controller
             return formatRet(500,"入库单不存在");
         }
         $batch->append('batch_code_barcode');
-//        $stock =
+
         unset($batch['batch_products']);
         return formatRet(0,"成功",$batch->toArray());
 

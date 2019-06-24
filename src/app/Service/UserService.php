@@ -33,7 +33,6 @@ class UserService{
         try {
 
             #先创建一个用户
-
             $user->email    = $request->email;
             $user->password = Hash::make($request->password);
             $nickname = explode("@",$request->email);

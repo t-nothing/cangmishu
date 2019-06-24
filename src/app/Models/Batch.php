@@ -174,7 +174,10 @@ class Batch extends Model
 
     public function distributor()
     {
-        return $this->belongsTo('App\Models\Distributor', 'distributor_id', 'id');
+        return $this->belongsTo('App\Models\Distributor', 'distributor_id', 'id')->withDefault([
+            'name_cn' => '',
+            'name_en' => ''
+        ]);
     }
 
     public function operatorUser()
