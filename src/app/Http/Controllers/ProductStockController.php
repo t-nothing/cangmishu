@@ -482,7 +482,7 @@ class ProductStockController extends  Controller
                 'ean' => $s->ean,
                 'stock_id' => $s->id,
                 'sku' => $s->sku,
-                'product_name' => $s->spec->product_name,
+                'product_name' => $s->product_name,
                 'shelf_num' => $s->shelf_num,
                 'shelf_num_waiting'=>$s->shelf_num_waiting,
                 'relevance_code' =>$s->relevance_code,

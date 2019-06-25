@@ -146,25 +146,24 @@ class ProductStock extends Model
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * @return string
-     */
-    public function getProductNameCnAttribute()
+    public  function  getProductNameAttribute()
     {
-        return isset($this->spec->product)
-            ? $name = $this->spec->product['name_cn'] . '(' . $this->name_cn . ')'
-            : '';
+        $name = $this->spec?($this->spec->product_name?:""):"";
+        return $name;
     }
 
-    /**
-     * @return string
-     */
-    public function getProductNameEnAttribute()
+    public  function  getProductNameEnAttribute()
     {
-        return isset($this->spec->product)
-            ? $name = $this->spec->product['name_en'] . '(' . $this->name_en . ')'
-            : '';
+        $name = $this->spec?($this->spec->product_name_en?:""):"";
+        return $name;
     }
+
+    public  function  getProductNameCnAttribute()
+    {
+        $name = $this->spec?($this->spec->product_name_cn?:""):"";
+        return $name;
+    }
+
 
 
     /**
