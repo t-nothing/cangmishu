@@ -57,7 +57,7 @@ class CreateBatchRequest extends BaseRequests
                 })
             ],
             'product_stock.*.need_num'         => 'required|integer|min:1',
-            'product_stock.*.distributor_code' => ['string','max:255','distinct'],
+            'product_stock.*.distributor_code' => 'string|max:255|distinct',
             'product_stock.*.remark'           => 'present|string|max:255',
         ];
     }
@@ -67,6 +67,10 @@ class CreateBatchRequest extends BaseRequests
         return [
             'warehouse_id.exists' => '仓库不存在',
             'batch_code.unique'  => '入库单编码重复',
+            'distributor_id.exists' =>'供货商不存在',
+            'type_id.exists' =>  '入库单分类不存在',
+            'product_stock.*.relevance_code.exists' =>  '外部编码不存在',
+            'product_stock.*.distributor_code.distinct' =>  '供货商货号重复',
         ];
     }
 }

@@ -94,10 +94,6 @@ class OrderController extends Controller
     }
 
 
-
-
-
-
     public function store(CreateOrderRequest $request)
     {
         app('log')->info('新增出库单',$request->all());
@@ -205,7 +201,6 @@ class OrderController extends Controller
                 $v['item']->save();
                 $v['stock']->decrement('shelf_num', $v['pick_num']);
                 // 添加记录
-                $v['stock']->addLog(ProductStockLog::TYPE_PICKING, $v['pick_num'],$request->order_id);
                 $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$request->order_id);
                 $res[]=[
                     'owner_id'=>$v['stock']->owner_id,
@@ -216,10 +211,7 @@ class OrderController extends Controller
             }
             $order->update(['status' => Order::STATUS_PICK_DONE,'verify_status'=>2,'delivery_data'=>time()]);
             // 记录出库单拣货完成的时间
-            OrderHistory::addHistory($order, Order::STATUS_DEFAULT);
             OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-//            OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-//            OrderHistory::addHistory($order, Order::STATUS_WAITING);
             DB::commit();
         }
         catch (BusinessException $exception){

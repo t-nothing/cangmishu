@@ -21,6 +21,10 @@ class Distributor extends Model
         return $query->where('user_id',$owner_id);
     }
 
+    public function  ScopeHasKeywords($query, $keywords){
+        return $query->where('name_cn','like','%'.$keywords.'%')->orWhere('name_en','like','%'.$keywords.'%');
+    }
+
 
 
     public function getNameAttribute()

@@ -19,9 +19,14 @@ class DistributorController extends Controller
         $this->validate($request, [
             'page'      => 'integer|min:1',
             'page_size' => new PageSize(),
+            'keywords'  => 'sometimes|string'
         ]);
 
-        $distributors = Distributor::where('user_id',app('auth')->ownerId())->paginate($request->input('page_size',10));
+        $distributors = Distributor::where('user_id',app('auth')->ownerId())
+                        ->when($request->filled('keywords'),function($q) use ($request){
+                            return $q->hasKeywords($request->keywords);
+                        })
+                        ->paginate($request->input('page_size',10));
 
         return formatRet(0, '', $distributors->toArray());
     }
