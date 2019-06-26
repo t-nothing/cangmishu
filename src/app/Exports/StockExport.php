@@ -29,18 +29,11 @@ class StockExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSiz
             $spec->product_name_cn,
             $spec->product_name_en,
             $spec->relevance_code,
-            $spec->owner?$spec->owner->nickname:"",
             $spec->stock_in_warehouse,
-            $spec->stock_to_be_on_shelf,
-            $spec->stock_on_shelf,
-            $spec->reserved_num,
-            $spec->available_num,
             $spec->stock_entrance_times,
             $spec->stock_entrance_qty,
             $spec->stock_out_times,
             $spec->stock_out_qty,
-            $spec->stocks_count,
-
         ];
     }
 

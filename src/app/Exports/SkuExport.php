@@ -48,6 +48,7 @@ class SkuExport implements FromQuery, WithMapping, WithHeadings, WithStrictNullC
             '货品中文名称',
             '货品英文名称',
             'SKU',
+            '仓库库存',
             'EAN',
             '出产批次号',
             '保质期',
