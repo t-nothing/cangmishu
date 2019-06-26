@@ -129,7 +129,7 @@ class Order extends Model
 //                $name = '拣货中';
 //                break;
             case Order::STATUS_PICK_DONE:
-                $name = '已拣货';
+                $name = '已出库';
                 break;
 //            case Order::STATUS_WAITING:
 //                $name = '待出库';
@@ -318,7 +318,7 @@ class Order extends Model
             'receiver_email'    =>  '',
             'line_name'         =>  '',
             'delivery_date'     => "2017-01-01",
-            'old_plan_status'   => self::ORDER_STATUS_SEND,
+            'old_plan_status'   => 0,
             'status'            => self::STATUS_DEFAULT,
         ];
         return $this->where('id',$id)->update($update);
