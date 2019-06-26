@@ -200,6 +200,7 @@ class OrderController extends Controller
                 $v['item']->verify_num = $v['pick_num'];
                 $v['item']->save();
                 $v['stock']->decrement('shelf_num', $v['pick_num']);
+                $v['stock']->decrement('stockin_num', $v['pick_num']);
                 // 添加记录
                 $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$request->order_id);
                 $res[]=[

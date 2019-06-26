@@ -89,14 +89,10 @@ class ProductStockController extends  Controller
                 $spec->append([
                     'product_name',
                     'stock_in_warehouse',// 仓库库存
-                    'stock_on_shelf',// 上架库存
                     'stock_entrance_times',// 入库次数
                     'stock_out_times',// 出库次数
-                    'stock_entrance_qty',// 入库次数
-                    'stock_out_qty',// 出库次数
-                    'reserved_num',// 锁定库存
-                    'available_num',// 可用库存
-                    'stock_to_be_on_shelf',// 待上架库存
+                    'stock_entrance_qty',// 入库数量
+                    'stock_out_qty',// 出库数量
                 ]);
             }
         }
@@ -108,24 +104,14 @@ class ProductStockController extends  Controller
                 $data['data'][$k]['owner'] = $v['owner']['email'];
 
                 $stocks = ProductStock::with(['batch', 'location'])//:id,code
-                ->withCount(['logs as edit_count' => function ($query) {
-                    $query->where('type_id', ProductStockLog::TYPE_COUNT);
-                }])
-                    ->doesntHave('batch', 'and', function ($query) {
-                        $query->where('status', Batch::STATUS_PREPARE)->orWhere('status', Batch::STATUS_CANCEL);
-                    })
+                    ->withCount(['logs as edit_count' => function ($query) {
+                        $query->where('type_id', ProductStockLog::TYPE_COUNT);
+                    }])
                     ->ofWarehouse($warehouse_id)
                     ->whose($v['owner_id'])
                     ->where('spec_id', $spec_id)
-                    ->where('status', '!=', ProductStock::GOODS_STATUS_OFFLINE)
+                    ->enable()
                     ->get();
-                //根据商品库存单号查出对应的待验货数量、待上架数量
-                $stocks = $stocks->map(function($stock) {
-                    $stock->append(['to_be_verify', 'shelf_num_waiting']);
-                    return $stock;
-                });
-                //待验货数量
-                $data['data'][$k]['total_to_be_verify'] =$stocks->sum('to_be_verify');
 
                 // SKU数
                 $data['data'][$k]['sku_count'] = $stocks->count();
@@ -149,16 +135,11 @@ class ProductStockController extends  Controller
                         $sku['expiration_date']         = $s['expiration_date'];
                         $sku['best_before_date']        = $s['best_before_date'];
                         $sku['stockin_num']             = $s['stockin_num'];
-                        $sku['shelf_num']               = $s['shelf_num'];
-                        $sku['shelf_num_waiting']       = $s['shelf_num_waiting'];
                         $sku['edit_count'] = $s['edit_count'];
                         $sku['location_code'] = isset($stock->location->code) ? $stock->location->code : '';
-                        $sku['to_be_verify']        = $s['to_be_verify'];
                         unset($sku['spec_id']);
-
                         $skus[] = $sku;
                     }
-
                     $data['data'][$k]['stocks'] = $skus;
                 }
 
@@ -166,8 +147,6 @@ class ProductStockController extends  Controller
                     $data['data'][$k]['warehouse_id'],
                     $data['data'][$k]['product_id'],
                     $data['data'][$k]['owner_id'],
-//                    $data['data'][$k]['name_cn'],
-//                    $data['data'][$k]['name_en'],
                     $data['data'][$k]['product']
                 );
             }
@@ -484,13 +463,15 @@ class ProductStockController extends  Controller
                 'sku' => $s->sku,
                 'product_name' => $s->product_name,
                 'shelf_num' => $s->shelf_num,
-                'shelf_num_waiting'=>$s->shelf_num_waiting,
                 'relevance_code' =>$s->relevance_code,
                 'location_code'=>$s->location->code,
                 'product_batch_num'=>$s->product_batch_num,
                 'best_before_date'=>$s->best_before_date,
                 'remark'=>$s->remark,
                 'expiration_date'=>$s->expiration_date?$s->expiration_date->toDateString():"",
+                'need_expiration_date' =>$s->need_expiration_date,
+                'need_best_before_date' =>$s->need_best_before_date,
+                'need_production_batch_number' => $s->need_production_batch_number,
             ];
         }
 
@@ -525,7 +506,8 @@ class ProductStockController extends  Controller
             ->ofWarehouse($warehouse->id)
             ->enabled()
             ->findOrFail($request->stock_id);
-        $stock->append(['to_be_verify', 'shelf_num_waiting']);
+        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number']);
+        $stock->setHidden(['spec']);
         return formatRet(0, '', [
             'stock' => $stock->toArray(),
         ]);
@@ -627,6 +609,8 @@ class ProductStockController extends  Controller
         if(!$stock){
             return formatRet(500,'sku不存在');
         }
+        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number',]);
+        $stock->setHidden(['spec']);
         return formatRet(0,'成功',$stock->toArray());
 
     }

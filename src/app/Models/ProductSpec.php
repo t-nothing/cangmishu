@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Redis;
 
 class ProductSpec extends Model
 {
-    use SoftDeletes;
 	protected $table = 'product_spec';
     protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'relevance_code', 'product_id','net_weight','gross_weight','is_warning'];
 
@@ -96,7 +94,7 @@ class ProductSpec extends Model
 	}
 
 	/**
-	 * 某规格/某仓库/仓库库存 = 已上架 + 已入库但未上架
+	 * 某规格/某仓库/仓库库存 = 已入库上架的库存 == 已上架库存
 	 *
 	 * @return integer
 	 */
@@ -106,10 +104,7 @@ class ProductSpec extends Model
 
 		return ProductStock::ofWarehouse($this->warehouse_id)
         		->whose($owner_id)
-                ->whereIn('status', [
-                    ProductStock::GOODS_STATUS_PREPARE,
-                    ProductStock::GOODS_STATUS_ONLINE,
-                ])
+                ->enabled()
                 ->where('spec_id', $this->id)
                 ->sum('stockin_num');
 	}
@@ -119,34 +114,34 @@ class ProductSpec extends Model
 	 *
 	 * @return integer
 	 */
-	public function getStockOnShelfAttribute()
-	{
-		$owner_id = $this->owner_id;
-
-		return ProductStock::ofWarehouse($this->warehouse_id)
-        		->whose($owner_id)
-                ->enabled()
-                ->where('spec_id', $this->id)
-                ->sum('shelf_num');
-	}
+//	public function getStockOnShelfAttribute()
+//	{
+//		$owner_id = $this->owner_id;
+//
+//		return ProductStock::ofWarehouse($this->warehouse_id)
+//        		->whose($owner_id)
+//                ->enabled()
+//                ->where('spec_id', $this->id)
+//                ->sum('shelf_num');
+//	}
 
 	/**
 	 * 待上架库存
 	 *
 	 * @return integer
 	 */
-	public function getStockToBeOnShelfAttribute()
-	{
-		$owner_id = $this->owner_id;
-
-		return ProductStock::ofWarehouse($this->warehouse_id)
-        		->whose($owner_id)
-                ->where('spec_id', $this->id)
-                ->where('status', ProductStock::GOODS_STATUS_PREPARE)
-                ->whereHas('batch', function ($query) {
-                    $query->where('status', Batch::STATUS_PROCEED);
-                })->sum('total_stockin_num');
-	}
+//	public function getStockToBeOnShelfAttribute()
+//	{
+//		$owner_id = $this->owner_id;
+//
+//		return ProductStock::ofWarehouse($this->warehouse_id)
+//        		->whose($owner_id)
+//                ->where('spec_id', $this->id)
+//                ->where('status', ProductStock::GOODS_STATUS_PREPARE)
+//                ->whereHas('batch', function ($query) {
+//                    $query->where('status', Batch::STATUS_PROCEED);
+//                })->sum('total_stockin_num');
+//	}
 
 	/**
 	 * 入库次数
@@ -159,10 +154,7 @@ class ProductSpec extends Model
 
 		return ProductStock::ofWarehouse($this->warehouse_id)
         		->whose($owner_id)
-                ->whereIn('status', [
-                    ProductStock::GOODS_STATUS_PREPARE,
-                    ProductStock::GOODS_STATUS_ONLINE,
-                ])
+                ->enabled()
                 ->where('spec_id', $this->id)
                 ->where('total_stockin_num', '>', 0)
                 ->count();
@@ -196,10 +188,7 @@ class ProductSpec extends Model
 
 		return ProductStock::ofWarehouse($this->warehouse_id)
         		->whose($owner_id)
-                ->whereIn('status', [
-                    ProductStock::GOODS_STATUS_PREPARE,
-                    ProductStock::GOODS_STATUS_ONLINE,
-                ])
+                ->enabled()
                 ->where('spec_id', $this->id)
                 ->sum('total_stockin_num');
 	}
@@ -209,6 +198,7 @@ class ProductSpec extends Model
 	 *
 	 * @return integer
 	 */
+
 	public function getStockOutQtyAttribute()
 	{
 		$owner_id = $this->owner_id;
@@ -227,34 +217,34 @@ class ProductSpec extends Model
 	 *
 	 * @return integer
 	 */
-	public function getReservedNumAttribute()
-    {
-        // 特定SKU的仓库数量 = 此SKU剩余已上架数量 + 此SKU待验货数量
-
-    	$owner_id = $this->owner_id;
-
-        // 待验货数量
-        $lock_num = OrderItem::ofWarehouse($this->warehouse_id)
-        		->whose($owner_id)
-                ->where('relevance_code', $this->relevance_code)
-                ->where('pick_num',0)
-                ->whereHas('order', function ($query) {
-                    $query->where('status', '==', Order::STATUS_DEFAULT);
-                })
-                ->sum('amount');
-
-        return $lock_num;
-    }
+//	public function getReservedNumAttribute()
+//    {
+//        // 特定SKU的仓库数量 = 此SKU剩余已上架数量 + 此SKU待验货数量
+//
+//    	$owner_id = $this->owner_id;
+//
+//        // 待验货数量
+//        $lock_num = OrderItem::ofWarehouse($this->warehouse_id)
+//        		->whose($owner_id)
+//                ->where('relevance_code', $this->relevance_code)
+//                ->where('pick_num',0)
+//                ->whereHas('order', function ($query) {
+//                    $query->where('status', '==', Order::STATUS_DEFAULT);
+//                })
+//                ->sum('amount');
+//
+//        return $lock_num;
+//    }
 
     /**
 	 * 可用库存
 	 *
 	 * @return integer
 	 */
-	public function getAvailableNumAttribute()
-    {
-        return max($this->stock_in_warehouse - $this->reserved_num, 0);
-    }
+//	public function getAvailableNumAttribute()
+//    {
+//        return max($this->stock_in_warehouse - $this->reserved_num, 0);
+//    }
 
     /**
      * SKU数量

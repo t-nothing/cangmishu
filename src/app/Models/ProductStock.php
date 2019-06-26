@@ -46,11 +46,11 @@ class ProductStock extends Model
      */
     protected $appends = [
         'relevance_code_barcode',
-        'product_name_cn'
     ];
 
     protected  $fillable =['owner_id','spec_id','relevance_code','need_num','remark','distributor_id','distributor_code','warehouse_id','status','sku','ean'];
     protected $guarded = [];
+
 
     /*
     |--------------------------------------------------------------------------
@@ -146,6 +146,24 @@ class ProductStock extends Model
     |--------------------------------------------------------------------------
     */
 
+    public  function getNeedExpirationDateAttribute()
+    {
+       return $this->spec->product->category->need_expiration_date;
+    }
+
+    public  function getNeedBestBeforeDateAttribute()
+    {
+        return $this->spec->product->category->need_best_before_date;
+
+    }
+
+    public  function getNeedProductionBatchNumberAttribute()
+    {
+        return $this->spec->product->category->need_production_batch_number;
+    }
+
+
+
     public  function  getProductNameAttribute()
     {
         $name = $this->spec?($this->spec->product_name?:""):"";
@@ -203,15 +221,15 @@ class ProductStock extends Model
      *
      * @return int|mixed
      */
-    public function getShelfNumWaitingAttribute()
-    {
-        return $this->status == ProductStock::GOODS_STATUS_PREPARE
-        && in_array($this->batch->status, [
-            Batch::STATUS_PROCEED, Batch::STATUS_ACCOMPLISH
-        ])
-            ? $this->stockin_num
-            : 0;
-    }
+//    public function getShelfNumWaitingAttribute()
+//    {
+//        return $this->status == ProductStock::GOODS_STATUS_PREPARE
+//        && in_array($this->batch->status, [
+//            Batch::STATUS_PROCEED, Batch::STATUS_ACCOMPLISH
+//        ])
+//            ? $this->stockin_num
+//            : 0;
+//    }
 
     /**
      * 获得待验货数量
@@ -221,15 +239,15 @@ class ProductStock extends Model
      *
      * @return int
      */
-    public function getToBeVerifyAttribute()
-    {
-        $verifying_num = OrderItem::where('product_stock_id', $this->id)
-                        ->where('verify_num',0)
-                        ->selectRaw('sum(pick_num - verify_num) AS verifying_num')
-                        ->value('verifying_num') ?? 0;
-
-        return $verifying_num;
-    }
+//    public function getToBeVerifyAttribute()
+//    {
+//        $verifying_num = OrderItem::where('product_stock_id', $this->id)
+//                        ->where('verify_num',0)
+//                        ->selectRaw('sum(pick_num - verify_num) AS verifying_num')
+//                        ->value('verifying_num') ?? 0;
+//
+//        return $verifying_num;
+//    }
 
     /*
     |--------------------------------------------------------------------------
@@ -273,25 +291,13 @@ class ProductStock extends Model
         $sku_total_stockin_num = ProductStock::where('sku', $this->sku)
             ->ofWarehouse($this->warehouse_id)
             ->whose($this->owner_id)
-            ->where(function ($query) {
-                $query->enabled()->orWhere(function ($query) {
-                    $query->where('status', ProductStock::GOODS_STATUS_PREPARE)->whereHas('batch', function ($query) {
-                        $query->where('status', Batch::STATUS_ACCOMPLISH);
-                    });
-                });
-            })
+            ->enable()
             ->sum('stockin_num');
 
         $spec_total_stockin_num = ProductStock::where('spec_id', $this->spec_id)
             ->ofWarehouse($this->warehouse_id)
             ->whose($this->owner_id)
-            ->where(function ($query) {
-                $query->enabled()->orWhere(function ($query) {
-                    $query->where('status', ProductStock::GOODS_STATUS_PREPARE)->whereHas('batch', function ($query) {
-                        $query->where('status', Batch::STATUS_ACCOMPLISH);
-                    });
-                });
-            })
+            ->enable()
             ->sum('stockin_num');
 
         $sku_total_shelf_num  = ProductStock::where('sku', $this->sku)
@@ -365,37 +371,37 @@ class ProductStock extends Model
         // 特定SKU的仓库数量 = 此SKU剩余已上架数量 + 此SKU待拣货数量
 
         // 待验货数量
-        $verifying_num =OrderItem::ofWarehouse($this->warehouse_id)
-        ->whose($this->owner_id)
-        ->where('relevance_code', $this->relevance_code)
-        ->where('product_stock_id', $this->getKey())
-        ->where('verify_num',0)
-        ->where('pick_num',0)
-        ->sum('amount');
-        $stockin_num = $new_shelf_num + $verifying_num;
+//        $verifying_num =OrderItem::ofWarehouse($this->warehouse_id)
+//        ->whose($this->owner_id)
+//        ->where('relevance_code', $this->relevance_code)
+//        ->where('product_stock_id', $this->getKey())
+//        ->where('verify_num',0)
+//        ->where('pick_num',0)
+//        ->sum('amount');
+        $stockin_num = $new_shelf_num ;
 
         return $stockin_num;
     }
 
-    public function getCurrentLockNum()
-    {
-
-        // 待验货数量
-        $lock_num = OrderItem::ofWarehouse($this->warehouse_id)
-            ->whose($this->owner_id)
-            ->where('relevance_code', $this->relevance_code)
-            ->where('product_stock_id', $this->getKey())
-            ->whereHas('pick', function($query) {
-                $query->whereIn('status', [
-                    Pick::STATUS_DEFAULT,
-                    Pick::STATUS_PICKING,
-                    Pick::STATUS_PICK_DONE,
-                ]);
-            })
-            ->sum('amount');
-
-        return $lock_num;
-    }
+//    public function getCurrentLockNum()
+//    {
+//
+//        // 待验货数量
+//        $lock_num = OrderItem::ofWarehouse($this->warehouse_id)
+//            ->whose($this->owner_id)
+//            ->where('relevance_code', $this->relevance_code)
+//            ->where('product_stock_id', $this->getKey())
+//            ->whereHas('pick', function($query) {
+//                $query->whereIn('status', [
+//                    Pick::STATUS_DEFAULT,
+//                    Pick::STATUS_PICKING,
+//                    Pick::STATUS_PICK_DONE,
+//                ]);
+//            })
+//            ->sum('amount');
+//
+//        return $lock_num;
+//    }
 
     /**
      * 获取现在总库存
@@ -405,10 +411,7 @@ class ProductStock extends Model
     {
         return   self::whose($this->owner_id)
             ->ofWarehouse($this->warehouse_id)
-            ->whereIn('status', [
-                ProductStock::GOODS_STATUS_PREPARE,
-                ProductStock::GOODS_STATUS_ONLINE,
-            ])
+            ->enable()
             ->where('relevance_code', $this->relevance_code)
             ->sum('stockin_num');
     }

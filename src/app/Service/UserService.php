@@ -147,6 +147,7 @@ class UserService{
             $batchType->name         = "默认分类";
             $batchType->is_enabled   = 1;
             $batchType->area_id      = $warehouseArea->id;
+            $batchType->owner_id      = $user->id;
             if (!$batchType->save()) {
                 throw new \Exception("默认入库单分类创建失败", 1);
             }
@@ -159,6 +160,7 @@ class UserService{
             $orderType->is_enabled   = 1;
             $orderType->is_partial   = 2;
             $orderType->area_id      = $warehouseArea->id;
+            $orderType->owner_id =  $user->id;
 
             if (!$orderType->save()) {
                 throw new \Exception("默认出库单分类创建失败", 1);
@@ -173,6 +175,7 @@ class UserService{
             $category->name_cn                      = "默认分类";
             $category->name_en                      = "Default Category";
             $category->is_enabled                   = 1;
+            $category->owner_id                     = $user->id;
 //            $category->need_expiration_date         = 0;
 //            $category->need_production_batch_number = 0;
 //            $category->need_best_before_date        = 0;

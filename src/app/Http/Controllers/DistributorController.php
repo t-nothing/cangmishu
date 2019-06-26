@@ -17,16 +17,22 @@ class DistributorController extends Controller
     public function index(BaseRequests $request)
     {
         $this->validate($request, [
+
             'page'      => 'integer|min:1',
             'page_size' => new PageSize(),
-            'keywords'  => 'sometimes|string'
+            'keywords'  => 'sometimes|string',
+            'all' =>'sometimes|integer'
         ]);
 
         $distributors = Distributor::where('user_id',app('auth')->ownerId())
                         ->when($request->filled('keywords'),function($q) use ($request){
                             return $q->hasKeywords($request->keywords);
-                        })
-                        ->paginate($request->input('page_size',10));
+                        });
+        if($request->input('all',0) == 0){
+            $distributors = $distributors ->paginate($request->input('page_size',10));
+        }else{
+            $distributors = $distributors ->get();
+        }
 
         return formatRet(0, '', $distributors->toArray());
     }
