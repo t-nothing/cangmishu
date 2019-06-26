@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
 {
@@ -52,6 +53,13 @@ class Handler extends ExceptionHandler
         if($request->wantsJson() ||$request->expectsJson()){
             $e =  $this->prepareException($e);
             switch ($e){
+                case $e instanceof  ValidationException:
+                   $re = collect($e->errors())->values()->flatten(1)->toArray();
+                    return  response()->json([
+                        'msg' => $re[0],
+                        'status' =>422 ,
+                        'data' => $re,
+                    ],422);
                 case  $e instanceof HttpResponseException:
                     return $e->getResponse();
                 case  $e instanceof AuthenticationException:

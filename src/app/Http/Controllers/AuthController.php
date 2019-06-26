@@ -9,6 +9,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Http\Requests\BaseRequests;
 use Illuminate\Http\Request;
 
 class AuthController extends  Controller
@@ -16,7 +17,7 @@ class AuthController extends  Controller
     /**
      * 登入
      */
-    public function login(Request $request)
+    public function login(BaseRequests $request)
     {
         $this->validate($request, [
             'email'    => 'required',
