@@ -29,9 +29,13 @@ class WarehouseController extends Controller
     public function index(BaseRequests $request)
     {
         $user_id = app('auth')->ownerId();
+        $user = app('auth')->user();
         $warehouses = Warehouse::where('owner_id',$user_id)->paginate($request->input('page_size',10));
         foreach ($warehouses as $wa){
-          $wa->append('warehouse_address');
+            if($user->default_warehouse_id == $wa->id){
+                $wa->setDefault(1);
+            }
+          $wa->append('warehouse_address','is_default_warehouse','warehouse_feature');
         }
         return formatRet(0, '', $warehouses->toArray());
     }
@@ -60,13 +64,6 @@ class WarehouseController extends Controller
     public function update(UpdateWarehouseRequest $request,$warehouse_id)
     {
         app('log')->info('编辑仓库',$request->all());
-        $this->validate($request, [
-            'name_cn' => [
-                'required','string','max:255',
-                Rule::unique('warehouse')->ignore($warehouse_id)
-            ],
-            'area' => 'required|numeric',
-        ]);
         $data = $request->all();
         try{
             Warehouse::where('id',$warehouse_id)->update($data);
@@ -81,6 +78,7 @@ class WarehouseController extends Controller
     {
         app('log')->info('删除仓库',['warehouse_id'=>$warehouse_id]);
         $ownerId = Auth::ownerId();
+
         try{
             Warehouse::where('id',$warehouse_id)->where('owner_id',$ownerId)->delete();
             //删除商品
@@ -105,6 +103,29 @@ class WarehouseController extends Controller
             app('log')->error('删除仓库失败',['msg'=>$e->getMessage()]);
             return formatRet(500, '失败');
         }
+    }
+
+
+    public function setDefault($warehouse_id)
+    {
+        $user = Auth::user();
+
+        if($user->boss_id){
+            //如果是员工账户
+            $warehouse = $user->groups->warehouse;
+            if($warehouse->id != $warehouse_id){
+                return formatRet(500,"无权设置");
+            }
+        }else{
+            $warehouse = Warehouse::where('owner_id', $user->id)->where('id', $warehouse_id)->first();
+            if(!$warehouse){
+                return formatRet(500,"仓库不存在或无权限查看");
+            }
+        }
+        $user->default_warehouse_id = $warehouse_id;
+        $user->save();
+
+        return formatRet(0,"设置成功");
     }
 
 }

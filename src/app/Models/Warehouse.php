@@ -9,6 +9,9 @@ class Warehouse extends Model
 {
     protected $table = 'warehouse';
 
+    public $default = 0;
+    public $warehouse_feature = "-";
+
     const TYPE_OPEN = 1;
     const TYPE_PERSONAL = 2;
 
@@ -23,6 +26,17 @@ class Warehouse extends Model
     {
         return strtotime($value);
     }
+
+    //默认仓库标识
+    public  function setDefault(int $default)
+    {
+        $this->default =$default;
+        $this->warehouse_feature = "默认仓库";
+        return $this;
+    }
+
+
+
 
     public function WarehouseArea()
     {
@@ -119,4 +133,14 @@ class Warehouse extends Model
         return $this->country.$this->city.$this->street.$this->door_no;
     }
 
+
+    public function getIsDefaultWarehouseAttribute()
+    {
+        return $this->default;
+    }
+
+    public function getWarehouseFeatureAttribute()
+    {
+        return $this->warehouse_feature;
+    }
 }

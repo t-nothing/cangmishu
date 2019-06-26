@@ -27,6 +27,7 @@ class CategoryController extends Controller
                     ->when($request->filled('is_enabled'),function($q)use($request) {
                         $q->where('is_enabled', $request->is_enabled);
                     })
+                    ->orderBy('id','ASC')
                     ->paginate($request->input('page_size',10));
 
         return formatRet(0, '', $categories->toArray());
