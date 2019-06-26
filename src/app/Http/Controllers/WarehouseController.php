@@ -79,7 +79,7 @@ class WarehouseController extends Controller
 
     public function  destroy($warehouse_id)
     {
-        app('log')->info('删除仓库',$warehouse_id);
+        app('log')->info('删除仓库',['warehouse_id'=>$warehouse_id]);
         $ownerId = Auth::ownerId();
         try{
             Warehouse::where('id',$warehouse_id)->where('owner_id',$ownerId)->delete();
