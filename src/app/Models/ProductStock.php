@@ -291,13 +291,13 @@ class ProductStock extends Model
         $sku_total_stockin_num = ProductStock::where('sku', $this->sku)
             ->ofWarehouse($this->warehouse_id)
             ->whose($this->owner_id)
-            ->enable()
+            ->enabled()
             ->sum('stockin_num');
 
         $spec_total_stockin_num = ProductStock::where('spec_id', $this->spec_id)
             ->ofWarehouse($this->warehouse_id)
             ->whose($this->owner_id)
-            ->enable()
+            ->enabled()
             ->sum('stockin_num');
 
         $sku_total_shelf_num  = ProductStock::where('sku', $this->sku)
@@ -411,7 +411,7 @@ class ProductStock extends Model
     {
         return   self::whose($this->owner_id)
             ->ofWarehouse($this->warehouse_id)
-            ->enable()
+            ->enabled()
             ->where('relevance_code', $this->relevance_code)
             ->sum('stockin_num');
     }

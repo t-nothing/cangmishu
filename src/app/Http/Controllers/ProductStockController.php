@@ -110,7 +110,7 @@ class ProductStockController extends  Controller
                     ->ofWarehouse($warehouse_id)
                     ->whose($v['owner_id'])
                     ->where('spec_id', $spec_id)
-                    ->enable()
+                    ->enabled()
                     ->get();
 
                 // SKU数
