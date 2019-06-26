@@ -51,6 +51,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/warehouses', 'WarehouseController@index');
     Route::post('/warehouses', 'WarehouseController@store');
     Route::put('/warehouses/{warehouse_id}', 'WarehouseController@update');
+    Route::delete('/warehouses/{warehouse_id}', 'WarehouseController@destroy');
 
     //商品分类
     Route::get('/categories', 'CategoryController@index');
