@@ -31,9 +31,9 @@ class UserForgetPasswordMail extends Mailable implements ShouldQueue
      * @param  int $url 重置网址
      * @return void
      */
-    public function __construct($toMail, $name, $url)
+    public function __construct($toMail, $name, $url,$logo,$qrCode)
     {
-        $this->to($toMail)->with(compact('name', 'url'));
+        $this->to($toMail)->with(compact('name', 'url','logo','qrCode'));
     }
 
     /**

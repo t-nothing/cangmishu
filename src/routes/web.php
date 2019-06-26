@@ -24,6 +24,14 @@ Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
 Route::post('/code', 'UserController@getCode');
 
+Route::post('/user/forgetPassword', 'PasswordController@store');// 忘记密码-请求重置
+Route::get('/user/resetPassword/{token_value}', [
+    'as' => 'pwd-activation',
+    'uses' => 'PasswordController@show',
+]);// 忘记密码-重置密码链接
+Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-重置密码接口
+
+
 Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库

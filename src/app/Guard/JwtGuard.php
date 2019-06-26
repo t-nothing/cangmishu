@@ -365,9 +365,10 @@ class JwtGuard implements Guard
         $toMail = $user->email;
         $name = $user->nickname;
         $url = route('pwd-activation', ['token_value' => $token->token_value]);
-
-        $message = new UserForgetPasswordMail($toMail, $name, $url);
-        $message->onQueue('emails');
+        $logo=env("APP_URL")."/images/logo.png";
+        $qrCode =env("APP_URL")."/images/qrCode.png";
+        $message = new UserForgetPasswordMail($toMail, $name, $url,$logo,$qrCode);
+        $message->onQueue('cangmishu_emails');
 
         Mail::send($message);
     }

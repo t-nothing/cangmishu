@@ -75,7 +75,6 @@ class UserController extends  Controller
         if(!$user){
             return formatRet(500,"请选择用户");
         }
-        app('log')->info('user',$user->toArray());
         $auth = Auth::user();
         if($user->boss_id !=0){
             if($user->boss_id !=$auth->id){
