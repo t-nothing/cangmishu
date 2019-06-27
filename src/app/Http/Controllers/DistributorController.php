@@ -49,13 +49,13 @@ class DistributorController extends Controller
             'name_cn' => [
                 'required','string','max:50',
                 Rule::unique('distributor')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
+                    return $query->where('user_id',Auth::ownerId());
                 }),
             ],
             'name_en' =>[
                 'required','string','max:50',
                 Rule::unique('distributor')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
+                    return $query->where('user_id',Auth::ownerId());
                 }),
             ],
         ]);
@@ -83,14 +83,14 @@ class DistributorController extends Controller
             'name_cn'        => [
                 'required','string','max:50',
                 Rule::unique('distributor')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
+                    return $query->where('user_id',Auth::ownerId());
                 })
                     ->ignore($this->route('category_id'))
             ],
             'name_en'        =>  [
                 'required','string','max:50',
                 Rule::unique('distributor')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
+                    return $query->where('user_id',Auth::ownerId());
                 })
                     ->ignore($this->route('category_id'))
             ],
