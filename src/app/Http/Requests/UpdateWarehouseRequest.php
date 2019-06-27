@@ -27,11 +27,18 @@ class UpdateWarehouseRequest extends BaseRequests
         return [
             'name_cn' => [
                 'required','string','max:255',
-                Rule::unique('warehouse')->ignore($this->route('warehouse_id'))
+                Rule::unique('warehouse')->where(function ($query) {
+                            return $query->where('owner_id',Auth::ownerId());
+                    })
+                    ->ignore($this->route('warehouse_id'))
             ],
             'code' => [
                 'required','string','max:255',
-                Rule::unique('warehouse')->ignore($this->route('warehouse_id'))
+                Rule::unique('warehouse')
+                    ->where(function ($query) {
+                            return $query->where('owner_id',Auth::ownerId());
+                     })
+                    ->ignore($this->route('warehouse_id'))
             ],
             'area'     => 'required|numeric',
             'city'     => 'sometimes|string|nullable',
