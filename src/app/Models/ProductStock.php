@@ -279,6 +279,7 @@ class ProductStock extends Model
      */
     public function addLog($type, $operation_num,$order_sn , $sku_total_shelf_num_old = 0, $remark = '')
     {
+        app('log')->info('拣货参数',compact('type', 'operation_num','order_sn', 'sku_total_shelf_num_old', 'remark'));
         $sku_total_stockin_num = ProductStock::where('sku', $this->sku)
             ->ofWarehouse($this->warehouse_id)
             ->whose($this->owner_id)
@@ -305,10 +306,11 @@ class ProductStock extends Model
         //根据uri判断时桌面端还是手持端
 
         if($type == ProductStockLog::TYPE_OUTPUT){
+            app('log')->info('order_sn ----'.$order_sn);
             $log = ProductStockLog::where('order_sn', $order_sn)->where('type_id',$type)->where('product_stock_id',$this->id)->first();
             if(!empty($log)){
-                app('log')->info('重复拣货失败',['log'=>$log]);
-                throw new BusinessException('拣货单'.$order_sn.'商品'.$this->relevance_code.'重复拣货');
+                app('log')->info('重复拣货失败',['log'=>$log->toArray()]);
+                throw new BusinessException('订单'.$order_sn.'商品'.$this->relevance_code.'重复拣货');
             }
         }
         return $this->logs()->create([
