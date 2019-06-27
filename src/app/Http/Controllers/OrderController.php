@@ -202,7 +202,7 @@ class OrderController extends Controller
                 $v['stock']->decrement('shelf_num', $v['pick_num']);
                 $v['stock']->decrement('stockin_num', $v['pick_num']);
                 // 添加记录
-                $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$request->order_id);
+                $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num']);
                 $res[]=[
                     'owner_id'=>$v['stock']->owner_id,
                     'relevance_code' =>$v['stock']->relevance_code,

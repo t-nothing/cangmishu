@@ -581,7 +581,7 @@ class ProductStockController extends  Controller
             $stock->save();
 
             // 添加入库单记录
-            $stock->addLog(ProductStockLog::TYPE_COUNT, $request->stock_num, '', $sku_total_shelf_num_old, $request->input('remark', ''));
+            $stock->addLog(ProductStockLog::TYPE_COUNT, $request->stock_num, $sku_total_shelf_num_old, $request->input('remark', ''));
             app('db')->commit();
         } catch (\Exception $e) {
             app('db')->rollback();
