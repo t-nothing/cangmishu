@@ -279,7 +279,6 @@ class ProductStock extends Model
      */
     public function addLog($type, $operation_num,$order_sn , $sku_total_shelf_num_old = 0, $remark = '')
     {
-        app('log')->info('拣货参数',compact('type', 'operation_num','order_sn', 'sku_total_shelf_num_old', 'remark'));
         $sku_total_stockin_num = ProductStock::where('sku', $this->sku)
             ->ofWarehouse($this->warehouse_id)
             ->whose($this->owner_id)

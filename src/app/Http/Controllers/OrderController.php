@@ -159,7 +159,7 @@ class OrderController extends Controller
         foreach ($items as $k=>$i){
 
             $item = OrderItem::find($i['order_item_id']);
-            app('log')->info('外部编码',['re' =>$item->relevance_code,'item'=>$i['order_item_id']]);
+
             if($i['pick_num'] > $item->amount){
                 return formatRet(500,'拣货数量超出应捡数目');
             }
@@ -180,16 +180,16 @@ class OrderController extends Controller
                     $cacahe_id[] = $stock_id;
                 }
             }
-//            app('log')->info('1stock',['stock'=>$stock]);
+
             //如过没有记录则去数据库拿
             if(empty($stock)){
                 $stock = app('stock')->getStockByAmount($i['pick_num'], $owner_id, $item->relevance_code, $cacahe_id);
             }
-//            app('log')->info('2stock',['stock'=>$stock]);
+
             if(empty($stock)){//库存真的不足
                 eRet($item->product_name.'库存不足');
             }
-//            app('log')->info('3stock',['stock'=>$stock]);
+
             $pick_stock[] =[
                 'item'=>$item,
                 'stock'=>$stock,
@@ -198,9 +198,7 @@ class OrderController extends Controller
         }
         DB::beginTransaction();
         $res = [];
-        foreach ($pick_stock as $k => $v){
-            app('log')->info('ss---'.$v['stock']->id);
-        }
+
         try{
 
             foreach ($pick_stock as $k => $v){
@@ -224,7 +222,7 @@ class OrderController extends Controller
             $order->update(['status' => Order::STATUS_PICK_DONE,'verify_status'=>2,'delivery_data'=>time()]);
             // 记录出库单拣货完成的时间
             OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-//            DB::commit();
+            DB::commit();
         }
         catch (BusinessException $exception){
             app('db')->rollback();
