@@ -145,7 +145,7 @@ class OrderController extends Controller
         $owner_id = Auth::ownerId();
         $order = Order::find($request->order_id);
         $items = $request->input('items');
-        $order->delivery_date = $request->input('delivery_date');
+        $order->delivery_date = strtotime($request->delivery_date);;
         $order->save();
         $item_in_rq = array_pluck($request->items, 'order_item_id');
 
