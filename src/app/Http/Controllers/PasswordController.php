@@ -51,8 +51,8 @@ class PasswordController extends Controller
             return response('', 404);
         }//存在token且未过期 跳转前端修改密码界面
 
-        $url = env('RESET_PASSWORD_URL') . "/#/backPassword?token=" . $token->token_value;
-
+        $url = env('RESET_PASSWORD_URL')."/#/backPassword?token=" . $token->token_value;
+        app('log')->info('url地址为'.$url);
         return redirect($url);
     }
 
