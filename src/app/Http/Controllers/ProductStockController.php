@@ -472,6 +472,9 @@ class ProductStockController extends  Controller
                 'need_expiration_date' =>$s->need_expiration_date,
                 'need_best_before_date' =>$s->need_best_before_date,
                 'need_production_batch_number' => $s->need_production_batch_number,
+                'need_expiration_date_name' =>$s->need_expiration_date_name,
+                'need_best_before_date_name' =>$s->need_best_before_date_name,
+                'need_production_batch_number_name' => $s->need_production_batch_number_name,
             ];
         }
 
@@ -506,7 +509,7 @@ class ProductStockController extends  Controller
             ->ofWarehouse($warehouse->id)
             ->enabled()
             ->findOrFail($request->stock_id);
-        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number']);
+        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number','need_expiration_date_name','need_best_before_date_name','need_production_batch_number_name',]);
         $stock->setHidden(['spec']);
         return formatRet(0, '', [
             'stock' => $stock->toArray(),
@@ -609,7 +612,7 @@ class ProductStockController extends  Controller
         if(!$stock){
             return formatRet(500,'sku不存在');
         }
-        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number','product_name']);
+        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number','need_expiration_date_name','need_best_before_date_name','need_production_batch_number_name','product_name']);
         $stock->setHidden(['spec']);
         return formatRet(0,'成功',$stock->toArray());
 

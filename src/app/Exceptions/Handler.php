@@ -16,6 +16,8 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
+        ValidationException::class,
+        AuthenticationException::class,
         BusinessException::class,
     ];
 

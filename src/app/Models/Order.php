@@ -181,10 +181,10 @@ class Order extends Model
     /**
      * @return boolean
      */
-    public function getRedeliveryStatusAttribute()
-    {
-        return $this->historys()->where('status', Order::STATUS_WAITING)->count() > 1;
-    }
+//    public function getRedeliveryStatusAttribute()
+//    {
+//        return $this->historys()->where('status', Order::STATUS_WAITING)->count() > 1;
+//    }
 
 
 

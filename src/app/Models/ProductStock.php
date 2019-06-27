@@ -142,6 +142,7 @@ class ProductStock extends Model
         return $query->where('owner_id', $user_id );
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | Attributes
@@ -153,9 +154,20 @@ class ProductStock extends Model
        return $this->spec->product->category->need_expiration_date;
     }
 
+    public  function getNeedExpirationDateNameAttribute()
+    {
+        return $this->spec->product->category->need_expiration_date?"保质期":"";
+    }
+
     public  function getNeedBestBeforeDateAttribute()
     {
         return $this->spec->product->category->need_best_before_date;
+
+    }
+
+    public  function getNeedBestBeforeDateNameAttribute()
+    {
+        return $this->spec->product->category->need_best_before_date?"最佳使用期":"";
 
     }
 
@@ -164,7 +176,10 @@ class ProductStock extends Model
         return $this->spec->product->category->need_production_batch_number;
     }
 
-
+    public  function getNeedProductionBatchNumberNameAttribute()
+    {
+        return $this->spec->product->category->need_production_batch_number?"生产批次号":"";
+    }
 
     public  function  getProductNameAttribute()
     {

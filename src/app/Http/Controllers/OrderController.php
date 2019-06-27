@@ -41,8 +41,7 @@ class OrderController extends Controller
                 })
             ]
         ]);
-        $order = Order::with(['orderItems:id,relevance_code,amount,name_cn,order_id,product_stock_id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])
-            ->ofWarehouse($request->warehouse_id)
+        $order = Order::ofWarehouse($request->warehouse_id)
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
             $order->where('created_at', '>', strtotime($request->created_at_b));
@@ -64,14 +63,17 @@ class OrderController extends Controller
                 [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
         });
 
-        $orders = $order->latest()->paginate($request->input('page_size',10),['id','created_at','send_phone','receiver_phone','send_fullname','receiver_fullname','delivery_date','warehouse_id','order_type','delivery_type','status','express_num','out_sn','remark']);
+        $orders = $order->latest()->paginate($request->input('page_size',10));
 
         foreach ($orders  as $k => $v) {
             $sum = 0;
             foreach ($v->orderItems as $k1 => $v1) {
                 $sum += $v1->amount;
             }
+            $v->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num','orderItems.stock:id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
             $v->append(['out_sn_barcode']);
+
+            $v->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
             $v->sum = $sum;
         }
 
