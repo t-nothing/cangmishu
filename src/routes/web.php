@@ -12,10 +12,7 @@
 */
 
 Route::get('/', function () {
-  $redis= app('redis');
-  $redis->set('name',"jack");
-  $name = $redis->get('name');
-  dd($name);
+
 });
 
 

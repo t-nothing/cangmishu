@@ -12,6 +12,7 @@ use App\Services\Service\ProductService;
 use App\Services\Service\ProductStockService;
 use App\Services\Service\StoreService;
 use App\Services\UserService;
+use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,7 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        //设置域名
+        app(UrlGenerator::class)->forceRootUrl(config('app.url'));
+
     }
 
     /**
