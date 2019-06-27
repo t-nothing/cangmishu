@@ -40,7 +40,7 @@ class OrderService
         $order->owner_id       = $user_id;
         $order->order_type     = $data->order_type;
         if($data->filled('delivery_date')){
-            $order->delivery_date  = $data->delivery_date;
+            $order->delivery_date  = strtotime($data->delivery_date);
         };
         if($data->filled('delivery_type')){
             $order->delivery_type  = $data->input('delivery_type');
