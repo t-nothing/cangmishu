@@ -45,7 +45,7 @@ class StoreService
         $stock->status                = ProductStock::GOODS_STATUS_ONLINE;
         $stock->save();
         // 添加记录
-        $stock->addLog(ProductStockLog::TYPE_BATCH_SHELF, $stock->stockin_num);
+        $stock->addLog(ProductStockLog::TYPE_BATCH_SHELF, $stock->stockin_num,$stock->batch->batch_code);
 
         return $stock;
     }

@@ -277,18 +277,8 @@ class ProductStock extends Model
     /**
      * 添加数据
      */
-    public function addLog($type, $operation_num,$order_sn = "", $sku_total_shelf_num_old = 0, $remark = '')
+    public function addLog($type, $operation_num,$order_sn , $sku_total_shelf_num_old = 0, $remark = '')
     {
-        switch ($type) {
-            case ProductStockLog::TYPE_BATCH_SHELF:
-                $order_sn = $this->batch->batch_code;
-                break;
-            case ProductStockLog::TYPE_OUTPUT:
-            default:
-                $order_sn = "";
-                break;
-        }
-
         $sku_total_stockin_num = ProductStock::where('sku', $this->sku)
             ->ofWarehouse($this->warehouse_id)
             ->whose($this->owner_id)
