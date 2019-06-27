@@ -465,7 +465,7 @@ class ProductStockController extends  Controller
                 'shelf_num' => $s->shelf_num,
                 'relevance_code' =>$s->relevance_code,
                 'location_code'=>$s->location->code,
-                'product_batch_num'=>$s->product_batch_num,
+                'product_batch_number'=>$s->product_batch_number,
                 'best_before_date'=>$s->best_before_date,
                 'remark'=>$s->remark,
                 'expiration_date'=>$s->expiration_date?$s->expiration_date->toDateString():"",
