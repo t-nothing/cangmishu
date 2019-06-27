@@ -144,7 +144,7 @@ class UserService{
             $batchType = new BatchType;
 
             $batchType->warehouse_id = $warehouse->id;
-            $batchType->name         = "默认分类";
+            $batchType->name         = "默认入库单分类";
             $batchType->is_enabled   = 1;
             $batchType->area_id      = $warehouseArea->id;
             $batchType->owner_id      = $user->id;
@@ -156,7 +156,7 @@ class UserService{
             $orderType = new OrderType;
 
             $orderType->warehouse_id = $warehouse->id;
-            $orderType->name         = "默认出库单";
+            $orderType->name         = "默认出库单分类";
             $orderType->is_enabled   = 1;
             $orderType->is_partial   = 2;
             $orderType->area_id      = $warehouseArea->id;

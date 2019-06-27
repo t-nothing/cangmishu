@@ -6,6 +6,7 @@ use App\Http\Requests\BaseRequests;
 use App\Models\Distributor;
 use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class DistributorController extends Controller
 {
@@ -45,8 +46,18 @@ class DistributorController extends Controller
     public function store(BaseRequests $request)
     {
         $this->validate($request, [
-            'name_cn' => 'required|string|max:255',
-            'name_en' => 'required|string|max:255',
+            'name_cn' => [
+                'required','string','max:50',
+                Rule::unique('distributor')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                }),
+            ],
+            'name_en' =>[
+                'required','string','max:50',
+                Rule::unique('distributor')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                }),
+            ],
         ]);
 
         $distributor = new Distributor;
@@ -69,8 +80,20 @@ class DistributorController extends Controller
     public function update(BaseRequests $request, $distributor_id)
     {
         $this->validate($request, [
-            'name_cn'        => 'required|string|max:255',
-            'name_en'        => 'required|string|max:255',
+            'name_cn'        => [
+                'required','string','max:50',
+                Rule::unique('distributor')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                })
+                    ->ignore($this->route('category_id'))
+            ],
+            'name_en'        =>  [
+                'required','string','max:50',
+                Rule::unique('distributor')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                })
+                    ->ignore($this->route('category_id'))
+            ],
         ]);
 
         if (! $distributor = Distributor::find($distributor_id)) {

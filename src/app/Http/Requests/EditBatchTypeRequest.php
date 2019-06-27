@@ -29,7 +29,9 @@ class EditBatchTypeRequest extends BaseRequests
         return[
             'name'         => [
                                 'required','string','max:50',
-                                Rule::unique('batch_type')->ignore($this->route('type_id'))
+                                Rule::unique('batch_type')->where(function ($query) {
+                                    return $query->where('owner_id',Auth::ownerId());
+                                })->ignore($this->route('type_id'))
                                ],
             'is_enabled'   => 'required|boolean',
         ];

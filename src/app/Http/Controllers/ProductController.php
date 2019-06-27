@@ -71,6 +71,7 @@ class ProductController extends Controller
                 'relevance_code' => $spec['relevance_code'],
                 'owner_id'       => Auth::ownerId(),
                 'warehouse_id'   => $request->warehouse_id,
+                'is_warning'     => $spec['is_warning']
             ];
         }
 

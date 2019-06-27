@@ -72,7 +72,6 @@ class CategoryController extends Controller
             app('log')->error('编辑货品分类失败',['msg' =>$e->getMessage()]);
             return formatRet(500,"编辑货品分类失败");
         }
-        return formatRet(0);
     }
 
     public function destroy($category_id)

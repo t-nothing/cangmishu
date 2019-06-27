@@ -26,14 +26,21 @@ class UpdateCategoryRequest extends BaseRequests
      */
     public function rules()
     {
+
         return [
             'name_cn'         => [
                 'required','string','max:50',
-                Rule::unique('category')->ignore($this->route('category_id')),
+                Rule::unique('category')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                })
+                    ->ignore($this->route('category_id'))
             ],
             'name_en'         => [
                 'required','string','max:50',
-                Rule::unique('category')->ignore($this->route('category_id')),
+                Rule::unique('category','name_en')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                })
+                    ->ignore($this->route('category_id'))
             ],
             'is_enabled'                   => 'required|boolean',
             'need_expiration_date'         => 'required|boolean',
