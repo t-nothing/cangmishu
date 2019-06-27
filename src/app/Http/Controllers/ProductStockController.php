@@ -609,7 +609,7 @@ class ProductStockController extends  Controller
         if(!$stock){
             return formatRet(500,'sku不存在');
         }
-        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number',]);
+        $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number','product_name']);
         $stock->setHidden(['spec']);
         return formatRet(0,'成功',$stock->toArray());
 
