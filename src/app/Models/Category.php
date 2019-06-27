@@ -21,6 +21,7 @@ class Category extends Model
 
     protected  $guarded = [];
 
+    public  $appends=['need_expiration_date_name','need_best_before_date_name','need_production_batch_number_name'];
     public function products()
     {
         return $this->hasMany('App\Models\Product', 'category_id', 'id');
@@ -39,5 +40,23 @@ class Category extends Model
     public  function ScopeOfWhose($query,$owner_id)
     {
         return $query->where('owner_id', $owner_id);
+    }
+
+
+    public  function getNeedExpirationDateNameAttribute()
+    {
+        return $this->need_expiration_date?"保质期":"";
+    }
+
+
+    public  function getNeedBestBeforeDateNameAttribute()
+    {
+        return $this->need_best_before_date?"最佳使用期":"";
+
+    }
+
+    public  function getNeedProductionBatchNumberNameAttribute()
+    {
+        return $this->need_production_batch_number?"生产批次号":"";
     }
 }
