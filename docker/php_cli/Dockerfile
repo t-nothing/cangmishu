@@ -7,12 +7,13 @@ RUN apt-get update && apt-get install -y \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
-#        libpng12-dev \
-				libpng-dev \
+		#libpng12-dev \
+		libpng-dev \
         zlib1g-dev \
-			  libxext-dev \
-				libfontconfig1-dev  \
-				libxrender-dev \
+		libxext-dev \
+		libfontconfig1-dev  \
+		libxrender-dev \
+		cron \ 
     && docker-php-ext-install -j$(nproc) iconv mcrypt mysqli pdo_mysql pcntl \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install -j$(nproc) gd \

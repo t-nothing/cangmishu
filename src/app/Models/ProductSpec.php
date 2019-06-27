@@ -9,7 +9,7 @@ class ProductSpec extends Model
 	protected $table = 'product_spec';
     protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'relevance_code', 'product_id','net_weight','gross_weight','is_warning'];
 
-//    public   $appends= ['product_name_cn'];
+    public   $appends= ['product_name_cn'];
 
 	/*
 	|--------------------------------------------------------------------------
