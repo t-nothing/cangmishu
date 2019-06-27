@@ -96,6 +96,8 @@ class ProductStock extends Model
         return $this->hasMany('App\Models\ProductStockLog', 'sku', 'sku');
     }
 
+
+
     /*
     |--------------------------------------------------------------------------
     | Scopes
@@ -275,15 +277,13 @@ class ProductStock extends Model
     /**
      * 添加数据
      */
-    public function addLog($type, $operation_num, $sku_total_shelf_num_old = 0, $remark = '')
+    public function addLog($type, $operation_num,$order_sn = "", $sku_total_shelf_num_old = 0, $remark = '')
     {
         switch ($type) {
             case ProductStockLog::TYPE_BATCH_SHELF:
                 $order_sn = $this->batch->batch_code;
                 break;
             case ProductStockLog::TYPE_OUTPUT:
-                $order_sn = $this->order->out_sn;
-                break;
             default:
                 $order_sn = "";
                 break;
