@@ -577,8 +577,8 @@ class ProductStockController extends  Controller
             $stock->shelf_num               = $request->stock_num;
             $stock->stockin_num             = $request->stock_num;
             $stock->ean                     = $request->ean;
-            $stock->expiration_date         = $request->input('expiration_date') ?: null;
-            $stock->best_before_date        = $request->input('best_before_date') ?: null;
+            $stock->expiration_date         = $request->input('expiration_date') ? strtotime($request->input('expiration_date')." 00:00:00"): null;
+            $stock->best_before_date        = $request->input('best_before_date') ? strtotime($request->input('best_before_date')." 00:00:00"): null;
             $stock->production_batch_number = $request->input('production_batch_number', '');
             $stock->warehouse_location_id   = $location->id;
             $stock->save();

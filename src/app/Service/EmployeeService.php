@@ -10,6 +10,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\UserGroupRel;
+use Illuminate\Support\Facades\DB;
 
 class EmployeeService
 {

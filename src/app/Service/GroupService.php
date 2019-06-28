@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class GroupService
 {
     public function getGroupsByUser($page_size, $user,$warehouse_id){
-        $groups = Groups::where('user_id',$user->id)->when($warehouse_id,function ($q) use ($warehouse_id){
+        $groups = Groups::with(['warehouse:id,name_cn'])->where('user_id',$user->id)->when($warehouse_id,function ($q) use ($warehouse_id){
             return $q->where('warehouse_id',$warehouse_id);
         });
         return $groups->paginate($page_size)->toArray();

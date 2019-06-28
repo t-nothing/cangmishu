@@ -115,6 +115,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Models\Groups', 'user_group_rel', 'user_id','group_id');
     }
+
     public  function  warehouseEmployee()
     {
         return $this->hasOne('App\Models\WarehouseEmployee','user_id','id');

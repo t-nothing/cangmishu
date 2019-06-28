@@ -29,6 +29,24 @@ class RelationController extends  Controller
             if(!$group->warehouse_id||!$group->owner_id || !$modules){
                 return eRet('请先为分组分配权限');
             }
+           //判断员功所在分组是否一致
+
+            $old_group =  UserGroupRel::where('user_id', $requests->user_id)->pluck('group_id')->toArray();
+
+            $old_warehouses = Groups::whereIn('id',$old_group)->pluck('warehouse_id')->toArray();
+
+            $old_warehouses = array_unique($old_warehouses);
+
+            if($old_warehouses){
+                if(count($old_warehouses) >1 ){
+                    return formatRet(500,"员工已在两个不同仓库，请先将员工从一个分组移除");
+                }
+
+                $warehouse_id = $group->warehouse_id;
+                if($old_warehouses[0] != $warehouse_id){
+                    return formatRet(500,"不可将员工添加至不同仓库的分组");
+                }
+            }
 
             $rel = UserGroupRel::where('user_id', $requests->user_id)->where('group_id', $requests->group_id)->first();
             if($rel){

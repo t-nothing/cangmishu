@@ -10,6 +10,8 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Requests\BaseRequests;
+use App\Models\GroupModuleRel;
+use App\Models\Modules;
 use Illuminate\Http\Request;
 
 class AuthController extends  Controller
@@ -31,6 +33,10 @@ class AuthController extends  Controller
 
         $data['user'] = $guard->user();
 
+        //获取用户权限
+        $modules =app('module')->getModulesByUser($guard->user(),$guard->user()->default_warehosue_id);
+        $modules = collect($modules)->pluck('id')->toArray();
+        $data['modules'] = $modules;
         return formatRet(0, '', $data);
     }
 
