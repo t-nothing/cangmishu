@@ -5,6 +5,7 @@ use App\Models\Batch;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Models\WarehouseLocation;
+use Illuminate\Support\Facades\DB;
 
 class StoreService
 {
@@ -12,12 +13,14 @@ class StoreService
     //入库
     public  function  InAndPutOn($warehouse_id,$data,$batch_id)
     {
+
         $stocks =[];
         if (count($data) ==count($data, 1)) {
             $stocks[] = $data;
         }else{
             $stocks = $data;
         }
+//        dd($stocks);
         $stocks = collect($stocks)->map(function ($v) use ($warehouse_id){
             //入库
             $stock = $this->In($warehouse_id,$v);
@@ -79,11 +82,12 @@ class StoreService
 
         $stock->distributor_code        = isset($data['distributor_code'])?$data['distributor_code']:"";
         $stock->ean                     = $data['ean'];
-        $stock->expiration_date         = $data['expiration_date'] ?: null;
-        $stock->best_before_date        = $data['best_before_date'] ?: null;
+        $stock->expiration_date         = $data['expiration_date'] ?strtotime($data['expiration_date']." 00:00:00"): null;
+        $stock->best_before_date        = $data['best_before_date'] ?strtotime($data['best_before_date']." 00:00:00"): null;
         $stock->production_batch_number = $data['production_batch_number']?: '';
         $stock->remark                  = $data['remark'];
         $stock->save();
+
         // 入库数量更新
         $stock->increment('stockin_num', $data['stockin_num']);
         $stock->increment('total_stockin_num', $data['stockin_num']);

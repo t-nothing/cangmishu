@@ -138,16 +138,16 @@ class BatchController extends Controller
     {
         app('log')->info('入库上架', $request->all());
         app('db')->beginTransaction();
-        try{
+//        try{
             $data = $request->stock;
             app('store')->InAndPutOn($request->warehouse_id,$data,$request->batch_id);
-            app('db')->commit();
+//            app('db')->commit();
             return formatRet(0);
-        }catch (\Exception $e){
-            app('db')->rollback();
-            app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"入库上架失败");
-        }
+//        }catch (\Exception $e){
+//            app('db')->rollback();
+//            app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
+//            return formatRet(500,"入库上架失败");
+//        }
     }
 
 

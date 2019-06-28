@@ -21,8 +21,6 @@ class ProductStock extends Model
         'created_at',
         'updated_at',
         'deleted_at',
-        'expiration_date',
-        'best_before_date',
     ];
 
     /**
