@@ -467,7 +467,7 @@ class ProductStockController extends  Controller
                 'location_code'=>$s->location->code,
                 'production_batch_number'=>$s->production_batch_number,
                 'best_before_date'=>$s->best_before_date?$s->best_before_date->toDateString():"",
-                'remark'=>$s->remark,
+                'remark'=>"",
                 'expiration_date'=>$s->expiration_date?$s->expiration_date->toDateString():"",
                 'need_expiration_date' =>$s->need_expiration_date,
                 'need_best_before_date' =>$s->need_best_before_date,
