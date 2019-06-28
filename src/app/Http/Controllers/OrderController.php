@@ -10,12 +10,8 @@ use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\OrderItem;
-use App\Models\Pick;
-use App\Models\ProductSpec;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
-use App\Models\ReceiverAddress;
-use App\Models\SenderAddress;
 use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -142,13 +138,12 @@ class OrderController extends Controller
 
     public function pickAndOut(PickAndOutRequest $request)
     {
+
         $owner_id = Auth::ownerId();
         $order = Order::find($request->order_id);
-        $items = $request->input('items');
         $order->delivery_date = strtotime($request->delivery_date." 00:00:00");
-
         $order->save();
-        app('log')->info('派送日期',['date' => $request->delivery_date,'int'=>strtotime($request->delivery_date),'order'=>$order->toArray()]);
+        $items = $request->input('items');
         $item_in_rq = array_pluck($request->items, 'order_item_id');
 
         $item_in_db = $order->orderItems->pluck('id')->toArray();
