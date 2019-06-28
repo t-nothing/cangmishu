@@ -51,16 +51,16 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-
         if($request->wantsJson() ||$request->expectsJson()){
             $e =  $this->prepareException($e);
             switch ($e){
                 case $e instanceof  ValidationException:
                    $re = collect($e->errors())->values()->flatten(1)->toArray();
+
                     return  response()->json([
                         'msg' => $re[0],
                         'status' =>422 ,
-                        'data' => $re,
+                        'data' => null,
                     ],422);
                 case  $e instanceof HttpResponseException:
                     return $e->getResponse();
