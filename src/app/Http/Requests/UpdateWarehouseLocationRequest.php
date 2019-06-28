@@ -29,7 +29,9 @@ class UpdateWarehouseLocationRequest extends BaseRequests
         return [
             'code'         => [
                 'required','string','max:50',
-                Rule::unique('warehouse_location')->ignore($this->route('location_id')),
+                Rule::unique('warehouse_location')->where(function($q){
+                    $q->where('owner_id',Auth::ownerId());
+                })->ignore($this->route('location_id')),
             ],
             'warehouse_area_id' => [
                 'required','integer','min:1',
