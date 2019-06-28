@@ -145,7 +145,7 @@ class OrderController extends Controller
         $owner_id = Auth::ownerId();
         $order = Order::find($request->order_id);
         $items = $request->input('items');
-        $order->delivery_date = strtotime($request->delivery_date);
+        $order->delivery_date = strtotime($request->delivery_date." 00:00:00");
 
         $order->save();
         app('log')->info('派送日期',['date' => $request->delivery_date,'int'=>strtotime($request->delivery_date),'order'=>$order->toArray()]);
