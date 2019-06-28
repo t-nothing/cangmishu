@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Modules;
-use Illuminate\Support\Facades\DB;
 
 class ModuleService
 {
@@ -14,7 +13,6 @@ class ModuleService
         if($user->boss_id){ //是员工
             //获得员工所在分组的权限，如果有分组的话
             if($warehouse_id){
-                DB::enableQueryLog();
                $modules =  $user->groups()->where('warehouse_id',$warehouse_id)->with(['modules'])->get()->pluck('modules')->flatten()->toArray();
             }
         }else{
