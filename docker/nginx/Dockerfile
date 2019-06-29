@@ -5,5 +5,5 @@ COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
 RUN mkdir -p /etc/nginx/ssl
 
-COPY ./ssl/fullchain.cer  /etc/nginx/ssl
-COPY ./ssl/*.cangmishu.com.key /etc/nginx/ssl
+COPY  ./ssl/fullchain1.pem  /etc/nginx/ssl
+COPY  ./ssl/privkey1.pem  /etc/nginx/ssl

@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-
+    return  "upgrade success!";
 });
 
 
