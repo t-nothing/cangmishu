@@ -126,7 +126,8 @@ class ProductController extends Controller
                    'name_en'        => $spec['name_en'],
                    'net_weight'     => $spec['net_weight'],
                    'gross_weight'   => $spec['gross_weight'],
-                   'is_warning'     => $spec['is_warning']
+                   'is_warning'     => $spec['is_warning'],
+                   'product_id'     => $product->id
                ];
                 ProductSpec::updateOrCreate(['relevance_code'=>$spec['relevance_code']],$data);
            }
