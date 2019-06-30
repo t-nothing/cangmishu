@@ -147,13 +147,21 @@ class ProductController extends Controller
         app('log')->error('删除货品', ["product_id" => $product_id]);
 
         $product = Product::where('owner_id', app('auth')->ownerId())->find($product_id);
+
         if(!$product){
             return formatRet(500,"货品不存在");
         }
+
+        $spec = ProductSpec::where('product_id',$product->id)->has('stocks')->get();
+        if(count($spec) >0 ){
+            return formatRet(500,"不允许删除此商品");
+        }
+
         DB::beginTransaction();
         try{
             $product->delete();
             $product->specs()->delete();
+            $product->specs()->stocks()->delete();
             DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
