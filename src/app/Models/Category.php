@@ -12,7 +12,7 @@ class Category extends Model
      *
      * @var array
      */
-    protected  $fillable =['name_cn', 'name_en', 'need_expiration_date', 'need_production_batch_number', 'need_best_before_date', 'is_enabled', 'id', 'owner_id', 'updated_at', 'created_at'];
+    protected  $fillable =['name_cn', 'name_en', 'need_expiration_date', 'need_production_batch_number', 'need_best_before_date', 'is_enabled', 'owner_id', 'updated_at', 'created_at'];
 
     protected $hidden = [
         'parent_id',
