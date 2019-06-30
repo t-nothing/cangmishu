@@ -128,7 +128,8 @@ class ProductController extends Controller
                    'gross_weight'   => $spec['gross_weight'],
                    'is_warning'     => $spec['is_warning'],
                    'product_id'     => $product->id,
-                   'owner_id'       =>Auth::ownerId()
+                   'owner_id'       =>Auth::ownerId(),
+                   'warehouse_id'   =>$product->warehouse_id
                ];
                 ProductSpec::updateOrCreate(['relevance_code'=>$spec['relevance_code']],$data);
            }
