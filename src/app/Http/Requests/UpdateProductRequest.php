@@ -39,11 +39,7 @@ class UpdateProductRequest extends BaseRequests
             'remark'                    => 'string|max:255',
             'photos'                    => 'string|max:255',
             'specs'                     => 'required|array',
-            'specs.*.relevance_code'    => ['required','string',
-                Rule::exists('product_spec','relevance_code')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
+            'specs.*.relevance_code'    => ['required','string'],
             'specs.*.name_cn'           => 'required|string|max:255',
             'specs.*.name_en'           => 'required|string|max:255',
             'specs.*.net_weight'        => 'present|numeric',
