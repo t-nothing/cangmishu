@@ -11,6 +11,7 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Auth\GuardHelpers;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
@@ -202,8 +203,8 @@ class JwtGuard implements Guard
             // $this->clearLoginAttempts($this->getResquest());
 
             // 更新最后登入时间
-
-            $user->last_login_at = $user->freshTimestamp();
+   
+            $user->last_login_at = time();
             $user->save();
 
             $this->setUser($user);
