@@ -203,7 +203,7 @@ class JwtGuard implements Guard
             // $this->clearLoginAttempts($this->getResquest());
 
             // 更新最后登入时间
-   
+
             $user->last_login_at = time();
             $user->save();
 
