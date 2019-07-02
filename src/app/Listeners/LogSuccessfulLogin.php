@@ -27,7 +27,7 @@ class LogSuccessfulLogin
     public function handle(Login $event)
     {
        $user= $event->user;
-        $user->last_login = Carbon::now()->toDateTimeString();
+        $user->last_login_at = Carbon::now()->toDateTimeString();
         $user->save();
     }
 
