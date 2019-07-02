@@ -36,7 +36,8 @@ class AuthController extends  Controller
         //获取用户权限
         $modules =app('module')->getModulesByUser($guard->user(),$guard->user()->default_warehouse_id);
         $modules = collect($modules)->pluck('id')->toArray();
-        $modules = array_unique($modules);
+        $modules =array_unique($modules);
+        ksort($modules);
         $data['modules'] = $modules;
         return formatRet(0, '', $data);
     }
