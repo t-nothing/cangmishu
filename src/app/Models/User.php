@@ -26,6 +26,7 @@ class User extends Authenticatable
         'name', 'email','phone','nickname','remark'
     ];
 
+    protected  $dateFormat  = "U";
     /**
      * The attributes excluded from the model's JSON form.
      *
