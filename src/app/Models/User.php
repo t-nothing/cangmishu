@@ -64,8 +64,8 @@ class User extends Authenticatable
         'last_login_at' => 'date:Y-m-d H:i:s',
     ];
 
-    public function fromDateTime($value) {
-
+    public function fromDateTime($value)
+    {
         return strtotime($value);
     }
     /*
