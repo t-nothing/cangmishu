@@ -12,10 +12,7 @@ use Illuminate\Database\Eloquent\Model as Models;
 class Model extends  Models
 {
     protected static $_instance = [];
-    public function fromDateTime($value)
-    {
-        return strtotime($value);
-    }
+
 
     /**
      * 模型白名单字段赋值

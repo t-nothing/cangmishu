@@ -2,7 +2,6 @@
 
 namespace App\Listeners;
 
-use Carbon\Carbon;
 use Illuminate\Auth\Events\Login;
 
 class LogSuccessfulLogin

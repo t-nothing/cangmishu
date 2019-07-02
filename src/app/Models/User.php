@@ -65,12 +65,6 @@ class User extends Authenticatable
     ];
 
 
-    public function fromDateTime($value) {
-
-        return parent::fromDateTime($value);
-    }
-
-
     /*
     |--------------------------------------------------------------------------
     | Relations
