@@ -2,10 +2,12 @@
 namespace App\Http\Controllers;
 use App\Http\Requests\BaseRequests;
 use App\Http\Requests\CreateUserRequest;
+use App\Mail\UserCallBackEmail;
 use App\Models\User;
 use App\Models\VerifyCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class UserController extends  Controller
@@ -135,5 +137,21 @@ class UserController extends  Controller
             return formatRet('无权查看');
         }
         return formatRet(0,'成功',$user->toArray());
+    }
+
+
+    public function callUser()
+    {
+        $users  = User::all();
+        $logo=env("APP_URL")."/images/logo.png";
+        $qrCode =env("APP_URL")."/images/qrCode.png";
+        $url =env('RESET_PASSWORD_URL');
+        foreach ($users as $user){
+            $name = explode("@",$user->email)[0];
+            $message = new UserCallBackEmail($logo,$qrCode,$url,$name);
+            $message->onQueue('cangmishu_emails');
+            Mail::to($user->email)->send($message);
+        }
+        return formatRet(0);
     }
 }
