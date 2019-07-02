@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-
+    return  "upgrade success!";
 });
 
 
@@ -20,6 +20,7 @@ Route::post('/login', 'AuthController@login');
 Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
 Route::post('/code', 'UserController@getCode');
+Route::post('/callUser', 'UserController@callUser');
 
 Route::post('/user/forgetPassword', 'PasswordController@store');// 忘记密码-请求重置
 Route::get('/user/resetPassword/{token_value}', [

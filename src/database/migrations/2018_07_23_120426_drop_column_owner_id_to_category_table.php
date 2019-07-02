@@ -13,9 +13,9 @@ class DropColumnOwnerIdToCategoryTable extends Migration
      */
     public function up()
     {
-        Schema::table('category', function (Blueprint $table) {
-            $table->dropColumn('owner_id');
-        });
+//        Schema::table('category', function (Blueprint $table) {
+//            $table->dropColumn('owner_id');
+//        });
 
         Schema::dropIfExists('tray');
         Schema::dropIfExists('shelf');

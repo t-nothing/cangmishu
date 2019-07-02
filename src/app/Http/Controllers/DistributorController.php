@@ -82,14 +82,14 @@ class DistributorController extends Controller
         $this->validate($request, [
             'name_cn'        => [
                 'required','string','max:50',
-                Rule::unique('distributor')->where(function ($query) use($distributor_id) {
+                Rule::unique('distributor')->where(function ($query)use($distributor_id) {
                     return $query->where('user_id',Auth::ownerId());
                 })
                     ->ignore($distributor_id)
             ],
             'name_en'        =>  [
                 'required','string','max:50',
-                Rule::unique('distributor')->where(function ($query) use($distributor_id) {
+                Rule::unique('distributor')->where(function ($query)use($distributor_id) {
                     return $query->where('user_id',Auth::ownerId());
                 })
                     ->ignore($distributor_id)

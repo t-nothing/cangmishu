@@ -118,27 +118,27 @@ class ProductController extends Controller
         $product->remark              = $request->remark;
         $product->photos              = $request->photos;
         DB::beginTransaction();
-       try{
-           $product->save();
-           foreach ($request->specs as $spec) {
-               $data= [
-                   'name_cn'        => $spec['name_cn'],
-                   'name_en'        => $spec['name_en'],
-                   'net_weight'     => $spec['net_weight'],
-                   'gross_weight'   => $spec['gross_weight'],
-                   'is_warning'     => $spec['is_warning'],
-                   'product_id'     => $product->id,
-                   'owner_id'       =>Auth::ownerId(),
-                   'warehouse_id'   =>$product->warehouse_id
-               ];
+        try{
+            $product->save();
+            foreach ($request->specs as $spec) {
+                $data= [
+                    'name_cn'        => $spec['name_cn'],
+                    'name_en'        => $spec['name_en'],
+                    'net_weight'     => $spec['net_weight'],
+                    'gross_weight'   => $spec['gross_weight'],
+                    'is_warning'     => $spec['is_warning'],
+                    'product_id'     => $product->id,
+                    'owner_id'       =>Auth::ownerId(),
+                    'warehouse_id'   =>$product->warehouse_id
+                ];
                 ProductSpec::updateOrCreate(['relevance_code'=>$spec['relevance_code']],$data);
-           }
-           DB::commit();
-           return formatRet(0,'编辑商品成功');
+            }
+            DB::commit();
+            return formatRet(0,'编辑商品成功');
         }catch(\Exception $e) {
-           DB::rollBack();
-           app('log')->error('编辑商品失败',['msg' => $e->getMessage()]);
-           return formatRet(500, '编辑商品失败');
+            DB::rollBack();
+            app('log')->error('编辑商品失败',['msg' => $e->getMessage()]);
+            return formatRet(500, '编辑商品失败');
         }
     }
 
@@ -180,7 +180,7 @@ class ProductController extends Controller
             'warehouse_id' => [
                 'required','min:1',
                 Rule::exists('warehouse','id')->where('owner_id',app('auth')->ownerId())
-                ]
+            ]
         ]);
         try {
             $productImport = new ProductsImport(new CategoryService);
