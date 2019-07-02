@@ -21,7 +21,7 @@
             <br>您可以直接点击下方网站链接，了解新版仓秘书系统。只需要1分钟，马上创建属于自己的仓库。提高您的仓库管理效率。<br/>
 
             <br>
-            <span style="font-weight: bold;">{{$url}}</span>
+            <a style="font-weight: bold; text-decoration: none;" href="{{$url}}">{{$url}}</a>
             <br/>
             <div style="padding-top: 30px">
                 <span> 非常谢谢您对我们的信任！</span>
