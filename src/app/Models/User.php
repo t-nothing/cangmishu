@@ -49,7 +49,7 @@ class User extends Authenticatable
         'created_at',
         'updated_at',
         'deleted_at',
-//      'last_login_at',
+        'last_login_at',
     ];
 
     /**
@@ -64,7 +64,10 @@ class User extends Authenticatable
         'last_login_at' => 'date:Y-m-d H:i:s',
     ];
 
+    public function fromDateTime($value) {
 
+        return strtotime($value);
+    }
     /*
     |--------------------------------------------------------------------------
     | Relations
