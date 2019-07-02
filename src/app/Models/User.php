@@ -49,7 +49,7 @@ class User extends Authenticatable
         'created_at',
         'updated_at',
         'deleted_at',
-        'last_login_at',
+//        'last_login_at',
     ];
 
     /**
