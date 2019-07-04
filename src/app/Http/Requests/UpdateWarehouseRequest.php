@@ -41,10 +41,10 @@ class UpdateWarehouseRequest extends BaseRequests
                     ->ignore($this->route('warehouse_id'))
             ],
             'area'     => 'required|numeric',
-            'city'     => 'sometimes|string|nullable',
-            'street'   => 'sometimes|string|nullable',
-            'door_no'  => 'sometimes|string|nullable',
-            'province' => 'sometimes|string|nullable',
+            'city'     => 'required|string',
+            'street'   => 'required|string',
+            'door_no'  => 'required|string',
+            'province' => 'required|string',
         ];
     }
 }
