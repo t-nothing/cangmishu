@@ -16,6 +16,31 @@ Route::get('/', function () {
 });
 
 
+
+$router->post('/user/test',function (){
+    $data = app('request')->user;
+    $users= json_decode($data,true);
+
+    \Illuminate\Support\Facades\DB::beginTransaction();
+    try{
+        foreach ($users as $user){
+            app('user')->testRegister($user);
+        }
+        \Illuminate\Support\Facades\DB::commit();
+        return formatRet(0,"成功");
+    }catch ( \App\Exceptions\BusinessException $e){
+        \Illuminate\Support\Facades\DB::rollBack();
+        return formatRet(500,"添加错误");
+    }catch (\Exception $e){
+        \Illuminate\Support\Facades\DB::rollBack();
+        return formatRet(500,"错误");
+    }
+});// 用户认证
+
+
+
+
+
 Route::post('/login', 'AuthController@login');
 Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
