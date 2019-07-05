@@ -192,4 +192,31 @@ Route::middleware(['auth:jwt'])->group(function () {
 });
 
 
+$router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) {
+    // 认证、授权
+    $router->post('/auth', 'AuthController@login');// 登入
+
+    $router->group(['middleware' => ['auth', 'role:admin']], function($router) {
+        // 首页
+        $router->get('/homePage', 'HomePageController@adminHomePage');// 列表
+        $router->get('/homePageNotice', 'HomePageController@adminNotice');// 列表
+        $router->get('/homePageTable', 'HomePageController@adminUsertable');// 列表
+
+        // 管理员
+        $router->get('/administrator', 'AdminController@list');// 列表
+        $router->put('/administrator', 'AdminController@create');// 添加到管理员列表
+        $router->delete('/administrator', 'AdminController@delete');// 移除出管理员列表
+
+        // 用户
+        $router->get('/user', 'UserController@list');// 列表
+        $router->get('/user/{user_id}', 'UserController@show');// 详情
+        $router->put('/user', 'UserController@store');// 创建
+        $router->post('/user', 'UserController@edit');// 编辑
+        $router->post('/user/lock', 'UserController@lock');// 禁用
+        $router->post('/user/unlock', 'UserController@unlock');// 启用
+
+    });
+});
+
+
 
