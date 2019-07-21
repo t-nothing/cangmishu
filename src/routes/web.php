@@ -189,6 +189,24 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::delete('warning','WarningController@destroy');
 
 
+    //店铺
+    Route::get('/shop', 'ShopController@index');
+    Route::post('/shop', 'ShopController@store');
+    Route::get('/shop/{id}', 'ShopController@show');
+    Route::put('/shop/{id}', 'ShopController@update');
+    Route::delete('/shop/{id}', 'ShopController@destroy');
+
+    //默认发件人
+    Route::get('/shop/{id}/sender', 'ShopController@senderShow');
+    Route::post('/shop/{id}/sender', 'ShopController@senderUpdate');
+
+    //店铺支付方式
+    Route::get('/shop/payment', 'ShopPaymentMethodController@index');
+    Route::post('/shop/payment', 'ShopPaymentMethodController@store');
+    Route::put('/shop/payment/{id}', 'ShopPaymentMethodController@update');
+    Route::delete('/shop/payment/{id}', 'ShopPaymentMethodController@destroy');
+
+
 });
 
 
