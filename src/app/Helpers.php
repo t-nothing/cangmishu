@@ -17,7 +17,7 @@ if (! function_exists('formatRet')) {
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    function formatRet($code, $message = '', array $data = [])
+    function formatRet($code, $message = '', array $data = [], $status = 200, array $headers = [], $options = 0)
     {
         if($code == 0 && !$message){
             $message = "成功";
@@ -31,7 +31,10 @@ if (! function_exists('formatRet')) {
             'msg' => $message,
             'data' => $data,
         ];
-        return response()->json($rt);
+
+        $options = JSON_UNESCAPED_UNICODE;
+
+        return response()->json($rt, $status, $headers, $options);
     }
 }
 

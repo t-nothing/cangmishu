@@ -21,7 +21,7 @@ class BaseRequests extends  FormRequest
     {
         $message = collect($validator->errors()->toArray())->flatten(1)->toArray();
         throw new HttpResponseException(response()->json(['code'=>422,'msg'=>$message[0],'data'=>null],
-            422));
+            422, [], JSON_UNESCAPED_UNICODE));
     }
 
 
@@ -50,4 +50,5 @@ class BaseRequests extends  FormRequest
     {
         return [];
     }
+
 }

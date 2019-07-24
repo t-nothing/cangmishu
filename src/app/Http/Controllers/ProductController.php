@@ -65,7 +65,7 @@ class ProductController extends Controller
             $specs[] = [
                 'product_id'     => 0,
                 'name_cn'        => $spec['name_cn'],
-                'name_en'        => $spec['name_en'],
+                'name_en'        => $spec['name_en']??$spec['name_cn'],
                 'net_weight'     => $spec['net_weight'],
                 'gross_weight'   => $spec['gross_weight'],
                 'relevance_code' => $spec['relevance_code'],
@@ -75,10 +75,11 @@ class ProductController extends Controller
             ];
         }
 
+
         $product = new Product;
         $product->category_id         = $request->category_id;
         $product->name_cn             = $request->name_cn;
-        $product->name_en             = $request->name_en;
+        $product->name_en             = $request->input('name_en', $request->name_cn);
         $product->hs_code             = $request->hs_code;
         $product->origin              = $request->origin;
         $product->display_link        = $request->input('display_link');
@@ -114,7 +115,7 @@ class ProductController extends Controller
         $product = Product::find($product_id);
         $product->category_id         = $request->category_id;
         $product->name_cn             = $request->name_cn;
-        $product->name_en             = $request->name_en;
+        $product->name_en             = $request->input('name_en', $request->name_cn);
         $product->remark              = $request->remark;
         $product->photos              = $request->photos;
         DB::beginTransaction();
@@ -123,7 +124,7 @@ class ProductController extends Controller
             foreach ($request->specs as $spec) {
                 $data= [
                     'name_cn'        => $spec['name_cn'],
-                    'name_en'        => $spec['name_en'],
+                    'name_en'        => $spec['name_en']??$spec['name_cn'],
                     'net_weight'     => $spec['net_weight'],
                     'gross_weight'   => $spec['gross_weight'],
                     'is_warning'     => $spec['is_warning'],

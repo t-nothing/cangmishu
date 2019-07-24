@@ -56,7 +56,6 @@ class Handler extends ExceptionHandler
             switch ($e){
                 case $e instanceof  ValidationException:
                    $re = collect($e->errors())->values()->flatten(1)->toArray();
-
                     return  response()->json([
                         'msg' => $re[0],
                         'status' =>422 ,

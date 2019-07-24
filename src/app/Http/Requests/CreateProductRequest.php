@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Rules\EnInput; 
 
 class CreateProductRequest extends BaseRequests
 {
@@ -24,6 +25,7 @@ class CreateProductRequest extends BaseRequests
      */
     public function rules()
     {
+        $self = $this;
         return [
             'warehouse_id' => [
                 'required','integer','min:1',
@@ -39,12 +41,12 @@ class CreateProductRequest extends BaseRequests
                 })
             ],
             'name_cn'                   => 'required|string|max:255',
-            'name_en'                   => 'required|string|max:255',
+            'name_en'                   =>  [new EnInput($this->warehouse_id)],
             'remark'                    => 'string|max:255',
             'photos'                    => 'string|max:255',
             'specs'                     => 'required|array',
             'specs.*.name_cn'           => 'required|string|max:255',
-            'specs.*.name_en'           => 'required|string|max:255',
+            'specs.*.name_en'           => [new EnInput($this->warehouse_id)],
             'specs.*.net_weight'        => 'present|numeric',
             'specs.*.gross_weight'      => 'present|numeric',
             'specs.*.relevance_code'    => [

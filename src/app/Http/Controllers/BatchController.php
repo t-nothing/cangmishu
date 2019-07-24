@@ -85,6 +85,9 @@ class BatchController extends Controller
         }
     }
 
+    /**
+     * 修改入库单
+     **/
     public function  update(UpdateBatchRequest $request,$batch_id)
     {
         app('log')->info('新增入库单', $request->all());

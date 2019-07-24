@@ -143,4 +143,22 @@ class Warehouse extends Model
     {
         return $this->warehouse_feature;
     }
+
+    /**
+     * 仓库是否开启双语
+     **/
+    public static function isEnabledLang(int $id)
+    {
+        try
+        {
+            return Warehouse::find($id)->is_enabeld_lang;
+        }
+        catch(\Exception $ex)
+        {
+            
+        }
+
+        return false;
+        
+    }
 }
