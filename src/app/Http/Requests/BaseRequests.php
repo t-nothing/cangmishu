@@ -13,9 +13,11 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use App\Models\Warehouse;
 
 class BaseRequests extends  FormRequest
 {
+    var $warehouseId ;
 
     protected function failedValidation(Validator $validator)
     {
@@ -49,6 +51,14 @@ class BaseRequests extends  FormRequest
     public function rules()
     {
         return [];
+    }
+
+    public function isRequiredLang(int $warehouseId = 0)
+    {
+        if($warehouseId == 0) {
+            $warehouseId = intval($this->route('warehouse_id'));
+        }
+        return   Warehouse::isEnabledLang($warehouseId);
     }
 
 }

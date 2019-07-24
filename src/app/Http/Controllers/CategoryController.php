@@ -40,6 +40,7 @@ class CategoryController extends Controller
         DB::beginTransaction();
         try{
             $data = $request->all();
+            $data["name_en"] = $request->input('name_en', $request->name_cn);
             $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
             $category = Category::create($data);
 
@@ -66,6 +67,7 @@ class CategoryController extends Controller
         app('log')->info('编辑货品分类', ['category_id'=>$category_id]);
         try{
             $data = $request->all();
+            $data["name_en"] = $request->input('name_en', $request->name_cn);
             Category::where('id',$category_id)->update($data);
             return formatRet(0);
         }catch (\Exception $e){

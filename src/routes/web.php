@@ -126,6 +126,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     //商品规格
     Route::delete('/specs/{spec_id}', 'ProductSpecController@destroy');
     Route::post('/specs/import', 'ProductSpecController@import');
+    Route::get('/specs', 'ProductSpecController@index');
 
 
     //入库单

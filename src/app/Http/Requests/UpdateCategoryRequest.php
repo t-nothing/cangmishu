@@ -16,6 +16,7 @@ class UpdateCategoryRequest extends BaseRequests
     public function authorize()
     {
         $type = Category::find($this->route('category_id'));
+        $this->warehouseId = $type->warehouse_id?? 0;
         return $type && $type->owner_id == Auth::ownerId();
     }
 
@@ -27,17 +28,10 @@ class UpdateCategoryRequest extends BaseRequests
     public function rules()
     {
 
-        return [
+        $arr = [
             'name_cn'         => [
                 'required','string','max:50',
                 Rule::unique('category')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
-                })
-                    ->ignore($this->route('category_id'))
-            ],
-            'name_en'         => [
-                'required','string','max:50',
-                Rule::unique('category','name_en')->where(function ($query) {
                     return $query->where('owner_id',Auth::ownerId());
                 })
                     ->ignore($this->route('category_id'))
@@ -47,5 +41,16 @@ class UpdateCategoryRequest extends BaseRequests
             'need_production_batch_number' => 'required|boolean',
             'need_best_before_date'        => 'required|boolean',
         ];
+
+        if($this->isRequiredLang())
+        {
+            $arr['name_en']         = [
+                'required','string','max:50',
+                Rule::unique('category','name_en')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                })->ignore($this->route('category_id'))
+            ];
+        }
+        return $arr;
     }
 }

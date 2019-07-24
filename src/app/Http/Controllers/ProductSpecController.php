@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BaseRequests;
+use App\Http\Requests\IndexProductRequest;
 use App\Imports\ProductSpecImport;
 use App\Services\Service\ProductService;
 use Illuminate\Http\Request;
@@ -16,21 +17,45 @@ class ProductSpecController extends Controller
 {
 
     /**
-     * 货品规格 - 新增
+     * 货品规格列表
      */
-    public function index($product_id)
+    public function index(IndexProductRequest $request)
     {
-        $product = Product::ofWarehouse($this->warehouse->id)->find($product_id);
+        // $product = Product::ofWarehouse($this->warehouse->id)->find($product_id);
 
-        if(app('auth')->isLimited()){
-            $product->whereIn('owner_id',app('auth')->ownerId());
+        // if(app('auth')->isLimited()){
+        //     $product->whereIn('owner_id',app('auth')->ownerId());
+        // }
+
+        // if (! $product) {
+        //     return formatRet(404, '货品不存在', [], 404);
+        // }
+
+        // return formatRet(0, '', $product->specs->toArray());
+
+        $product = ProductSpec::ofWarehouse($request->warehouse_id)
+            ->where('owner_id',app('auth')->ownerId())
+            ->latest('updated_at');
+        if($request->filled('category_id')){
+            $product = $product->where('category_id',$request->category_id);
         }
 
-        if (! $product) {
-            return formatRet(404, '货品不存在', [], 404);
+        if ($request->filled('updated_at_b')) {
+            $product = $product->where('updated_at', '>', strtotime($request->updated_at_b));
         }
 
-        return formatRet(0, '', $product->specs->toArray());
+        if ($request->filled('updated_at_e')) {
+            $product = $product->where('updated_at', '<', strtotime($request->updated_at_e));
+        }
+
+        if ($request->filled('keywords')) {
+            $product = $product->hasKeyword($request->keywords);
+        }
+
+
+        $products = $product->paginate($request->input('page_size',10))->makeHidden(['product','deleted_at', 'created_at', 'updated_at', 'is_warning', 'name_cn', 'name_en']);
+
+        return formatRet(0, '', $products->toArray());
     }
 
     /**
