@@ -138,6 +138,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/batch/shelf', 'BatchController@shelf');
     Route::get('/batch/{batch_id}/download', 'BatchController@download');
     Route::get('/batch/{batch_id}/pdf', 'BatchController@pdf');
+    Route::post('/batchCode', 'BatchController@batchCode');
 
 
     //出库单

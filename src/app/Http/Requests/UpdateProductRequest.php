@@ -40,11 +40,12 @@ class UpdateProductRequest extends BaseRequests
             'remark'                    => 'string|max:255',
             'photos'                    => 'string|max:255',
             'specs'                     => 'required|array',
+            'specs.*.id'                => 'required|int|min:0',
             'specs.*.relevance_code'    => ['required','string'],
             'specs.*.name_cn'           => 'required|string|max:255',
-            'specs.*.net_weight'        => 'present|numeric',
+            // 'specs.*.net_weight'        => 'present|numeric',
             'specs.*.gross_weight'      => 'present|numeric',
-            'specs.*.is_warning'        => 'required|boolean',
+            // 'specs.*.is_warning'        => 'required|boolean',
         ];
 
         if($this->isRequiredLang($this->warehouseId))

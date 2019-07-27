@@ -52,10 +52,11 @@ class ProductSpecController extends Controller
             $product = $product->hasKeyword($request->keywords);
         }
 
+        $paginator = $product->paginate($request->input('page_size',10));
+        $data = $paginator->makeHidden(['product','deleted_at', 'created_at', 'updated_at', 'is_warning', 'name_cn', 'name_en']);
+        $paginator->data = $data;
 
-        $products = $product->paginate($request->input('page_size',10))->makeHidden(['product','deleted_at', 'created_at', 'updated_at', 'is_warning', 'name_cn', 'name_en']);
-
-        return formatRet(0, '', $products->toArray());
+        return formatRet(0, '', $paginator->toArray());
     }
 
     /**

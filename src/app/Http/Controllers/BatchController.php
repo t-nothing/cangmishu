@@ -8,6 +8,7 @@ use App\Http\Requests\CreateShelfRequest;
 use App\Http\Requests\UpdateBatchRequest;
 use App\Models\Batch;
 use App\Models\ProductStock;
+use App\Models\BatchMarkLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use PDF;
@@ -229,6 +230,20 @@ class BatchController extends Controller
         unset($batch['batch_products']);
         return formatRet(0,"成功",$batch->toArray());
 
+    }
+
+    /*
+     * 生成 -入库单号
+     * */
+    public function batchCode()
+    { 
+        $warehouse_code = app('auth')->warehouse()->code;
+        $batch_time = date('y').date('W').date('w');
+        $batch_mark = BatchMarkLog::newMark($warehouse_code);
+        $data = [
+            'batch_code'    => $warehouse_code.$batch_time.sprintf("%04d", $batch_mark),
+        ];
+        return formatRet(0, '',$data);
     }
 
 }

@@ -26,7 +26,7 @@ class ProductController extends Controller
     public function index(IndexProductRequest $request)
     {
         app('log')->info('查询列表',$request->all());
-        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning'])
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price'])
             ->ofWarehouse($request->warehouse_id)
             ->where('owner_id',app('auth')->ownerId())
             ->latest('updated_at');
@@ -66,13 +66,19 @@ class ProductController extends Controller
                 'product_id'     => 0,
                 'name_cn'        => $spec['name_cn'],
                 'name_en'        => $spec['name_en']??$spec['name_cn'],
-                'net_weight'     => $spec['net_weight'],
+                'net_weight'     => $spec['net_weight']??$spec['gross_weight'],
                 'gross_weight'   => $spec['gross_weight'],
                 'relevance_code' => $spec['relevance_code'],
+                'sale_price'     => $spec['sale_price'],
+                'purchase_price' => $spec['purchase_price'],
                 'owner_id'       => Auth::ownerId(),
                 'warehouse_id'   => $request->warehouse_id,
-                'is_warning'     => $spec['is_warning']
+                'is_warning'     => 1
             ];
+            $exists = ProductSpec::whose(app('auth')->ownerId())->where('relevance_code', $spec['relevance_code'])->first();
+            if ($exists) {
+                return formatRet(500, trans('message.relevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
+            }
         }
 
 
@@ -87,11 +93,13 @@ class ProductController extends Controller
         $product->photos              = $request->input('photos');
         $product->owner_id            = Auth::ownerId();
         $product->warehouse_id	      = $request->warehouse_id;
+        $product->sale_price          = $specs[0]['sale_price'];
+        $product->purchase_price      = $specs[0]['purchase_price'];
 
         try{
             $product->save();
             foreach ($specs as $k => $v) {
-                $specs[$k]['product_id'] = $product->id;
+                $specs[$k]['product_id']    = $product->id;
             }
             ProductSpec::insert($specs);
             return formatRet(0);
@@ -111,8 +119,8 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, $product_id)
     {
         app('log')->info('编辑商品',$request->all());
-
         $product = Product::find($product_id);
+        $product->load("specs");
         $product->category_id         = $request->category_id;
         $product->name_cn             = $request->name_cn;
         $product->name_en             = $request->input('name_en', $request->name_cn);
@@ -121,19 +129,54 @@ class ProductController extends Controller
         DB::beginTransaction();
         try{
             $product->save();
+            $existIdArr = $product->specs->pluck("id")->toArray();
+            $updateIdArr = collect($request->specs)->pluck("id")->toArray();
+            $willRemoveIdArr = array_diff($existIdArr, $updateIdArr);
+            $existIdArr[] = 0;
             foreach ($request->specs as $spec) {
+
+                if(!in_array($spec["id"], $existIdArr)) {
+                    throw new \Exception("不存在的规格ID", 1);
+                }
+
+                $exists = ProductSpec::whose(Auth::ownerId())->where('relevance_code', $spec['relevance_code'])->where('id','!=', $spec['id'])->first();
+                if ($exists) {
+                    return formatRet(500, trans('message.relevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
+                }
+
                 $data= [
+                    'id'             => $spec['id'],
                     'name_cn'        => $spec['name_cn'],
                     'name_en'        => $spec['name_en']??$spec['name_cn'],
-                    'net_weight'     => $spec['net_weight'],
+                    'net_weight'     => $spec['net_weight']??$spec['gross_weight'],
                     'gross_weight'   => $spec['gross_weight'],
-                    'is_warning'     => $spec['is_warning'],
+                    'relevance_code' => $spec['relevance_code'],
+                    'sale_price'     => $spec['sale_price'],
+                    'purchase_price' => $spec['purchase_price'],
+                    'owner_id'       => Auth::ownerId(),
+                    'warehouse_id'   => $request->warehouse_id,
+                    'is_warning'     => 1,
                     'product_id'     => $product->id,
-                    'owner_id'       =>Auth::ownerId(),
-                    'warehouse_id'   =>$product->warehouse_id
                 ];
-                ProductSpec::updateOrCreate(['relevance_code'=>$spec['relevance_code']],$data);
+                ProductSpec::updateOrCreate(
+                    [
+                        'relevance_code'=>$spec['relevance_code'], 
+                        'owner_id'      =>Auth::ownerId()
+                    ],
+                    $data
+                );
             }
+
+            foreach ($willRemoveIdArr as $key => $id) {
+                $spec = ProductSpec::where('id',$id)->has('stocks')->get();
+                if(count($spec) >0 ){
+                    return formatRet(500, "不允许删除此规格,规格下面的库存");
+                } else {
+                    //将多余的删除掉
+                    ProductSpec::where('id', $willRemoveIdArr)->where('owner_id', Auth::ownerId())->delete();
+                }
+            }
+
             DB::commit();
             return formatRet(0,'编辑商品成功');
         }catch(\Exception $e) {
@@ -160,9 +203,9 @@ class ProductController extends Controller
 
         DB::beginTransaction();
         try{
-            $product->delete();
+            // $product->specs()->stocks()->delete();
             $product->specs()->delete();
-            $product->specs()->stocks()->delete();
+            $product->delete();
             DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
@@ -213,7 +256,7 @@ class ProductController extends Controller
                 Rule::exists('warehouse','id')->where('owner_id',app('auth')->ownerId())
             ]
         ]);
-        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning'])
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price'])
             ->ofWarehouse($request->warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->where('id', $product_id)
