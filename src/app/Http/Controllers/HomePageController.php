@@ -38,8 +38,8 @@ class HomePageController extends Controller
         $sql = "select 
 (select count(*)  from `batch` where warehouse_id = ? ) as batch_count,
 (select count(*) from `order` where warehouse_id = ? ) as order_count,
-(select count(*) from `order` where warehouse_id = ? and date_format( created_at, '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_order_count,
-(select count(*) from `batch` where warehouse_id = ? and date_format( created_at, '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_batch_count,
+(select count(*) from `order` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_order_count,
+(select count(*) from `batch` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_batch_count,
 (select sum(shelf_num) from `product_stock` where warehouse_id = ? ) as product_total";
         $homePageAnalyze = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
         $homePageAnalyze = [
