@@ -92,10 +92,6 @@
       </p>
       <p>
         <span>入库单编号</span>
-        <span class="top1">{{ $batch['batch_code'] }}</span>
-      </p>
-      <p>
-        <span>确认单编号</span>
         <span class="top1">{{ $batch['confirmation_number'] }}</span>
       </p>
       <p>
@@ -121,11 +117,11 @@
           <th class="text_center">#</th>
           <th class="text_center">SKU</th>
           <th class="text_center">商品信息</th>
-          <th class="text_center">预/已入库数量(个)</th>
+          <th class="text_center">采购价格</th>
+          <th class="text_center">预计数量</th>
+          <th class="text_center">实时数量</th>
           <th class="text_center">入库单批次号</th>
-          <th class="text_center">供应商货号</th>
           <th class="text_center">备注</th>
-          <th class="text_center">推荐货位</th>
         </tr>
         <tbody>
           @forelse ($batch['batch_products'] as $k => $product)
@@ -136,11 +132,11 @@
               <p>{{ $product['relevance_code'] }}</p>
             </td>
             <td class="text_center">{{ $product['spec']['product']['name_cn'] }}({{$product['spec']['name_cn']}})</td>
-            <td class="text_center">{{ $product['need_num'] }}/{{ $product['total_stockin_num'] }}</td>
+            <td class="text_center">{{ $product['spec']['purchase_price'] }}</td>
+            <td class="text_center">{{ $product['need_num'] }}</td>
+            <td class="text_center">{{ $product['total_stockin_num'] }}</td>
             <td class="text_center">{{ $product['sku'] }}</td>
-            <td class="text_center">{{ $product['distributor_code'] }}</td>
             <td class="text_center">{{ $product['remark'] }}</td>
-            <td class="text_center">{{ $product['recommended_location']['code'] }}</td>
           </tr>
           @empty
           @endforelse

@@ -170,6 +170,22 @@ class Order extends Model
         return $name;
     }
 
+    /**
+     * @return int
+     */
+    public function getSubPickNumAttribute()
+    {
+        return $this->orderItems->pluck('pick_num')->sum();
+    }
+
+
+    /**
+     * @return int
+     */
+    public function getSubOrderQtyAttribute()
+    {
+        return $this->orderItems->pluck('amount')->sum();
+    }
 
     public function getOutSnBarcodeAttribute()
     {

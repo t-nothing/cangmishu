@@ -9,7 +9,7 @@ class ProductSpec extends Model
 	protected $table = 'product_spec';
     protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'relevance_code', 'product_id','net_weight','gross_weight','is_warning'];
 
-    public   $appends= ['product_name', 'spec_name'];
+    public   $appends= ['product_name', 'spec_name', 'stockin_num'];
 
 	/*
 	|--------------------------------------------------------------------------
@@ -120,6 +120,11 @@ class ProductSpec extends Model
                 ->where('spec_id', $this->id)
                 ->sum('stockin_num');
 	}
+
+    public function getStockInNumAttribute()
+    {
+        return $this->getStockInWarehouseAttribute();
+    }
 
 	/**
 	 * 某规格/某仓库/已上架

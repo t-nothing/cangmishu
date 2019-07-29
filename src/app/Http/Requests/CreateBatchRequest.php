@@ -38,7 +38,11 @@ class CreateBatchRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
-            'confirmation_number'              => 'string|max:255',
+            'confirmation_number'              => ['string','max:50',
+                Rule::unique('batch', 'batch_code')->where(function($q) use($warehouse_id) {
+                    $q->where('warehouse_id', $warehouse_id);
+                })
+            ],
             'distributor_id'                   =>  [
                 'integer','min:1',
                 Rule::exists('distributor','id')->where(function($q){
@@ -71,6 +75,7 @@ class CreateBatchRequest extends BaseRequests
             'type_id.exists' =>  '入库单分类不存在',
             'product_stock.*.relevance_code.exists' =>  '外部编码不存在',
             'product_stock.*.distributor_code.distinct' =>  '供货商货号重复',
+            'confirmation_number.unique' =>  '单据编号已存在',
         ];
     }
 }

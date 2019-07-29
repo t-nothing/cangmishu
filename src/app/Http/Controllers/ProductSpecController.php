@@ -32,20 +32,21 @@ class ProductSpecController extends Controller
         // }
 
         // return formatRet(0, '', $product->specs->toArray());
-
-        $product = ProductSpec::ofWarehouse($request->warehouse_id)
-            ->where('owner_id',app('auth')->ownerId())
-            ->latest('updated_at');
+        $product = ProductSpec::leftjoin('product', 'product.id','=', 'product_spec.product_id')
+            ->where('product_spec.warehouse_id',$request->warehouse_id)
+            ->where('product_spec.owner_id',app('auth')->ownerId())
+            ->select('product_spec.*')
+            ->latest('product_spec.updated_at');
         if($request->filled('category_id')){
-            $product = $product->where('category_id',$request->category_id);
+            $product = $product->where('product.category_id',$request->category_id);
         }
 
         if ($request->filled('updated_at_b')) {
-            $product = $product->where('updated_at', '>', strtotime($request->updated_at_b));
+            $product = $product->where('product_spec.updated_at', '>', strtotime($request->updated_at_b));
         }
 
         if ($request->filled('updated_at_e')) {
-            $product = $product->where('updated_at', '<', strtotime($request->updated_at_e));
+            $product = $product->where('product_spec.updated_at', '<', strtotime($request->updated_at_e));
         }
 
         if ($request->filled('keywords')) {
@@ -55,6 +56,7 @@ class ProductSpecController extends Controller
         $paginator = $product->paginate($request->input('page_size',10));
         $data = $paginator->makeHidden(['product','deleted_at', 'created_at', 'updated_at', 'is_warning', 'name_cn', 'name_en']);
         $paginator->data = $data;
+
 
         return formatRet(0, '', $paginator->toArray());
     }
