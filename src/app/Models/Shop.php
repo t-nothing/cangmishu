@@ -11,6 +11,26 @@ class Shop extends Model
     protected $table = 'shop';
 
     protected $hidden = ['domain','owner_id','deleted_at'];
+    protected $appends = [
+        'name'
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attributes
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * @return string
+     */
+    public function getNameAttribute()
+    {
+        
+        $lang = app('translator')->getLocale();
+        
+        return $this->{'name_'.$lang}??$this->name_cn;
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -32,6 +52,11 @@ class Shop extends Model
     public function senderAddress()
     {
         return $this->hasOne('App\Models\ShopSenderAddress', 'shop_id', 'id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany('App\Models\ShopProduct', 'shop_id', 'id' );
     }
 
 

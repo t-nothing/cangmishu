@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers;
 use App\Http\Requests\BaseRequests;
+use App\Http\Requests\CreateShopRequest;
+use App\Http\Requests\UpdateShopRequest;
 use App\Models\Shop;
 use App\Models\ShopPaymentMethod;
 use App\Models\ShopSenderAddress;
+use App\Models\ShopProduct;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 
 class ShopController extends Controller
 {
+    /**
+     * 店铺列表
+     */
     public function index(BaseRequests $request)
     {
         app('log')->info('店铺列表',$request->all());
@@ -44,47 +50,63 @@ class ShopController extends Controller
         return formatRet(0,'',$re);
     }
 
-    function update(BaseRequests $request,int  $id)
+    /**
+     * 店铺修改
+     */
+    function update(UpdateShopRequest $request,int  $id)
     {
-        $this->validate($request, [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
-            'name_cn'                   => [
-               'required','string','max:100',
-                Rule::unique('shop', 'name_cn')->where(function($q) use($request){
-                    $q->where('owner_id',Auth::ownerId())->where('name_cn','!=', $request->name_cn);
-                })
-            ],
-            'name_en'                   => 'required|string|max:100',
-            'logo'                      => 'somtimes|url|max:100',
-            'banner_background'         => 'somtimes|url|max:100',
-            'default_lang'              => 'required|string|in:zh-cn,english',
-            'default_currency'          => 'required|string|in:CNY,EUR,USD',
-            'email'                     => 'required|email|max:100'
-        ]);
-
+        $data = $request->all();
         app('db')->beginTransaction();
         try
         {
 
             $shop = Shop::find($id);
+            $shop->name_cn              = $data['name_cn'];
+            $shop->name_en              = $data['name_en']??$data['name_cn'];
+            $shop->logo                 = $data['logo']??'';
+            $shop->banner_background    = $data['banner_background']??'';
+            $shop->default_lang         = $data['default_lang']??'cn';
+            $shop->default_currency     = $data['default_currency']??'CNY';
+            $shop->email                = $data['email']??'';
+            $shop->owner_id             = Auth::ownerId();
+            $shop->is_closed            = 0;
+            $shop->is_stock_show        = 1;
+            $shop->is_price_show        = 1;
+            $shop->is_allow_over_order  = 1;
+            $shop->domain               = md5($data['name_cn']);
+            
+            $shop->save();
 
-            if (! $shop || $shop->owner_id != Auth::id()){
-                return formatRet(500,'用户不存在或无权限编辑');
+            $items = [];
+
+            foreach ($data['items'] as $key => $value) {
+                $items[] = new ShopProduct([
+                    'product_id'        =>  $value['product_id'],
+                    'sale_price'        =>  $value['sale_price'],
+                    'is_shelf'          =>  $value['is_shelf'],
+                    'remark'            =>  $value['remark'],
+                    'pics'              =>  json_encode($value['pics'], true),
+                ]);
             }
 
-            $shop->name_cn = $request->name_cn;
-            $shop->name_en = $request->name_en;
-            $shop->logo = $request->logo;
-            $shop->banner_background = $request->banner_background;
-            $shop->default_lang = $request->default_lang;
-            $shop->default_currency = $request->default_currency;
-            $shop->email = $request->email;
-            $shop->save();
+            ShopProduct::where('shop_id', $shop->id)->delete();
+            ShopSenderAddress::where('shop_id', $shop->id)->delete();
+
+            $shop->items()->saveMany($items);
+
+
+            $contact = $data['contact'];
+
+            $shop->senderAddress()->save(new ShopSenderAddress([
+                'country'           =>  $contact['country'],
+                'province'          =>  $contact['province'],
+                'city'              =>  $contact['city'],
+                'district'          =>  $contact['district'],
+                'address'           =>  $contact['address'],
+                'fullname'          =>  $contact['fullname'],
+                'phone'             =>  $contact['phone'],
+            ]));
+
 
             app('db')->commit();
         }
@@ -98,49 +120,63 @@ class ShopController extends Controller
         return formatRet(0);
     }
 
-
-    function store(BaseRequests $request)
+    /**
+     * 店铺新增
+     */
+    function store(CreateShopRequest $request)
     {
-        $this->validate($request, [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
-            'name_cn'                   => [
-               'required','string','max:100',
-                Rule::unique('shop', 'name_cn')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
-            'name_en'                   => 'required|string|max:100',
-            'logo'                      => 'somtimes|url|max:100',
-            'banner_background'         => 'somtimes|url|max:100',
-            'default_lang'              => 'required|string|in:zh-cn,english',
-            'default_currency'          => 'required|string|in:CNY,EUR,USD',
-            'email'                     => 'required|email|max:100'
-        ]);
 
+        $data = $request->all();
         app('db')->beginTransaction();
         try
         {
+
             $shop = new Shop;
-            $shop->warehouse_id = $request->warehouse_id;
-            $shop->name_cn = $request->name_cn;
-            $shop->name_en = $request->name_en;
-            $shop->logo = $request->logo;
-            $shop->banner_background = $request->banner_background;
-            $shop->default_lang = $request->default_lang;
-            $shop->default_currency = $request->default_currency;
-            $shop->email = $request->email;
-            $shop->owner_id = Auth::ownerId();
-            $shop->is_closed = 1;
-            $shop->is_stock_show = 1;
-            $shop->is_price_show = 1;
-            $shop->is_allow_over_order = 1;
-            $shop->domain = md5($shop->warehouse_id.time());
+            $shop->warehouse_id         = $data['warehouse_id'];
+            $shop->name_cn              = $data['name_cn'];
+            $shop->name_en              = $data['name_en']??$data['name_cn'];
+            $shop->logo                 = $data['logo']??'';
+            $shop->banner_background    = $data['banner_background']??'';
+            $shop->default_lang         = $data['default_lang']??'cn';
+            $shop->default_currency     = $data['default_currency']??'CNY';
+            $shop->email                = $data['email']??'';
+            $shop->owner_id             = Auth::ownerId();
+            $shop->is_closed            = 0;
+            $shop->is_stock_show        = 1;
+            $shop->is_price_show        = 1;
+            $shop->is_allow_over_order  = 1;
+            $shop->domain               = md5($data['name_cn']);
+            
             $shop->save();
+
+            $items = [];
+
+            foreach ($data['items'] as $key => $value) {
+                $items[] = new ShopProduct([
+                    'product_id'        =>  $value['product_id'],
+                    'sale_price'        =>  $value['sale_price'],
+                    'is_shelf'          =>  $value['is_shelf'],
+                    'remark'            =>  $value['remark'],
+                    'pics'              =>  json_encode($value['pics'], true),
+                ]);
+            }
+
+
+            $shop->items()->saveMany($items);
+
+
+            $contact = $data['contact'];
+
+            $shop->senderAddress()->save(new ShopSenderAddress([
+                'country'           =>  $contact['country'],
+                'province'          =>  $contact['province'],
+                'city'              =>  $contact['city'],
+                'district'          =>  $contact['district'],
+                'address'           =>  $contact['address'],
+                'fullname'          =>  $contact['fullname'],
+                'phone'             =>  $contact['phone'],
+            ]));
+
 
             app('db')->commit();
         }
@@ -168,6 +204,8 @@ class ShopController extends Controller
         app('db')->beginTransaction();
         try {
             $shop->delete();
+            ShopProduct::where('shop_id', $shop->id)->delete();
+            ShopSenderAddress::where('shop_id', $shop->id)->delete();
             app('db')->commit();
 
         } catch (\Exception $e) {
@@ -188,74 +226,8 @@ class ShopController extends Controller
             return formatRet(500,'店铺不存在或无权限编辑');
         }
 
-        $shop->load("senderAddress","paymentMethod");
+        $shop->load("senderAddress","items");
 
         return formatRet(0,"成功",$shop->toArray());
-    }
-
-    /**
-     * 默认发件人
-     */
-    public function senderShow(BaseRequests $request,$id)
-    {
-
-        $shop = Shop::find($id);
-
-        if (! $shop || $shop->owner_id != Auth::id()){
-            return formatRet(500,'店铺不存在或无权限编辑');
-        }
-
-        $shop->load("senderAddress");
-
-
-        if(!is_null($shop->senderAddress))
-        {
-            return formatRet(0,"成功", $shop->senderAddress->toArray());
-        }
-        return formatRet(0,"成功", []);
-    }
-
-    /**
-     * 默认发件人
-     */
-    public function senderUpdate(BaseRequests $request, $id)
-    {
-        $shop = Shop::find($id);
-
-        if (! $shop || $shop->owner_id != Auth::id()){
-            return formatRet(500,'店铺不存在或无权限编辑');
-        }
-
-        $this->validate($request, 
-            [
-                'fullname' => 'required|string',
-                'phone'    => 'required|string',
-                'country'  => 'string',
-                'province' => 'required|string',
-                'city'     => 'required|string',
-                'district' => 'required|string',
-                'address'  => 'required|string',
-                'postcode' => 'string'
-            ]
-        );
-
-        $senderAddress = ShopSenderAddress::updateOrCreate(
-            [
-                'shop_id'       =>  $shop->id,
-            ],
-            [
-                'is_default'    =>  1,
-                'country'       =>  $request->country,
-                'province'      =>  $request->province,
-                'city'          =>  $request->city,
-                'district'      =>  $request->district,
-                'address'       =>  $request->address,
-                'postcode'      =>  $request->postcode,
-                'fullname'      =>  $request->fullname,
-                'phone'         =>  $request->phone,
-            ]
-        );
-
-        return formatRet(0,"成功",$senderAddress->toArray());
     }
 }

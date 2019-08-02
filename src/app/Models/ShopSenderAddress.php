@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ShopSenderAddress extends Model
 {
-    use SoftDeletes;
     protected $table = 'shop_sender_address';
     protected $fillable  = ['shop_id', 'is_default', 'country', 'province', 'city', 'district', 'address', 'postcode', 'fullname', 'phone']; 
 
