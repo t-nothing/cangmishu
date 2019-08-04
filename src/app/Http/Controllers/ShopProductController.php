@@ -1,9 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Http\Requests\BaseRequests;
 use App\Models\Shop;
+use App\Models\Product;
 use App\Models\ShopProduct;
+use App\Models\ShopProductSpec;
+use App\Http\Requests\BaseRequests;
+use App\Http\Requests\CreateShopProductRequest;
+use App\Http\Requests\UpdateShopProductRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +17,7 @@ class ShopProductController extends Controller
     /**
      * 店铺商品列表
      */
-    public function index(BaseRequests $request, int $id)
+    public function index(BaseRequests $request, int $shopId)
     {
         app('log')->info('店铺商品列表',$request->all());
         $this->validate($request,[
@@ -21,9 +25,9 @@ class ShopProductController extends Controller
             'created_at_e'      => 'date_format:Y-m-d|after_or_equal:created_at_b',
             'keywords'          => 'string|max:255',
         ]);
-        $batchs =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.product_id')
-            ->ofWarehouse($request->input('warehouse_id'))
-            ->where('shop_id', $id)
+        $batchs =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
+            ->with("specs")
+            ->where('shop_id', $shopId)
             ->where('owner_id',Auth::ownerId())
             ->when($request->filled('created_at_b'),function ($q) use ($request){
                 return $q->where('shop_product.created_at', '>', strtotime($request->input('created_at_b')));
@@ -34,7 +38,17 @@ class ShopProductController extends Controller
             ->when($request->filled('keywords'),function ($q) use ($request){
                 return $q->hasKeyword($request->input('keywords'));
             })
-            ->latest()->paginate($request->input('page_size',10));
+            ->latest()->paginate($request->input('page_size',10), [
+                'shop_product.id',
+                'product.name_cn',
+                'product.name_en',
+                'shop_product.sale_price',
+                'shop_product.is_shelf',
+                'shop_product.pics',
+                'shop_product.remark',
+                'shop_product.created_at',
+                'shop_product.updated_at',
+            ]);
 
             $re = $batchs->toArray();
 
@@ -48,99 +62,115 @@ class ShopProductController extends Controller
     }
 
     /**
-     * 更新销售价格
+     * 更新单个商品
      **/
-    function updateSalePrice(BaseRequests $request,int  $id)
+    function update(UpdateShopProductRequest $request, int $shopId, int  $id)
     {
-        $this->validate($request, [
-            'sale_price'              => 'required|float|min:0.01',
-        ]);
-
+ 
         app('db')->beginTransaction();
         try
         {
-
-            $shopProduct = ShopProduct::find($id)->with('shop');
-
-            if (! $shopProduct || $shopProduct->shop || $shopProduct->shop->owner_id != Auth::id()){
-                return formatRet(500,'用户不存在或无权限编辑');
+            $shopProduct = $request->getShopProduct();
+            
+            $shopProduct->is_shelf      = 1;
+            $shopProduct->name_cn       = $request->name_cn??"";
+            $shopProduct->remark        = $request->input("name_en", $request->name_cn);
+            $shopProduct->remark        = $request->remark??"";
+            $shopProduct->pics          = json_encode($request->pics, true);
+            
+            foreach ($request->specs as $spec) {
+                $spec = ShopProductSpec::where("shop_product_id", $id)->where("id", $spec["id"])->firstOrFail();
+                $spec->name_cn      = $spec["name_cn"];
+                $spec->name_en      = $spec["name_en"]??$spec["name_cn"];
+                $spec->sale_price   = $spec["sale_price"];
+                $spec->save();
             }
-
-            $shopProduct->sale_price = $request->sale_price;
-            $shop->save();
-
+            $shopProduct->sale_price    = $request->specs[0]["sale_price"];
+            $shopProduct->save();
+            
             app('db')->commit();
         }
         catch (\Exception $e)
         {
             app('db')->rollback();
-            app('log')->error('修改商品价格失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"修改商品价格失败");
+            app('log')->error('修改商品失败',['msg' =>$e->getMessage()]);
+            return formatRet(500,"修改商品失败");
         }
 
         return formatRet(0);
     }
 
     /**
-     * 同步商品库
-     **/
-    function syncProduct(BaseRequests $request,int  $id)
-    {
-        $shop = ShopProduct::find($id);
-        if(!$shop)
-        {
-
-        }
-
-
-    }
-
-    /**
      * 选择商品
      **/
-    function chooseProduct(BaseRequests $request,int  $id)
+    function store(CreateShopProductRequest $request, int $shopId)
     {
-        $this->validate($request, [
-            'products'                  => 'required|array|max:100',
-            'products.*'                => 'required|int|min:1',
-        ]);
-
         $dbProducts = Product::ofWarehouse($request->warehouse_id)
             ->where('owner_id',app('auth')->ownerId())
             ->whereIn('id', $request->products)
-            ->select('id')
-            ->get()->pluck('id')->toArray();
+            ->get()->keyBy('id');
+
+        $dbIdArr = $dbProducts->pluck('id')->toArray();
 
         //
-        $diffArr = array_diff($request->products, $dbProducts);
-        if($diffArr)
+        $diffArr = array_diff($request->products, $dbIdArr);
+        if(count($diffArr))
         {
-
+            app('log')->info('店铺商品新增',$request->all());
+            return formatRet(500,"新增商品失败,商品信息不存在");
         }
 
         app('db')->beginTransaction();
         try
         {
-            ShopProduct::updateOrCreate(
-                [
-                    "shop_id"       =>  $id,
-                    "product_id"    =>  $id,
-                ],
-                [
-                    'product_id'    =>  $request->product_id,
-                    'shop_id'       =>  $request->shop_id,
-                    'sale_price'    =>  $request->sale_price,
-                    'is_shelf'      =>  $request->is_shelf,
-                ]
-            );
+            foreach ($request->products as $key => $product_id) {
+
+                $exist = ShopProduct::where('shop_id', $shopId)->where('product_id', $product_id)->count();
+                if($exist) continue;
+
+                $productInfo = $dbProducts[$product_id];
+                $productInfo->load("specs");
+                $shopProduct                = new ShopProduct;
+                $shopProduct->shop_id       = $shopId;
+                $shopProduct->product_id    = $product_id;
+                $shopProduct->sale_price    = $product_id;
+                $shopProduct->name_cn       = $productInfo["name_cn"];
+                $shopProduct->name_en       = $productInfo["name_en"];
+                $shopProduct->is_shelf      = 1;
+                $shopProduct->remark        = $productInfo["remark"]??"";
+                if(!empty($productInfo["photos"]))
+                {
+                    $shopProduct->pics          = json_encode([$productInfo["photos"]], true);
+                }
+
+
+                $shopProduct->save();
+                $specs = [];
+                foreach ($productInfo->specs as $spec) {
+
+                    $specs[] = new ShopProductSpec([
+                        'shop_id'           =>  $shopId,
+                        'shop_product_id'   =>  $shopProduct->id,
+                        'name_cn'           =>  $spec->name_cn,
+                        'name_en'           =>  $spec->name_en,
+                        'product_id'        =>  $spec->product_id,
+                        'spec_id'           =>  $spec->id,
+                        'sale_price'        =>  $spec->sale_price,
+                        'is_shelf'          =>  1,
+                    ]);
+                }
+                
+                
+                $shopProduct->specs()->saveMany($specs);
+            }
 
             app('db')->commit();
         }
         catch (\Exception $e)
         {
             app('db')->rollback();
-            app('log')->error('新增店铺失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增店铺失败");
+            app('log')->error('新增商品失败',['msg' =>$e->getMessage()]);
+            return formatRet(500,"新增商品失败");
         }
 
         return formatRet(0);
@@ -149,18 +179,20 @@ class ShopProductController extends Controller
     /**
      * 删除商品
      */
-    public function destroy(BaseRequests $request,$id)
+    public function destroy(BaseRequests $request, int $shopId, int  $id)
     {
 
-        $shopProduct = ShopProduct::find($id)->with('shop');
-
-        if (! $shopProduct || $shopProduct->shop || $shopProduct->shop->owner_id != Auth::id()){
-            return formatRet(500,'用户不存在或无权限编辑');
-        }
-
-        
-        app('db')->beginTransaction();
         try {
+            $shopProduct = ShopProduct::with("shop")->findOrFail($id);
+
+            if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
+                return formatRet(500,'用户不存在或无权限编辑');
+            }
+
+            
+            app('db')->beginTransaction();
+        
+            $shopProduct->specs()->delete();
             $shopProduct->delete();
             app('db')->commit();
 
@@ -174,17 +206,48 @@ class ShopProductController extends Controller
     /**
      * 商品详细
      */
-    public function show(BaseRequests $request,$id)
+    public function show(BaseRequests $request, int $shopId, int  $id)
     {
-        $shop = Shop::find($id);
+         
+        $shopProduct = ShopProduct::with("shop")->findOrFail($id);
 
-        if (! $shop || $shop->owner_id != Auth::id()){
-            return formatRet(500,'店铺不存在或无权限编辑');
+        if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
+            return formatRet(500,'用户不存在或无权限编辑');
+        }
+        $shopProduct->load("specs");
+
+        return formatRet(0,"成功",$shopProduct->toArray());
+    }
+
+    /**
+     * 上下架商品
+     */
+    public function onShelf(BaseRequests $request, int $shopId, int  $id)
+    {
+
+        $this->validate($request,[
+            'is_shelf'      => 'required|boolean'
+        ]);
+
+        $shopProduct = ShopProduct::with("shop")->findOrFail($id);
+
+        if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
+            return formatRet(500,'用户不存在或无权限编辑');
         }
 
-        $shop->load("senderAddress","paymentMethod");
+        
+        app('db')->beginTransaction();
+        try {
+            $shopProduct->specs()->update(['is_shelf'=>$request->is_shelf]);
+            $shopProduct->is_shelf = $request->is_shelf;
+            $shopProduct->save();
+            app('db')->commit();
 
-        return formatRet(0,"成功",$shop->toArray());
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            return formatRet(500,'操作商品失败');
+        }
+        return formatRet(0);
     }
 
 }

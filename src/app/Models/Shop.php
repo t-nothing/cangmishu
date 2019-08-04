@@ -10,7 +10,7 @@ class Shop extends Model
     use SoftDeletes;
     protected $table = 'shop';
 
-    protected $hidden = ['domain','owner_id','deleted_at'];
+    protected $hidden = ['domain','owner_id','deleted_at','announcement_cn', 'announcement_en', 'pay_notice_cn', 'pay_notice_en', 'cart_notice_cn', 'cart_notice_en', 'is_stock_show', 'is_price_show', 'is_allow_over_order', 'email'];
     protected $appends = [
         'name'
     ];

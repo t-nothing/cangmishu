@@ -198,6 +198,14 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/shop/{id}', 'ShopController@update');
     Route::delete('/shop/{id}', 'ShopController@destroy');
 
+    //店铺详细
+    Route::get('/shop/{shopId}/product', 'ShopProductController@index');
+    Route::post('/shop/{shopId}/product', 'ShopProductController@store');
+    Route::put('/shop/{shopId}/product/{id}', 'ShopProductController@update');
+    Route::delete('/shop/{shopId}/product/{id}', 'ShopProductController@destroy');
+    Route::get('/shop/{shopId}/product/{id}', 'ShopProductController@show');
+    Route::patch('/shop/{shopId}/product/{id}', 'ShopProductController@onShelf');
+
     //默认发件人
     Route::get('/shop/{id}/sender', 'ShopController@senderShow');
     Route::post('/shop/{id}/sender', 'ShopController@senderUpdate');

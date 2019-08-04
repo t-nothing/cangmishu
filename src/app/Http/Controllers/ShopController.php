@@ -77,24 +77,22 @@ class ShopController extends Controller
             
             $shop->save();
 
-            $items = [];
+            // $items = [];
 
-            foreach ($data['items'] as $key => $value) {
-                $items[] = new ShopProduct([
-                    'product_id'        =>  $value['product_id'],
-                    'sale_price'        =>  $value['sale_price'],
-                    'is_shelf'          =>  $value['is_shelf'],
-                    'remark'            =>  $value['remark'],
-                    'pics'              =>  json_encode($value['pics'], true),
-                ]);
-            }
+            // foreach ($data['items'] as $key => $value) {
+            //     $items[] = new ShopProduct([
+            //         'product_id'        =>  $value['product_id'],
+            //         'sale_price'        =>  $value['sale_price'],
+            //         'is_shelf'          =>  $value['is_shelf'],
+            //         'remark'            =>  $value['remark'],
+            //         'pics'              =>  json_encode($value['pics'], true),
+            //     ]);
+            // }
 
-            ShopProduct::where('shop_id', $shop->id)->delete();
+            // ShopProduct::where('shop_id', $shop->id)->delete();
             ShopSenderAddress::where('shop_id', $shop->id)->delete();
 
-            $shop->items()->saveMany($items);
-
-
+            // $shop->items()->saveMany($items);
             $contact = $data['contact'];
 
             $shop->senderAddress()->save(new ShopSenderAddress([
@@ -149,20 +147,20 @@ class ShopController extends Controller
             
             $shop->save();
 
-            $items = [];
+            // $items = [];
 
-            foreach ($data['items'] as $key => $value) {
-                $items[] = new ShopProduct([
-                    'product_id'        =>  $value['product_id'],
-                    'sale_price'        =>  $value['sale_price'],
-                    'is_shelf'          =>  $value['is_shelf'],
-                    'remark'            =>  $value['remark'],
-                    'pics'              =>  json_encode($value['pics'], true),
-                ]);
-            }
+            // foreach ($data['items'] as $key => $value) {
+            //     $items[] = new ShopProduct([
+            //         'product_id'        =>  $value['product_id'],
+            //         'sale_price'        =>  $value['sale_price'],
+            //         'is_shelf'          =>  $value['is_shelf'],
+            //         'remark'            =>  $value['remark'],
+            //         'pics'              =>  json_encode($value['pics'], true),
+            //     ]);
+            // }
 
 
-            $shop->items()->saveMany($items);
+            // $shop->items()->saveMany($items);
 
 
             $contact = $data['contact'];
@@ -226,7 +224,7 @@ class ShopController extends Controller
             return formatRet(500,'店铺不存在或无权限编辑');
         }
 
-        $shop->load("senderAddress","items");
+        $shop->load("senderAddress");
 
         return formatRet(0,"成功",$shop->toArray());
     }
