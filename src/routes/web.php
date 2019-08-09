@@ -246,5 +246,21 @@ $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) 
     });
 });
 
+$router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
+    Route::any('wechat', 'WeChatController@serve');
+});
 
+//店铺开放型接口
+$router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop'], function($router) {
+
+    Route::post('/login', 'AuthenticateController@autoLogin')->name('openShopLogin');
+    
+
+    $router->group(['middleware' => [ 'wechat.oauth']], function($router) {
+        
+    });
+
+    
+
+});

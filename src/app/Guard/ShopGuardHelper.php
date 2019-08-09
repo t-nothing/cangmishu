@@ -3,12 +3,12 @@
 namespace App\Guard;
 
 use App\Exceptions\BusinessException;
-use App\Models\Warehouse;
+use App\Models\Shop;
 
 /**
  * These methods are typically the same across all guards.
  */
-trait WarehouseGuardHelpers
+trait ShopGuardHelpers
 {
     /**
      * The currently chosen warehouse.

@@ -79,4 +79,9 @@ class Model extends  Models
         }
         return self::$_instance[$class];
     }
+
+    public  function ScopeOfWarehouse($query, $warehouse_id)
+    {
+        return $query->where('warehouse_id', $warehouse_id);
+    }
 }
