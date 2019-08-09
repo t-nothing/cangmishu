@@ -26,6 +26,7 @@ class UpdateShopRequest extends BaseRequests
      */
     public function rules()
     {
+
         $arr = [
             'warehouse_id' => [
                 'required','integer','min:1',
@@ -44,15 +45,7 @@ class UpdateShopRequest extends BaseRequests
             'default_lang'              => 'somtimes|string|in:zh-cn,english',
             'default_currency'          => 'somtimes|string|in:CNY,EUR,USD',
             'email'                     => 'somtimes|email|max:100',
-            'remark'                    => 'somtimes|string',
-            // 'items'                     => 'required|array',
-            // 'items.*.id'                => 'required|int|min:0',
-            // 'items.*.product_id'        => 'required|int|min:0',
-            // 'items.*.sale_price'        => 'required|numeric|min:0',
-            // 'item.*.is_shelf'           => 'required|int|min:0|max:1',
-            // 'items.*.remark'            => 'present|string',
-            // 'items.*.pics'              => 'present|array',
-            // 'items.*.pics.*'            => 'required|url',
+            'remark'                    => 'required|string',
             'contact'                   => 'required|array',
             'contact.fullname'          => 'required|string',
             'contact.phone'             => 'required|string',
