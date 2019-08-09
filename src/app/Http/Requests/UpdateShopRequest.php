@@ -44,6 +44,7 @@ class UpdateShopRequest extends BaseRequests
             'default_lang'              => 'somtimes|string|in:zh-cn,english',
             'default_currency'          => 'somtimes|string|in:CNY,EUR,USD',
             'email'                     => 'somtimes|email|max:100',
+            'remark'                    => 'somtimes|string',
             // 'items'                     => 'required|array',
             // 'items.*.id'                => 'required|int|min:0',
             // 'items.*.product_id'        => 'required|int|min:0',

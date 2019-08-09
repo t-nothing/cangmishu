@@ -24,9 +24,10 @@ class ShopController extends Controller
             'created_at_b'      => 'date_format:Y-m-d',
             'created_at_e'      => 'date_format:Y-m-d|after_or_equal:created_at_b',
             'keywords'          => 'string|max:255',
-            'warehouse_id'      => 'integer',
+            'warehouse_id'      => 'required|integer',
         ]);
         $batchs =   Shop::ofWarehouse($request->input('warehouse_id'))
+            ->with('senderAddress')
             ->where('owner_id',Auth::ownerId())
             ->when($request->filled('created_at_b'),function ($q) use ($request){
                 return $q->where('created_at', '>', strtotime($request->input('created_at_b')));
@@ -69,6 +70,7 @@ class ShopController extends Controller
             $shop->default_currency     = $data['default_currency']??'CNY';
             $shop->email                = $data['email']??'';
             $shop->owner_id             = Auth::ownerId();
+            $shop->remark_cn            = $data['remark']??'';
             $shop->is_closed            = 0;
             $shop->is_stock_show        = 1;
             $shop->is_price_show        = 1;
@@ -139,6 +141,7 @@ class ShopController extends Controller
             $shop->default_currency     = $data['default_currency']??'CNY';
             $shop->email                = $data['email']??'';
             $shop->owner_id             = Auth::ownerId();
+            $shop->remark_cn            = $data['remark']??'';
             $shop->is_closed            = 0;
             $shop->is_stock_show        = 1;
             $shop->is_price_show        = 1;
