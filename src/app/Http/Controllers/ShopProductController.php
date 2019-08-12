@@ -54,7 +54,7 @@ class ShopProductController extends Controller
 
 //
             $data = collect($re['data'])->map(function($v){
-                $v['pics'] = json_decode($v['pics'], true);
+                $v['pics'] = json_encode($v['pics'], true);
                 unset($v['batch_products']);
                 return $v;
             })->toArray();
