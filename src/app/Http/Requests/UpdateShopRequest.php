@@ -40,12 +40,12 @@ class UpdateShopRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })->ignore($this->route('id'))
             ],
-            'logo'                      => 'somtimes|url|max:100',
-            'banner_background'         => 'somtimes|url|max:100',
-            'default_lang'              => 'somtimes|string|in:zh-cn,english',
-            'default_currency'          => 'somtimes|string|in:CNY,EUR,USD',
-            'email'                     => 'somtimes|email|max:100',
-            'remark'                    => 'string',
+            'logo'                      => 'present|url|max:100',
+            'banner_background'         => 'present|url|max:100',
+            'default_lang'              => 'present|string|in:zh-cn,english',
+            'default_currency'          => 'present|string|in:CNY,EUR,USD',
+            'email'                     => 'present|email|max:100',
+            'remark'                    => 'required|string',
             'contact'                   => 'required|array',
             'contact.fullname'          => 'required|string',
             'contact.phone'             => 'required|string',
