@@ -45,7 +45,7 @@ class UpdateShopRequest extends BaseRequests
             'default_lang'              => 'somtimes|string|in:zh-cn,english',
             'default_currency'          => 'somtimes|string|in:CNY,EUR,USD',
             'email'                     => 'somtimes|email|max:100',
-            'remark'                    => 'required|string',
+            'remark'                    => 'string',
             'contact'                   => 'required|array',
             'contact.fullname'          => 'required|string',
             'contact.phone'             => 'required|string',
