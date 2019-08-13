@@ -162,6 +162,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Overtrue\LaravelWeChat\ServiceProvider::class,
+        Gloudemans\Shoppingcart\ShoppingcartServiceProvider::class
 
     ],
 
@@ -214,6 +215,8 @@ return [
         'PDF' => Barryvdh\Snappy\Facades\SnappyPdf::class,
         'SnappyImage' => Barryvdh\Snappy\Facades\SnappyImage::class,
         'EasyWeChat' => Overtrue\LaravelWeChat\Facade::class,
+        'Cart' => Gloudemans\Shoppingcart\Facades\Cart::class,
+
     ],
 
 ];

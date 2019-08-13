@@ -37,11 +37,11 @@ class CreateShopRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
-            'logo'                      => 'somtimes|url|max:100',
-            'banner_background'         => 'somtimes|url|max:100',
-            'default_lang'              => 'somtimes|string|in:zh-cn,english',
-            'default_currency'          => 'somtimes|string|in:CNY,EUR,USD',
-            'email'                     => 'somtimes|email|max:100',
+            'logo'                      => 'url|max:100',
+            'banner_background'         => 'url|max:100',
+            'default_lang'              => 'string|in:zh-cn,english',
+            'default_currency'          => 'string|in:CNY,EUR,USD',
+            'email'                     => 'email|max:100',
             'remark'                    => 'required|string',
             // 'items'                     => 'required|array',
             // 'items.*.id'                => 'required|int|min:0',

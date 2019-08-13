@@ -10,17 +10,19 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\Client;
-use GuzzleHttp\Client as HttpClient;
 use App\Models\ShopUser;
 use EasyWeChat\Factory;
 use App\Http\Requests\BaseRequests;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Access\AuthorizationException;
 
 
 class AuthenticateController extends  Controller
 {
     use AuthenticatesUsers;
+
+    private $app;
 
     /**
      * 用户名即OPEN ID
@@ -30,76 +32,79 @@ class AuthenticateController extends  Controller
         return 'openid';
     }
 
-    public function easyWechatGetSession($code)
-    {
-        $config = config('wechat.mini_program.default');
-        $app = Factory::miniProgram($config);
-        return $app->auth->session($code);
-    }
-
     /**
      * 处理小程序的自动登陆和注册
      * @param $oauth
      */
     public function autoLogin(BaseRequests $request)
     {
-        // 获取openid
-        if ($request->filled('code')) {
-            $wechatUserInfo = $this->easyWechatGetSession($request->code);
+        $this->validate($request, [
+            'code'              => 'required|string',
+            // 'shopid'            => 'required|int',
+            'nick_name'         => 'required|string',
+            'gender'            => 'required|string',
+            'country'           => 'required|string',
+            'city'              => 'required|string',
+            'avatar_url'        => 'required|url',
+            'language'          => 'required|string',
+            'mobile'             => 'string',
+        ]);
+
+        // 根据 code 获取微信 openid 和 session_key
+        $miniProgram = Factory::miniProgram(config('wechat.mini_program.default'));
+        $data = $miniProgram->auth->session($request->code);
+        if (isset($data['errcode'])) {
+            return formatRet(401, 'code已过期或不正确', 401);
         }
 
-        if (!$request->openid && empty($wechatUserInfo['openid'])) 
+        $openid = $data['openid'];
+        $weixinSessionKey = $data['session_key'];
+
+        $avatar_url = str_replace('/132', '/0', $request->avatar_url);//拿到分辨率高点的头像
+        $country    = $request->country??'';
+        $province   = $request->province??'';
+        $city       = $request->city??'';
+        $gender     = $request->gender == '1' ? '1' : '2';//没传过性别的就默认女的吧，体验好些
+        $language   = $request->language??'';
+        $mobile      = $request->mobile??'';
+
+
+        $user = ShopUser::where('weapp_openid', $openid)->first();
+        if(!$user)
         {
-            if (isset($wechatUserInfo) && !empty($wechatUserInfo['errmsg'])) {
-                return formatRet(500, $wechatUserInfo['errmsg']);
-            } else {
-                return formatRet(401, '用户openid没有获取到');
-            }
+
+            $user = new ShopUser;
+            $user->weapp_openid     = $openid;
+            $user->password         = $weixinSessionKey;
+            $user->nick_name        = $request->nick_name??'';
+            $user->avatar_url       = $avatar_url;
+            $user->gender           = $gender;
+            $user->country          = $country;
+            $user->province         = $province;
+            $user->city             = $city;
+            $user->language         = $language;
+            $user->city             = $city;
+            $user->save();
         }
 
-        $openid = empty($wechatUserInfo['openid'])?$request->openid:$wechatUserInfo['openid'];
-        $userInfo = ShopUser::where('openid', $openid)->first();
+        $user->last_login_time  = Carbon::now()->timestamp;
+        $user->last_login_ip  = $request->getClientIP();
+        $user->weapp_session_key  = $weixinSessionKey;
+        $user->avatar_url  = $avatar_url;
+        $user->save();
 
-        if ($userInfo && $userInfo->toArray()) 
-        {
-            //执行登录
-            $userInfo->last_login_ip = $this->getClientIP();
-            $userInfo->last_login_time = Carbon::now();
-            $userInfo->save();
-            $token = $userInfo->createToken($openid)->accessToken;
+        // 直接创建token并设置有效期
+        $createToken = $user->createToken($user->weapp_openid);
+        $createToken->token->expires_at = Carbon::now()->addDays(30);
+        $createToken->token->save();
+        $token = $createToken->accessToken;
 
-            return formatRet(0, "登录成功", compact('token','userInfo'));
-        } 
-        else 
-        {
-            //执行注册
-            return $this->register($request, $openid);
-        }
+        return formatRet(0, "登录成功", [
+            'access_token'=>    $token,
+            'token_type' => "Bearer",
+            'expires_in' => Carbon::now()->addDays(30),
+            'data' => $user,
+        ]);
     }
-
-    /*
-     * 用户注册
-    * @param Request $request
-    */
-    public function register(BaseRequests $request, $openid)
-    {
-        //  进行基本验证
-        $user_info = \GuzzleHttp\json_decode($request->input('rawData'),true);
-        $newUser = [
-            'openid'                =>  $openid, //openid
-            'nickname'              =>  $user_info['nickName'],// 昵称
-            'email'                 =>  time().'unknow@cangmishu.com',// 邮箱
-            'name'                  =>  $user_info['nickName'],// 昵称
-            'avatar'                =>  $user_info['avatarUrl'], //头像
-            'password'              =>  Hash::make(Str::random(16)),
-            'last_login_ip'         =>  $this->getClientIP(),
-            'last_login_time'       =>  Carbon::now()
-        ];
-
-        $userInfo = ShopUser::create($newUser);
-        $token = $userInfo->createToken($openid)->accessToken;
-        return formatRet(0, "登录成功", compact('token','userInfo'));
-    }
-
 
 }

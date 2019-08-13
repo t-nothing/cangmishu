@@ -82,11 +82,10 @@ trait WarehouseGuardHelpers
         return $owner;
     }
 
-    public function shopWarehouseId()
+    
+    public function shopId()
     {
-        //判断当前账户是否为员工账户
-        $user = $this->user();
-        $owner= $user->boss_id ?:$user->id;
-        return $owner;
+        return $this->getRequest()->header('Shop', '');
     }
+
 }

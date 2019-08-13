@@ -21,7 +21,7 @@ return [
     */
     'database' => [
         'connection' => null,
-        'table' => 'shoppingcart',
+        'table' => 'shop_shoppingcart',
     ],
     /*
     |--------------------------------------------------------------------------

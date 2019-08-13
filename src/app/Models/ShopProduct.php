@@ -38,4 +38,15 @@ class ShopProduct extends Model
         }
         return $this->{'name_'.$lang};
     }
+
+    /**
+     * 限制查询只包括指定关键字。
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     * @author liusen
+     */
+    public function scopeHasKeyword($query, $keywords)
+    {
+        $query->orwhere('shop_product.name_cn', 'like', '%' . $keywords . '%')->orWhere('shop_product.name_en', 'like', '%' . $keywords . '%');
+    }
 }

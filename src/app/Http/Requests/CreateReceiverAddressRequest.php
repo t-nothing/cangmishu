@@ -31,7 +31,7 @@ class CreateReceiverAddressRequest extends BaseRequests
             'city'     => 'required|string',
             'district' => 'required|string',
             'address'  => 'required|string',
-//            'postcode' => 'string'
+            'postcode' => 'string'
         ];
     }
 }

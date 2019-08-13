@@ -14,7 +14,12 @@ class ShopProductSpec extends Model
 
     public function product()
     {
-        return $this->belongsTo('App\Models\ShopProudct', 'shop_product_id', 'id');
+        return $this->belongsTo('App\Models\ShopProduct', 'shop_product_id', 'id');
+    }
+
+    public function productSpec()
+    {
+        return $this->hasOne('App\Models\ProductSpec', 'id', 'spec_id');
     }
 
     /**

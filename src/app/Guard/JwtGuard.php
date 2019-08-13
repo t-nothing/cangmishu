@@ -380,5 +380,4 @@ class JwtGuard implements Guard
 
 
 
-
 }

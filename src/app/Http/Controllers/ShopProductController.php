@@ -217,6 +217,8 @@ class ShopProductController extends Controller
         }
         $shopProduct->load("specs");
 
+        $shopProduct->pics = json_decode($shopProduct->pics, true);
+
         return formatRet(0,"成功",$shopProduct->toArray());
     }
 

@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\User;
+use Laravel\Passport\HasApiTokens;
 
-class ShopUser extends Authenticatable
+class ShopUser extends User
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens,Notifiable;
 
+    protected $table = 'shop_user';
 
+    protected  $dateFormat  = "U";
     /**
      * The attributes that are mass assignable.
      *
@@ -18,7 +20,7 @@ class ShopUser extends Authenticatable
      */
     protected $fillable = [
 
-        'id', 'email', 'password','openid','nick_name','avatar_url','last_login_ip','last_login_time','mobile',
+        'id', 'email', 'password','weapp_openid','nick_name','avatar_url','last_login_ip','last_login_time','mobile','gender','country','province','city','language','weapp_session_key'
     ];
 
     /**
@@ -27,7 +29,7 @@ class ShopUser extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token','openid','deleted_at',
     ];
 
 
@@ -37,5 +39,18 @@ class ShopUser extends Authenticatable
         $q = \Auth::user()->openid;
         return Self::where('openid', $q)->get();
 
+    }
+
+    public function findForPassport($username) {
+        return $this->where('openid', $username)->first();
+    }
+
+    public function validateForPassportPasswordGrant($password)
+    {
+        $decrypted = Crypt::decryptString($password);
+        if ($decrypted == $this->openId) {
+            return true;
+        }
+        return false;
     }
 }

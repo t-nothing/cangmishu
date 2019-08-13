@@ -46,6 +46,7 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:60,1',
             'bindings',
+            \Barryvdh\Cors\HandleCors::class
         ],
     ];
 
@@ -67,6 +68,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'role' => Role::class,
         'locale'  => \App\Http\Middleware\Localization::class,
+        'shop'  => \App\Http\Middleware\Shop::class,
         // 'wechat.oauth' => \Overtrue\LaravelWeChat\Middleware\OAuthAuthenticate::class,
     ];
 }

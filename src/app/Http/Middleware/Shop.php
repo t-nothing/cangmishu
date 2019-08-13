@@ -3,8 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\Factory as Auth;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Auth\Factory as Auth;
+use App\Models\Shop as Model;
 
 class Shop
 {
@@ -17,48 +18,52 @@ class Shop
     protected $auth;
 
 
-
     public function __construct( Auth $auth)
     {
         $this->auth = $auth;
     }
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     *
-     * @throws \Illuminate\Auth\AuthenticationException
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function handle($request, Closure $next, $roles)
+    public function handle($request, Closure $next)
     {
-        $user = $this->auth->authenticate();
+        $shopId = $this->getShopIdRequest($request);
 
-        if ($user->isLocked()) {
-            throw new AuthorizationException('账号被锁,请联系管理员');
+        $shopInfo = Model::find($shopId);
+
+        if (!$shopInfo) {
+            throw new AuthorizationException('店铺不存在');
         }
 
-        $roles =  explode('|', $roles);
+        $shopInfo->load('senderAddress');
+        
+        $request->merge([
+            'shop'  =>  $shopInfo
+        ]);//合并参数
 
-        // 必须是平台管理员，其他的角色没有用
-        if (in_array('admin', $roles)) {
-            $this->isAdmin($user);
-        }
         return $next($request);
     }
 
     /**
-     * 是不是平台管理员
+     * Get the locale for the current request.
+     * default lang ="cn"
      */
-    protected function isAdmin($user)
+    public function getShopIdRequest($request)
     {
-        if (! $user->isAdmin()) {
-            throw new AuthorizationException('非管理员，无权限 ');
+        $shop = $request->header('Shop');
+        if (is_null($shop)) {
+            $shop = $request->header('Shop');
+        }
+        
+        if (! is_null($shop)) {
+            return $shop;
+        } 
+
+        $shop = $request->query('lang');
+
+        if (! is_null($shop)) {
+            return $shop;
         }
 
-        return true;
+        return $shop;
     }
+
 }

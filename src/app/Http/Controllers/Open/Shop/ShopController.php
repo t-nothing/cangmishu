@@ -5,47 +5,19 @@
 
 namespace App\Http\Controllers\Open\Shop;
 use App\Http\Requests\BaseRequests;
+use App\Http\Controllers\Controller;
 use App\Rules\PageSize;
-use App\Models\ShopProduct;
+use App\Models\Shop;
 
 class ShopController extends Controller
 {
 
     /**
-     * 商品首页
+     * 店铺详细
      **/
-    public function index(BaseRequests $request, int $catId = 0)
+    public function show(BaseRequests $request)
     {
-        $this->validate($request, [
-            'page'         => 'integer|min:1',
-            'page_size'    => new PageSize(),
-            'is_enabled'   => 'boolean',
-        ]);
-
-        $categories = Category::OfWarehouse(Auth::shopWarehouseId())
-                    ->where('is_enabled', 1)
-                    ->orderBy('id','ASC')
-                    ->paginate($request->input('page_size',10));
-
-        return formatRet(0, '', $categories->toArray());
-    }
-
-    /**
-     * 分类详细
-     **/
-    public function show(BaseRequests $request, int $id)
-    {
-        $this->validate($request, [
-            'page'         => 'integer|min:1',
-            'page_size'    => new PageSize(),
-            'is_enabled'   => 'boolean',
-        ]);
-
-        $categories = Category::OfWarehouse(Auth::shopWarehouseId())
-                    ->where('is_enabled', 1)
-                    ->orderBy('id','ASC')
-                    ->paginate($request->input('page_size',10));
-
-        return formatRet(0, '', $categories->toArray());
+        $request->shop->setVisible(['name', 'remark', 'logo', 'banner_background']);
+        return formatRet(0, '', $request->shop->toArray());
     }
 }

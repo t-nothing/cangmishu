@@ -10,6 +10,7 @@ use App\Models\ShopSenderAddress;
 use App\Models\ShopProduct;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 
 class ShopController extends Controller
@@ -146,8 +147,23 @@ class ShopController extends Controller
             $shop->is_stock_show        = 1;
             $shop->is_price_show        = 1;
             $shop->is_allow_over_order  = 1;
-            $shop->domain               = md5($data['name_cn']);
+            $shop->save();
+            $shop->domain               = md5($shop->id);
+            $shop->weapp_qrcode         = sprintf("%s.png", $shop->domain);
             
+            $app = app('wechat.mini_program');
+            $response = $app->app_code->get('/shop/'.$shop->id);
+
+            if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+
+                $filePath = storage_path('/app/public/weapp/') ;
+                $filename = $response->saveAs($filePath, sprintf("%s.png", $shop->domain));
+
+                $url = Storage::url('weapp/'.$filename);
+                $shop->weapp_qrcode         = app('url')->to($url) ;
+                
+            }
+
             $shop->save();
 
             // $items = [];

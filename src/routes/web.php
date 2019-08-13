@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return  "upgrade success!";
+    return  "upgrade success!".env('APP_ENV');
 });
 
 // 用户认证
@@ -255,10 +255,20 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop'], function($router) {
 
     Route::post('/login', 'AuthenticateController@autoLogin')->name('openShopLogin');
-    
+    $router->get('/', 'ShopController@show');// 店铺详细
+    $router->get('/categories', 'CategoryController@list');// 列表
+    $router->get('/categories/{id}/products', 'ProductController@list');// 商品列表
+    $router->get('/products/{id}', 'ProductController@show');// 商品详细
 
-    $router->group(['middleware' => [ 'wechat.oauth']], function($router) {
+    $router->group(['middleware' => [ 'auth:shop', 'shop']], function($router) {
         
+        $router->get('/cart', 'CartController@list');// 购物车列表
+        $router->get('/cart/count', 'CartController@count');// 购物车数量
+        $router->post('/cart', 'CartController@store');// 加入购物车
+        $router->patch('/cart/{id}/{qty}', 'CartController@updateQty');// 修改购物车数量
+        $router->delete('/cart/{id}', 'CartController@remove');// 删除单个购物车商品
+        $router->delete('/cart', 'CartController@destroy');// 删除整个购物车商品
+        $router->post('/cart/checkout', 'CartController@checkout');// 下单
     });
 
     

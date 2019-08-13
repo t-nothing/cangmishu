@@ -6,7 +6,11 @@
 namespace App\Http\Controllers\Open\Shop;
 use App\Http\Requests\BaseRequests;
 use App\Rules\PageSize;
+use App\Http\Controllers\Controller;
+use App\Models\Shop;
+use App\Models\Product;
 use App\Models\ShopProduct;
+use App\Models\ShopProductSpec;
 
 class ProductController extends Controller
 {
@@ -14,20 +18,35 @@ class ProductController extends Controller
     /**
      * 商品首页
      **/
-    public function index(BaseRequests $request, int $catId = 0)
+    public function list(BaseRequests $request, int $catId = 0)
     {
-        $this->validate($request, [
-            'page'         => 'integer|min:1',
-            'page_size'    => new PageSize(),
-            'is_enabled'   => 'boolean',
-        ]);
+        $dataList =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
+            ->with("specs")
+            ->where('shop_id', $request->shop->id)
+            ->when($request->filled('keywords'),function ($q) use ($request){
+                return $q->hasKeyword($request->input('keywords'));
+            })
+            ->latest()->paginate($request->input('page_size',10), [
+                'shop_product.id',
+                'product.name_cn',
+                'product.name_en',
+                'shop_product.sale_price',
+                'shop_product.is_shelf',
+                'shop_product.pics',
+                'shop_product.remark',
+                'shop_product.created_at',
+                'shop_product.updated_at',
+            ]);
 
-        $categories = Category::OfWarehouse(Auth::shopWarehouseId())
-                    ->where('is_enabled', 1)
-                    ->orderBy('id','ASC')
-                    ->paginate($request->input('page_size',10));
+            $re = $dataList->toArray();
 
-        return formatRet(0, '', $categories->toArray());
+//
+            $data = collect($re['data'])->map(function($v){
+                unset($v['batch_products']);
+                return $v;
+            })->toArray();
+            $re['data'] = $data;
+        return formatRet(0,'',$re);
     }
 
     /**
@@ -35,17 +54,13 @@ class ProductController extends Controller
      **/
     public function show(BaseRequests $request, int $id)
     {
-        $this->validate($request, [
-            'page'         => 'integer|min:1',
-            'page_size'    => new PageSize(),
-            'is_enabled'   => 'boolean',
-        ]);
+        $shopProduct = ShopProduct::with("shop")->findOrFail($id);
 
-        $categories = Category::OfWarehouse(Auth::shopWarehouseId())
-                    ->where('is_enabled', 1)
-                    ->orderBy('id','ASC')
-                    ->paginate($request->input('page_size',10));
+        if ( !$shopProduct || !$shopProduct->shop ){
+            return formatRet(404,'商品不存在', 404);
+        }
+        $shopProduct->load("specs");
 
-        return formatRet(0, '', $categories->toArray());
+        return formatRet(0,"成功",$shopProduct->toArray());
     }
 }
