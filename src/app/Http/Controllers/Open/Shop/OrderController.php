@@ -4,6 +4,11 @@
  */
 
 namespace App\Http\Controllers\Open\Shop;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\BaseRequests;
+use App\Rules\PageSize;
+use App\Models\Order;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -19,50 +24,67 @@ class OrderController extends Controller
         ]);
 
 
-        $categories = Category::OfWarehouse($request->shop->warehouse_id)
-                    ->where('is_enabled', 1)
-                    ->orderBy('id','ASC')
+        $dataList = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)
+                    ->orderBy('id','DESC')
+                    ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency')
                     ->paginate(
                         $request->input('page_size',50),
-                        ['id', 'name_cn']
+                        ['id', 'out_sn', 'status', 'remark', 'express_code', 'delivery_date', 'delivery_type', 
+                            'receiver_country', 
+                            'receiver_city',
+                            'receiver_postcode',
+                            'receiver_district',
+                            'receiver_address',
+                            'receiver_fullname',
+                            'receiver_phone',
+                            'receiver_province',
+                            'created_at',
+                            'updated_at',
+                            'sub_pay',
+                            'sub_total'
+                        ]
                     );
 
-        return formatRet(0, '', $categories->toArray());
-    }
-
-    /**
-     * 在线下单
-     */
-    public function store(CreateOrderRequest $request)
-    {
-        app('log')->info('新增出库单',$request->all());
-        app('db')->beginTransaction();
-        try {
-            app('order')->create($request);
-            app('db')->commit();
-        } catch (\Exception $e) {
-            app('db')->rollback();
-            app('log')->error('新增出库单失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '出库单新增失败');
-        }
-        return formatRet(0,'出库单新增成功');
+        return formatRet(0, '', $dataList->toArray());
     }
 
     /**
      * 订单详细
      */
-    public function show(CreateOrderRequest $request)
+    public function show(BaseRequests $request, $id)
     {
-        app('log')->info('新增出库单',$request->all());
-        app('db')->beginTransaction();
-        try {
-            app('order')->create($request);
-            app('db')->commit();
-        } catch (\Exception $e) {
-            app('db')->rollback();
-            app('log')->error('新增出库单失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '出库单新增失败');
+        app('log')->info('订单详细',['id'=>$id]);
+        $order = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)->find($id);
+
+        if(!$order){
+            return formatRet(404,"订单不存在", 404);
         }
-        return formatRet(0,'出库单新增成功');
+
+        $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency");
+        $order->setVisible([
+                'id', 
+                'out_sn', 
+                'status', 
+                'remark', 
+                'express_code', 
+                'delivery_date', 
+                'delivery_type', 
+                'receiver_country', 
+                'receiver_city',
+                'receiver_postcode',
+                'receiver_district',
+                'receiver_address',
+                'receiver_fullname',
+                'receiver_phone',
+                'receiver_province',
+                'created_at',
+                'updated_at',
+                'sub_pay',
+                'sub_total',
+                'orderItems'
+            ]);
+
+       
+        return formatRet(0, '', $order->toArray());
     }
 }

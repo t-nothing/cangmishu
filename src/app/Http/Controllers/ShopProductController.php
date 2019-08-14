@@ -180,21 +180,28 @@ class ShopProductController extends Controller
     /**
      * 删除商品
      */
-    public function destroy(BaseRequests $request, int $shopId, int  $id)
+    public function destroy(BaseRequests $request, int $shopId)
     {
 
+        $this->validate($request,[
+            'id'                => 'required|array',
+            'id.*'              => 'required|int|min:1',
+        ]);
+
         try {
-            $shopProduct = ShopProduct::with("shop")->findOrFail($id);
-
-            if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
-                return formatRet(500,'用户不存在或无权限编辑');
-            }
-
-            
+            $shopProducts = ShopProduct::with("shop")->whereIn('id', $request->id);
             app('db')->beginTransaction();
-        
-            $shopProduct->specs()->delete();
-            $shopProduct->delete();
+            foreach ($shopProducts as $key => $shopProduct) {
+
+                if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
+                    return formatRet(500,'用户不存在或无权限编辑');
+                }
+
+                
+                $shopProduct->specs()->delete();
+                $shopProduct->delete();
+            }
+            
             app('db')->commit();
 
         } catch (\Exception $e) {
@@ -225,25 +232,31 @@ class ShopProductController extends Controller
     /**
      * 上下架商品
      */
-    public function onShelf(BaseRequests $request, int $shopId, int  $id)
+    public function onShelf(BaseRequests $request, int $shopId)
     {
 
         $this->validate($request,[
-            'is_shelf'      => 'required|boolean'
+            'is_shelf'          => 'required|boolean',
+            'id'                => 'required|array',
+            'id.*'              => 'required|int|min:1',
         ]);
 
-        $shopProduct = ShopProduct::with("shop")->findOrFail($id);
-
-        if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
-            return formatRet(500,'用户不存在或无权限编辑');
-        }
+        $shopProducts = ShopProduct::with("shop")->whereIn('id', $request->id);
 
         
-        app('db')->beginTransaction();
+        
         try {
-            $shopProduct->specs()->update(['is_shelf'=>$request->is_shelf]);
-            $shopProduct->is_shelf = $request->is_shelf;
-            $shopProduct->save();
+            app('db')->beginTransaction();
+            foreach ($shopProducts as $key => $shopProduct) {
+                if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
+                    return formatRet(500,'用户不存在或无权限编辑');
+                }
+
+                $shopProduct->specs()->update(['is_shelf'=>$request->is_shelf]);
+                $shopProduct->is_shelf = $request->is_shelf;
+                $shopProduct->save();
+            }
+           
             app('db')->commit();
 
         } catch (\Exception $e) {
@@ -252,5 +265,6 @@ class ShopProductController extends Controller
         }
         return formatRet(0);
     }
+
 
 }

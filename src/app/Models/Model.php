@@ -84,4 +84,14 @@ class Model extends  Models
     {
         return $query->where('warehouse_id', $warehouse_id);
     }
+
+    public  function ScopeOfShop($query, $shop_id)
+    {
+        return $query->where('shop_id', $shop_id);
+    }
+
+    public  function ScopeOfShopUser($query, $shop_id, $shop_user_id)
+    {
+        return $query->where('shop_id', $shop_id)->where('shop_user_id', $shop_user_id);
+    }
 }

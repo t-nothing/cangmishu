@@ -202,9 +202,9 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/shop/{shopId}/product', 'ShopProductController@index');
     Route::post('/shop/{shopId}/product', 'ShopProductController@store');
     Route::put('/shop/{shopId}/product/{id}', 'ShopProductController@update');
-    Route::delete('/shop/{shopId}/product/{id}', 'ShopProductController@destroy');
+    Route::delete('/shop/{shopId}/product', 'ShopProductController@destroy');
     Route::get('/shop/{shopId}/product/{id}', 'ShopProductController@show');
-    Route::patch('/shop/{shopId}/product/{id}', 'ShopProductController@onShelf');
+    Route::patch('/shop/{shopId}/product', 'ShopProductController@onShelf');
 
     //默认发件人
     Route::get('/shop/{id}/sender', 'ShopController@senderShow');
@@ -269,6 +269,9 @@ $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop'], function(
         $router->delete('/cart/{id}', 'CartController@remove');// 删除单个购物车商品
         $router->delete('/cart', 'CartController@destroy');// 删除整个购物车商品
         $router->post('/cart/checkout', 'CartController@checkout');// 下单
+
+        $router->get('/order', 'OrderController@list');// 店铺订单ID
+        $router->get('/order/{id}', 'OrderController@show');// 店铺订单ID
     });
 
     
