@@ -17,13 +17,11 @@ class OrderService
     {
 
         $user_id = ($userId == 0) ?Auth::ownerId():$userId;
-
-        $lock = Cache::lock(sprintf("orderCreate:%s", $user_id), 10);
-
+        
         try {
+            $lock = Cache::lock(sprintf("orderCreateUserLock:%s", $user_id));
             //加一个锁防止并发
             if ($lock->get()) {
-
                 $items=[];
                 foreach ($data->goods_data as $k => $v) {
 
@@ -107,18 +105,20 @@ class OrderService
                 $order->save();
                 OrderHistory::addHistory($order, Order::STATUS_DEFAULT);
                 $order->orderItems()->createMany($items);
+                
                 $lock->release();
                 return $order;
-            };
+            } else {
+                throw new \Exception("锁不能释放", 1);
+                
+            }
         } 
         catch(\Exception $ex) {
-
             $lock->release();
             throw new \Exception($ex->getMessage(), 1);
         }
-        
-        
 
+        
     }
 
 

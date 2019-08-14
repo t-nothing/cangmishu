@@ -97,7 +97,12 @@ class OrderController extends Controller
         app('log')->info('新增出库单',$request->all());
         app('db')->beginTransaction();
         try {
-            app('order')->create($request);
+            $order = app('order')->create($request);
+            if(!isset($order->out_sn))
+            {
+                throw new \Exception("出库单新增失败", 1);
+                
+            }
             app('db')->commit();
         } catch (\Exception $e) {
             app('db')->rollback();

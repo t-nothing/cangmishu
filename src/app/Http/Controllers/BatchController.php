@@ -137,7 +137,9 @@ class BatchController extends Controller
     }
 
 
-
+    /**
+     * 入库上架
+     */
     public function shelf(CreateShelfRequest $request)
     {
         app('log')->info('入库上架', $request->all());
