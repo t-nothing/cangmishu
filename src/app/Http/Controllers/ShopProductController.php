@@ -135,11 +135,11 @@ class ShopProductController extends Controller
                 $shopProduct                = new ShopProduct;
                 $shopProduct->shop_id       = $shopId;
                 $shopProduct->product_id    = $product_id;
-                $shopProduct->sale_price    = $product_id;
                 $shopProduct->name_cn       = $productInfo["name_cn"];
                 $shopProduct->name_en       = $productInfo["name_en"];
                 $shopProduct->is_shelf      = 1;
                 $shopProduct->remark        = $productInfo["remark"]??"";
+                $shopProduct->sale_price    = $productInfo->specs[0]["sale_price"];
                 if(!empty($productInfo["photos"]))
                 {
                     $shopProduct->pics          = json_encode([$productInfo["photos"]], true);
