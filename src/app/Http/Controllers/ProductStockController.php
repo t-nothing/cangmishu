@@ -440,7 +440,7 @@ class ProductStockController extends  Controller
         $warehouse = app('auth')->warehouse();
 
         $location = WarehouseLocation::ofWarehouse($warehouse->id)->enabled()
-            ->where('code', $request->code)->first();
+            ->where('code', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code)->first();
 
         $stock = ProductStock::with('spec.product')
             ->where('owner_id', app('auth')->ownerId())
