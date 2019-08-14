@@ -204,7 +204,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/shop/{shopId}/product/{id}', 'ShopProductController@update');
     Route::delete('/shop/{shopId}/product/{ids}', 'ShopProductController@destroy');
     Route::get('/shop/{shopId}/product/{id}', 'ShopProductController@show');
-    Route::patch('/shop/{shopId}/product', 'ShopProductController@onShelf');
+    Route::put('/shop/{shopId}/product', 'ShopProductController@onShelf');
 
     //默认发件人
     Route::get('/shop/{id}/sender', 'ShopController@senderShow');
