@@ -428,7 +428,7 @@ class ProductSpec extends Model
      **/
     static function getPurchasePrice($id)
     {
-        return Self::find($id)->purchase_price;
+        return Self::find($id)->purchase_price??0;
     }
 
 	/*
