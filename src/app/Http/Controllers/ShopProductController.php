@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Shop;
 use App\Models\Product;
+use App\Models\ProductSpec;
 use App\Models\ShopProduct;
 use App\Models\ShopProductSpec;
 use App\Http\Requests\BaseRequests;
@@ -223,6 +224,11 @@ class ShopProductController extends Controller
             return formatRet(500,'用户不存在或无权限编辑');
         }
         $shopProduct->load("specs");
+
+        foreach ($shopProduct->specs as $key => $value) {
+
+            $value->purchase_price = ProductSpec::getPurchasePrice($value->id);
+        }
 
         $shopProduct->pics = json_decode($shopProduct->pics, true);
 

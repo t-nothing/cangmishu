@@ -423,6 +423,14 @@ class ProductSpec extends Model
 		});
 	}
 
+    /**
+     * 得到进货价格
+     **/
+    static function getPurchasePrice($id)
+    {
+        return Self::find($id)->purchase_price;
+    }
+
 	/*
 	|--------------------------------------------------------------------------
 	| Operations
