@@ -181,16 +181,11 @@ class ShopProductController extends Controller
     /**
      * 删除商品
      */
-    public function destroy(BaseRequests $request, int $shopId)
+    public function destroy(BaseRequests $request, int $shopId, $ids)
     {
-
-        $this->validate($request,[
-            'id'                => 'required|array',
-            'id.*'              => 'required|int|min:1',
-        ]);
-
+        $idArr = explode(",", $ids);
         try {
-            $shopProducts = ShopProduct::with("shop")->whereIn('id', $request->id);
+            $shopProducts = ShopProduct::with("shop")->whereIn('id', $idArr);
             app('db')->beginTransaction();
             foreach ($shopProducts as $key => $shopProduct) {
 

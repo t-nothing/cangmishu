@@ -202,7 +202,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/shop/{shopId}/product', 'ShopProductController@index');
     Route::post('/shop/{shopId}/product', 'ShopProductController@store');
     Route::put('/shop/{shopId}/product/{id}', 'ShopProductController@update');
-    Route::delete('/shop/{shopId}/product', 'ShopProductController@destroy');
+    Route::delete('/shop/{shopId}/product/{ids}', 'ShopProductController@destroy');
     Route::get('/shop/{shopId}/product/{id}', 'ShopProductController@show');
     Route::patch('/shop/{shopId}/product', 'ShopProductController@onShelf');
 
