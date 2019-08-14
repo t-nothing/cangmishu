@@ -161,11 +161,11 @@ class ProductController extends Controller
                     'product_id'     => $product->id,
                 ];
                 ProductSpec::updateOrCreate(
+                    $data,
                     [
                         'relevance_code'=>$spec['relevance_code'], 
                         'owner_id'      =>Auth::ownerId()
-                    ],
-                    $data
+                    ]
                 );
             }
 
