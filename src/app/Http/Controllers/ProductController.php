@@ -126,8 +126,8 @@ class ProductController extends Controller
         $product->name_en             = $request->input('name_en', $request->name_cn);
         $product->remark              = $request->remark;
         $product->photos              = $request->photos;
-        $product->sale_price          = $specs[0]['sale_price'];
-        $product->purchase_price      = $specs[0]['purchase_price'];
+        $product->sale_price          = $request->specs[0]['sale_price'];
+        $product->purchase_price      = $request->specs[0]['purchase_price'];
         DB::beginTransaction();
         try{
             $product->save();
