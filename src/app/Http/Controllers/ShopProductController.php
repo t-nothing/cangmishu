@@ -80,11 +80,11 @@ class ShopProductController extends Controller
             $shopProduct->remark        = $request->remark??"";
             $shopProduct->pics          = json_encode($request->pics, true);
             
-            foreach ($request->specs as $spec) {
-                $spec = ShopProductSpec::where("shop_product_id", $id)->where("id", $spec["id"])->firstOrFail();
-                $spec->name_cn      = $spec["name_cn"];
-                $spec->name_en      = $spec["name_en"]??$spec["name_cn"];
-                $spec->sale_price   = $spec["sale_price"];
+            foreach ($request->specs as $s) {
+                $spec = ShopProductSpec::where("shop_product_id", $id)->where("id", $s["id"])->firstOrFail();
+                $spec->name_cn      = $s["name_cn"];
+                $spec->name_en      = $s["name_en"]??$s["name_cn"];
+                $spec->sale_price   = $s["sale_price"];
                 $spec->save();
             }
             $shopProduct->sale_price    = $request->specs[0]["sale_price"];
