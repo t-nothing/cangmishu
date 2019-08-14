@@ -117,7 +117,7 @@
           <th class="text_center">#</th>
           <th class="text_center">SKU</th>
           <th class="text_center">商品信息</th>
-          <th class="text_center">采购价格</th>
+          <th class="text_center">进货单价（元）</th>
           <th class="text_center">预计数量</th>
           <th class="text_center">实时数量</th>
           <th class="text_center">入库单批次号</th>
