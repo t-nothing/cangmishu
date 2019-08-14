@@ -11,6 +11,7 @@ use App\Http\Requests\CreateShopProductRequest;
 use App\Http\Requests\UpdateShopProductRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Validator;
 
 
 class ShopProductController extends Controller
@@ -184,15 +185,19 @@ class ShopProductController extends Controller
     public function destroy(BaseRequests $request, int $shopId, $ids)
     {
         $idArr = explode(",", $ids);
+        $idArr = collect($idArr)->map(function ($item, $key) {
+            return intval($item) ;
+        });
+
+
         try {
-            $shopProducts = ShopProduct::with("shop")->whereIn('id', $idArr);
+            $shopProducts = ShopProduct::with("shop")->whereIn('id', $idArr->all())->get();
             app('db')->beginTransaction();
             foreach ($shopProducts as $key => $shopProduct) {
 
                 if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
                     return formatRet(500,'用户不存在或无权限编辑');
                 }
-
                 
                 $shopProduct->specs()->delete();
                 $shopProduct->delete();
@@ -242,7 +247,7 @@ class ShopProductController extends Controller
             'id.*'              => 'required|int|min:1',
         ]);
 
-        $shopProducts = ShopProduct::with("shop")->whereIn('id', $request->id);
+        $shopProducts = ShopProduct::with("shop")->whereIn('id', $request->id)->get();
 
         
         
