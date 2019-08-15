@@ -38,6 +38,7 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo('App\Models\Category', 'category_id', 'id');
+      
     }
 
     public function specs()
@@ -63,7 +64,7 @@ class Product extends Model
      */
     public function scopeWhose($query, $user_id)
     {
-        return $query->where('owner_id', $user_id);
+        return $query->where('product.owner_id', $user_id);
     }
 
 
@@ -75,7 +76,7 @@ class Product extends Model
      */
     public function scopeOfWarehouse($query, $user_id)
     {
-        return $query->where('warehouse_id', $user_id);
+        return $query->where('product.warehouse_id', $user_id);
     }
 
     /**

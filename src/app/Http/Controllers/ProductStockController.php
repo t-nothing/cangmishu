@@ -13,6 +13,8 @@ use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Events\StockIn;
+use App\Events\StockOut;
 
 class ProductStockController extends  Controller
 {
@@ -160,6 +162,12 @@ class ProductStockController extends  Controller
      */
     public function getLogsForSpec(BaseRequests $request,$spec_id)
     {
+
+
+        $stock = ProductStock::find(1);
+        event(new StockOut($stock, 1));
+        exit;
+
         $this->validate($request, [
             'page'         => 'integer|min:1',
             'page_size'    => new PageSize,

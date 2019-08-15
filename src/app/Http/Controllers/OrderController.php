@@ -144,6 +144,8 @@ class OrderController extends Controller
     public function pickAndOut(PickAndOutRequest $request)
     {
 
+        app("store")->pickAndOut($request->all());
+
         $owner_id = Auth::ownerId();
         $order = Order::find($request->order_id);
         $order->delivery_date = strtotime($request->delivery_date." 00:00:00");

@@ -4,6 +4,7 @@ namespace  App\Services\Service;
 use App\Models\Pick;
 use App\Models\ProductStock;
 use App\Models\ProductStockLock;
+use App\Events\StockPick;
 
 class PickService
 {

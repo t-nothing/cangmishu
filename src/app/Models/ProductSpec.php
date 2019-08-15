@@ -323,7 +323,7 @@ class ProductSpec extends Model
      */
     public function scopeOfWarehouse($query, $warehouse_id)
     {
-        return $query->where('warehouse_id', $warehouse_id);
+        return $query->where('product_spec.warehouse_id', $warehouse_id);
     }
 
     /**
@@ -333,7 +333,7 @@ class ProductSpec extends Model
      */
     public function scopeWhose($query, $user_id)
     {
-        return $query->where('owner_id', $user_id);
+        return $query->where('product_spec.owner_id', $user_id);
     }
 
 

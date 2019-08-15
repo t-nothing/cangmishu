@@ -5,7 +5,13 @@ use App\Models\Batch;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Models\WarehouseLocation;
+use App\Models\OrderItem;
+use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
+use App\Events\StockIn;
+use App\Events\StockPutOn;
+use App\Events\StockPick;
+use App\Events\StockOut;
 
 class StoreService
 {
@@ -28,9 +34,9 @@ class StoreService
             $this->putOn($stock,$warehouse_id,$v['code']);
         })->toArray();
         //确认入库
-       $batch = Batch::find($batch_id);
-       $batch->status = Batch::STATUS_ACCOMPLISH;
-       $batch->save();
+        $batch = Batch::find($batch_id);
+        $batch->status = Batch::STATUS_ACCOMPLISH;
+        $batch->save();
         return $stocks;
     }
 
@@ -43,12 +49,10 @@ class StoreService
         }
 
         $stock->warehouse_location_id = $location->id;
-        $stock->shelf_num             = $stock->stockin_num;
-        $stock->total_shelf_num       = $stock->stockin_num;
         $stock->status                = ProductStock::GOODS_STATUS_ONLINE;
         $stock->save();
-        // 添加记录
-        $stock->addLog(ProductStockLog::TYPE_BATCH_SHELF, $stock->stockin_num,$stock->batch->batch_code);
+        
+        event(new StockPutOn($stock, $stock->stockin_num));
 
         return $stock;
     }
@@ -88,12 +92,136 @@ class StoreService
         $stock->remark                  = $data['remark'];
         $stock->save();
 
-        // 入库数量更新
-        $stock->increment('stockin_num', $data['stockin_num']);
-        $stock->increment('total_stockin_num', $data['stockin_num']);
         // 添加入库单记录
 //        $stock->addLog(ProductStockLog::TYPE_BATCH, $data['stockin_num']);
-
+        
+        event(new StockIn($stock, $data['stockin_num']));
         return $stock;
     }
+
+    //拣货并出库
+    public function pickAndOut($data)
+    {
+   
+        DB::beginTransaction();
+
+        try{
+
+
+            $order = Order::find($data["order_id"]);
+            if(!$order) 
+            {
+                throw new \Exception("订单不存在", 1);
+            }
+
+            //先拣货
+            $pick = $this->pick($data["items"], $order);
+            //再出库
+            $this->out($pick, $data["delivery_date"], $order);
+
+            DB::commit();
+            return true;
+        }
+        catch (\Exception $e){
+            DB::rollBack();
+            app('log')->error('出库失败',['msg'=>$e->getMessage()]);
+        }
+        
+        return false;
+    }
+
+    /**
+     * 拣货单， 订单
+     **/
+    public function pick($pickItems, $order)
+    {
+        $pickItemIdArr = array_pluck($pickItems, 'order_item_id');
+        $orderItemArr = $order->orderItems->pluck('id')->toArray();
+        sort($pickItemIdArr);
+        sort($orderItemArr);
+        if ($pickItemIdArr != $orderItemArr) {
+            throw new \Exception("拣货单物品项数据有误", 1);
+        }
+
+        $pickStockResult = [];
+
+        foreach ($pickItems as $k=>$i)
+        {
+
+            $item = OrderItem::find($i['order_item_id']);
+            if(!$item){
+                throw new \Exception("拣货数量有误,订单明细丢失", 1);
+                
+            }
+
+            if(intval($i['pick_num']) > intval($item->amount)){
+
+                throw new \Exception("拣货数量超出应捡数目", 1);
+            }
+
+ 
+            //如过没有记录则去数据库拿
+            $stock = app('stock')->getStockByAmount($i['pick_num'], $owner_id, $item->relevance_code, $cacahe_id);
+        
+            if(empty($stock)){//库存真的不足
+                throw new \Exception($item->product_name.'库存不足', 1);
+            }
+
+            $pickStockResult[] = [
+                'item'      =>  $item,
+                'stock'     =>  $stock,
+                'pick_num'  =>  $i['pick_num']
+            ];
+        }
+
+        foreach ($pickStockResult as $k => $v){
+
+            $v['item']->product_stock_id = $v['stock']->id;
+            $v['item']->pick_num = $v['pick_num'];
+            $v['item']->verify_num = $v['pick_num'];
+            $v['item']->save();
+            // 添加记录
+            // $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$order->out_sn);
+
+            event(new StockPick($v['stock'], $v['pick_num']));
+ 
+        }
+
+        $order->update([
+            'status' => Order::STATUS_PICK_DONE,
+            'verify_status'=>2,
+            'delivery_data'=>time()
+        ]);
+
+        // 记录出库单拣货完成的时间
+        OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
+
+        return $pickStockResult;
+
+        
+    }
+
+    /**
+     * 拣货单， 出库
+     **/
+    public function out(Array $pickStockResult, $deliveryDate, $order)
+    {
+        foreach ($pickStockResult as $k => $v){
+
+            event(new StockOut($v['stock'], $v['pick_num']));
+
+            $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$order->out_sn);
+ 
+        }
+
+        $order->delivery_date = strtotime($deliveryDate." 00:00:00");
+        $order->status = Order::STATUS_WAITING;
+        $order->verify_status = 2;
+        $order->save();
+
+        // 记录出库单拣货完成的时间
+        OrderHistory::addHistory($order, Order::STATUS_WAITING);
+
+    }
+
 }

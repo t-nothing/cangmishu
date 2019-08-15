@@ -63,15 +63,4 @@ class ProductStockService
             ->first();
         return $stocks;
     }
-
-//    public function getStockOverAmount($amount,$stocks){
-//        foreach ($stocks as $stock){
-//            $lock_num = ProductStockLock::where('stock_id',$stock->id)->where('over_time','>=',time())->sum('lock_amount');
-//            $use_num = $stock->shelf_num - $lock_num;
-//            if($use_num >= $amount){
-//                return $stock;
-//            }
-//        }
-//        return [];
-//    }
 }

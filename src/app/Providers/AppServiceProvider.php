@@ -12,9 +12,12 @@ use App\Services\Service\OrderService;
 use App\Services\Service\ProductService;
 use App\Services\Service\ProductStockService;
 use App\Services\Service\StoreService;
+use App\Services\Service\ProductStockLogService;
 use App\Services\UserService;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
+use App\Observers\CategoryObserver;
+use App\Models\Category;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //设置域名
         app(UrlGenerator::class)->forceRootUrl(config('app.url'));
-
+        Category::observe(CategoryObserver::class);
         if ( env('APP_ENV') === 'local' ) {
             \DB::listen(
                 function ($sql) {
@@ -83,6 +86,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('stock',function(){
             return new ProductStockService();
         });
+        $this->app->singleton('stockLog',function(){
+            return new ProductStockLogService();
+        });
+        
         $this->app->singleton('product',function(){
             return new ProductService();
         });

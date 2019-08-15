@@ -8,6 +8,8 @@ use Illuminate\Validation\Rule;
 
 class UpdateCategoryRequest extends BaseRequests
 {
+    var $modelData;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -15,9 +17,9 @@ class UpdateCategoryRequest extends BaseRequests
      */
     public function authorize()
     {
-        $type = Category::find($this->route('category_id'));
-        $this->warehouseId = $type->warehouse_id?? 0;
-        return $type && $type->owner_id == Auth::ownerId();
+        $this->modelData = Category::find($this->route('category_id'));
+        $this->warehouseId = $this->modelData->warehouse_id?? 0;
+        return $this->modelData && $this->modelData->owner_id == Auth::ownerId();
     }
 
     /**

@@ -211,16 +211,12 @@ class BatchController extends Controller
 
     }
 
-
-    public  function  show (BaseRequests $request,$batch_id)
+    public function show(BaseRequests $request, $id)
     {
         app('log')->info('查询入库单详情',$request->all());
         $this->validate($request,[
             'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
+                'required','integer','min:1'
             ]
         ]);
 
@@ -228,10 +224,9 @@ class BatchController extends Controller
             ->with([
                 'warehouse:id,name_cn',
                 'batchType:id,name',
-                'distributor:id,name_cn,name_en',
-                'stocks'
+                'distributor:id,name_cn,name_en'
             ])
-            ->where('id',$batch_id)
+            ->where('id',$id)
             ->first();
         if(!$batch){
             return formatRet(500,"入库单不存在");
@@ -240,7 +235,6 @@ class BatchController extends Controller
 
         unset($batch['batch_products']);
         return formatRet(0,"成功",$batch->toArray());
-
     }
 
     /*
