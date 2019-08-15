@@ -9,6 +9,9 @@ use App\Models\Batch;
 use App\Models\BatchMarkLog;
 class BatchService
 {
+    /**
+     * 创建入库单
+     **/
     public function create($request)
     {
         $stocks = [];

@@ -107,6 +107,9 @@ class OrderService
                 $order->orderItems()->createMany($items);
                 
                 $lock->release();
+
+                //这个地方可以加一个服务
+                //@todo 下单邮件通知
                 return $order;
             } else {
                 throw new \Exception("锁不能释放", 1);
@@ -121,7 +124,9 @@ class OrderService
         
     }
 
-
+    /**
+     * 更新订单数量
+     */
     public function UpdateData($data,$order)
     {
         $order->orderItems()->delete();

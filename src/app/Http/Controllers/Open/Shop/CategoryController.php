@@ -23,7 +23,6 @@ class CategoryController extends Controller
             'is_enabled'   => 'boolean',
         ]);
 
-
         $categories = Category::OfWarehouse($request->shop->warehouse_id)
                     ->where('is_enabled', 1)
                     ->orderBy('id','ASC')

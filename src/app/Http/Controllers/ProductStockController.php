@@ -41,7 +41,7 @@ class ProductStockController extends  Controller
         $warehouse_id = $request->input('warehouse_id');
         $option = $request->input('option');
 
-        $results = ProductSpec::with('owner:id,email', 'product.category.feature')
+        $results = ProductSpec::with('owner:id,email')
             ->ofWarehouse($warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->when($relevance_code = $request->input('relevance_code'), function ($query) use ($relevance_code) {
@@ -464,7 +464,7 @@ class ProductStockController extends  Controller
                 'product_name' => $s->product_name,
                 'shelf_num' => $s->shelf_num,
                 'relevance_code' =>$s->relevance_code,
-                'location_code'=>$s->location->code,
+                'location_code'=>$s->location->code??'',
                 'production_batch_number'=>$s->production_batch_number,
                 'best_before_date'=>$s->best_before_date?$s->best_before_date->toDateString():"",
                 'remark'=>"",

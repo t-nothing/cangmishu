@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use DB;
 use App\Services\BatchService;
 use App\Services\GroupService;
 use App\Services\ModuleService;
@@ -26,6 +27,36 @@ class AppServiceProvider extends ServiceProvider
     {
         //设置域名
         app(UrlGenerator::class)->forceRootUrl(config('app.url'));
+
+        if ( env('APP_ENV') === 'local' ) {
+            \DB::listen(
+                function ($sql) {
+                    foreach ($sql->bindings as $i => $binding) {
+                        if ($binding instanceof \DateTime) {
+                            $sql->bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
+                        } else {
+                            if (is_string($binding)) {
+                                $sql->bindings[$i] = "'$binding'";
+                            }
+                        }
+                    }
+
+                    // Insert bindings into query
+                    $query = str_replace(array('%', '?'), array('%%', '%s'), $sql->sql);
+
+                    $query = vsprintf($query, $sql->bindings);
+
+                    // Save the query to file
+                    $logFile = fopen(
+                        storage_path('logs' . DIRECTORY_SEPARATOR . date('Y-m-d') . '_query.log'),
+                        'a+'
+                    );
+                    fwrite($logFile, date('Y-m-d H:i:s') . ': ' . $query . PHP_EOL);
+                    fclose($logFile);
+                }
+            );
+
+        }
 
     }
 

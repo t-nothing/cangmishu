@@ -147,7 +147,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/order/status/{order_id}', 'OrderController@updateStatus');
     Route::put('/order/data/{order_id}', 'OrderController@updateData');
     Route::delete('/order/{order_id}', 'OrderController@destroy');
-    Route::post('/order/out', 'OrderController@pickAndOut');
+    Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
     Route::get('/order/{order_id}', 'OrderController@show');
 
 
@@ -252,7 +252,7 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 });
 
 //店铺开放型接口
-$router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop'], function($router) {
+$router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware' => ['shop']], function($router) {
 
     Route::post('/login', 'AuthenticateController@autoLogin')->name('openShopLogin');
     $router->get('/', 'ShopController@show');// 店铺详细
@@ -260,7 +260,7 @@ $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop'], function(
     $router->get('/categories/{id}/products', 'ProductController@list');// 商品列表
     $router->get('/products/{id}', 'ProductController@show');// 商品详细
 
-    $router->group(['middleware' => [ 'auth:shop', 'shop']], function($router) {
+    $router->group(['middleware' => [ 'auth:shop']], function($router) {
         
         $router->get('/cart', 'CartController@list');// 购物车列表
         $router->get('/cart/count', 'CartController@count');// 购物车数量

@@ -15,6 +15,9 @@ use PDF;
 
 class BatchController extends Controller
 {
+    /**
+     * 入库单首页
+     **/
     public function index(BaseRequests $request)
     {
         app('log')->info('查询入库单',$request->all());
@@ -70,6 +73,9 @@ class BatchController extends Controller
         return formatRet(0,'',$re);
     }
 
+    /**
+     * 入库单存储
+     **/
     public function  store(CreateBatchRequest $request)
     {
         app('log')->info('新增入库单', $request->all());
@@ -110,6 +116,9 @@ class BatchController extends Controller
         }
     }
 
+    /**
+     * 删除入库单
+     **/
     public function  destroy($batch_id)
     {
         app('log')->info('删除入库单', ['id'=>$batch_id]);

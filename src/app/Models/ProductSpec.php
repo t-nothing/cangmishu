@@ -9,7 +9,7 @@ class ProductSpec extends Model
 	protected $table = 'product_spec';
     protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'relevance_code', 'product_id','net_weight','gross_weight','is_warning', 'sale_price', 'purchase_price'];
 
-    public   $appends= ['product_name', 'spec_name', 'stockin_num'];
+    // public   $appends= ['product_name', 'spec_name', 'stockin_num'];
 
 	/*
 	|--------------------------------------------------------------------------
@@ -24,7 +24,10 @@ class ProductSpec extends Model
 
 	public function product()
 	{
-		return $this->belongsTo('App\Models\Product', 'product_id', 'id');
+		return $this->belongsTo('App\Models\Product', 'product_id', 'id')->when(!is_null($this->warehouse_id), function($query){
+            //加一个仓库ID有索引更快
+            $query->where('warehouse_id', $this->warehouse_id);
+        });
 	}
 
 	public function stocks()
