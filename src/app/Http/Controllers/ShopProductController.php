@@ -227,7 +227,7 @@ class ShopProductController extends Controller
 
         foreach ($shopProduct->specs as $key => $value) {
 
-            $value->orgin_sale_price = ProductSpec::getSalePrice($value->spec_id);
+            $value->origin_sale_price = ProductSpec::getSalePrice($value->spec_id);
         }
 
         $shopProduct->pics = json_decode($shopProduct->pics, true);
