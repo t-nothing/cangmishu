@@ -58,6 +58,7 @@ class OrderService
                         'amount' => $v['num'],
                         'name_cn' => $spec->product_name_cn,
                         'sale_price' => $v['sale_price']??0,
+                        'purchase_price' => $spec->purchase_price??0,
                         'name_en' => $spec->product_name_en,
                     ];
 
