@@ -152,7 +152,7 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('出库拣货失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '出库拣货失败');
+            return formatRet(500, '出库拣货失败:'.$e->getMessage());
         }
         
         return formatRet(0,'出库拣货成功');

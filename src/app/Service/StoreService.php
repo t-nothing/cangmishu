@@ -115,6 +115,11 @@ class StoreService
 
         //先拣货
         $pick = $this->pick($data["items"], $order);
+        $pick_num = collect($pick)->sum('pick_num');
+        if($pick_num <=0) {
+            throw new \Exception("拣货失败,不需要出库", 1);
+        }
+
         //再出库
         $this->out($pick, $data["delivery_date"], $order);
     }
@@ -161,6 +166,10 @@ class StoreService
                 'stock'     =>  $stock,
                 'pick_num'  =>  $i['pick_num']
             ];
+        }
+
+        if(count($pickStockResult) ==0) {
+            throw new \Exception("拣货数量不能为零", 1);
         }
 
         foreach ($pickStockResult as $k => $v){

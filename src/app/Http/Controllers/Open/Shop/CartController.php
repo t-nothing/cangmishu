@@ -232,6 +232,7 @@ class CartController extends Controller
                 $orderItem[] = [
                     'relevance_code'    =>  $row->options['relevance_code'],
                     'num'               =>  $row->qty,
+                    'sale_price'        =>  $row->price,
                 ];
             }
 

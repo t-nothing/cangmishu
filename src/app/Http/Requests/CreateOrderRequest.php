@@ -49,6 +49,7 @@ class CreateOrderRequest extends BaseRequests
                 })
             ],
             'goods_data.*.num'            => 'required|integer|min:1',
+            'goods_data.*.sale_price'     => 'required|numeric|min:0',
             // 快递单数据
             'delivery_type'               => 'string|string|max:255',
             'express_num'                 => 'string|max:255',
