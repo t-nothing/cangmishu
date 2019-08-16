@@ -40,7 +40,7 @@ class HomePageController extends Controller
 (select count(*) from `order` where warehouse_id = ? ) as order_count,
 (select count(*) from `order` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_order_count,
 (select count(*) from `batch` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_batch_count,
-(select sum(shelf_num) from `product_stock` where warehouse_id = ? ) as product_total";
+(select sum(total_stock_num) from `product` where warehouse_id = ? ) as product_total";
         $homePageAnalyze = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
         $homePageAnalyze = [
             "warehouse_id" => $warehouse_id,
@@ -50,40 +50,6 @@ class HomePageController extends Controller
             "month_batch_count" => $homePageAnalyze[0]->month_batch_count, // 本月出库次数
             "product_total" => $homePageAnalyze[0]->product_total, // 可用库存数
         ];
-        // //获取这一天的数据
-        // $homePageAnalyze = HomePageAnalyze::where('warehouse_id',$warehouse_id)
-        //     ->where('created_at', '>', strtotime(date('Y-m-d 00:00:00', time())))
-        //     ->first();
-
-        // //获取这一月的数据
-        // $analyzes = HomePageAnalyze::where('warehouse_id',$warehouse_id)->where('created_at', '>',
-        //     date('Y-m-1 00:00:00', time()))->get();
-
-        // if (!$homePageAnalyze) {
-        //     $homePageAnalyze = [
-        //         "warehouse_id" => $warehouse_id,
-        //         "batch_count" => 0, // 今日入库次数
-        //         "order_count" => 0, // 今日出库次数
-        //         // "batch_product_num" => 0, // 本月入库次数
-        //         // "order_product_num" => 0, // 本月出库次数
-        //         "product_total" => 0, // 可用库存数
-        //     ];
-        // }else{
-        //     $homePageAnalyze = $homePageAnalyze->toArray();
-        // }
-
-        // $monthAnalyze = ['month_order_count' => 0, 'month_batch_count' => 0, 'month_product_stock' => 0];
-        // if ($analyzes->toArray()) {
-        //     foreach ($analyzes as $k => $v) {
-        //         $monthAnalyze['month_order_count'] += $v['order_count']; //本月出库次数：
-        //         $monthAnalyze['month_batch_count'] += $v['batch_count']; //本月入库次数：
-        //         $monthAnalyze['month_product_stock'] += $v['product_total']; //
-        //     }
-        // }
-
-
-        // $homePageAnalyze = array_merge($homePageAnalyze, $monthAnalyze);
-
         return formatRet(0, '', $homePageAnalyze);
 
     }
