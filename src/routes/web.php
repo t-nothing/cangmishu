@@ -144,11 +144,12 @@ Route::middleware(['auth:jwt'])->group(function () {
     //出库单
     Route::get('/order', 'OrderController@index');
     Route::post('/order', 'OrderController@store');
-    Route::put('/order/status/{order_id}', 'OrderController@updateStatus');
+    Route::put('/order/status/{order_id}', 'OrderController@cancelOrder');
     Route::put('/order/data/{order_id}', 'OrderController@updateData');
     Route::delete('/order/{order_id}', 'OrderController@destroy');
     Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
     Route::get('/order/{order_id}', 'OrderController@show');
+    Route::put('/order/express/{order_id}', 'OrderController@updateExpressNumber'); //更新快递单号
 
 
     //库存

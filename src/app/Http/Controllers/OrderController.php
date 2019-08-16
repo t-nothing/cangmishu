@@ -161,7 +161,10 @@ class OrderController extends Controller
 
     }
 
-    public function updateStatus(BaseRequests $request,$order_id)
+    /**
+     * 取消订单
+     */
+    public function cancelOrder(BaseRequests $request,$order_id)
     {
         app('log')->info('request',$request->all());
         app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
@@ -185,6 +188,38 @@ class OrderController extends Controller
         return formatRet(0,'成功');
     }
 
+    /**
+     * 更新运单号
+     */
+    public function updateExpressNumber(BaseRequests $request,$order_id)
+    {
+        $this->validate($request,[
+            'warehouse_id' =>  [
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where(function($q){
+                    $q->where('owner_id',Auth::ownerId());
+                })
+            ],
+            'delivery_type'               => 'string|string|max:255',
+            'express_num'                 => 'string|max:255',
+        ]);
+        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+        if(!$order){
+            return formatRet(500,"订单不存在");
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500,"没有权限");
+        }
+
+        $order->update(
+            [
+                'delivery_type'=>$request->delivery_type,
+                'express_num'=>$request->express_num,
+            ]
+        );
+        return formatRet(0,'成功');
+    }
+
     public function  UpdateData(UpdateOrderRequest $request,$order_id )
     {
         app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
@@ -202,4 +237,5 @@ class OrderController extends Controller
             return formatRet(500, '修改出库单数据失败');
         }
     }
+
 }
