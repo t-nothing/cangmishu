@@ -34,9 +34,13 @@ class StockInNotification
 
         $model->spec->increment('total_stockin_num', $event->qty);
         $model->spec->increment('total_floor_num', $event->qty);
+        $model->spec->increment('total_stockin_times', 1);
 
         $model->spec->product->increment('total_stockin_num', $event->qty);
         $model->spec->product->increment('total_floor_num', $event->qty);
+        $model->spec->product->increment('total_stockin_times', 1);
+
+
 
         app("log")->info("入库事件");
         

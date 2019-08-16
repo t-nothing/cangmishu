@@ -55,6 +55,14 @@ class ProductSpecController extends Controller
 
         $paginator = $product->paginate($request->input('page_size',10));
         $data = $paginator->makeHidden(['product','deleted_at', 'created_at', 'updated_at', 'is_warning', 'name_cn', 'name_en']);
+
+        $model = new ProductSpec;
+        foreach ($data as $k => $v) {
+            $model->product = $v['product'];
+            $model->name_cn = $v['name_cn'];
+            $model->name_en = $v['name_en'];
+            $data[$k]['product_name'] = $model->product_name;
+        }
         $paginator->data = $data;
 
 

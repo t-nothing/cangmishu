@@ -43,7 +43,7 @@ class ProductStockController extends  Controller
         $warehouse_id = $request->input('warehouse_id');
         $option = $request->input('option');
 
-        $results = ProductSpec::with('owner:id,email')
+        $results = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times', 'product:id,name_cn,name_en'])
             ->ofWarehouse($warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->when($relevance_code = $request->input('relevance_code'), function ($query) use ($relevance_code) {
@@ -72,89 +72,23 @@ class ProductStockController extends  Controller
             ->when($option == 3, function ($query) use ($warehouse_id, $owner_id) {
                 $query->onlyToBeOnShelf($warehouse_id, $owner_id);
             })
+            ->select(['id','created_at','name_cn','name_en','product_id','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','warehouse_id','relevance_code','total_stockin_times', 'total_stockout_times'])
             // sortBy
             ->latest()
             // 分页
-            ->paginate($request->input('page_size',10), [
-                'id',
-                'warehouse_id',
-                'product_id',
-                'name_cn',
-                'name_en',
-                'relevance_code',
-                'owner_id',
-            ]);
+            ->paginate($request->input('page_size',10))->toArray();
 
-        if ($results) {
-            foreach ($results as $key => $spec) {
 
-                $spec->append([
-                    'product_name',
-                    'stock_in_warehouse',// 仓库库存
-                    'stock_entrance_times',// 入库次数
-                    'stock_out_times',// 出库次数
-                    'stock_entrance_qty',// 入库数量
-                    'stock_out_qty',// 出库数量
-                ]);
+        if ($results['data']) {
+            $model = new ProductSpec;
+            foreach ($results['data'] as $k => $v) {
+                $model->product = $v['product'];
+                $model->name_cn = $v['name_cn'];
+                $model->name_en = $v['name_en'];
+                $results['data'][$k]['product_name'] = $model->product_name;
             }
         }
-        $data = $results->toArray();
-        if ($data['data']) {
-            foreach ($data['data'] as $k => $v) {
-                $spec_id = $v['id'];
-
-                $data['data'][$k]['owner'] = $v['owner']['email'];
-
-                $stocks = ProductStock::with(['batch', 'location'])//:id,code
-                    ->withCount(['logs as edit_count' => function ($query) {
-                        $query->where('type_id', ProductStockLog::TYPE_COUNT);
-                    }])
-                    ->ofWarehouse($warehouse_id)
-                    ->whose($v['owner_id'])
-                    ->where('spec_id', $spec_id)
-                    ->enabled()
-                    ->get();
-
-                // SKU数
-                $data['data'][$k]['sku_count'] = $stocks->count();
-                $data['data'][$k]['feature_name_cn'] = $v['product']['category']['feature']['name_cn'] ?? '';
-
-                // SKU
-                $data['data'][$k]['stocks'] = [];
-
-                if ($stocks) {
-                    $skus = [];
-
-                    foreach ($stocks as $stock) {
-                        $sku = [];
-                        $s = $stock->toArray();
-
-                        $sku['stock_id']                = $s['id'];
-                        $sku['spec_id']                 = $s['spec_id'];
-                        $sku['sku']                     = $s['sku'];
-                        $sku['ean']                     = $s['ean'];
-                        $sku['production_batch_number'] = $s['production_batch_number'];
-                        $sku['expiration_date']         = $s['expiration_date'];
-                        $sku['best_before_date']        = $s['best_before_date'];
-                        $sku['stockin_num']             = $s['stockin_num'];
-                        $sku['edit_count'] = $s['edit_count'];
-                        $sku['location_code'] = isset($stock->location->code) ? $stock->location->code : '';
-                        unset($sku['spec_id']);
-                        $skus[] = $sku;
-                    }
-                    $data['data'][$k]['stocks'] = $skus;
-                }
-
-                unset(
-                    $data['data'][$k]['warehouse_id'],
-                    $data['data'][$k]['product_id'],
-                    $data['data'][$k]['owner_id'],
-                    $data['data'][$k]['product']
-                );
-            }
-        }
-
-        return formatRet(0, '', $data);
+        return formatRet(0, '', $results);
     }
 
     /**
@@ -162,11 +96,6 @@ class ProductStockController extends  Controller
      */
     public function getLogsForSpec(BaseRequests $request,$spec_id)
     {
-
-
-        $stock = ProductStock::find(1);
-        event(new StockOut($stock, 1));
-        exit;
 
         $this->validate($request, [
             'page'         => 'integer|min:1',
@@ -212,8 +141,8 @@ class ProductStockController extends  Controller
             'remark',
             'sku',
             'spec_id',
-            'spec_total_shelf_num',
-            'spec_total_stockin_num',
+            'sku_total_shelf_num',
+            'sku_total_stockin_num',
             'type_id',
             'created_at',
         ])->toArray();

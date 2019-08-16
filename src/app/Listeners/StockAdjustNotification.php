@@ -36,6 +36,7 @@ class StockAdjustNotification
         //如货位上面有10个，盘成8个，货位就减2
         //如货位上面有8个，盘成10个，货位就减2
         $diff_num = $event->qty - $model->shelf_num;
+        $model->increment('recount_times',1);
         if($diff_num > 0 ) {
             $model->decrement('shelf_num', $diff_num);
             $model->spec->decrement('total_shelf_num', $diff_num);

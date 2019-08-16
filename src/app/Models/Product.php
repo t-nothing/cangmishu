@@ -15,8 +15,6 @@ class Product extends Model
     const PRODUCT_STATUS_ONLINE = 2; // 正常商品，可以售卖
     const PRODUCT_STATUS_OFFLINE = 3; // 在仓库，不卖了，下架了
 
-    public   $appends= ['stockin_num'];
-
     /*
     |--------------------------------------------------------------------------
     | Relations
@@ -95,11 +93,6 @@ class Product extends Model
                     ->orWhere('name_en', 'like', '%' . $keywords . '%');
         });
         return $query;
-    }
-
-    public function getStockInNumAttribute()
-    {
-        return 0;
     }
 
     static function stock($id)

@@ -26,9 +26,10 @@ class ProductController extends Controller
     public function index(IndexProductRequest $request)
     {
         app('log')->info('查询列表',$request->all());
-        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price'])
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price,total_stockin_num'])
             ->ofWarehouse($request->warehouse_id)
             ->where('owner_id',app('auth')->ownerId())
+            ->select(['id','name_cn','name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'updated_at', 'warehouse_id'])
             ->latest('updated_at');
         if($request->filled('category_id')){
             $product = $product->where('category_id',$request->category_id);

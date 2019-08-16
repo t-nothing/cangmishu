@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Notifications\Notifiable;
 
 class Category extends Model
 {
     protected $table = 'category';
-
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -21,7 +21,12 @@ class Category extends Model
 
     protected  $guarded = [];
 
-    public  $appends=['need_expiration_date_name','need_best_before_date_name','need_production_batch_number_name'];
+    public  $appends = [
+        'need_expiration_date_name',
+        'need_best_before_date_name',
+        'need_production_batch_number_name'
+    ];
+
     public function products()
     {
         return $this->hasMany('App\Models\Product', 'category_id', 'id');
@@ -59,4 +64,5 @@ class Category extends Model
     {
         return $this->need_production_batch_number?"生产批次号":"";
     }
+
 }

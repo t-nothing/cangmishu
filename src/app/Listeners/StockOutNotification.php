@@ -35,9 +35,11 @@ class StockOutNotification
         $model->spec->decrement('total_stockin_num', $event->qty);
         $model->spec->decrement('total_lock_num', $event->qty);
         $model->spec->increment('total_stockout_num', $event->qty);
+        $model->spec->increment('total_stockout_times', 1);
         
         $model->spec->product->decrement('total_stockin_num', $event->qty);
         $model->spec->product->decrement('total_lock_num', $event->qty);
         $model->spec->product->increment('total_stockout_num', $event->qty);
+        $model->spec->product->increment('total_stockout_times', 1);
     }
 }
