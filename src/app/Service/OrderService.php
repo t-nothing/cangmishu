@@ -22,6 +22,8 @@ class OrderService
             $lock = Cache::lock(sprintf("orderCreateUserLock:%s", $user_id));
             //加一个锁防止并发
             if ($lock->get()) {
+
+                $subTotal = 0;
                 $items=[];
                 foreach ($data->goods_data as $k => $v) {
 
@@ -45,6 +47,9 @@ class OrderService
                         'sale_price' => $v['sale_price']??0,
                         'name_en' => $spec->product_name_en,
                     ];
+
+
+                    $subTotal += ($v['sale_price']??0);
                 }
 
                 $order = new Order();
@@ -102,6 +107,8 @@ class OrderService
                 $order->express_num = $data->express_num;
                 $order->shop_id    = $data->shop_id??0;
                 $order->shop_user_id    = $data->shop_user_id??0;
+
+                $order->sub_total    = $subTotal;
 
                 $order->save();
                 OrderHistory::addHistory($order, Order::STATUS_DEFAULT);
