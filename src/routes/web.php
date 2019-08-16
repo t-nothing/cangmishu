@@ -150,6 +150,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
     Route::get('/order/{order_id}', 'OrderController@show');
     Route::put('/order/express/{order_id}', 'OrderController@updateExpressNumber'); //更新快递单号
+    Route::put('/order/pay/{order_id}', 'OrderController@updatePayStatus'); //更新快递单号
 
 
     //库存

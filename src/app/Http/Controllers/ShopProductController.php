@@ -231,8 +231,8 @@ class ShopProductController extends Controller
             $value->origin_sale_price = ProductSpec::getSalePrice($value->spec_id);
         }
 
-        $shopProduct->pics = json_decode($shopProduct->pics, true);
-        $shopProduct->descs = json_decode($shopProduct->descs, true);
+        $shopProduct->pics = json_decode($shopProduct->pics, true)??[];
+        $shopProduct->descs = json_decode($shopProduct->descs, true)??[];
 
         return formatRet(0,"成功",$shopProduct->toArray());
     }

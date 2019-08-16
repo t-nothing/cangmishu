@@ -194,16 +194,11 @@ class OrderController extends Controller
     public function updateExpressNumber(BaseRequests $request,$order_id)
     {
         $this->validate($request,[
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'delivery_type'               => 'string|string|max:255',
             'express_num'                 => 'string|max:255',
         ]);
-        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+
+        $order = Order::find($order_id);
         if(!$order){
             return formatRet(500,"订单不存在");
         }
@@ -215,6 +210,33 @@ class OrderController extends Controller
             [
                 'delivery_type'=>$request->delivery_type,
                 'express_num'=>$request->express_num,
+            ]
+        );
+        return formatRet(0,'成功');
+    }
+
+     /**
+     * 更新支付价格
+     */
+    public function updatePayStatus(BaseRequests $request,$order_id)
+    {
+        $this->validate($request,[
+            'pay_status'              => 'required|integer|min:0',
+            'sub_pay'                 => 'required|numeric|min:0',
+        ]);
+        
+        $order = Order::find($order_id);
+        if(!$order){
+            return formatRet(500,"订单不存在");
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500,"没有权限");
+        }
+
+        $order->update(
+            [
+                'pay_status'=>$request->pay_status,
+                'sub_pay'=>$request->sub_pay,
             ]
         );
         return formatRet(0,'成功');
