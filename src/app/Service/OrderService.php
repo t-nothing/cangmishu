@@ -13,6 +13,19 @@ use Illuminate\Contracts\Cache\LockTimeoutException;
 class OrderService
 {
 
+    private $source = '';
+
+    public function setSource($v)
+    {
+        $this->source = $v;
+        return $this;
+    }
+
+    public function getSource()
+    {
+        return $this->source;
+    }
+
     public  function create($data, $userId = 0)
     {
 
@@ -64,6 +77,7 @@ class OrderService
                 $order->warehouse_id   = $data->warehouse_id;
                 $order->status         = Order::STATUS_DEFAULT;
                 $order->remark         = $data->input("remark","");
+                $order->source         = $this->getSource();
 
                 // 收件人信息
                 if(!isset($data->receiver))
