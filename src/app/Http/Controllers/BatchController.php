@@ -225,14 +225,15 @@ class BatchController extends Controller
             ->with([
                 'warehouse:id,name_cn',
                 'batchType:id,name',
-                'distributor:id,name_cn,name_en'
+                'distributor:id,name_cn,name_en',
+                'batchProducts'
             ])
             ->where('id',$id)
             ->first();
         if(!$batch){
             return formatRet(500,"入库单不存在");
         }
-        $batch->append('batch_code_barcode');
+        $batch->append(['batch_code_barcode']);
 
         $data = $batch->toArray();
         if($data)

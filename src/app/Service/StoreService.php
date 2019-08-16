@@ -30,7 +30,7 @@ class StoreService
         }
 //        dd($stocks);
         $stock_num = 0;
-        $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, $stock_num){
+        $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num){
             //入库
             $stock = $this->In($warehouse_id,$v);
 
