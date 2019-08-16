@@ -15,7 +15,7 @@ class StockAdjustNotification
      */
     public function __construct()
     {
-        //
+        // 
     }
 
     /**
@@ -38,13 +38,19 @@ class StockAdjustNotification
         $diff_num = $event->qty - $model->shelf_num;
         $model->increment('recount_times',1);
         if($diff_num > 0 ) {
+            $model->decrement('stock_num', $diff_num);
             $model->decrement('shelf_num', $diff_num);
             $model->spec->decrement('total_shelf_num', $diff_num);
+            $model->spec->decrement('total_stock_num', $diff_num);
             $model->spec->product->decrement('total_shelf_num', $diff_num);
+            $model->spec->product->decrement('total_stock_num', $diff_num);
         } elseif($diff_num < 0 ) {
+            $model->increment('stock_num', $diff_num);
             $model->increment('shelf_num', $diff_num);
             $model->spec->increment('total_shelf_num', $diff_num);
+            $model->spec->increment('total_stock_num', $diff_num);
             $model->spec->product->increment('total_shelf_num', $diff_num);
+            $model->spec->product->increment('total_stock_num', $diff_num);
         } 
 
     }

@@ -29,14 +29,22 @@ class StockInNotification
         
         $model = $event->stock->load("spec.product");
         
-        $model->increment('stockin_num', $event->qty);
+        $model->increment('stockin_num', $event->qty); //总入库数量
+        $model->increment('stock_num', $event->qty); //库存数量
         $model->increment('floor_num', $event->qty);
 
+        //库存可用数量
+        $model->spec->increment('total_stock_num', $event->qty);
+        //入库数量
         $model->spec->increment('total_stockin_num', $event->qty);
+
         $model->spec->increment('total_floor_num', $event->qty);
         $model->spec->increment('total_stockin_times', 1);
 
-        $model->spec->product->increment('total_stockin_num', $event->qty);
+
+        $model->spec->product->increment('total_stock_num', $event->qty); #可用库存
+        $model->spec->product->increment('total_stockin_num', $event->qty); //总入库数量
+
         $model->spec->product->increment('total_floor_num', $event->qty);
         $model->spec->product->increment('total_stockin_times', 1);
 

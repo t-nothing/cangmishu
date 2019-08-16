@@ -15,7 +15,7 @@ class StockPickNotification
      */
     public function __construct()
     {
-        //
+        // 
     }
 
     /**
@@ -27,7 +27,7 @@ class StockPickNotification
     public function handle(StockPick $event)
     {
         $model = $event->stock->load("spec.product");
-        
+        //架子上面减少
         $model->decrement('shelf_num', $event->qty);
         $model->increment('lock_num', $event->qty);//锁定库存增加
         

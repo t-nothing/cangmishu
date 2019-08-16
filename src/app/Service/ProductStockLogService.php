@@ -108,9 +108,9 @@ class ProductStockLogService
         $model->operator            = app('auth')->id();
         $model->source              = $this->getSource();
 
-        $model->product_total_stockin_num = $stock->spec->product->total_stockin_num;
-        $model->spec_total_stockin_num = $stock->spec->total_stockin_num;
-        $model->stock_total_stockin_num = $stock->total_stockin_num;
+        $model->product_total_stock_num = $stock->spec->product->total_stock_num;
+        $model->spec_total_stock_num = $stock->spec->total_stock_num;
+        $model->stock_total_stock_num = $stock->stock_num;
 
         //库存记录
 
