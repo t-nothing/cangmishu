@@ -29,12 +29,12 @@ class StockPickNotification
         $model = $event->stock->load("spec.product");
         
         $model->decrement('shelf_num', $event->qty);
-        $model->increment('lock_num', $event->qty);
+        $model->increment('lock_num', $event->qty);//锁定库存增加
         
         $model->spec->decrement('total_shelf_num', $event->qty);
-        $model->spec->increment('total_lock_num', $event->qty);
+        $model->spec->increment('total_lock_num', $event->qty);//锁定库存
         
         $model->spec->product->decrement('total_shelf_num', $event->qty);
-        $model->spec->product->increment('total_lock_num', $event->qty);
+        $model->spec->product->increment('total_lock_num', $event->qty);//锁定库存
     }
 }

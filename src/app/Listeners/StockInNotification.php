@@ -38,8 +38,7 @@ class StockInNotification
         $model->spec->product->increment('total_stockin_num', $event->qty);
         $model->spec->product->increment('total_floor_num', $event->qty);
 
-        // $model->addLog(ProductStockLog::TYPE_BATCH_SHELF, $model->stockin_num,$model->batch->batch_code);
-
+        app("log")->info("入库事件");
         
     }
 }

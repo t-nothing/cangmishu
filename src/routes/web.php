@@ -154,7 +154,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     //库存
     Route::get('/stock/code', 'ProductStockController@getSkus');
     Route::get('/stock/sku/{sku}', 'ProductStockController@getInfoBySku');
-    Route::put('/stock/{stock_id}', 'ProductStockController@update');
+    Route::put('/stock/{stock_id}', 'ProductStockController@update');//盘点
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
     Route::get('/stock/spec/log/{stock_id}', 'ProductStockController@getLogsForSpec');
     Route::get('/stock', 'ProductStockController@index');

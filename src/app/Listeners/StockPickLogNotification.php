@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\StockPick;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\ProductStockLog;
 
 class StockPickLogNotification
 {
@@ -30,11 +31,13 @@ class StockPickLogNotification
         $option = $event->option;
         $qty = $event->qty;
 
-        app("stockLog")->setTypeId(ProductStockLog::TYPE_PUTON)
+        app("stockLog")->setTypeId(ProductStockLog::TYPE_PICKING)
                         ->setStock($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)
                         ->log();
+
+        app("log")->info("拣货事件日志");
     }
 }

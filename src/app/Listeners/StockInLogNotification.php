@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\StockIn;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\ProductStockLog;
 
 class StockInLogNotification
 {
@@ -19,7 +20,7 @@ class StockInLogNotification
     }
 
     /**
-     * Handle the event.
+     * 入库事件日志
      *
      * @param  StockIn  $event
      * @return void
@@ -30,11 +31,14 @@ class StockInLogNotification
         $option = $event->option;
         $qty = $event->qty;
 
-        app("stockLog")->setTypeId(ProductStockLog::TYPE_PUTON)
+        app("stockLog")->setTypeId(ProductStockLog::TYPE_IN)
                         ->setStock($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)
                         ->log();
+
+
+        app("log")->info("入库事件日志");
     }
 }

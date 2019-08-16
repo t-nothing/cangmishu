@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\StockAdjust;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\ProductStockLog;
 
 class StockAdjustLogNotification
 {
@@ -30,7 +31,7 @@ class StockAdjustLogNotification
         $option = $event->option;
         $qty = $event->qty;
 
-        app("stockLog")->setTypeId(ProductStockLog::TYPE_PUTON)
+        app("stockLog")->setTypeId(ProductStockLog::TYPE_COUNT)
                         ->setStock($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)

@@ -8,12 +8,12 @@ class Order extends Model
 
     const STATUS_CANCEL  = 0;// 订单已取消
     const STATUS_DEFAULT = 1;// 待拣货（默认状态）
-    const STATUS_PICK_DONE = 2;// 拣货完成（默认状态）
-//    const STATUS_PICKING = 2;// 拣货中
-//    const STATUS_PICK_DONE = 3;// 已拣货
+    // const STATUS_PICK_DONE = 2;// 拣货完成（默认状态）
+   const STATUS_PICKING = 2;// 拣货中
+   const STATUS_PICK_DONE = 3;// 已拣货
     const STATUS_WAITING = 4;// 待出库（已验货）
-//    const STATUS_SENDING = 5;// 配送中
-//    const STATUS_SUCCESS = 6;// 已收货
+   const STATUS_SENDING = 5;// 配送中
+   const STATUS_SUCCESS = 6;// 已收货
 
     // const ORDER_DELIVERY_TYPE_NLE       = 1;// NLE配送
     // const ORDER_DELIVERY_TYPE_ONESELF   = 2;// 仓库自提
@@ -124,21 +124,21 @@ class Order extends Model
             case Order::STATUS_DEFAULT:
                 $name = '待拣货';
                 break;
-//            case Order::STATUS_PICKING:
-//                $name = '拣货中';
-//                break;
+            case Order::STATUS_PICKING:
+               $name = '拣货中';
+               break;
             case Order::STATUS_PICK_DONE:
                 $name = '已出库';
                 break;
-//            case Order::STATUS_WAITING:
-//                $name = '待出库';
-//                break;
-//            case Order::STATUS_SENDING:
-//                $name = '配送中';
-//                break;
-//            case Order::STATUS_SUCCESS:
-//                $name = '已收货';
-//                break;
+            case Order::STATUS_WAITING:
+               $name = '待发货';
+               break;
+            case Order::STATUS_SENDING:
+               $name = '配送中';
+               break;
+            case Order::STATUS_SUCCESS:
+               $name = '已收货';
+               break;
             default:
                 break;
         }

@@ -155,7 +155,7 @@ class BatchController extends Controller
         app('db')->beginTransaction();
         try{
             $data = $request->stock;
-            app('store')->InAndPutOn($request->warehouse_id,$data,$request->batch_id);
+            $res = app('store')->InAndPutOn($request->warehouse_id,$data,$request->batch_id);
             app('db')->commit();
             return formatRet(0);
         }catch (\Exception $e){

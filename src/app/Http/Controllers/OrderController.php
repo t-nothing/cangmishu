@@ -144,109 +144,20 @@ class OrderController extends Controller
     public function pickAndOut(PickAndOutRequest $request)
     {
 
-        app("store")->pickAndOut($request->all());
-
-        $owner_id = Auth::ownerId();
-        $order = Order::find($request->order_id);
-        $order->delivery_date = strtotime($request->delivery_date." 00:00:00");
-        $order->save();
-        $items = $request->input('items');
-        $item_in_rq = array_pluck($request->items, 'order_item_id');
-
-        $item_in_db = $order->orderItems->pluck('id')->toArray();
-        sort($item_in_rq);
-        sort($item_in_db);
-        if ($item_in_rq != $item_in_db) {
-            return formatRet(500, "拣货单物品项数据有误");
-        }
-
-        $redis = app('redis.connection');
-        $pick_stock = [];
-        foreach ($items as $k=>$i){
-
-            $item = OrderItem::find($i['order_item_id']);
-
-            if($i['pick_num'] > $item->amount){
-                return formatRet(500,'拣货数量超出应捡数目');
-            }
-            $name = 'cangmishu_pick_'.$owner_id.'_'.$item->relevance_code;
-            $cache_stock = $redis->hgetall($name);
-            $cacahe_id =[];
-            $stock= "";
-            if($cache_stock){ //如果redis里有缓存
-                foreach ($cache_stock as $stock_id => $rest_num){
-                    //判断redis库存是否可用
-                    $rest_stock = ProductStock::find($stock_id);
-                    if($rest_stock->status == ProductStock::GOODS_STATUS_ONLINE){
-                        if($rest_num >= $i['pick_num'] ){ //可用库存足够
-                            $stock = $rest_stock;
-                            break;
-                        }
-                    }
-                    $cacahe_id[] = $stock_id;
-                }
-            }
-
-            //如过没有记录则去数据库拿
-            if(empty($stock)){
-                $stock = app('stock')->getStockByAmount($i['pick_num'], $owner_id, $item->relevance_code, $cacahe_id);
-            }
-
-            if(empty($stock)){//库存真的不足
-                eRet($item->product_name.'库存不足');
-            }
-
-            $pick_stock[] =[
-                'item'=>$item,
-                'stock'=>$stock,
-                'pick_num' =>$i['pick_num']
-            ];
-        }
-        DB::beginTransaction();
-        $res = [];
-
-        try{
-
-            foreach ($pick_stock as $k => $v){
-
-                $v['item']->product_stock_id = $v['stock']->id;
-                $v['item']->pick_num = $v['pick_num'];
-                $v['item']->verify_num = $v['pick_num'];
-                $v['item']->save();
-                $v['stock']->decrement('shelf_num', $v['pick_num']);
-                $v['stock']->decrement('stockin_num', $v['pick_num']);
-                // 添加记录
-
-                $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$order->out_sn);
-                $res[]=[
-                    'owner_id'=>$v['stock']->owner_id,
-                    'relevance_code' =>$v['stock']->relevance_code,
-                    'stock_id' =>$v['stock']->id,
-                    'shelf_num' =>$v['stock']->shelf_num
-                ];
-            }
-            $order->update(['status' => Order::STATUS_PICK_DONE,'verify_status'=>2,'delivery_data'=>time()]);
-            // 记录出库单拣货完成的时间
-            OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-            DB::commit();
-        }
-        catch (BusinessException $exception){
+        app('log')->info('新增出库拣货单',$request->all());
+        app('db')->beginTransaction();
+        try {
+            app("store")->pickAndOut($request->all());
+            app('db')->commit();
+        } catch (\Exception $e) {
             app('db')->rollback();
-            $message = $exception->getResponse()->getData()->msg;
-            info('完成拣货失败', ['exception msg' =>$message]);
-            return formatRet(500, $message);
+            app('log')->error('出库拣货失败',['msg'=>$e->getMessage()]);
+            return formatRet(500, '出库拣货失败');
         }
-        catch (\Exception $e){
-            DB::rollBack();
-            app('log')->error('出库失败',['msg'=>$e->getMessage()]);
-            return formatRet(500,'出库失败');
-        }
-        foreach ($res as $s){
-            $name = 'pick_'.$s['owner_id'].'_'.$s['relevance_code'];
-            app('log')->info('写入缓存', ['message'=> '名称'.$name.'序号'.$s['stock_id'].'数量'.$s['shelf_num']]);
-            $redis->hset($name, $s['stock_id'], $s['shelf_num']);
-        }
-        return formatRet(0,'出库成功');
+        
+        return formatRet(0,'出库拣货成功');
+
+        
 
     }
 

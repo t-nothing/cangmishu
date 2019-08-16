@@ -37,5 +37,7 @@ class StockPutOnLogNotification
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)
                         ->log();
+        app("log")->info("上架事件日志");
+
     }
 }

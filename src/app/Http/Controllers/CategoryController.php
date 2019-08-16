@@ -20,6 +20,7 @@ class CategoryController extends Controller
             'page'         => 'integer|min:1',
             'page_size'    => new PageSize(),
             'is_enabled'   => 'boolean',
+            'no_pager'     => 'boolean'
         ]);
 
         $categories = Category::with('feature:id,name_cn,name_en')
@@ -27,8 +28,15 @@ class CategoryController extends Controller
                     ->when($request->filled('is_enabled'),function($q)use($request) {
                         $q->where('is_enabled', $request->is_enabled);
                     })
-                    ->orderBy('id','ASC')
-                    ->paginate($request->input('page_size',10));
+                    ->orderBy('id','ASC');
+        //如果需要分页
+        if(!$request->filled('no_pager', 0)) {
+            $categories = $categories->paginate($request->input('page_size',10));
+        }
+        else {
+            $categories = $categories->get();
+        }
+                    
 
         return formatRet(0, '', $categories->toArray());
     }
@@ -62,13 +70,13 @@ class CategoryController extends Controller
         }
     }
 
-    public function update(UpdateCategoryRequest $request,$category_id)
+    public function update(UpdateCategoryRequest $request,$id)
     {
-        app('log')->info('编辑货品分类', ['category_id'=>$category_id]);
+        app('log')->info('编辑货品分类', ['id'=>$id]);
         try{
             $data = $request->all();
             $data["name_en"] = $request->input('name_en', $request->name_cn);
-            Category::where('id',$category_id)->update($data);
+            $request->modelData->update($data);
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑货品分类失败',['msg' =>$e->getMessage()]);
@@ -92,7 +100,7 @@ class CategoryController extends Controller
             return formatRet(500,"该分类下存在货品，不允许删除");
         }
         try{
-            Category::where('id',$category_id)->delete();
+            $category->delete();
             UserCategoryWarning::where('category_id',$category_id)->forceDelete();
             return formatRet(0);
         }catch (\Exception $e){

@@ -5,6 +5,7 @@ use App\Models\Batch;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Models\WarehouseLocation;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,7 @@ use App\Events\StockIn;
 use App\Events\StockPutOn;
 use App\Events\StockPick;
 use App\Events\StockOut;
+use App\Events\StockAdjust;
 
 class StoreService
 {
@@ -19,7 +21,7 @@ class StoreService
     //入库
     public  function  InAndPutOn($warehouse_id,$data,$batch_id)
     {
-
+ 
         $stocks =[];
         if (count($data) ==count($data, 1)) {
             $stocks[] = $data;
@@ -37,6 +39,7 @@ class StoreService
         $batch = Batch::find($batch_id);
         $batch->status = Batch::STATUS_ACCOMPLISH;
         $batch->save();
+
         return $stocks;
     }
 
@@ -92,9 +95,6 @@ class StoreService
         $stock->remark                  = $data['remark'];
         $stock->save();
 
-        // 添加入库单记录
-//        $stock->addLog(ProductStockLog::TYPE_BATCH, $data['stockin_num']);
-        
         event(new StockIn($stock, $data['stockin_num']));
         return $stock;
     }
@@ -103,31 +103,16 @@ class StoreService
     public function pickAndOut($data)
     {
    
-        DB::beginTransaction();
-
-        try{
-
-
-            $order = Order::find($data["order_id"]);
-            if(!$order) 
-            {
-                throw new \Exception("订单不存在", 1);
-            }
-
-            //先拣货
-            $pick = $this->pick($data["items"], $order);
-            //再出库
-            $this->out($pick, $data["delivery_date"], $order);
-
-            DB::commit();
-            return true;
+        $order = Order::find($data["order_id"]);
+        if(!$order) 
+        {
+            throw new \Exception("订单不存在", 1);
         }
-        catch (\Exception $e){
-            DB::rollBack();
-            app('log')->error('出库失败',['msg'=>$e->getMessage()]);
-        }
-        
-        return false;
+
+        //先拣货
+        $pick = $this->pick($data["items"], $order);
+        //再出库
+        $this->out($pick, $data["delivery_date"], $order);
     }
 
     /**
@@ -161,7 +146,7 @@ class StoreService
 
  
             //如过没有记录则去数据库拿
-            $stock = app('stock')->getStockByAmount($i['pick_num'], $owner_id, $item->relevance_code, $cacahe_id);
+            $stock = app('stock')->getStockByAmount($i['pick_num'], $order->owner_id, $item->relevance_code);
         
             if(empty($stock)){//库存真的不足
                 throw new \Exception($item->product_name.'库存不足', 1);
@@ -181,8 +166,6 @@ class StoreService
             $v['item']->verify_num = $v['pick_num'];
             $v['item']->save();
             // 添加记录
-            // $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$order->out_sn);
-
             event(new StockPick($v['stock'], $v['pick_num']));
  
         }
@@ -207,10 +190,7 @@ class StoreService
     public function out(Array $pickStockResult, $deliveryDate, $order)
     {
         foreach ($pickStockResult as $k => $v){
-
             event(new StockOut($v['stock'], $v['pick_num']));
-
-            $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$order->out_sn);
  
         }
 
@@ -221,6 +201,15 @@ class StoreService
 
         // 记录出库单拣货完成的时间
         OrderHistory::addHistory($order, Order::STATUS_WAITING);
+
+    }
+
+    /**
+     * 盘点
+     **/
+    public function recount($stock, $qty)
+    {
+        event(new StockAdjust($stock, $qty));
 
     }
 

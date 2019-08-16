@@ -27,7 +27,7 @@ class BaseStock
      *
      * @return void
      */
-    public function __construct(ProductStock $stock, int $qty, $option = NULL)
+    public function __construct($stock, int $qty, $option = NULL)
     {
         $this->stock = $stock;
         $this->qty = $qty;

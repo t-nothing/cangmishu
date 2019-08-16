@@ -525,7 +525,7 @@ class ProductStockController extends  Controller
     }
 
     /**
-     * 库存 - 编辑
+     * 库存 - 盘点
      */
     public function update(BaseRequests $request,$stock_id)
     {
@@ -537,7 +537,7 @@ class ProductStockController extends  Controller
             'expiration_date'         => 'sometimes|date_format:Y-m-d',
             'best_before_date'        => 'sometimes|date_format:Y-m-d',
             'production_batch_number' => 'sometimes|string|max:255',
-            'location_code'           => 'required|string',
+            // 'location_code'           => 'required|string',
             'remark'                  => 'string|max:255',
             'warehouse_id'            =>[
                 'required','integer','min:1',
@@ -576,23 +576,14 @@ class ProductStockController extends  Controller
 
         app('db')->beginTransaction();
         try {
-            // 原库存
-            $sku_total_shelf_num_old = ProductStock::ofWarehouse($stock->warehouse_id)
-                ->enabled()
-                ->whose($stock->owner_id)
-                ->where('sku', $stock->sku)->sum('shelf_num');
-
-            $stock->shelf_num               = $request->stock_num;
-            $stock->stockin_num             = $request->stock_num;
             $stock->ean                     = $request->ean;
             $stock->expiration_date         = $request->input('expiration_date') ? strtotime($request->input('expiration_date')." 00:00:00"): null;
             $stock->best_before_date        = $request->input('best_before_date') ? strtotime($request->input('best_before_date')." 00:00:00"): null;
             $stock->production_batch_number = $request->input('production_batch_number', '');
-            $stock->warehouse_location_id   = $location->id;
             $stock->save();
 
-            // 添加入库单记录
-            $stock->addLog(ProductStockLog::TYPE_COUNT, $request->stock_num,"", $sku_total_shelf_num_old, $request->input('remark', ''));
+            app("store")->recount($stock, $request->stock_num);
+
             app('db')->commit();
         } catch (\Exception $e) {
             app('db')->rollback();
