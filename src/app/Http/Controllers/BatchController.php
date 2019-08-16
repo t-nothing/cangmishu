@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateBatchRequest;
 use App\Models\Batch;
 use App\Models\ProductStock;
 use App\Models\BatchMarkLog;
+use App\Models\ProductSpec;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use PDF;
@@ -233,8 +234,21 @@ class BatchController extends Controller
         }
         $batch->append('batch_code_barcode');
 
+        $data = $batch->toArray();
+        if($data)
+        {
+            $model = new ProductSpec;
+            foreach ($data['batch_products'] as $k => $v) {
+            
+                $model->product = $v['spec']['product'];
+                $model->name_cn = $v['spec']['name_cn'];
+                $model->name_en = $v['spec']['name_en'];
+                $data['batch_products'][$k]['spec']['product_name'] = $model->product_name;
+            }
+        }
+
         unset($batch['batch_products']);
-        return formatRet(0,"成功",$batch->toArray());
+        return formatRet(0,"成功",$data);
     }
 
     /*
