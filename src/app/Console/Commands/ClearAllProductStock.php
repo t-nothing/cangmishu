@@ -12,7 +12,7 @@ class ClearAllProductStock extends Command
      *
      * @var string
      */
-    protected $signature = 'stock:clear';
+    protected $signature = 'stock:clear-all';
 
     /**
      * The console command description.
