@@ -134,7 +134,7 @@
             <td class="text_center">{{ $product['spec']['product']['name_cn'] }}({{$product['spec']['name_cn']}})</td>
             <td class="text_center">{{ $product['spec']['purchase_price'] }}</td>
             <td class="text_center">{{ $product['need_num'] }}</td>
-            <td class="text_center">{{ $product['total_stockin_num'] }}</td>
+            <td class="text_center">{{ $product['stockin_num'] }}</td>
             <td class="text_center">{{ $product['sku'] }}</td>
             <td class="text_center">{{ $product['remark'] }}</td>
           </tr>
