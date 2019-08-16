@@ -101,13 +101,9 @@ class Batch extends Model
      */
     public function getTotalNumAttribute()
     {
-        $r = [
-            'total_need_num' => 0,
-            'total_stockin_num' => 0,
-        ];
 
-        $r['total_need_num']    = $this->batchProducts->sum('need_num');
-        $r['total_stockin_num'] =  $this->batchProducts->sum('total_stockin_num');
+        $r['total_need_num']    = $this->need_num;
+        $r['total_stockin_num'] =  $this->stock_num;
 
         return $r;
     }
