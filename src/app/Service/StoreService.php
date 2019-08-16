@@ -29,15 +29,19 @@ class StoreService
             $stocks = $data;
         }
 //        dd($stocks);
-        $stocks = collect($stocks)->map(function ($v) use ($warehouse_id){
+        $stock_num = 0;
+        $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, $stock_num){
             //入库
             $stock = $this->In($warehouse_id,$v);
+
+            $stock_num += $v['stockin_num'];
             //上架
             $this->putOn($stock,$warehouse_id,$v['code']);
         })->toArray();
         //确认入库
         $batch = Batch::find($batch_id);
         $batch->status = Batch::STATUS_ACCOMPLISH;
+        $batch->stock_num = $stock_num; //实际数量
         $batch->save();
 
         return $stocks;
