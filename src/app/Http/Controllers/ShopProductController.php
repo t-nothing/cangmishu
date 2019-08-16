@@ -80,6 +80,7 @@ class ShopProductController extends Controller
             $shopProduct->remark        = $request->input("name_en", $request->name_cn);
             $shopProduct->remark        = $request->remark??"";
             $shopProduct->pics          = json_encode($request->pics, true);
+            $shopProduct->descs         = json_encode($request->descs, true);
             
             foreach ($request->specs as $s) {
                 $spec = ShopProductSpec::where("shop_product_id", $id)->where("id", $s["id"])->firstOrFail();
@@ -231,6 +232,7 @@ class ShopProductController extends Controller
         }
 
         $shopProduct->pics = json_decode($shopProduct->pics, true);
+        $shopProduct->descs = json_decode($shopProduct->descs, true);
 
         return formatRet(0,"成功",$shopProduct->toArray());
     }

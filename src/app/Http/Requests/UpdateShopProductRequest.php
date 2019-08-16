@@ -39,6 +39,8 @@ class UpdateShopProductRequest extends BaseRequests
             'remark'                    => 'present|string',
             'pics'                      => 'present|array',
             'pics.*'                    => 'required|url', 
+            'descs'                     => 'present|array',
+            'descs.*'                   => 'required|url', 
             'specs'                     => 'present|array',
             'specs.*.name_cn'           => 'required|string|min:1|max:20',
             'specs.*.sale_price'        => 'required|numeric|min:0',

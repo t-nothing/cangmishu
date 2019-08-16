@@ -10,7 +10,8 @@ class ShopProduct extends Model
     protected $table = 'shop_product';
     protected  $fillable = ['product_id','sale_price','is_shelf','remark','pics'];
     protected $casts = [
-        'pics' => 'array'
+        'pics' => 'array',
+        'descs'=> 'array',
     ]; 
 
     protected $appends = ['name'];
