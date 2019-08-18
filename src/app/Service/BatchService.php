@@ -20,11 +20,14 @@ class BatchService
         foreach ($request['product_stock'] as $k => $v) {
             // 检查入库单商品外部编码
             $spec = ProductSpec::ofWarehouse($request['warehouse_id'])
+                ->with('product')
                 ->whose(app('auth')->ownerId())
                 ->where('relevance_code', $v['relevance_code'])
                 ->firstOrFail();
             $batch_num+=$v['need_num'];
             $stocks[] = [
+                'name_cn'          => $spec->product_name_cn,
+                'name_en'          => $spec->product_name_en,
                 'owner_id'         => Auth::ownerId(),
                 'spec_id'          => $spec->id,
                 'relevance_code'   => $v['relevance_code'],

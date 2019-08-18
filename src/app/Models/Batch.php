@@ -154,7 +154,7 @@ class Batch extends Model
 
     public function batchProducts()
     {
-        return $this->hasMany('App\Models\ProductStock', 'batch_id', 'id')
+        return $this->hasMany('App\Models\BatchProduct', 'batch_id', 'id')
                     ->with('spec.product');
     }
 
