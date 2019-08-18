@@ -63,6 +63,7 @@ class CreateBatchRequest extends BaseRequests
             'product_stock.*.need_num'         => 'required|integer|min:1',
             'product_stock.*.distributor_code' => 'string|max:255|distinct',
             'product_stock.*.remark'           => 'present|string|max:255',
+            'product_stock.*.purchase_price'   => 'required|numeric|min:0',
         ];
     }
 
@@ -75,6 +76,7 @@ class CreateBatchRequest extends BaseRequests
             'type_id.exists' =>  '入库单分类不存在',
             'product_stock.*.relevance_code.exists' =>  '外部编码不存在',
             'product_stock.*.distributor_code.distinct' =>  '供货商货号重复',
+            'product_stock.*.purchase_price.required' =>  '进货价格不能为空',
             'confirmation_number.unique' =>  '单据编号已存在',
         ];
     }

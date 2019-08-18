@@ -8,6 +8,7 @@ use App\Models\Shop;
 
 class CreateShopProductRequest extends BaseRequests
 {
+    public $modelData;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -15,8 +16,8 @@ class CreateShopProductRequest extends BaseRequests
      */
     public function authorize()
     {
-        $shop = Shop::find($this->route('shopId'));
-        return $shop && $shop->owner_id == Auth::ownerId();
+        $this->modelData = Shop::find($this->route('shopId'));
+        return $this->modelData && $this->modelData->owner_id == Auth::ownerId();
     }
 
     /**

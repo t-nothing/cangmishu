@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Imports\ProductsImport;
 use App\Models\Product;
 use App\Models\ProductSpec;
+use App\Models\ShopProductSpec;
 use App\Services\Service\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ class ProductController extends Controller
         $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price,total_stock_num'])
             ->ofWarehouse($request->warehouse_id)
             ->where('owner_id',app('auth')->ownerId())
-            ->select(['id','name_cn','name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'updated_at', 'warehouse_id'])
+            ->select(['id','name_cn','name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'updated_at', 'warehouse_id','total_stock_num'])
             ->latest('updated_at');
         if($request->filled('category_id')){
             $product = $product->where('category_id',$request->category_id);
@@ -147,7 +148,7 @@ class ProductController extends Controller
                     return formatRet(500, trans('message.relevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
                 }
 
-                $data= [
+                $data = [
                     'id'             => $spec['id'],
                     'name_cn'        => $spec['name_cn'],
                     'name_en'        => $spec['name_en']??$spec['name_cn'],
@@ -177,7 +178,8 @@ class ProductController extends Controller
                     return formatRet(500, "不允许删除此规格,规格下面的库存");
                 } else {
                     //将多余的删除掉
-                    ProductSpec::where('id', $willRemoveIdArr)->where('owner_id', Auth::ownerId())->delete();
+                    ProductSpec::where('id', $id)->where('owner_id', Auth::ownerId())->delete();
+                    ShopProductSpec::where('spec_id', $id)->delete();
                 }
             }
 

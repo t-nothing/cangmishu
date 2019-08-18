@@ -147,6 +147,20 @@ class ShopProductController extends Controller
                     $shopProduct->pics          = json_encode([$productInfo["photos"]], true);
                 }
 
+                $app = app('wechat.mini_program');
+                $response = $app->app_code->get('/shop/'.$shopId.'/'.$shopProduct->id);
+
+                if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+
+                    $filePath = storage_path('/app/public/weapp/') ;
+                    $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $this->modelData->domain, $shopProduct->id));
+
+                    $url = Storage::url('weapp/'.$filename);
+                    $shopProduct->weapp_qrcode   = app('url')->to($url) ;
+                }
+
+                
+
 
                 $shopProduct->save();
                 $specs = [];
