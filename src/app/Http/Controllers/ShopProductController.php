@@ -150,21 +150,24 @@ class ShopProductController extends Controller
                 }
 
                 $shopProduct->save();
-                $app = app('wechat.mini_program');
-                $response = $app->app_code->get('/shop/'.$shopId.'/'.$shopProduct->id);
 
-                if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+                $filePath = storage_path('/app/public/weapp/') ;
+                //如果图片不存在才会生成
+                if(!file_exists($filePath.sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id)))
+                {
+                    $app = app('wechat.mini_program');
+                    $response = $app->app_code->get('/shop/'.$shopId.'/'.$shopProduct->id);
 
-                    $filePath = storage_path('/app/public/weapp/') ;
-                    $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id));
+                    if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
 
-                    $url = Storage::url('weapp/'.$filename);
-                    $shopProduct->weapp_qrcode   = app('url')->to($url) ;
-                    $shopProduct->save();
+                        
+                        $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id));
+
+                        $url = Storage::url('weapp/'.$filename);
+                        $shopProduct->weapp_qrcode   = app('url')->to($url) ;
+                        $shopProduct->save();
+                    }
                 }
-
-                
-
 
                 $specs = [];
                 foreach ($productInfo->specs as $spec) {
