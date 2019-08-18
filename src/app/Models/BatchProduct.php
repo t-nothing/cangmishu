@@ -211,6 +211,7 @@ class BatchProduct extends Model
         $stock->expiration_date           = $this->getExpirationDate(); //保质期
         $stock->best_before_date          = $this->getBestBeforeDate();
         $stock->production_batch_number   = $this->getProductionBatchNumber();
+        $stock->warehouse_location_id     = 0;
 
         $stock->save();
         //推送上默认位置

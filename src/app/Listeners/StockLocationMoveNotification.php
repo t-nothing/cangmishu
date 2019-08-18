@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockMove;
+use App\Events\StockLocationMove;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -24,7 +24,7 @@ class StockLocationMoveNotification
      * @param  StockMove  $event
      * @return void
      */
-    public function handle(StockMove $event)
+    public function handle(StockLocationMove $event)
     {
         //
     }

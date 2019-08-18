@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockAdjust;
+use App\Events\StockLocationAdjust;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -21,10 +21,10 @@ class StockLocationAdjustNotification
     /**
      * 库存盘点
      * 上架的货位库存发生变化，总库存发生变化
-     * @param  StockAdjust  $event
+     * @param  StockLocationAdjust  $event
      * @return void
      */
-    public function handle(StockAdjust $event)
+    public function handle(StockLocationAdjust $event)
     {
         /**
          * $event->qty;

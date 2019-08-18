@@ -114,6 +114,7 @@ class ProductStockService
         $restNum = $amount;
         foreach ($stocks as $k=>&$stock){
 
+            $stock->pick_num = $stock->shelf_num;
             //如果找完了
             if($restNum <= 0)
             {
@@ -125,7 +126,7 @@ class ProductStockService
 
             //架上的库存减锁定库存
             //use_num =实际可用库存
-            $availableNum = $stock->shelf_num - $lock_num;
+            $availableNum = $stock->pick_num - $lock_num;
 
             if($availableNum <= 0)
             {
@@ -133,7 +134,7 @@ class ProductStockService
                 continue;
             }
 
-            $stock->shelf_num = min($availableNum, $restNum);
+            $stock->pick_num = min($availableNum, $restNum);
             $restNum -= min($availableNum, $restNum);
         }
 

@@ -319,7 +319,6 @@ class ProductStock extends Model
         $location->warehouse_id = $this->warehouse_id;
         $location->sort_num = 0;
 
-
         $location->save();
 
         return $location;

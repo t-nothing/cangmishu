@@ -32,13 +32,15 @@ class StoreService
 //        dd($stocks);
         $stock_num = 0;
         $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num){
-            //入库
-            $stock = $this->In($warehouse_id,$v);
+            //入库到虚拟货位
+            $locationStock = $this->In($warehouse_id,$v);
 
             $stock_num += $v['stockin_num'];
             //上架
-            $this->putOn($stock,$warehouse_id,$v['code']);
+            $this->moveTo($locationStock,$warehouse_id,$v['code']);
+            
         })->toArray();
+
         //确认入库
         $batch = Batch::find($batch_id);
         $batch->status = Batch::STATUS_ACCOMPLISH;
@@ -50,20 +52,17 @@ class StoreService
 
 
     //上架
-    public  function putOn(ProductStock $stock,$warehouse_id, $code){
+    public  function moveTo($stockLocation, $warehouse_id, $code){
 
         if (! $location = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $code)->where('is_enabled',1)->first()) {
             return eRet('货位不存在或未启用('.$code.')');
         }
+        //从虚拟库存整体移动到新位置
+        $newStockLocation = $stockLocation->moveTo($stockLocation->shelf_num, $location);
 
-        $stock->warehouse_location_id = $location->id;
-        $stock->save();//先兼容一下旧数据
-        //库存上架
-        $stock->pushToLocation($location->id, $stock->stockin_num);
-        
-        event(new StockLocationPutOn($stock, $stock->stockin_num));
+        event(new StockLocationPutOn($newStockLocation, $stockLocation->shelf_num));
 
-        return $stock;
+        return $newStockLocation;
     }
 
 
@@ -115,8 +114,11 @@ class StoreService
         $batchProduct->stockin_num             = $data["stockin_num"];//记录已经入库数量
         $batchProduct->save();
 
-        event(new StockLocationIn($productStock, $data['stockin_num']));
-        return $productStock;
+        //先上传到虚拟货位
+        $locationStock = $productStock->pushToLocation(0, $data['stockin_num']);
+
+        event(new StockLocationIn($locationStock, $data['stockin_num']));
+        return $locationStock;
     }
 
     //拣货并出库
@@ -205,9 +207,10 @@ class StoreService
             $v['item']->verify_num = $v['pick_num'];
             $v['item']->save();
 
-            foreach ($v['pick_locations'] as $location) {
+            foreach ($v['pick_locations'] as $locationStock) {
                 // 添加记录
-                event(new StockLocationPick($location->stock, $location['shelf_num']));
+                // 这里的pick_num 实际上是拣货数量
+                event(new StockLocationPick($locationStock, $locationStock['pick_num']));
             }
             
  
@@ -233,7 +236,10 @@ class StoreService
     public function out(Array $pickStockResult, $deliveryDate, $order)
     {
         foreach ($pickStockResult as $k => $v){
-            event(new StockOut($v['stock'], $v['pick_num']));
+
+            foreach ($v['pick_locations'] as $locationStock) {
+                event(new StockLocationOut($locationStock, $locationStock['pick_num']));
+            }
  
         }
 
@@ -250,9 +256,9 @@ class StoreService
     /**
      * 盘点
      **/
-    public function recount($stock, $qty)
+    public function recount($stockLocation, $qty)
     {
-        event(new StockLocationAdjust($stock, $qty));
+        event(new StockLocationAdjust($stockLocation, $qty));
 
     }
 

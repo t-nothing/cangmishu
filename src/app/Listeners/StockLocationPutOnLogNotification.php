@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockPutOn;
+use App\Events\StockLocationPutOn;
 use App\Models\ProductStockLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,14 +25,14 @@ class StockLocationPutOnLogNotification
      * @param  StockPutOn  $event
      * @return void
      */
-    public function handle(StockPutOn $event)
+    public function handle(StockLocationPutOn $event)
     {
-        $model = $event->stock;
+        $model = $event->stockLocation;
         $option = $event->option;
         $qty = $event->qty;
 
         app("stockLog")->setTypeId(ProductStockLog::TYPE_PUTON)
-                        ->setStock($model)
+                        ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)

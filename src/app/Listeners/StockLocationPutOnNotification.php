@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockPutOn;
+use App\Events\StockLocationPutOn;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -24,10 +24,9 @@ class StockLocationPutOnNotification
      * @param  StockPutOn  $event
      * @return void
      */
-    public function handle(StockPutOn $event)
+    public function handle(StockLocationPutOn $event)
     {
         $model = $event->stock->load("spec.product");
-        
         $model->increment('shelf_num', $event->qty);
         $model->decrement('floor_num', $event->qty);
         
@@ -36,5 +35,7 @@ class StockLocationPutOnNotification
         
         $model->spec->product->increment('total_shelf_num', $event->qty);
         $model->spec->product->decrement('total_floor_num', $event->qty);
+
+        app('log')->info('上架之后事件 handle');
     }
 }

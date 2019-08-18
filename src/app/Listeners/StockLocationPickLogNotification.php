@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockPick;
+use App\Events\StockLocationPick;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ProductStockLog;
@@ -25,14 +25,14 @@ class StockLocationPickLogNotification
      * @param  StockPick  $event
      * @return void
      */
-    public function handle(StockPick $event)
+    public function handle(StockLocationPick $event)
     {
-        $model = $event->stock;
+        $model = $event->stockLocation;
         $option = $event->option;
         $qty = $event->qty;
 
         app("stockLog")->setTypeId(ProductStockLog::TYPE_PICKING)
-                        ->setStock($model)
+                        ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)

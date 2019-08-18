@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockAdjust;
+use App\Events\StockLocationAdjust;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ProductStockLog;
@@ -22,17 +22,17 @@ class StockLocationAdjustLogNotification
     /**
      * Handle the event.
      *
-     * @param  StockAdjust  $event
+     * @param  StockLocationAdjust  $event
      * @return void
      */
-    public function handle(StockAdjust $event)
+    public function handle(StockLocationAdjust $event)
     {
-        $model = $event->stock;
+        $model = $event->stockLocation;
         $option = $event->option;
         $qty = $event->qty;
 
         app("stockLog")->setTypeId(ProductStockLog::TYPE_COUNT)
-                        ->setStock($model)
+                        ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)

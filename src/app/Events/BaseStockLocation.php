@@ -14,10 +14,11 @@ use App\Modles\ProductStock;
 /**
  * 库存事件
  */
-class BaseStock
+class BaseStockLocation
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $stockLocation;
     public $stock;
     public $qty;
     public $option;
@@ -27,9 +28,10 @@ class BaseStock
      *
      * @return void
      */
-    public function __construct($stock, int $qty, $option = NULL)
+    public function __construct($stockLocation, int $qty, $option = NULL)
     {
-        $this->stock = $stock;
+        $this->stockLocation = $stockLocation;
+        $this->stock = $stockLocation->stock;
         $this->qty = $qty;
         $this->option = $option;
     }

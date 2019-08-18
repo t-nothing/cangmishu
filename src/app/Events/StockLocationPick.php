@@ -2,6 +2,6 @@
 
 namespace App\Events;
 
-class StockLocationPick extends BaseStock
+class StockLocationPick extends BaseStockLocation
 {
 }

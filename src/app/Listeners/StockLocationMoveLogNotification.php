@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockMove;
+use App\Events\StockLocationMove;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ProductStockLog;
@@ -25,14 +25,14 @@ class StockLocationMoveLogNotification
      * @param  StockMove  $event
      * @return void
      */
-    public function handle(StockMove $event)
+    public function handle(StockLocationMove $event)
     {
-        $model = $event->stock;
+        $model = $event->stockLocation;
         $option = $event->option;
         $qty = $event->qty;
 
         app("stockLog")->setTypeId(ProductStockLog::TYPE_MOVE)
-                        ->setStock($model)
+                        ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)

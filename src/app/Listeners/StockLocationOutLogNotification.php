@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\StockOut;
+use App\Events\StockLocationOut;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ProductStockLog;
@@ -25,14 +25,14 @@ class StockLocationOutLogNotification
      * @param  StockOut  $event
      * @return void
      */
-    public function handle(StockOut $event)
+    public function handle(StockLocationOut $event)
     {
-        $model = $event->stock;
+        $model = $event->stockLocation;
         $option = $event->option;
         $qty = $event->qty;
 
         app("stockLog")->setTypeId(ProductStockLog::TYPE_OUTPUT)
-                        ->setStock($model)
+                        ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)

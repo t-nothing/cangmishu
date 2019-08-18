@@ -162,11 +162,7 @@ class ProductStockLocation extends Model
         // 如果当前货位上面没有东西了
         // if($this->shelf_num <= 0 )
         // {
-        //     // $this->delete();
-        // } 
-        // else 
-        // {
-            
+        //     $this->delete();
         // }
 
        $this->save();
