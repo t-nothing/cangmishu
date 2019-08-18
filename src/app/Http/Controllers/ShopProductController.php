@@ -12,6 +12,7 @@ use App\Http\Requests\UpdateShopProductRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Validator;
+use Illuminate\Support\Facades\Storage;
 
 
 class ShopProductController extends Controller
@@ -50,6 +51,7 @@ class ShopProductController extends Controller
                 'shop_product.remark',
                 'shop_product.created_at',
                 'shop_product.updated_at',
+                'shop_product.weapp_qrcode',
             ]);
 
             $re = $batchs->toArray();
@@ -147,22 +149,23 @@ class ShopProductController extends Controller
                     $shopProduct->pics          = json_encode([$productInfo["photos"]], true);
                 }
 
+                $shopProduct->save();
                 $app = app('wechat.mini_program');
                 $response = $app->app_code->get('/shop/'.$shopId.'/'.$shopProduct->id);
 
                 if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
 
                     $filePath = storage_path('/app/public/weapp/') ;
-                    $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $this->modelData->domain, $shopProduct->id));
+                    $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id));
 
                     $url = Storage::url('weapp/'.$filename);
                     $shopProduct->weapp_qrcode   = app('url')->to($url) ;
+                    $shopProduct->save();
                 }
 
                 
 
 
-                $shopProduct->save();
                 $specs = [];
                 foreach ($productInfo->specs as $spec) {
 
