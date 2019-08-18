@@ -29,7 +29,6 @@ Route::get('/user/resetPassword/{token_value}', [
 ]);// 忘记密码-重置密码链接
 Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-重置密码接口
 
-
 Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
@@ -144,14 +143,16 @@ Route::middleware(['auth:jwt'])->group(function () {
     //出库单
     Route::get('/order', 'OrderController@index');
     Route::post('/order', 'OrderController@store');
-    Route::put('/order/status/{order_id}', 'OrderController@cancelOrder');
+    Route::put('/order/cancel/{order_id}', 'OrderController@cancelOrder');
     Route::put('/order/data/{order_id}', 'OrderController@updateData');
     Route::delete('/order/{order_id}', 'OrderController@destroy');
     Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
     Route::get('/order/{order_id}', 'OrderController@show');
-    Route::put('/order/express/{order_id}', 'OrderController@updateExpressNumber'); //更新快递单号
-    Route::put('/order/pay/{order_id}', 'OrderController@updatePayStatus'); //更新快递单号
-
+    Route::put('/order/express/{order_id}', 'OrderController@updateExpress'); //更新快递单号
+    Route::put('/order/pay/{order_id}', 'OrderController@updatePayStatus'); //更新支付方式
+    Route::put('/order/completed/{order_id}', 'OrderController@completed'); //设为签收
+    Route::get('/order/pay/status', 'OrderController@payStatusList'); //支付状态列表
+    Route::get('/order/pay/type', 'OrderController@payTypeList'); //支付方式列表
 
     //库存
     Route::get('/stock/code', 'ProductStockController@getSkus');
@@ -251,6 +252,8 @@ $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) 
 $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
     Route::any('wechat', 'WeChatController@serve');
+    Route::get('/express', 'ExpressController@list');//快递公司列表
+
 });
 
 //店铺开放型接口

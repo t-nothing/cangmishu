@@ -37,6 +37,18 @@ class EventServiceProvider extends ServiceProvider
                 'App\Listeners\StockMoveNotification',
                 'App\Listeners\StockMoveLogNotification',
             ],
+        'App\Events\OrderCreated' => [ //更新了快递单号
+                'App\Listeners\OrderCreatedNotification',
+            ],
+        'App\Events\OrderPaid' => [ //更新了快递单号
+                'App\Listeners\OrderPaidNotification',
+            ],
+        'App\Events\OrderShipped' => [ //更新了快递单号
+                'App\Listeners\OrderShippedNotification',
+            ],
+        'App\Events\OrderCompleted' => [ //更新了快递单号
+                'App\Listeners\OrderCompletedNotification',
+            ],
     ];
 
     /**

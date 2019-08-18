@@ -188,13 +188,12 @@ class CartController extends Controller
 
             $data = new BaseRequests;            
 
-            $data->delivery_type  = "";
+            $data->express_code  = "";
             $data->remark = "";
             $data->shop_id = $request->shop->id;
             $data->shop_user_id = Auth::user()->id;
             $data->warehouse_id =  $request->shop->warehouse_id;
             $data->order_type = 1;
-            $data->delivery_type = "微店铺下单";
             $data->shop_remark = "微店铺下单";
             $data->remark = "用户备注";
             $data->express_num = "";

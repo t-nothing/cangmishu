@@ -2,153 +2,134 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
+  <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
   <title>入库单</title>
-  <style>
-    * {
-      margin: 0px;
-      padding: 0px;
+  <style type="text/css">
+    *{
+      font-size: 13px;
     }
-    table {
-      border-collapse: collapse;
-      border-spacing: 0;
+    h3{
+      font-size: 16px;
     }
-    .title {
-      text-align: center;
-      margin: 50px;
-      font-size: 30px;
-      font-weight: bold;
-    }
-    .top-left {
-      padding: 20px 60px;
-      width: 400px;
-    }
-    .top-left p {
-      line-height: 30px;
-    }
-    .top-left .top1 {
-      padding-left: 30px;
-    }
-    .top-left .top2 {
-      padding-left: 14px;
-    }
-    .top-left .top3 {
-      padding-left: 44px;
+    .table-bordered {
+      border: 2px solid #000000;
+      page-break-inside: avoid;
+      page-break-after: avoid;
     }
 
-    .qrcode {
+    .table-bordered thead th,
+    .table-bordered thead td {
+      border-bottom-width: 2px;
+      border: 1px solid #000000;
+    }
+    .table-bordered th,
+    .table-bordered td {
+      border: 1px solid #000000;
+    }
+    .qrcode{
+      float: right;
+      font-size: 15px;
       position: absolute;
-      right: 120px;
-      top: 170px;
-    }
-    .qrcode img {
-      height: 70px;
-      width: 250px;
-    }
-    .qrcode p {
+      right: 0px;
       text-align: center;
     }
 
-    .goods-table p {
-      margin-left: 5%;
-      font-size: 18px;
-      font-weight: bold;
+    .A4{
+      background: white;
+      position: relative;
     }
-
-    table {
-      width: 90%;
-      max-width: 100%;
-      margin: 20px 5%;
-      background-color: #fff;
+    .no-print{
     }
-
-    .table td,
-    .table th {
-      padding: 10px;
-      border: 1px solid #eee;
-      text-align: left;
-      font-size: 14px;
-      color: #555;
+    @page {
+      size: A4;
+      margin: 2mm 2mm;
+      padding: 0;
     }
-
-    .bottom-right {
-      padding-top: 50px;
-      padding-left: 65%;
-      line-height: 30px;
-    }
-    .goods-table .table .text_center {
-      text-align: center;
+    @media print{
+      /*隐藏不打印的元素*/
+      .no-print{
+          display:none;
+      }
     }
   </style>
+
+
 </head>
 
 <body>
-  <div class="warehouse" id="box_info">
-    <p class="title">({{ $batch['warehouse']['name_cn'] }}) 入库单</p>
+  <div class="container-fluid">
+    <div class="A4"> 
 
-    <div class="top-left">
-      <p>
-        <span>入库单分类</span>
-        <span class="top1">{{ $batch['batch_type']['name'] }}</span>
-      </p>
-      <p>
-        <span>入库单编号</span>
-        <span class="top1">{{ $batch['confirmation_number'] }}</span>
-      </p>
-      <p>
-        <span>入库单供应商</span>
-        <span class="top2">{{ $batch['distributor']['name_cn'] }}</span>
-      </p>
-      <p>
-        <span>入库备注</span>
-        <span class="top3">{{ $batch['remark'] }}</span>
-      </p>
+      <div class="qrcode">
+        <img src="{{ $batch['batch_code_barcode'] }}">
+        <p>{{ $batch['batch_code'] }}</p>
+      </div>
+      <h3 class="text-center"> {{ $batch['warehouse']['name_cn'] }}入库单</h3>
 
-    </div>
-
-    <div class="qrcode">
-      <img src="{{ $batch['batch_code_barcode'] }}">
-      <p>{{ $batch['batch_code'] }}</p>
-    </div>
-
-    <div class="goods-table">
-      <p>商品列表</p>
-      <table class="table">
-        <tr>
-          <th class="text_center">#</th>
-          <th class="text_center">SKU</th>
-          <th class="text_center">商品信息</th>
-          <th class="text_center">进货单价（元）</th>
-          <th class="text_center">预计数量</th>
-          <th class="text_center">实时数量</th>
-          <th class="text_center">入库单批次号</th>
-          <th class="text_center">备注</th>
-        </tr>
-        <tbody>
-          @forelse ($batch['batch_products'] as $k => $product)
+      <div class="row" style="margin-top: 30px;">
+        <div class="col-md-4">制单日期：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</div>
+        <div class="col-md-8 text-right">类型：{{ $batch['batch_type']['name'] }}</div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">供应商：{{ $batch['distributor']['name_cn'] }}</div>
+      </div>
+      <div style="margin-top: 30px;"></div>
+    <h6>商品列表</h6>
+      
+    <table class="table  table-bordered text-center" >
+        <thead>
           <tr>
-            <td class="text_center">{{ $k+1 }}</td>
-            <td class="text_center">
+            <th>#</th>
+            <th>SKU</th>
+            <th>商品信息</th>
+            <th>进货单价（元）</th>
+            <th>进货数量</th>
+            <?php if($batch['download']??0){?>
+            <th class="no-print">实时数量</th>
+            <th class="no-print">入库单批次号</th>
+            <?php }?>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php $total = 0;?>
+          @forelse ($batch['batch_products'] as $k => $product)
+          <?php $total += $product['spec']['purchase_price'];?>
+          <tr>
+            <td>{{ $k+1 }}</td>
+            <td>
               <img src="{{ $product['relevance_code_barcode'] }}">
               <p>{{ $product['relevance_code'] }}</p>
             </td>
-            <td class="text_center">{{ $product['spec']['product']['name_cn'] }}({{$product['spec']['name_cn']}})</td>
-            <td class="text_center">{{ $product['spec']['purchase_price'] }}</td>
-            <td class="text_center">{{ $product['need_num'] }}</td>
-            <td class="text_center">{{ $product['stockin_num'] }}</td>
-            <td class="text_center">{{ $product['sku'] }}</td>
-            <td class="text_center">{{ $product['remark'] }}</td>
+            <td>
+              {{ $product['spec']['product']['name_cn'] }}({{$product['spec']['name_cn']}})
+            </td>
+            <td>￥{{ $product['spec']['purchase_price'] }}</td>
+            <td>{{ $product['need_num'] }}</td>
+            <?php if($batch['download']??0){?>
+            <td class="no-print">{{ $product['stockin_num'] }}</td>
+            <td class="no-print">{{ $product['sku'] }}</td>
+            <?php }?>
+            <td>{{ $product['remark'] }}</td>
           </tr>
           @empty
           @endforelse
         </tbody>
+        <tfoot class="text-left">
+          <tr>
+            <td colspan="3">合计：</td>
+            <td class="text-center"> ￥ {{ number_format($total, 2) }}</td>
+            <?php if($batch['download']??0){?>
+            <td class="text-center no-print"> {{ $batch['need_num'] }}</td>
+            <td class="text-center no-print"> {{ $batch['stock_num'] }}</td>
+            <?php }?>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
       </table>
-    </div>
-
-    <div class="bottom-right">
-      <!-- <p>运单号: info_waybill</p> -->
-      <p>预计入库总数: {{ $batch['total_num']['total_need_num'] }}</p>
-      <!-- <p>操作人: info_operator</p> -->
-      <p>预期入库时间: {{ $batch['plan_time'] }}  -  {{ $batch['over_time'] }}</p>
+      <div class="row">
+        <div class="col-md-12">备注：{{ $batch['remark'] }}</div>
+      </div>
     </div>
   </div>
 </body>

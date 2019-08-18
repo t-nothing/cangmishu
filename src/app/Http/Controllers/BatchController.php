@@ -183,7 +183,7 @@ class BatchController extends Controller
             }
         }
 
-        return view('pdfs.batch', [
+        return view('pdfs.batch.template_1', [
             'batch' => $batch->toArray(),
         ]);
     }
@@ -207,7 +207,7 @@ class BatchController extends Controller
 
         $file = $batch->batch_code . '.pdf';
 
-        $pdf = PDF::loadView('pdfs.batch', ['batch' => $batch->toArray()]);
+        $pdf = PDF::loadView('pdfs.batch.template_1', ['batch' => $batch->toArray(), 'download'=>true]);
         return $pdf->download($file);
 
     }

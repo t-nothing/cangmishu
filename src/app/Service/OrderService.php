@@ -9,6 +9,10 @@ use App\Models\SenderAddress;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Contracts\Cache\LockTimeoutException;
+use App\Events\OrderCreated;
+use App\Events\OrderShipped;
+use App\Events\OrderPaid;
+use App\Events\OrderCompleted;
 
 class OrderService
 {
@@ -26,6 +30,102 @@ class OrderService
         return $this->source;
     }
 
+    /**
+     * 更新快递公司
+     **/
+    public function updateExpress($data, $id)
+    {
+        $order = Order::find($id);
+        if(!$order) {
+            throw new \Exception("订单未找到", 1);
+        }
+
+        if(!app('ship')->validCode($data->express_code)){
+            throw new \Exception("快递公司不合法", 1);
+        }
+
+        $order->update(
+            [
+                'express_code'  =>  $data->express_code,
+                'express_num'   =>  $data->express_num,
+                'status'        =>  Order::STATUS_SENDING //配送中
+            ]
+        );
+
+        event(new OrderShipped($order));
+        OrderHistory::addHistory($order, Order::STATUS_SENDING);
+
+        return true;
+
+    }
+
+
+    /**
+     * 更新支付信息
+     **/
+    public function updatePay($data, $id)
+    {
+
+        $order = Order::find($id);
+        if(!$order) {
+            throw new \Exception("订单未找到", 1);
+        }
+
+        if(!in_array($data->pay_status, [Order::ORDER_PAY_STAUTS_PAID, Order::ORDER_PAY_STATUS_UNPAY, Order::ORDER_PAY_STATUS_REFUND])){
+            throw new \Exception("支付状态非法:".$data->pay_status, 1);
+        }
+
+
+        if(!in_array($data->pay_type, [0, Order::ORDER_PAY_TYPE_ALIPAY, Order::ORDER_PAY_TYPE_WECHAT, Order::ORDER_PAY_TYPE_BANK, Order::ORDER_PAY_TYPE_CASH, Order::ORDER_PAY_TYPE_OTHER])){
+            throw new \Exception("支付方式非法", 1);
+        }
+
+        if(intval($data->pay_status) >0 && intval($data->pay_type) == 0){
+            throw new \Exception("请选择支付方式", 1);
+        }
+
+        $order->update(
+            [
+                'pay_status'                =>  $data->pay_status,
+                'sub_pay'                   =>  $data->sub_pay,
+                'payment_account_number'    =>  $data->payment_account_number??'',
+            ]
+        );
+
+
+        if(intval($data["pay_status"]) == Order::STATUS_PAID) {
+            event(new OrderPaid($order));
+            OrderHistory::addHistory($order, Order::STATUS_PAID);
+        }
+
+
+        return true;
+    }
+
+    /**
+     * 更新状态为签收
+     **/
+    public function updateRceived($data, $id)
+    {
+        $order = Order::find($id);
+        if(!$order) {
+            throw new \Exception("订单未找到", 1);
+        }
+
+
+        $order->update(
+            [
+                'status'    =>  Order::STATUS_SUCCESS,
+            ]
+        );
+
+        event(new OrderCompleted($order));
+        OrderHistory::addHistory($order, Order::STATUS_SUCCESS);
+    }
+
+    /**
+     * 创建订单
+     **/
     public  function create($data, $userId = 0)
     {
 
@@ -131,8 +231,7 @@ class OrderService
                 
                 $lock->release();
 
-                //这个地方可以加一个服务
-                //@todo 下单邮件通知
+                event(new OrderCreated($order));
                 return $order;
             } else {
                 throw new \Exception("锁不能释放", 1);

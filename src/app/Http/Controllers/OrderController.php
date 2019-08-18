@@ -156,9 +156,38 @@ class OrderController extends Controller
         }
         
         return formatRet(0,'出库拣货成功');
+    }
 
-        
+    /**
+     * 支付状态列表
+     */
+    public function payStatusList(){
+        return formatRet(
+            0,
+            '成功',
+            [
+                Order::ORDER_PAY_STAUTS_UNPAY =>  '未支付',
+                Order::ORDER_PAY_STAUTS_REFUND =>  '已退款',
+                Order::ORDER_PAY_STAUTS_PAID =>  '已支付',
+            ]
+        );
+    }
 
+    /**
+     * 支付方式列表
+     */
+    public function payTypeList(){
+        return formatRet(
+            0,
+            '成功',
+            [
+                Order::ORDER_PAY_TYPE_ALIPAY    =>  '支付宝支付',
+                Order::ORDER_PAY_TYPE_WECHAT    =>  '微信支付',
+                Order::ORDER_PAY_TYPE_BANK      =>  '银行卡支付',
+                Order::ORDER_PAY_TYPE_CASH      =>  '现金支付',
+                Order::ORDER_PAY_TYPE_OTHER     =>  '其他方式',
+            ]
+        );
     }
 
     /**
@@ -191,14 +220,15 @@ class OrderController extends Controller
     /**
      * 更新运单号
      */
-    public function updateExpressNumber(BaseRequests $request,$order_id)
+    public function updateExpress(BaseRequests $request,$id)
     {
         $this->validate($request,[
-            'delivery_type'               => 'string|string|max:255',
-            'express_num'                 => 'string|max:255',
+            'express_code'           => 'required|string|string|max:255',
+            'express_num'            => 'required|string|max:255',
+            'shop_remark'            => 'string|max:255',
         ]);
 
-        $order = Order::find($order_id);
+        $order = Order::find($id);
         if(!$order){
             return formatRet(500,"订单不存在");
         }
@@ -206,26 +236,31 @@ class OrderController extends Controller
             return formatRet(500,"没有权限");
         }
 
-        $order->update(
-            [
-                'delivery_type'=>$request->delivery_type,
-                'express_num'=>$request->express_num,
-            ]
-        );
+        try {
+            app('order')->updateExpress($request,$id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新发货信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500, '更新发货信息失败');
+        }
         return formatRet(0,'成功');
+
     }
 
      /**
      * 更新支付价格
      */
-    public function updatePayStatus(BaseRequests $request,$order_id)
+    public function updatePayStatus(BaseRequests $request,$id)
     {
         $this->validate($request,[
-            'pay_status'              => 'required|integer|min:0',
-            'sub_pay'                 => 'required|numeric|min:0',
+            'pay_status'                => 'required|integer|min:0',
+            'pay_type'                  => 'required|integer|min:1',
+            'sub_pay'                   => 'required|numeric|min:0',
+            'payment_account_number'    => 'string',
         ]);
         
-        $order = Order::find($order_id);
+        $order = Order::find($id);
         if(!$order){
             return formatRet(500,"订单不存在");
         }
@@ -233,12 +268,36 @@ class OrderController extends Controller
             return formatRet(500,"没有权限");
         }
 
-        $order->update(
-            [
-                'pay_status'=>$request->pay_status,
-                'sub_pay'=>$request->sub_pay,
-            ]
-        );
+        try {
+            app('order')->updatePay($request,$id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500, '更新支付信息失败');
+        }
+        return formatRet(0,'成功');
+    }
+
+    /**
+     * 设为签收
+     **/
+    public function completed(BaseRequests $request,$id ){
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500,"订单不存在");
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500,"没有权限");
+        }
+        try {
+            app('order')->updateRceived($request,$id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500, '签收失败');
+        }
         return formatRet(0,'成功');
     }
 

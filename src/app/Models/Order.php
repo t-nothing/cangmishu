@@ -13,13 +13,14 @@ class Order extends Model
    const STATUS_PICK_DONE = 3;// 已拣货
     const STATUS_WAITING = 4;// 待出库（已验货）
    const STATUS_SENDING = 5;// 配送中
-   const STATUS_SUCCESS = 6;// 已收货
+   const STATUS_PAID = 6;// 已支付
+   const STATUS_SUCCESS = 7;// 已收货
 
-    // const ORDER_DELIVERY_TYPE_NLE       = 1;// NLE配送
-    // const ORDER_DELIVERY_TYPE_ONESELF   = 2;// 仓库自提
-    // const ORDER_DELIVERY_TYPE_POSTNL    = 3;// postnl
-    // const ORDER_DELIVERY_TYPE_EAX       = 4;// 欧亚派送
-    // const ORDER_DELIVERY_TYPE_AGENCY    = 5;// 代理收货点
+    const ORDER_DELIVERY_TYPE_AIR      = 1;// 空运
+    const ORDER_DELIVERY_TYPE_SHIP     = 2;// 海运
+    const ORDER_DELIVERY_TYPE_TRAIN    = 3;// 铁运
+    const ORDER_DELIVERY_TYPE_TRUCK    = 4;// 汽车
+    const ORDER_DELIVERY_TYPE_PEOPLE   = 5;// 人肉
 
     const VERIFY_STATUS_INIT = 1;//未验货
     const VERIFY_STATUS_DONE = 2;//已验货
@@ -28,6 +29,17 @@ class Order extends Model
     const ORDER_PLAN_DNS    = 0;// 未开始预约
     const ORDER_PLAN_HAS    = 1;// 已预约
     const ORDER_PLAN_CANCEL = 2;// 取消预约
+
+
+    const ORDER_PAY_STATUS_UNPAY   = 0;// 未支付
+    const ORDER_PAY_STATUS_REFUND  = 1;// 退款
+    const ORDER_PAY_STAUTS_PAID    = 2;// 支付成功
+
+    const ORDER_PAY_TYPE_ALIPAY  = 1;// 支付宝支付
+    const ORDER_PAY_TYPE_WECHAT  = 2;// 微信支付
+    const ORDER_PAY_TYPE_BANK  = 3;// 银行卡支付
+    const ORDER_PAY_TYPE_CASH  = 4;// 现金支付
+    const ORDER_PAY_TYPE_OTHER  = 9;// 其他方式
 
     protected $dates = [
         'created_at',
