@@ -183,8 +183,15 @@ class BatchController extends Controller
             }
         }
 
-        return view('pdfs.batch.template_1', [
+        $viewTemplateName = 'pdfs.batch.template_1';
+        if($batch->status == Batch::STATUS_PREPARE) {
+            $viewTemplateName = 'pdfs.batch.template_2';
+        } elseif($batch->status == Batch::STATUS_PROCEED) {
+            $viewTemplateName = 'pdfs.batch';
+        }
+        return view($viewTemplateName, [
             'batch' => $batch->toArray(),
+            'showInStock'=>1
         ]);
     }
 
@@ -207,7 +214,7 @@ class BatchController extends Controller
 
         $file = $batch->batch_code . '.pdf';
 
-        $pdf = PDF::loadView('pdfs.batch.template_1', ['batch' => $batch->toArray(), 'download'=>true]);
+        $pdf = PDF::loadView('pdfs.batch.template_1', ['batch' => $batch->toArray(), 'showInStock'=>0]);
         return $pdf->download($file);
 
     }

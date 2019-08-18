@@ -84,8 +84,8 @@
             <th>商品信息</th>
             <th>进货单价（元）</th>
             <th>进货数量</th>
-            <?php if($batch['download']??0){?>
-            <th class="no-print">实时数量</th>
+            <?php if($showInStock??0){?>
+            <th class="no-print">实际数量</th>
             <th class="no-print">入库单批次号</th>
             <?php }?>
             <th>备注</th>
@@ -106,7 +106,7 @@
             </td>
             <td>￥{{ $product['spec']['purchase_price'] }}</td>
             <td>{{ $product['need_num'] }}</td>
-            <?php if($batch['download']??0){?>
+            <?php if($showInStock??0){?>
             <td class="no-print">{{ $product['stockin_num'] }}</td>
             <td class="no-print">{{ $product['sku'] }}</td>
             <?php }?>
@@ -119,7 +119,7 @@
           <tr>
             <td colspan="3">合计：</td>
             <td class="text-center"> ￥ {{ number_format($total, 2) }}</td>
-            <?php if($batch['download']??0){?>
+            <?php if($showInStock??0){?>
             <td class="text-center no-print"> {{ $batch['need_num'] }}</td>
             <td class="text-center no-print"> {{ $batch['stock_num'] }}</td>
             <?php }?>

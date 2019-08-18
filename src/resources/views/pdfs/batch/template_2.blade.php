@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <title>入库单</title>
+  <title>采购单申请单</title>
   <style type="text/css">
     *{
       font-size: 13px;
@@ -40,25 +40,13 @@
 
 <body>
   <div class="container-fluid" style="position: relative;">
-    <div class="qrcode" style="position: absolute; right: 0px; ">
-        <img src="{{ $batch['batch_code_barcode'] }}">
-     
-        <div style="font-size: 18px; color: red; border-bottom: 2px solid #000000"><b style="color: black">NO.</b> {{ $batch['confirmation_number'] }}
-
-      </div>
-     </div>
-    <h2 align="center">入&nbsp;&nbsp;库&nbsp;&nbsp;单</h2>
+    <span style="position: absolute; right: 0px; font-size: 18px; color: red; border-bottom: 2px solid #000000"><b style="color: black">NO.</b> {{ $batch['confirmation_number'] }}</span>
+    <h2 align="center">采&nbsp;&nbsp;购&nbsp;&nbsp;单</h2>
     <table width="100%" border="0" align="center" style="margin-top: 30px;">
       <tr>
-        <td width="33%">制单日期：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</td>
-        <td width="33%">仓库：{{ $batch['warehouse']['name_cn'] }}</td>
-        <td>类型：{{ $batch['batch_type']['name'] }}</td>
-      </tr>
-    </table>
-    <table width="100%" border="0"  align="center">
-      <tr>
         <td width="33%">供应商：{{ $batch['distributor']['name_cn'] }}</td>
-        <td>备注：{{ $batch['remark'] }}</td>
+        <td width="33%">采购部门：{{ $batch['warehouse']['name_cn'] }}</td>
+        <td>类型：{{ $batch['batch_type']['name'] }}</td>
       </tr>
     </table>
     
@@ -69,11 +57,7 @@
           <th width="120px">货品编号</th>
           <th >货品名称</th>
           <th width="120px">规格型号</th>
-          <th width="80px">进货数量</th>
-          <?php if($showInStock??0){?>
-            <th class="no-print" width="80px">实际数量</th>
-            <th class="no-print">入库单批次号</th>
-          <?php }?>
+          <th width="60px">数量</th>
           <th width="100px">金额</th>
           <th width="100px">备注</th>
         </tr>
@@ -88,10 +72,6 @@
           <td>{{ $product['spec']['product']['name_cn'] }}</td>
           <td>{{$product['spec']['name_cn']}}</td>
           <td>{{ $product['need_num'] }}</td>
-            <?php if($showInStock??0){?>
-            <td class="no-print">{{ $product['stockin_num'] }}</td>
-            <td class="no-print">{{ $product['sku'] }}</td>
-            <?php }?>
           <td>￥{{ $product['spec']['purchase_price'] }}</td>
           <td>{{ $product['remark'] }}</td>
         </tr>
@@ -102,20 +82,24 @@
         <tr>
           <td colspan="4">合计：</td>
           <td class="text-center"> {{ $batch['need_num'] }}</td>
-          <?php if($showInStock??0){?>
-            <td></td><td></td>
-          <?php }?>
           <td class="text-center">￥ {{ number_format($total, 2) }}</td>
           <td></td>
         </tr>
       </tfoot>
     </table>
 
+    <table width="100%" border="0"  align="center" class="table table-bordered ">
+      <tr>
+        <td width="180px">采购备注：</td>
+        <td height="100px"></td>
+      </tr>
+    </table>
+
     <table width="100%" border="0"  align="center">
       <tr>
-        <td width="33%">财务主管：</td>
-        <td width="33%">部门经理：</td>
-        <td >仓库保管人：</td>
+        <td width="33%">制单日期：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</td>
+        <td width="33%">采购人签名：</td>
+        <td >负责人签名：</td>
       </tr>
     </table>
   </div>
