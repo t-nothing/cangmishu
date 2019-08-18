@@ -2,6 +2,7 @@
 namespace  App\Services\Service;
 
 use App\Models\Batch;
+use App\Models\BatchProduct;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Models\WarehouseLocation;
@@ -9,11 +10,11 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
-use App\Events\StockIn;
-use App\Events\StockPutOn;
-use App\Events\StockPick;
-use App\Events\StockOut;
-use App\Events\StockAdjust;
+use App\Events\StockLocationIn;
+use App\Events\StockLocationPutOn;
+use App\Events\StockLocationPick;
+use App\Events\StockLocationOut;
+use App\Events\StockLocationAdjust;
 
 class StoreService
 {
@@ -56,10 +57,11 @@ class StoreService
         }
 
         $stock->warehouse_location_id = $location->id;
-        $stock->status                = ProductStock::GOODS_STATUS_ONLINE;
-        $stock->save();
+        $stock->save();//先兼容一下旧数据
+        //库存上架
+        $stock->pushToLocation($location->id, $stock->stockin_num);
         
-        event(new StockPutOn($stock, $stock->stockin_num));
+        event(new StockLocationPutOn($stock, $stock->stockin_num));
 
         return $stock;
     }
@@ -68,13 +70,13 @@ class StoreService
     //入库
     public function In($warehouse_id,$data)
     {
-        $stock = ProductStock::ofWarehouse($warehouse_id)->findOrFail($data['stock_id']);
-        $stock->load(['batch', 'spec.product.category']);
+        $batchProduct = BatchProduct::ofWarehouse($warehouse_id)->findOrFail($data['stock_id']);
+        $batchProduct->load(['batch', 'spec.product.category']);
 
-        if (! $stock->batch->canStockIn()) {
+        if (! $batchProduct->batch->canStockIn()) {
             return eRet('id为'.$data['stock_id']."的入库单状态不是待入库或入库中");
         }
-        $category = $stock->spec->product->category;
+        $category = $batchProduct->spec->product->category;
         if ($category) {
             $rules = [];
             $category->need_expiration_date == 1 AND
@@ -86,21 +88,35 @@ class StoreService
             $rules &&
             validator($data,$rules);
         }
+
+        $batchProduct->distributor_code        = isset($data['distributor_code'])?$data['distributor_code']:"";
+        $batchProduct->ean                     = $data['ean'];
+        $batchProduct->expiration_date         = isset($data['expiration_date']) ?strtotime($data['expiration_date']." 00:00:00"): null;
+        $batchProduct->best_before_date        = isset($data['best_before_date']) ?strtotime($data['best_before_date']." 00:00:00"): null;
+        $batchProduct->production_batch_number = $data['production_batch_number']??'';
+        $batchProduct->remark                  = $data['remark'];
+
+        // 添加入库单记录
+        $productStock = $batchProduct->setStockQty($data["stockin_num"])
+                     ->setBoxCode($data["box_code"]??'')
+                     ->setDistributorCode($batchProduct->distributor_code)
+                     ->setEan($batchProduct->ean)
+                     ->setProductionBatchNumber($batchProduct->production_batch_number)
+                     ->setExpirationDate($batchProduct->expiration_date)
+                     ->setBestBeforeDate($batchProduct->best_before_date)
+                     ->convertToStock();
+
         // 入库单状态，修改为，入库中
-        $stock->batch->status = Batch::STATUS_PROCEED;
-        $stock->batch->save();
+        $batchProduct->batch->status = Batch::STATUS_PROCEED;
+        $batchProduct->batch->save();
         // 入库单信息完善
 
-        $stock->distributor_code        = isset($data['distributor_code'])?$data['distributor_code']:"";
-        $stock->ean                     = $data['ean'];
-        $stock->expiration_date         = $data['expiration_date'] ?strtotime($data['expiration_date']." 00:00:00"): null;
-        $stock->best_before_date        = $data['best_before_date'] ?strtotime($data['best_before_date']." 00:00:00"): null;
-        $stock->production_batch_number = $data['production_batch_number']?: '';
-        $stock->remark                  = $data['remark'];
-        $stock->save();
+        
+        $batchProduct->stockin_num             = $data["stockin_num"];//记录已经入库数量
+        $batchProduct->save();
 
-        event(new StockIn($stock, $data['stockin_num']));
-        return $stock;
+        event(new StockLocationIn($productStock, $data['stockin_num']));
+        return $productStock;
     }
 
     //拣货并出库
@@ -155,15 +171,25 @@ class StoreService
 
  
             //如过没有记录则去数据库拿
-            $stock = app('stock')->getStockByAmount($i['pick_num'], $order->owner_id, $item->relevance_code);
+            $stockInLocations = app('stock')->getStockByAmount($i['pick_num'], $order->owner_id, $item->relevance_code);
+
         
-            if(empty($stock)){//库存真的不足
+            if($stockInLocations)
+            {
+                //保留原来结构
+                //一个货位库存对应一个位置
+                $stockInLocations = app('stock')->getStockOverAmount($i['pick_num'], $stockInLocations);
+            }
+
+            if(is_null($stockInLocations) || empty($stockInLocations) || count($stockInLocations)==0)
+            {
+                //库存真的不足
                 throw new \Exception($item->product_name.'库存不足', 1);
             }
 
             $pickStockResult[] = [
                 'item'      =>  $item,
-                'stock'     =>  $stock,
+                'pick_locations'     =>  $stockInLocations,
                 'pick_num'  =>  $i['pick_num']
             ];
         }
@@ -178,8 +204,12 @@ class StoreService
             $v['item']->pick_num = $v['pick_num'];
             $v['item']->verify_num = $v['pick_num'];
             $v['item']->save();
-            // 添加记录
-            event(new StockPick($v['stock'], $v['pick_num']));
+
+            foreach ($v['pick_locations'] as $location) {
+                // 添加记录
+                event(new StockLocationPick($location->stock, $location['shelf_num']));
+            }
+            
  
         }
 
@@ -222,7 +252,7 @@ class StoreService
      **/
     public function recount($stock, $qty)
     {
-        event(new StockAdjust($stock, $qty));
+        event(new StockLocationAdjust($stock, $qty));
 
     }
 

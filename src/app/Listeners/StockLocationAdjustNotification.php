@@ -6,7 +6,7 @@ use App\Events\StockAdjust;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class StockAdjustNotification
+class StockLocationAdjustNotification
 {
     /**
      * Create the event listener.

@@ -182,26 +182,18 @@ class BatchProduct extends Model
      */
     public function getRecommendedLocationAttribute()
     {
-        $stock = ProductStock::with('locations')
-            ->enabled()
-            ->where('spec_id', $this->spec_id)
-            ->where('id', '!=', $this->id)
-            ->has('locations')
-            ->latest()
-            ->first();
-
-        return $stock ? $stock->locations : null;
+        return null;
     }
-
 
     /**
      * 将入库单明细入库
      */
-    public function pushStock()
+    public function convertToStock()
     {
         $stock = new ProductStock;
         //真正写入到库存表中
-        
+         ####!!! 不需要在这里增加数量，事件会自动处理
+
         $stock->owner_id                  = $this->owner_id;
         $stock->spec_id                   = $this->spec_id;
         $stock->relevance_code            = $this->relevance_code;
@@ -209,10 +201,6 @@ class BatchProduct extends Model
         $stock->box_code                  = $this->getBoxCode(); //箱子编码
         $stock->need_num                  = $this->getStockQty();//入库
         $stock->pieces_num                = $this->pieces_num;
-        $stock->stockin_num               = $this->getStockQty();//入库
-        $stock->total_stockin_num         = $this->getStockQty();//入库
-        $stock->shelf_num                 = $this->getStockQty();//入库
-        $stock->total_shelf_num           = $this->getStockQty();//入库
         $stock->remark                    = $this->remark;
                 // distributor_id   = $this->distributor_id;
         $stock->distributor_code          = $this->getDistributorCode();
@@ -226,17 +214,7 @@ class BatchProduct extends Model
 
         $stock->save();
         //推送上默认位置
-        $stock->pushLocation();
-        //增加入库日志
-        $stock->addLog(ProductStockLog::TYPE_BATCH, $this->getStockQty());
-
-        //虚拟入库区不需要上架
-        // $stock->addLog(ProductStockLog::TYPE_SHELF, $this->getStockQty());
 
         return $stock;
-
-
     }
-
-
 }

@@ -64,7 +64,7 @@ class BatchService
         $data['batch_code'] = $this->batchCode($warehouse);
 
         $batch = Batch::create($data);
-        $batch->stocks()->createMany($stocks);
+        $batch->batchProducts()->createMany($stocks);
         BatchMarkLog::saveBatchCode($batch);
 
         return true;

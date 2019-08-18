@@ -6,7 +6,7 @@ use App\Events\StockPutOn;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class StockPutOnNotification
+class StockLocationPutOnNotification
 {
     /**
      * Create the event listener.

@@ -6,7 +6,7 @@ use App\Events\StockPick;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class StockPickNotification
+class StockLocationPickNotification
 {
     /**
      * Create the event listener.

@@ -270,92 +270,6 @@ class ProductStock extends Model
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * 生成 SKU
-     *
-     * @return bool
-     */
-    public function generateSKU()
-    {
-        if (empty(trim($this->sku))) {
-            // $this->sku = 'sku' . substr(md5($this->stock_id), 0, 9);
-            $this->sku = 'SKU'. $this->warehouse->code .encodeData(date('Y-m-d')) . encodeseq($this->id);
-
-            return $this->save();
-        }
-
-        return true;
-    }
-
-    /**
-     * 添加数据
-     */
-    public function addLog($type, $operation_num,$order_sn , $sku_total_shelf_num_old = 0, $remark = '')
-    {
-        $sku_total_stockin_num = ProductStock::where('sku', $this->sku)
-            ->ofWarehouse($this->warehouse_id)
-            ->whose($this->owner_id)
-            ->enabled()
-            ->sum('stockin_num');
-
-        $spec_total_stockin_num = ProductStock::where('spec_id', $this->spec_id)
-            ->ofWarehouse($this->warehouse_id)
-            ->whose($this->owner_id)
-            ->enabled()
-            ->sum('stockin_num');
-
-        $sku_total_shelf_num  = ProductStock::where('sku', $this->sku)
-            ->ofWarehouse($this->warehouse_id)
-            ->whose($this->owner_id)
-            ->enabled()
-            ->sum('shelf_num');
-
-        $spec_total_shelf_num = ProductStock::where('spec_id', $this->spec_id)
-            ->ofWarehouse($this->warehouse_id)
-            ->whose($this->owner_id)
-            ->enabled()
-            ->sum('shelf_num');
-        //根据uri判断时桌面端还是手持端
-
-        if($type == ProductStockLog::TYPE_OUTPUT){
-            app('log')->info('order_sn ----'.$order_sn);
-            $log = ProductStockLog::where('order_sn', $order_sn)->where('type_id',$type)->where('product_stock_id',$this->id)->first();
-            if(!empty($log)){
-                app('log')->info('重复拣货失败',['log'=>$log->toArray()]);
-                throw new BusinessException('订单'.$order_sn.'商品'.$this->relevance_code.'重复拣货');
-            }
-        }
-        return $this->logs()->create([
-            'type_id'              => $type,
-            'order_sn'             => $order_sn,
-            'owner_id'             => $this->owner_id,
-            'warehouse_id'         => $this->warehouse_id,
-            'spec_id'              => $this->spec_id,
-            'sku'                  => $this->sku,
-            'operation_num'        => $operation_num,
-            'spec_total_stockin_num' => $spec_total_stockin_num,
-            'spec_total_shelf_num' => $spec_total_shelf_num,
-            'sku_total_stockin_num' => $sku_total_stockin_num,
-            'sku_total_shelf_num'  => $sku_total_shelf_num,
-            'sku_total_shelf_num_old' => $sku_total_shelf_num_old,
-            'operator'             => app('auth')->id(),
-            'remark'               => $remark,
-        ]);
-    }
-
-    public function recommendLocation()
-    {
-        $stock = ProductStock::with('location')
-            ->enabled()
-            ->where('spec_id', $this->spec_id)
-            ->where('id', '!=', $this->id)
-            ->has('location')
-            ->latest()
-            ->first();
-
-        return $stock ? $stock->location : null;
-    }
-
     public function recommendLocations()
     {
         $ids = ProductStock::has('location')
@@ -371,54 +285,47 @@ class ProductStock extends Model
         return $locations;
     }
 
-    public function getCurrentStockinNum($new_shelf_num)
+    /**
+     * 同步更新库存基础信息至货位
+     * 
+     */
+    public function syncLocationInfo()
     {
-        // 特定SKU的仓库数量 = 此SKU剩余已上架数量 + 此SKU待拣货数量
-
-        // 待验货数量
-//        $verifying_num =OrderItem::ofWarehouse($this->warehouse_id)
-//        ->whose($this->owner_id)
-//        ->where('relevance_code', $this->relevance_code)
-//        ->where('product_stock_id', $this->getKey())
-//        ->where('verify_num',0)
-//        ->where('pick_num',0)
-//        ->sum('amount');
-        $stockin_num = $new_shelf_num ;
-
-        return $stockin_num;
+        ProductStockLocation::where('stock_id', $this->id)
+          ->update(
+            [
+                'ean'                       => $this->ean,
+            ]
+        );
     }
-
-//    public function getCurrentLockNum()
-//    {
-//
-//        // 待验货数量
-//        $lock_num = OrderItem::ofWarehouse($this->warehouse_id)
-//            ->whose($this->owner_id)
-//            ->where('relevance_code', $this->relevance_code)
-//            ->where('product_stock_id', $this->getKey())
-//            ->whereHas('pick', function($query) {
-//                $query->whereIn('status', [
-//                    Pick::STATUS_DEFAULT,
-//                    Pick::STATUS_PICKING,
-//                    Pick::STATUS_PICK_DONE,
-//                ]);
-//            })
-//            ->sum('amount');
-//
-//        return $lock_num;
-//    }
 
     /**
-     * 获取现在总库存
-     * @return mixed
+     * 推到货位上面
+     * 将库存上架
      */
-    public function getStockinNum()
+    public function pushToLocation(int $locationId = 0, $qty = 0)
     {
-        return   self::whose($this->owner_id)
-            ->ofWarehouse($this->warehouse_id)
-            ->enabled()
-            ->where('relevance_code', $this->relevance_code)
-            ->sum('stockin_num');
+
+        //增加到货位上面（虚拟的）
+        $location = new ProductStockLocation;
+        $location->stock_id = $this->id;
+        $location->spec_id  = $this->spec_id;
+        $location->warehouse_location_id = $locationId; //实际仓库货位
+        $location->sku = $this->sku;
+        $location->ean = $this->ean;
+        $location->relevance_code = $this->relevance_code;
+        $location->shelf_num = $qty;
+        $location->owner_id = $this->owner_id;
+        $location->warehouse_id = $this->warehouse_id;
+        $location->sort_num = 0;
+
+
+        $location->save();
+
+        return $location;
     }
+
+
+
 
 }

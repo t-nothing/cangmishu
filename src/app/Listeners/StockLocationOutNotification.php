@@ -6,7 +6,7 @@ use App\Events\StockOut;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class StockOutNotification
+class StockLocationOutNotification
 {
     /**
      * Create the event listener.

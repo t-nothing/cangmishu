@@ -7,7 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ProductStockLog;
 
-class StockPickLogNotification
+class StockLocationPickLogNotification
 {
     /**
      * Create the event listener.
