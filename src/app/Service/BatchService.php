@@ -27,6 +27,7 @@ class BatchService
             $stocks[] = [
                 'owner_id'         => Auth::ownerId(),
                 'spec_id'          => $spec->id,
+                'purchase_price'   => $v['purchase_price'],
                 'relevance_code'   => $v['relevance_code'],
                 'need_num'         => $v['need_num'],
                 'remark'           => $v['remark'],
@@ -85,6 +86,7 @@ class BatchService
             $stocks[] = [
                 'owner_id'         => Auth::ownerId(),
                 'spec_id'          => $spec->id,
+                'purchase_price'   => $v['purchase_price'],
                 'relevance_code'   => $v['relevance_code'],
                 'need_num'         => $v['need_num'],
                 'remark'           => $v['remark'],
