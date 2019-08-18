@@ -9,6 +9,7 @@ use App\Models\WarehouseLocation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
+use App\Models\OrderItemStockLocation;
 use Illuminate\Support\Facades\DB;
 use App\Events\StockLocationIn;
 use App\Events\StockLocationPutOn;
@@ -38,7 +39,7 @@ class StoreService
             $stock_num += $v['stockin_num'];
             //上架
             $this->moveTo($locationStock,$warehouse_id,$v['code']);
-            
+
         })->toArray();
 
         //确认入库
@@ -60,7 +61,7 @@ class StoreService
         //从虚拟库存整体移动到新位置
         $newStockLocation = $stockLocation->moveTo($stockLocation->shelf_num, $location);
 
-        event(new StockLocationPutOn($newStockLocation, $stockLocation->shelf_num));
+        event(new StockLocationPutOn($newStockLocation, $newStockLocation->shelf_num));
 
         return $newStockLocation;
     }
@@ -97,13 +98,13 @@ class StoreService
 
         // 添加入库单记录
         $productStock = $batchProduct->setStockQty($data["stockin_num"])
-                     ->setBoxCode($data["box_code"]??'')
-                     ->setDistributorCode($batchProduct->distributor_code)
-                     ->setEan($batchProduct->ean)
-                     ->setProductionBatchNumber($batchProduct->production_batch_number)
-                     ->setExpirationDate($batchProduct->expiration_date)
-                     ->setBestBeforeDate($batchProduct->best_before_date)
-                     ->convertToStock();
+                        ->setBoxCode($data["box_code"]??'')
+                        ->setDistributorCode($batchProduct->distributor_code)
+                        ->setEan($batchProduct->ean)
+                        ->setProductionBatchNumber($batchProduct->production_batch_number)
+                        ->setExpirationDate($batchProduct->expiration_date)
+                        ->setBestBeforeDate($batchProduct->best_before_date)
+                        ->convertToStock();
 
         // 入库单状态，修改为，入库中
         $batchProduct->batch->status = Batch::STATUS_PROCEED;
@@ -133,6 +134,7 @@ class StoreService
 
         //先拣货
         $pick = $this->pick($data["items"], $order);
+        app('log')->info('拣货流程完成');
         $pick_num = collect($pick)->sum('pick_num');
         if($pick_num <=0) {
             throw new \Exception("拣货失败,不需要出库", 1);
@@ -147,6 +149,9 @@ class StoreService
      **/
     public function pick($pickItems, $order)
     {
+        app('log')->info('开始拣货', [
+            'out_sn'=> $order->out_sn
+        ]);
         $pickItemIdArr = array_pluck($pickItems, 'order_item_id');
         $orderItemArr = $order->orderItems->pluck('id')->toArray();
         sort($pickItemIdArr);
@@ -175,7 +180,7 @@ class StoreService
             //如过没有记录则去数据库拿
             $stockInLocations = app('stock')->getStockByAmount($i['pick_num'], $order->owner_id, $item->relevance_code);
 
-        
+            // app('log')->info('库存不足', $stockInLocations->toArray());
             if($stockInLocations)
             {
                 //保留原来结构
@@ -185,6 +190,7 @@ class StoreService
 
             if(is_null($stockInLocations) || empty($stockInLocations) || count($stockInLocations)==0)
             {
+                // app('log')->info('库存不足', $stockInLocations->toArray());
                 //库存真的不足
                 throw new \Exception($item->product_name.'库存不足', 1);
             }
@@ -202,14 +208,36 @@ class StoreService
 
         foreach ($pickStockResult as $k => $v){
 
-            $v['item']->product_stock_id = $v['stock']->id;
+            app('log')->info('开始从库位拣货AAA');
+            // $v['item']->product_stock_id = $v['stock']->id;
             $v['item']->pick_num = $v['pick_num'];
             $v['item']->verify_num = $v['pick_num'];
             $v['item']->save();
 
+            app('log')->info('开始从库位拣货AAA');
+
             foreach ($v['pick_locations'] as $locationStock) {
                 // 添加记录
                 // 这里的pick_num 实际上是拣货数量
+
+
+                app('log')->info('开始从库位拣货', [
+                    'location_id'   =>  $locationStock["id"],
+                    'out_sn'        => $locationStock['pick_num']
+                ]);
+
+                //这里是要拼出来存到出库清单对应的位置中去的
+                $tmp['stock_id'] = $locationStock["stock_id"];
+                $tmp['warehouse_location_id'] = $locationStock["warehouse_location_id"];
+                $tmp['warehouse_location_code'] = $locationStock["warehouse_location_code"];
+                $tmp['warehouse_id'] = $locationStock["warehouse_id"];
+                $tmp['product_stock_location_id'] = $locationStock["id"];
+                $tmp['item_id'] = $v['item']["id"];
+                $tmp['pick_num'] = $locationStock['pick_num'];
+                $tmp['shipment_num'] = $locationStock["shipment_num"]??"";
+                OrderItemStockLocation::create($tmp);
+
+
                 event(new StockLocationPick($locationStock, $locationStock['pick_num']));
             }
             

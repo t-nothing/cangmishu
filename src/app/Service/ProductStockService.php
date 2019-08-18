@@ -67,7 +67,7 @@ class ProductStockService
         }
 
 
-        DB::connection()->enableQueryLog();  // 开启QueryLog
+        // DB::connection()->enableQueryLog();  // 开启QueryLog
         $stocks = ProductStockLocation::leftjoin('product_stock', 'product_stock.id', '=', 'product_stock_location.stock_id')
             ->where('product_stock_location.owner_id', $owner_id)
             ->where('product_stock_location.warehouse_id', $this->warehouse->id)
@@ -106,19 +106,19 @@ class ProductStockService
      * 扣掉已经锁掉的库存
      * @param amout 拣货数量
      **/
-    public function getStockOverAmount(int $amount, $stocks){
+    public function getStockOverAmount(int $amount, $stockInLocations){
 
         //@todo 这个地方存在，10个苹果去3个记录上面拿
         //原来是判断一个位置就行了
         //over_time
         $restNum = $amount;
-        foreach ($stocks as $k=>&$stock){
+        foreach ($stockInLocations as $k=>&$stock){
 
             $stock->pick_num = $stock->shelf_num;
             //如果找完了
             if($restNum <= 0)
             {
-                unset($stocks[$k]);
+                unset($stockInLocations[$k]);
                 continue;
             }
 
@@ -130,9 +130,15 @@ class ProductStockService
 
             if($availableNum <= 0)
             {
-                unset($stocks[$k]);
+                unset($stockInLocations[$k]);
                 continue;
             }
+
+
+            app('log')->info('开始拣货', [
+                'stock-id'=> $stock->stock_id
+            ]);
+
 
             $stock->pick_num = min($availableNum, $restNum);
             $restNum -= min($availableNum, $restNum);
@@ -140,6 +146,6 @@ class ProductStockService
 
 
 
-        return $stocks;
+        return $stockInLocations;
     }
 }
