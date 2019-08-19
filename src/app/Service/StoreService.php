@@ -206,6 +206,8 @@ class StoreService
             throw new \Exception("拣货数量不能为零", 1);
         }
 
+        //这里可以先生成拣货单
+
         foreach ($pickStockResult as $k => $v){
 
             app('log')->info('开始从库位拣货AAA');
