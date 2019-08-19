@@ -40,6 +40,8 @@ class ClearAllProductStock extends Command
     {
         DB::update('update product set total_stockin_num = 0, total_shelf_num =0 ,total_floor_num= 0, total_lock_num=0,total_stockout_num=0,total_stockin_times=0,total_stockout_times=0,total_stock_num=0');
         DB::update('update product_spec set total_stockin_num = 0, total_shelf_num =0 ,total_floor_num= 0, total_lock_num=0,total_stockout_num=0,total_stockin_times=0,total_stockout_times=0,total_stock_num=0');
+        DB::delete("delete from batch");
+        DB::delete("delete from batch_product");
         DB::delete("delete from product_stock");
         DB::delete("delete from product_stock_location");
         DB::delete("delete from product_stock_lock");
