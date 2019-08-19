@@ -13,29 +13,29 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'App\Events\StockIn' => [
-                'App\Listeners\StockInNotification',
-                'App\Listeners\StockInLogNotification',
+        'App\Events\StockLocationIn' => [
+                'App\Listeners\StockLocationInNotification',
+                'App\Listeners\StockLocationInLogNotification',
             ],
-        'App\Events\StockPutOn' => [
-                'App\Listeners\StockPutOnNotification',
-                'App\Listeners\StockPutOnLogNotification',
+        'App\Events\StockLocationPutOn' => [
+                'App\Listeners\StockLocationPutOnNotification',
+                'App\Listeners\StockLocationPutOnLogNotification',
             ],
-        'App\Events\StockPick' => [
-                'App\Listeners\StockPickNotification',
-                'App\Listeners\StockPickLogNotification',
+        'App\Events\StockLocationPick' => [
+                'App\Listeners\StockLocationPickNotification',
+                'App\Listeners\StockLocationPickLogNotification',
             ],
-        'App\Events\StockOut' => [
-                'App\Listeners\StockOutNotification',
-                'App\Listeners\StockOutLogNotification',
+        'App\Events\StockLocationOut' => [
+                'App\Listeners\StockLocationOutNotification',
+                'App\Listeners\StockLocationOutLogNotification',
             ],
-        'App\Events\StockAdjust' => [
-                'App\Listeners\StockAdjustNotification',
-                'App\Listeners\StockAdjustLogNotification',
+        'App\Events\StockLocationAdjust' => [
+                'App\Listeners\StockLocationAdjustNotification',
+                'App\Listeners\StockLocationAdjustLogNotification',
             ],
-        'App\Events\StockMove' => [
-                'App\Listeners\StockMoveNotification',
-                'App\Listeners\StockMoveLogNotification',
+        'App\Events\StockLocationMove' => [
+                'App\Listeners\StockLocationMoveNotification',
+                'App\Listeners\StockLocationMoveLogNotification',
             ],
         'App\Events\OrderCreated' => [ //更新了快递单号
                 'App\Listeners\OrderCreatedNotification',

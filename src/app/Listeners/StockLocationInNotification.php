@@ -2,11 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Events\StockIn;
+use App\Events\StockLocationIn;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class StockInNotification
+class StockLocationInNotification
 {
     /**
      * Create the event listener.
@@ -24,7 +24,7 @@ class StockInNotification
      * @param  StockIn  $event
      * @return void
      */
-    public function handle(StockIn $event)
+    public function handle(StockLocationIn $event)
     {
         
         $model = $event->stock->load("spec.product");

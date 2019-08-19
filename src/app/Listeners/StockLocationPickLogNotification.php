@@ -2,12 +2,12 @@
 
 namespace App\Listeners;
 
-use App\Events\StockPutOn;
-use App\Models\ProductStockLog;
+use App\Events\StockLocationPick;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\ProductStockLog;
 
-class StockPutOnLogNotification
+class StockLocationPickLogNotification
 {
     /**
      * Create the event listener.
@@ -22,22 +22,22 @@ class StockPutOnLogNotification
     /**
      * Handle the event.
      *
-     * @param  StockPutOn  $event
+     * @param  StockPick  $event
      * @return void
      */
-    public function handle(StockPutOn $event)
+    public function handle(StockLocationPick $event)
     {
-        $model = $event->stock;
+        $model = $event->stockLocation;
         $option = $event->option;
         $qty = $event->qty;
 
-        app("stockLog")->setTypeId(ProductStockLog::TYPE_PUTON)
-                        ->setStock($model)
+        app("stockLog")->setTypeId(ProductStockLog::TYPE_PICKING)
+                        ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)
                         ->log();
-        app("log")->info("上架事件日志");
 
+        app("log")->info("拣货事件日志");
     }
 }

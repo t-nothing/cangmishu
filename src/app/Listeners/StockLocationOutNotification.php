@@ -2,11 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Events\StockOut;
+use App\Events\StockLocationOut;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class StockOutNotification
+class StockLocationOutNotification
 {
     /**
      * Create the event listener.
@@ -21,10 +21,10 @@ class StockOutNotification
     /**
      * 出库之后
      * 总库存减少，锁定库存减少
-     * @param  StockOut  $event
+     * @param  StockLocationOut  $event
      * @return void
      */
-    public function handle(StockOut $event)
+    public function handle(StockLocationOut $event)
     {
         $model = $event->stock->load("spec.product");
 

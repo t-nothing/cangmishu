@@ -8,7 +8,7 @@ class ProductStockLogService
 {
     protected  $warehouse;
     protected  $typeId;
-    protected  $stock;
+    protected  $stockLocation;
     protected  $num;
     protected  $remark;
     protected  $itemId = 0;
@@ -30,15 +30,15 @@ class ProductStockLogService
         return $this->typeId;
     }
 
-    public function setStock($v)
+    public function setStockLocation($v)
     {
-        $this->stock = $v;
+        $this->stockLocation = $v;
         return $this;
     }
 
-    public function getStock()
+    public function getStockLocation()
     {
-        return $this->stock;
+        return $this->stockLocation;
     }
 
     public function setNum($v)
@@ -89,24 +89,28 @@ class ProductStockLogService
 
     public function log()
     {
-        $stock = $this->getStock();
+        $stockLoation = $this->getStockLocation();
 
 
         app("log")->info("log开始记录");
+        $stock = $stockLoation->stock;
 
         //记录
         $model  = new ProductStockLog;
-        $model->product_stock_id    = $stock->id;
-        $model->type_id             = $this->getTypeId();
-        $model->owner_id            = $stock->owner_id;
-        $model->warehouse_id        = $stock->warehouse_id;
-        $model->spec_id             = $stock->spec_id;
-        $model->sku                 = $stock->sku;
-        $model->operation_num       = $this->getNum();
-        $model->remark              = $this->getRemark();
-        $model->item_id             = $this->getItemId();
-        $model->operator            = app('auth')->id();
-        $model->source              = $this->getSource();
+        $model->product_stock_id            = $stockLoation->stock_id;
+        $model->type_id                     = $this->getTypeId();
+        $model->owner_id                    = $stockLoation->owner_id;
+        $model->warehouse_id                = $stockLoation->warehouse_id;
+        $model->spec_id                     = $stockLoation->spec_id;
+        $model->sku                         = $stockLoation->sku;
+        $model->operation_num               = $this->getNum();
+        $model->remark                      = $this->getRemark();
+        $model->item_id                     = $this->getItemId();
+        $model->operator                    = app('auth')->id();
+        $model->source                      = $this->getSource();
+        $model->product_stock_location_id   = $stockLoation->id;
+
+        $model->product_stock_location_code = $stockLoation->warehouse_location_code;
 
         $model->product_total_stock_num = $stock->spec->product->total_stock_num;
         $model->spec_total_stock_num = $stock->spec->total_stock_num;
@@ -115,5 +119,8 @@ class ProductStockLogService
         //库存记录
 
         $model->save();
+
+
+        app("log")->info("log开始完成");
     }
 }

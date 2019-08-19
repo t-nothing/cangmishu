@@ -2,11 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Events\StockPick;
+use App\Events\StockLocationPick;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class StockPickNotification
+class StockLocationPickNotification
 {
     /**
      * Create the event listener.
@@ -24,8 +24,12 @@ class StockPickNotification
      * @param  StockPick  $event
      * @return void
      */
-    public function handle(StockPick $event)
+    public function handle(StockLocationPick $event)
     {
+
+        app('log')->info('拣货事件', [
+            'stock-id'=> $event->stock->id
+        ]);
         $model = $event->stock->load("spec.product");
         //架子上面减少
         $model->decrement('shelf_num', $event->qty);

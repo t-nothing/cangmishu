@@ -2,12 +2,12 @@
 
 namespace App\Listeners;
 
-use App\Events\StockIn;
+use App\Events\StockLocationOut;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ProductStockLog;
 
-class StockInLogNotification
+class StockLocationOutLogNotification
 {
     /**
      * Create the event listener.
@@ -20,25 +20,24 @@ class StockInLogNotification
     }
 
     /**
-     * 入库事件日志
+     * Handle the event.
      *
-     * @param  StockIn  $event
+     * @param  StockOut  $event
      * @return void
      */
-    public function handle(StockIn $event)
+    public function handle(StockLocationOut $event)
     {
-        $model = $event->stock;
+        $model = $event->stockLocation;
         $option = $event->option;
         $qty = $event->qty;
 
-        app("stockLog")->setTypeId(ProductStockLog::TYPE_IN)
-                        ->setStock($model)
+        app("stockLog")->setTypeId(ProductStockLog::TYPE_OUTPUT)
+                        ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)
                         ->log();
+        app("log")->info("出库事件日志");
 
-
-        app("log")->info("入库事件日志");
     }
 }

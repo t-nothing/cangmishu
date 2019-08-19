@@ -42,7 +42,7 @@ class CreateShelfRequest extends BaseRequests
             'stock.*'                         => 'required|array',
             'stock.*.stock_id' 				  => [
                 'required','integer','min:1',
-                Rule::exists('product_stock','id')->where(function($q){
+                Rule::exists('batch_product','id')->where(function($q){
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],

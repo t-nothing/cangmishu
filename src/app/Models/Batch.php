@@ -154,7 +154,7 @@ class Batch extends Model
 
     public function batchProducts()
     {
-        return $this->hasMany('App\Models\ProductStock', 'batch_id', 'id')
+        return $this->hasMany('App\Models\BatchProduct', 'batch_id', 'id')
                     ->with('spec.product');
     }
 
@@ -252,44 +252,5 @@ class Batch extends Model
             : '';
     }
 
-    // 生成和比对SKU
-    // public static function generateSKU(ProductStock $stock)
-    // {
-    //     if (! empty($stock->sku)) {
-    //         return $stock->sku;
-    //     }
-
-    //     $batch = $stock->batch;
-
-    //     $sku = ProductSku::where('spec_id', $stock->spec->id)
-    //                      ->where('expiration_date', $stock->expiration_date)
-    //                      ->where('production_batch_number', $stock->production_batch_number)
-    //                      ->where('confirmation_number', $stock->batch->confirmation_number)
-    //                      ->value('sku');
-
-    //     if (! $sku) {
-    //         $sku = 'sku' . get_hash();
-
-    //         DB::transaction(function () use ($stock, $sku) {
-    //             $exists = ProductSku::where('sku', $sku)->first();
-
-    //             if (! $exists) {
-    //                 $productSku = ProductSku::insert([
-    //                     'sku'                      => $sku,
-    //                     'spec_id'                  => $stock->spec_id,
-    //                     'expiration_date'          => $stock->expiration_date,
-    //                     'production_batch_number'  => $stock->production_batch_number,
-    //                     'confirmation_number'      => $stock->batch->confirmation_number,
-    //                     'batch_code'               => $stock->batch->batch_code,
-    //                 ]);
-
-    //                 $stock->sku = $sku;
-    //                 $stock->save();
-    //             }
-    //         });
-    //     }
-
-    //     return false;
-    // }
 
 }

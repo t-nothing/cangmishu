@@ -458,68 +458,81 @@ class ProductStockController extends  Controller
      */
     public function update(BaseRequests $request,$stock_id)
     {
-        app('log')->info('手持端 - 库存盘点', $request->input());
+
+        app('log')->info('桌面端 - 库存编辑', $request->post());
 
         $this->validate($request, [
-            'stock_num'               => 'required|integer|min:0|max:9999',
-            'ean'                     => 'required|string|max:255',
-            'expiration_date'         => 'sometimes|date_format:Y-m-d',
-            'best_before_date'        => 'sometimes|date_format:Y-m-d',
-            'production_batch_number' => 'sometimes|string|max:255',
-            // 'location_code'           => 'required|string',
-            'remark'                  => 'string|max:255',
-            'warehouse_id'            =>[
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where('owner_id',Auth::ownerId())
-            ]
+            'id'                        => 'required|integer|min:1',
+            'ean'                       => 'required|string|max:255',
+            'expiration_date'           => 'date_format:Y-m-d',
+            'best_before_date'          => 'date_format:Y-m-d',
+            'production_batch_number'   => 'string|max:255',
+            'locations'                 => 'required|array',
+            'locations.*.id'            => 'required|integer|min:0',
+            'locations.*.shelf_num'     => 'required|integer|min:0',
+            'locations.*.remark'       => 'string|max:255',
         ]);
 
-        $warehouse = Auth::warehouse();
-
+        $warehouse = app('auth')->warehouse();
         $stock = ProductStock::ofWarehouse($warehouse->id)
-            ->where('owner_id',app('auth')->ownerId())
-            ->where('status', ProductStock::GOODS_STATUS_ONLINE)
-            ->findOrFail($stock_id);
+            ->when(app('auth')->isLimited(),function($q){
+                return $q->whereIn('owner_id',app('auth')->ownerId());
+            })
+            ->findOrFail($request->id);
+
 
         $category = $stock->spec->product->category;
-        if ($category) {
+        if ($category) 
+        {
             $rules = [];
             $category->need_expiration_date == 1 AND
-            $rules['expiration_date'] = 'required|date_format:Y-m-d';
+                $rules['expiration_date'] = 'required|date_format:Y-m-d';
             $category->need_best_before_date == 1 AND
-            $rules['best_before_date'] = 'required|date_format:Y-m-d';
+                $rules['best_before_date'] = 'required|date_format:Y-m-d';
             $category->need_production_batch_number == 1 AND
-            $rules['production_batch_number'] = 'required|string|max:255';
+                $rules['production_batch_number'] = 'required|string|max:255';
             $rules AND
-            $this->validate($request, $rules);
-        }
-
-        $location = WarehouseLocation::ofWarehouse($warehouse->id)
-            ->enabled()
-            ->where('code', $request->location_code)
-            ->first();
-
-        if (! $location) {
-            return formatRet(500, '货位不存在或未启用');
+                $this->validate($request, $rules);
         }
 
         app('db')->beginTransaction();
         try {
+
             $stock->ean                     = $request->ean;
-            $stock->expiration_date         = $request->input('expiration_date') ? strtotime($request->input('expiration_date')." 00:00:00"): null;
-            $stock->best_before_date        = $request->input('best_before_date') ? strtotime($request->input('best_before_date')." 00:00:00"): null;
+            $stock->expiration_date         = $request->input('expiration_date') ?: null;
+            $stock->best_before_date        = $request->input('best_before_date') ?: null;
             $stock->production_batch_number = $request->input('production_batch_number', '');
             $stock->save();
+            //同位货位上面的信息
+            $stock->syncLocationInfo();
 
-            app("store")->recount($stock, $request->stock_num);
+            $old_stock_num = $stock->stock_num;
+            $new_stock_num = 0;
+            foreach ($request->locations as $key => $location) {
+
+                $stockLocation = ProductStockLocation::ofWarehouse($warehouse->id)
+                ->where("stock_id", $request->id)
+                ->findOrFail($location["id"]);
+
+                //盘点后的库存减去盘点前的上架库存
+                $final_num = $location["shelf_num"] - $stockLocation["shelf_num"];
+
+                $stockLocation->adjustShelfNum($location["shelf_num"]);
+
+
+            }
+
 
             app('db')->commit();
+            
+
         } catch (\Exception $e) {
             app('db')->rollback();
-            info('手持端 - 库存盘点', ['exception msg' => $e->getMessage()]);
+            info('桌面端 - 库存盘点', ['exception msg' => $e->getMessage()]);
 
-            return formatRet(500, '失败');
+            return formatRet(500, trans('message.failed'));
         }
+
         return formatRet(0);
     }
 
