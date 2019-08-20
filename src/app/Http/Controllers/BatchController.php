@@ -167,7 +167,7 @@ class BatchController extends Controller
     }
 
 
-    public function pdf($batch_id)
+    public function pdf($batch_id, $template = '')
     {
         if (! $batch = Batch::find($batch_id)) {
             return formatRet(404, '入库单不存在', [], 404);
@@ -183,19 +183,19 @@ class BatchController extends Controller
             }
         }
 
-        $viewTemplateName = 'pdfs.batch.template_1';
-        if($batch->status == Batch::STATUS_PREPARE) {
-            $viewTemplateName = 'pdfs.batch.template_2';
-        } elseif($batch->status == Batch::STATUS_PROCEED) {
-            $viewTemplateName = 'pdfs.batch';
+
+        $template = "pdfs.batch.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['entry','purchase'])){
+            $template = "pdfs.batch";
         }
-        return view($viewTemplateName, [
+
+        return view($template, [
             'batch' => $batch->toArray(),
             'showInStock'=>1
         ]);
     }
 
-    public function download(BaseRequests $request, $batch_id)
+    public function download(BaseRequests $request, $batch_id, $template = '')
     {
 
         if (! $batch = Batch::where('owner_id',Auth::ownerId())->find($batch_id)) {
@@ -214,8 +214,20 @@ class BatchController extends Controller
 
         $file = $batch->batch_code . '.pdf';
 
-        $pdf = PDF::loadView('pdfs.batch.template_1', ['batch' => $batch->toArray(), 'showInStock'=>0]);
-        return $pdf->download($file);
+        $template = "pdfs.batch.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['', 'entry','purchase'])){
+            $template = "pdfs.batch.template_batchno";
+        }
+
+        $pdf = PDF::setPaper('a4');
+
+        if($template == "pdfs.batch.template_batchno" )
+        {
+            $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '1')->setOption('margin-right', '1')->setOption('margin-top', '2')->setOption('margin-bottom', '1');
+        }
+
+
+        return $pdf->loadView($template, ['batch' => $batch->toArray(), 'showInStock'=>0])->download($file);
 
     }
 
