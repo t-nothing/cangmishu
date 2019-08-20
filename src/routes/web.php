@@ -221,6 +221,12 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/shop/payment/{id}', 'ShopPaymentMethodController@update');
     Route::delete('/shop/payment/{id}', 'ShopPaymentMethodController@destroy');
 
+    //库存盘点
+    Route::get('/recount', 'RecountController@index');
+    Route::post('/recount', 'RecountController@store');
+    Route::get('/recount/{id}', 'RecountController@show');
+    Route::delete('/recount/{id}', 'RecountController@destroy');
+
 
 });
 

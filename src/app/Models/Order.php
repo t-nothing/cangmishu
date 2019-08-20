@@ -52,7 +52,7 @@ class Order extends Model
         'delivery_date' => 'date:Y-m-d',
     ];
 
-    protected  $fillable =['warehouse_id','order_type','delivery_date','delivery_type','status','receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','receiver_fullname','receiver_phone','send_country','send_province','send_city','send_postcode','send_district','send_address','send_fullname','send_phone','express_num','out_sn'];
+    protected  $fillable =['warehouse_id','order_type','delivery_date','delivery_type','status','receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','receiver_fullname','receiver_phone','send_country','send_province','send_city','send_postcode','send_district','send_address','send_fullname','send_phone','express_num','out_sn','express_code','shop_remark','pay_status','pay_type','sub_pay','payment_account_number'];
 
     protected $guarded = [];
 
