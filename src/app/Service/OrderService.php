@@ -48,6 +48,7 @@ class OrderService
             [
                 'express_code'  =>  $data->express_code,
                 'express_num'   =>  $data->express_num,
+                'shop_remark'   =>  $data->shop_remark,
                 'status'        =>  Order::STATUS_SENDING //配送中
             ]
         );
