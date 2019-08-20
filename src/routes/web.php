@@ -158,7 +158,8 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/order/pay/type', 'OrderController@payTypeList'); //支付方式列表
 
     //库存
-    Route::get('/stock/code', 'ProductStockController@getSkus');
+    // Route::get('/stock/code', 'ProductStockController@getSkus');
+    Route::get('/stock/code', 'ProductStockController@getLocations');
     Route::get('/stock/sku/{sku}', 'ProductStockController@getInfoBySku');
     Route::put('/stock/{stock_id}', 'ProductStockController@update');//盘点
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');

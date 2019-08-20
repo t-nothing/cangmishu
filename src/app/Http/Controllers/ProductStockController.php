@@ -563,6 +563,62 @@ class ProductStockController extends  Controller
 
     }
 
+    public function getLocations(BaseRequests $request)
+    {
+
+        app('log')->info('查询某货位上的所有SKU',['owner_id'=>app('auth')->ownerId(),'request'=>$request->all()]);
+        $this->validate($request, [
+            'code' => 'required|string',
+            'warehouse_id'=>[
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where(function($q){
+                    $q->where('owner_id',Auth::ownerId());
+                })
+            ]
+        ]);
+
+        $warehouse = app('auth')->warehouse();
+
+        $location = WarehouseLocation::ofWarehouse($warehouse->id)->enabled()
+            ->where('code', $request->code)->first();
+
+        $stock = ProductStockLocation::with('spec.product')
+            ->where('owner_id', app('auth')->ownerId())
+            ->ofWarehouse($warehouse->id);
+
+        // sku 还是 货位
+        if ($location) {
+            $stock->where('warehouse_location_id', $location->id);
+        } else {
+            $stock->where('sku', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code);
+        }
+
+        $stocks= $stock->paginate();
+
+        $arr= [];
+        foreach ($stocks as $stockLoation) {
+
+            $arr[] = [
+                    'id'                    =>  $stockLoation->id,
+                    'name_cn'               =>  $stockLoation->stock->product_name_cn,
+                    'name_en'               =>  $stockLoation->stock->product_name_en,
+                    'relevance_code'        =>  $stockLoation->stock->spec->relevance_code,
+                    'stock_sku'             =>  $stockLoation->stock->sku,
+                    'shelf_num_orgin'       =>  $stockLoation->shelf_num,
+                    'shelf_num_now'         =>  $stockLoation->shelf_num,
+                    'total_purcharse_orgin' =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'total_purcharse_now'   =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'status'                =>  1,
+                    'location_code'         =>  $stockLoation->warehouse_location_code,
+                    'location_id'           =>  $stockLoation->warehouse_location_id,
+                ];
+        }
+
+        $result = $stocks->toArray();
+        unset($result['data']);
+        $result['data'] = $arr;
+        return formatRet(0, '成功', $result);
+    }
 
     /**
      * 根据规格ID得到位置

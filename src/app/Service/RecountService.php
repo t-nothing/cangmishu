@@ -50,6 +50,7 @@ class RecountService
                         ];
 
                         $arr[] = new RecountStock([
+                            'id'                    =>  $stockLoation->id,
                             'name_cn'               =>  $stockLoation->stock->product_name_cn,
                             'name_en'               =>  $stockLoation->stock->product_name_en,
                             'relevance_code'        =>  $stockLoation->stock->spec->relevance_code,
@@ -103,6 +104,7 @@ class RecountService
         foreach ($stockLocations as $key => $stockLoation) {
             
             $arr[] = [
+                    'id'                    =>  $stockLoation->id,
                     'name_cn'               =>  $stockLoation->stock->product_name_cn,
                     'name_en'               =>  $stockLoation->stock->product_name_en,
                     'relevance_code'        =>  $stockLoation->stock->spec->relevance_code,
