@@ -14,6 +14,7 @@ use App\Services\Service\ProductStockService;
 use App\Services\Service\StoreService;
 use App\Services\Service\ProductStockLogService;
 use App\Services\Service\ShipService;
+use App\Services\Service\RecountService;
 use App\Services\UserService;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
@@ -108,6 +109,9 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton('ship',function(){
             return new ShipService();
+        });
+        $this->app->singleton('recount',function(){
+            return new RecountService();
         });
     }
 }

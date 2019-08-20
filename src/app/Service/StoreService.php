@@ -15,7 +15,6 @@ use App\Events\StockLocationIn;
 use App\Events\StockLocationPutOn;
 use App\Events\StockLocationPick;
 use App\Events\StockLocationOut;
-use App\Events\StockLocationAdjust;
 
 class StoreService
 {
@@ -283,13 +282,5 @@ class StoreService
 
     }
 
-    /**
-     * 盘点
-     **/
-    public function recount($stockLocation, $qty)
-    {
-        event(new StockLocationAdjust($stockLocation, $qty));
-
-    }
 
 }

@@ -8,6 +8,7 @@ use App\Models\Batch;
 use App\Models\ProductSpec;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
+use App\Models\ProductStockLocation;
 use App\Models\WarehouseLocation;
 use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
@@ -379,9 +380,9 @@ class ProductStockController extends  Controller
         $location = WarehouseLocation::ofWarehouse($warehouse->id)->enabled()
             ->where('code', $request->code)->first();
 
-        $stock = ProductStock::with('spec.product')
+        $stock = ProductStockLocation::with('spec.product')
             ->where('owner_id', app('auth')->ownerId())
-            ->ofWarehouse($warehouse->id)->enabled();
+            ->ofWarehouse($warehouse->id);
 
         // sku 还是 货位
         if ($location) {
@@ -396,7 +397,8 @@ class ProductStockController extends  Controller
         foreach ($stocks as $s) {
             $re[] = [
                 'ean' => $s->ean,
-                'stock_id' => $s->id,
+                'id'  => $s->id,
+                'stock_id' => $s->stock_id,
                 'sku' => $s->sku,
                 'product_name' => $s->product_name,
                 'shelf_num' => $s->shelf_num,
@@ -536,7 +538,9 @@ class ProductStockController extends  Controller
         return formatRet(0);
     }
 
-
+    /**
+     * 
+     */
     public  function  getInfoBySku(BaseRequests $request, $sku)
     {
         app('log')->info('查看库存详情', $request->input());
@@ -557,6 +561,26 @@ class ProductStockController extends  Controller
         $stock->setHidden(['spec']);
         return formatRet(0,'成功',$stock->toArray());
 
+    }
+
+
+    /**
+     * 根据规格ID得到位置
+     *
+     */
+    public function getLocationBySpec(BaseRequests $request){
+
+        $this->validate($request, [
+            'warehouse_id'            =>[
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where('owner_id',Auth::ownerId())
+            ],
+            'spec'      => 'required|array',
+            'spec.*' => 'required|integer|min:1',
+        ]);
+
+
+        return formatRet(0,'成功',app("recount")->getLocationBySpec($request->all()));
     }
 
 }

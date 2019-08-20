@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Support\Facades\Cache;
 
 class Recount extends Model
 {
@@ -89,5 +90,11 @@ class Recount extends Model
     {
         // return $query->where('batch_code', 'like', '%' . $keywords . '%')
         //              ->orWhere('confirmation_number', 'like', '%' . $keywords . '%');
+    }
+
+    public static function no()
+    {
+        $key = "PD".date("Ymd");
+        return sprintf("%s%04s", $key, Cache::increment($key));
     }
 }

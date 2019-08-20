@@ -32,9 +32,9 @@ class CreateRecountTable extends Migration
         Schema::create('recount_stock', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('recount_id')->comment('盘点单ID');
-            $table->string('sku_product_name_cn')->comment('中文商品规格名称');
-            $table->string('sku_product_name_en')->comment('英文商品规格名称');
-            $table->string('sku')->comment('SKU');
+            $table->string('name_cn')->comment('中文商品规格名称');
+            $table->string('name_en')->comment('英文商品规格名称');
+            $table->string('relevance_code')->comment('外部编码');
             $table->string('stock_sku')->comment('入库批次号');
             $table->integer('shelf_num_orgin')->comment('原库存');
             $table->integer('shelf_num_now')->comment('新库存');
