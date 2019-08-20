@@ -185,7 +185,7 @@ class BatchController extends Controller
 
 
         $template = "pdfs.batch.template_".strtolower($template);
-        if(!in_array(strtolower($template), ['entry','purchase'])){
+        if(!in_array(strtolower($template), ['entry','purchase','batchno'])){
             $template = "pdfs.batch";
         }
 
@@ -215,8 +215,8 @@ class BatchController extends Controller
         $file = $batch->batch_code . '.pdf';
 
         $template = "pdfs.batch.template_".strtolower($template);
-        if(!in_array(strtolower($template), ['', 'entry','purchase'])){
-            $template = "pdfs.batch.template_batchno";
+        if(!in_array(strtolower($template), ['', 'entry','purchase','batchno'])){
+            $template = "pdfs.batch";
         }
 
         $pdf = PDF::setPaper('a4');
