@@ -12,7 +12,15 @@ class ExpressController extends Controller
 
     public function list(){
 
-        return formatRet(0, '', app('ship')->expressCompanyList());
+        $dataList = app('ship')->expressCompanyList();
+        $arr  = [];
+        foreach ($dataList as $key => $value) {
+            $arr[] = [
+                'code'  => $key,
+                'name'  =>  $value
+            ];
+        }
+        return formatRet(0, '', $arr);
       
     }
 }

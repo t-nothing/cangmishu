@@ -9,12 +9,12 @@ class Order extends Model
     const STATUS_CANCEL  = 0;// 订单已取消
     const STATUS_DEFAULT = 1;// 待拣货（默认状态）
     // const STATUS_PICK_DONE = 2;// 拣货完成（默认状态）
-   const STATUS_PICKING = 2;// 拣货中
-   const STATUS_PICK_DONE = 3;// 已拣货
+    const STATUS_PICKING = 2;// 拣货中
+    const STATUS_PICK_DONE = 3;// 已拣货
     const STATUS_WAITING = 4;// 待出库（已验货）
-   const STATUS_SENDING = 5;// 配送中
-   const STATUS_PAID = 6;// 已支付
-   const STATUS_SUCCESS = 7;// 已收货
+    const STATUS_SENDING = 5;// 配送中
+    const STATUS_PAID = 6;// 已支付
+    const STATUS_SUCCESS = 7;// 已收货
 
     const ORDER_DELIVERY_TYPE_AIR      = 1;// 空运
     const ORDER_DELIVERY_TYPE_SHIP     = 2;// 海运
