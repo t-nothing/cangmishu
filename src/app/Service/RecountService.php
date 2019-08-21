@@ -60,8 +60,8 @@ class RecountService
                             'total_purcharse_orgin' =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
                             'total_purcharse_now'   =>  $stockLoation->stock->purchase_price * $v["num"],
                             'status'                =>  1,
-                            'location_code'         =>  $stockLoation->warehouse_location_code,
-                            'location_id'           =>  $stockLoation->warehouse_location_id,
+                            'location_code'         =>  $stockLoation->warehouse_location_code??'',
+                            'location_id'           =>  $stockLoation->warehouse_location_id??0,
                         ]);
                     }
 

@@ -59,8 +59,8 @@ class RecountController extends Controller
             app('recount')->create($data);
             return formatRet(0);
         }catch (\Exception $e){
-            app('log')->error('新增入库单分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增入库单分类失败");
+            app('log')->error('新增盘点单失败',['msg' =>$e->getMessage()]);
+            return formatRet(500,"新增盘点单失败");
         }
     }
 

@@ -26,7 +26,7 @@ class CartController extends Controller
 
     public function getWhoesCart()
     {
-        $key = sprintf("%s:shop-%d:cart", Auth::user()->id, 1);
+        $key = sprintf("%s:shop-%d:cart", Auth::shopId(), Auth::user()->id);
         return $key;
     }
 
