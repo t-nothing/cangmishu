@@ -173,6 +173,10 @@ class BatchController extends Controller
             return formatRet(404, '入库单不存在', [], 404);
         }
 
+        if($batch->owner_id != Auth::ownerId()){
+            return formatRet(500,'没有权限');
+        }
+
         $batch->load(['batchProducts', 'distributor', 'warehouse', 'batchType', 'operatorUser']);
 
         $batch->append('batch_code_barcode');
@@ -201,6 +205,10 @@ class BatchController extends Controller
 
         if (! $batch = Batch::where('owner_id',Auth::ownerId())->find($batch_id)) {
             return formatRet(404, '入库单不存在或者没有权限操作', [], 404);
+        }
+
+        if($batch->owner_id != Auth::ownerId()){
+            return formatRet(500,'没有权限');
         }
 
         $batch->load(['batchProducts', 'distributor', 'warehouse', 'batchType', 'operatorUser']);

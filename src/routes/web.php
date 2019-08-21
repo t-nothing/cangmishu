@@ -29,6 +29,8 @@ Route::get('/user/resetPassword/{token_value}', [
 ]);// 忘记密码-重置密码链接
 Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-重置密码接口
 
+
+
 Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
@@ -156,6 +158,11 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/order/completed/{order_id}', 'OrderController@completed'); //设为签收
     Route::get('/order/pay/status', 'OrderController@payStatusList'); //支付状态列表
     Route::get('/order/pay/type', 'OrderController@payTypeList'); //支付方式列表
+    
+    Route::get('/order/{id}/download/', 'OrderController@download');
+    Route::get('/order/{id}/download/{tempate}', 'OrderController@download');
+    Route::get('/order/{id}/pdf/', 'OrderController@pdf');
+    Route::get('/order/{id}/pdf/{tempate}', 'OrderController@pdf');
 
     //库存
     // Route::get('/stock/code', 'ProductStockController@getSkus');

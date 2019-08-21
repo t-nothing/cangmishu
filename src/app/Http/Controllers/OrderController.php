@@ -16,6 +16,7 @@ use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use PDF;
 
 class OrderController extends Controller
 {
@@ -319,4 +320,68 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * 预览PDF
+     **/
+    public function pdf($id, $template = '')
+    {
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet("500",'找不到该出库单');
+        }
+
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500,"没有权限");
+        }
+        
+        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->append(['out_sn_barcode']);
+
+        $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+
+      
+        $template = "pdfs.order.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['out','pick'])){
+            $template = "pdfs.order.template_pick";
+        }
+
+
+        return view($template, [
+            'order' => $order->toArray(),
+        ]);
+    }
+
+    /**
+     * 下载PDF
+     *
+    */
+    public function download(BaseRequests $request, $id, $template = '')
+    {
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet("500",'找不到该出库单');
+        }
+
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500,"没有权限");
+        }
+
+        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->append(['out_sn_barcode']);
+
+        $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+
+      
+        $template = "pdfs.order.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['out','pick'])){
+            $template = "pdfs.order.template_pick";
+        }
+
+        $pdf = PDF::setPaper('a4');
+
+        $file = $order->out_sn . '.pdf';
+        return $pdf->loadView($template, ['order' => $order->toArray()])->download($file);
+
+    }
 }

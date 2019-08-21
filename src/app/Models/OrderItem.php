@@ -54,9 +54,12 @@ class OrderItem extends Model
         return $this->belongsTo('App\Models\Pick', 'shipment_num', 'shipment_num');
     }
 
-    public function stock()
+    /**
+     * 一个出库商品从多个位置出现 
+     */
+    public function stocks()
     {
-        return $this->belongsTo('App\Models\ProductStock', 'product_stock_id', 'id');
+        return $this->hasMany('App\Models\OrderItemStockLocation', 'item_id', 'id');
     }
 
     public function spec()
