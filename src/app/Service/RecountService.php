@@ -35,6 +35,9 @@ class RecountService
 
                     $arr = [];
                     $op = [];
+
+                    $totalQty = 0;
+                    $totalOrginQty = 0;
                     foreach ($data['stock'] as $key => $v) {
                         
                         $stockLoation = ProductStockLocation::where("warehouse_id", $data["warehouse_id"])->where("id", $v["id"])->first();
@@ -49,6 +52,9 @@ class RecountService
                             'model' =>  $stockLoation,
                             'qty'   =>  $v["num"]
                         ];
+
+                        $totalQty += $v["num"];
+                        $totalOrginQty += $stockLoation->shelf_num;
 
                         $arr[] = new RecountStock([
                             'id'                    =>  $stockLoation->id,
@@ -68,7 +74,9 @@ class RecountService
 
                     $model = new Recount;
                     $model->recount_no = Recount::no();
+
                     $model->status = 1;
+                    $model->diff_count = $totalQty - $totalOrginQty;
                     $model->remark = $data["remark"];
                     $model->warehouse_id = $data["warehouse_id"];
                     $model->owner_id = $data["owner_id"];
