@@ -173,6 +173,7 @@ class CartController extends Controller
     {
         app('log')->info('店铺下单',$request->all());
         app('db')->beginTransaction();
+        $outSn = "";
         try {
 
             $this->load($request->shop->id);
@@ -238,8 +239,10 @@ class CartController extends Controller
            
             $data->goods_data = collect($orderItem);
             
-            app('order')->setSource($request->shop->name_cn)->create($data, $request->shop->owner_id);
+            $orderResult = app('order')->setSource($request->shop->name_cn)->create($data, $request->shop->owner_id);
             app('db')->commit();
+
+            $outSn =  $orderResult->out_sn;
 
             Cart::destroy();
 
@@ -248,6 +251,8 @@ class CartController extends Controller
             app('log')->error('下单失败',['msg'=>$e->getMessage()]);
             return formatRet(500, '下单失败:'.$e->getMessage());
         }
-        return formatRet(0,'出库单新增成功');
+        return formatRet(0,'下单成功',[
+            'out_sn'  =>  $outSn
+        ]);
     }
 }
