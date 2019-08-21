@@ -33,11 +33,11 @@ class StoreService
         $stock_num = 0;
         $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num){
             //入库到虚拟货位
-            $locationStock = $this->In($warehouse_id,$v);
+            $locationStock = $this->InAndMoveTo($warehouse_id,$v, $v['code']);
 
             $stock_num += $v['stockin_num'];
             //上架
-            $this->moveTo($locationStock,$warehouse_id,$v['code']);
+            // $this->moveTo($locationStock,$warehouse_id,$v['code']);
 
         })->toArray();
 
@@ -67,7 +67,7 @@ class StoreService
 
 
     //入库
-    public function In($warehouse_id,$data)
+    public function InAndMoveTo($warehouse_id,$data, $code)
     {
         $batchProduct = BatchProduct::ofWarehouse($warehouse_id)->findOrFail($data['stock_id']);
         $batchProduct->load(['batch', 'spec.product.category']);
@@ -75,6 +75,11 @@ class StoreService
         if (! $batchProduct->batch->canStockIn()) {
             return eRet('id为'.$data['stock_id']."的入库单状态不是待入库或入库中");
         }
+
+        if (! $location = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $code)->where('is_enabled',1)->first()) {
+            return eRet('货位不存在或未启用('.$code.')');
+        }
+
         $category = $batchProduct->spec->product->category;
         if ($category) {
             $rules = [];
@@ -114,10 +119,13 @@ class StoreService
         $batchProduct->stockin_num             = $data["stockin_num"];//记录已经入库数量
         $batchProduct->save();
 
-        //先上传到虚拟货位
-        $locationStock = $productStock->pushToLocation(0, $data['stockin_num']);
+        //直接上到货位上面
+        $locationStock = $productStock->pushToLocation($location->id, $data['stockin_num']);
 
+        //入库
         event(new StockLocationIn($locationStock, $data['stockin_num']));
+        //上架
+        event(new StockLocationPutOn($locationStock, $locationStock->shelf_num));
         return $locationStock;
     }
 
