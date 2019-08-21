@@ -245,7 +245,7 @@ class StoreService
                 $tmp['pick_num'] = $locationStock['pick_num'];
                 $tmp['shipment_num'] = $locationStock["shipment_num"]??"";
                 $tmp['stock_sku'] = $locationStock["sku"];
-                $tmp['relevance_code'] = $v["relevance_code"];
+                $tmp['relevance_code'] = $v['item']->relevance_code;
                 $tmp['verify_num'] = $locationStock['pick_num'];//自动验货
                 OrderItemStockLocation::create($tmp);
 

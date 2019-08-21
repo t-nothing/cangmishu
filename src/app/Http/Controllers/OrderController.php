@@ -83,7 +83,7 @@ class OrderController extends Controller
         if(!$order){
             return formatRet("500",'找不到该出库单');
         }
-        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stock:id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
         $order->append(['out_sn_barcode']);
 
         $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
