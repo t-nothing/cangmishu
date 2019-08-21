@@ -238,7 +238,7 @@ class CartController extends Controller
            
             $data->goods_data = collect($orderItem);
             
-            app('order')->setSource("Wechat")->create($data, $request->shop->owner_id);
+            app('order')->setSource($request->shop->name_cn)->create($data, $request->shop->owner_id);
             app('db')->commit();
 
             Cart::destroy();
