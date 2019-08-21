@@ -16,7 +16,6 @@ class AddDiffCountFieldToRecountTable extends Migration
         
         Schema::table('recount', function (Blueprint $table)  { 
             $table->integer('diff_count')->comment('差别数字')->default(0);
-            $table->integer('stock_location_id')->comment('库存货位ID')->default(0);
         });
 
         Schema::table('recount_stock', function (Blueprint $table)  { 

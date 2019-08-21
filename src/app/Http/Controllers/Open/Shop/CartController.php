@@ -7,16 +7,15 @@ namespace App\Http\Controllers\Open\Shop;
 use App\Http\Requests\BaseRequests;
 use App\Http\Controllers\Controller;
 use App\Rules\PageSize;
-// use Overtrue\LaravelShoppingCart\Cart;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ShopProductSpec;
 use App\Models\ReceiverAddress;
 use App\Models\SenderAddress;
 use App\Http\Requests\CreateShopCartCheckoutRequest;
-use Cart;
 
 class CartController extends Controller
 {
+
     public function shopId()
     {
         return app('request')->header('Shop', '');
@@ -31,11 +30,6 @@ class CartController extends Controller
     {
         $key = sprintf("%s:shop-%d:cart", $this->shopId(), Auth::user()->id);
         return $key;
-    }
-
-    public function load($shopId)
-    {
-        Cart::instance($this->getInstanceName())->restore($this->getWhoesCart());
     }
 
     /**
@@ -58,14 +52,12 @@ class CartController extends Controller
 
         try
         {
-            $this->load($request->shop->id);
             $spec->load('productSpec');
-            Cart::add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, 1, [
+            app('cart')->name($this->getWhoesCart())->add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, [
                 'spec'              =>  $spec->name,
                 'source'            =>  'wechat.mini_program',
                 'relevance_code'    =>  $spec->productSpec->relevance_code
             ]);
-            Cart::store($this->getWhoesCart());
 
             return formatRet(200,"添加购物车成功");
         }
@@ -88,8 +80,7 @@ class CartController extends Controller
         
         try
         {
-            $this->load($request->shop->id);
-            Cart::update($id, $qty);
+            app('cart')->name($this->getWhoesCart())->update($id, $qty);
 
             return formatRet(200,"更新商品成功");
         }
@@ -110,8 +101,7 @@ class CartController extends Controller
         
         try
         {
-            $this->load($request->shop->id);
-            Cart::remove($id);
+            app('cart')->name($this->getWhoesCart())->remove($id);
 
             return formatRet(200,"移除商品成功");
         }
@@ -131,8 +121,7 @@ class CartController extends Controller
     {
         try
         {
-            $this->load($request->shop->id);
-            Cart::destroy();
+            app('cart')->name($this->getWhoesCart())->destroy();
 
             return formatRet(200,"清空购物车成功");
         }
@@ -151,8 +140,9 @@ class CartController extends Controller
      **/
     public function list(BaseRequests $request)
     {
-        $this->load($request->shop->id);
-        return formatRet(0, '', Cart::content()->toArray());
+        $items = app('cart')->name($this->getWhoesCart())->all();
+
+        return formatRet(0, '', $items->toArray());
     }
 
     /**
@@ -160,11 +150,9 @@ class CartController extends Controller
      **/
     public function count(BaseRequests $request)
     {
-        $this->load($request->shop->id);
         return formatRet(0, '', [
-            'count'         =>  Cart::count(),
-            'total'         =>  Cart::total(),
-            'discount'      =>  Cart::discount()
+            'count'         =>  app('cart')->name($this->getWhoesCart())->count(),
+            'total'         =>  app('cart')->name($this->getWhoesCart())->total(),
         ]);
     }
 
@@ -178,13 +166,12 @@ class CartController extends Controller
         $outSn = "";
         try {
 
-            $this->load($request->shop->id);
-            if($request->verify_money != Cart::total())
+            if($request->verify_money != app('cart')->name($this->getWhoesCart())->total())
             {
                 throw new \Exception("下单金额不一致", 1);
             }
 
-            if(0 === Cart::count())
+            if(0 === app('cart')->name($this->getWhoesCart())->count())
             {
                 throw new \Exception("购物车不能为空", 1);
             }
@@ -230,9 +217,9 @@ class CartController extends Controller
 
 
             $orderItem = [];
-            foreach(Cart::content() as $row)  {
+            foreach(app('cart')->name($this->getWhoesCart())->all() as $row)  {
                 $orderItem[] = [
-                    'relevance_code'    =>  $row->options['relevance_code'],
+                    'relevance_code'    =>  $row->relevance_code,
                     'num'               =>  $row->qty,
                     'sale_price'        =>  $row->price,
                 ];
@@ -246,7 +233,7 @@ class CartController extends Controller
 
             $outSn =  $orderResult->out_sn;
 
-            Cart::destroy();
+            app('cart')->name($this->getWhoesCart())->destroy();
 
         } catch (\Exception $e) {
             app('db')->rollback();
