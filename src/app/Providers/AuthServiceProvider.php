@@ -36,11 +36,11 @@ class AuthServiceProvider extends ServiceProvider
             return new JwtGuard(Auth::createUserProvider($config['provider']),app('request'));
         });
 
-        // Auth::extend('shop', function ($app, $name, array $config) {
-        //     // 返回一个 Illuminate\Contracts\Auth\Guard 实例...
+        Auth::extend('shop', function ($app, $name, array $config) {
+            // 返回一个 Illuminate\Contracts\Auth\Guard 实例...
 
-        //     return new ShopGuard(Auth::createUserProvider($config['provider']),app('request'));
-        // });
+            return new ShopGuard(Auth::createUserProvider($config['provider']),app('request'));
+        });
 
         Passport::routes(function (RouteRegistrar $router) {
             config(['auth.guards.api.provider' => 'users']);

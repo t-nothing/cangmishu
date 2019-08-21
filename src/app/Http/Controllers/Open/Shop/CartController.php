@@ -17,7 +17,10 @@ use Cart;
 
 class CartController extends Controller
 {
-    // var $cart;
+    public function shopId()
+    {
+        return app('request')->header('Shop', '');
+    }
 
     public function getInstanceName()
     {
@@ -26,7 +29,7 @@ class CartController extends Controller
 
     public function getWhoesCart()
     {
-        $key = sprintf("%s:shop-%d:cart", Auth::shopId(), Auth::user()->id);
+        $key = sprintf("%s:shop-%d:cart", $this->shopId(), Auth::user()->id);
         return $key;
     }
 
@@ -149,7 +152,6 @@ class CartController extends Controller
     public function list(BaseRequests $request)
     {
         $this->load($request->shop->id);
-
         return formatRet(0, '', Cart::content()->toArray());
     }
 
