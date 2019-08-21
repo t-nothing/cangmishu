@@ -26,9 +26,9 @@ class RecountService
         //校验stock
         if(isset($data['stock']))
         {
-
+            $lock = NULL;
             try {
-                $lock = Cache::lock(sprintf("recountLock:%s:%d", $data["warehouse_id"]), strtotime(date("Y-m-d H")));
+                $lock = Cache::lock(sprintf("recountStockLock:%s:%d", $data["warehouse_id"]), strtotime(date("Y-m-d H")));
                 //加一个锁防止并发
                 if ($lock->get()) {
 
@@ -78,6 +78,7 @@ class RecountService
                     foreach ($op as $key => $v) {
                         event(new StockLocationAdjust($v["model"], $v["qty"]));
                     }
+                    $lock->release();
                 }
             }
             catch(\Exception $ex) {
