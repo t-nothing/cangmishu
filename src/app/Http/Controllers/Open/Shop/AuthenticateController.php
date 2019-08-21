@@ -54,7 +54,7 @@ class AuthenticateController extends  Controller
         $miniProgram = Factory::miniProgram(config('wechat.mini_program.default'));
         $data = $miniProgram->auth->session($request->code);
         if (isset($data['errcode'])) {
-            return formatRet(401, 'code已过期或不正确', 401);
+            return formatRet(401, 'code已过期或不正确', [], 401);
         }
 
         $openid = $data['openid'];

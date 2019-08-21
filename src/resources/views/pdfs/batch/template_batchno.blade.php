@@ -7,6 +7,7 @@
   <style type="text/css">
     *{
       font-size: 11px;
+      font-family:Arial,'宋体',simsun;
     }
     .page{
       width: 70mm;
@@ -37,14 +38,13 @@
     }
 
 }
-  </style>
+</style>
 </head>
-
 <body>
     @forelse ($batch['batch_products'] as $k => $product)
     <div class="page">
       <div class="barcode">
-        <img src="{{ $product['relevance_code_barcode'] }}">
+        <img src="{{ $product['relevance_code_barcode'] }}" align="center">
         <p>{{ $product['relevance_code'] }}</p>
       </div>
 

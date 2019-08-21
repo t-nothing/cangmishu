@@ -195,6 +195,7 @@ class BatchController extends Controller
         ]);
     }
 
+    /**下载PDF**/
     public function download(BaseRequests $request, $batch_id, $template = '')
     {
 
@@ -223,7 +224,7 @@ class BatchController extends Controller
 
         if($template == "pdfs.batch.template_batchno" )
         {
-            $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '1')->setOption('margin-right', '1')->setOption('margin-top', '2')->setOption('margin-bottom', '1');
+            $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '2')->setOption('margin-bottom', '0');
         }
 
 

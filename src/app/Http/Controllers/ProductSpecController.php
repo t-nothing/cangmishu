@@ -157,15 +157,15 @@ class ProductSpecController extends Controller
      */
     public function destroy($spec_id)
     {
-        if (! $spec = ProductSpec::where('owner_id', Auth::ownerId())->find($spec_id)) {
-            return formatRet(404, '商品规格不存在', [], 404);
-        }
+        // if (! $spec = ProductSpec::where('owner_id', Auth::ownerId())->find($spec_id)) {
+        //     return formatRet(404, '商品规格不存在', [], 404);
+        // }
 
-        if ($spec->delete()) {
-            return formatRet(0);
-        }
+        // if ($spec->delete()) {
+        //     return formatRet(0);
+        // }
 
-        return formatRet(500, '失败');
+        // return formatRet(500, '失败');
     }
 
     public function import(BaseRequests $request)
