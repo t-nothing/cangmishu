@@ -28,7 +28,8 @@ class RecountService
         {
             $lock = NULL;
             try {
-                $lock = Cache::lock(sprintf("recountStockLock:%s:%d", $data["warehouse_id"]), strtotime(date("Y-m-d H")));
+                $lock = Cache::lock(sprintf("recountStockLocks:%s:%d", $data["warehouse_id"], strtotime(date("Y-m-d H"))));
+
                 //加一个锁防止并发
                 if ($lock->get()) {
 
