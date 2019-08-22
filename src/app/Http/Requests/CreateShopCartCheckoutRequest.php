@@ -24,6 +24,8 @@ class CreateShopCartCheckoutRequest extends BaseRequests
     public function rules()
     {
         return [
+            'id'            => 'required|array',
+            'id.*'          => 'required|string',
             'verify_money'  => 'required|numeric|min:0',
             'fullname'      => 'required|string',
             'phone'         => 'required|string',

@@ -85,9 +85,17 @@ class CartService
      *
      * @return \Illuminate\Support\Collection
      */
-    public function all()
+    public function all($idArr = NULL)
     {
-        return $this->getCart();
+        $all = $this->getCart();
+        if(!is_null($idArr)){
+            foreach ($all as $key => $value) {
+                if(!in_array($key, $idArr)) {
+                    unset($all[$key]);
+                }
+            }
+        }
+        return $all;
     }
     /**
      * Add a row to the cart.
@@ -133,6 +141,12 @@ class CartService
 
         event(new CartUpdated($this->name, [$row, $cart]));
         return $raw;
+    }
+
+    public function removeBy($idArr) {
+        foreach ($idArr as $key => $rawId) {
+            $this->remove($rawId);
+        }
     }
     /**
      * Remove a row from the cart.
@@ -192,23 +206,28 @@ class CartService
      *
      * @return float
      */
-    public function total()
+    public function total($idArr = NULL)
     {
-        return $this->totalPrice();
+        return $this->totalPrice($idArr);
     }
     /**
      * Return total price of cart.
      *
      * @return
      */
-    public function totalPrice()
+    public function totalPrice($idArr = NULL)
     {
         $total = 0;
         $cart = $this->getCart();
         if ($cart->isEmpty()) {
             return $total;
         }
-        foreach ($cart as $row) {
+        foreach ($cart as $key => $row) {
+            if(!is_null($idArr)) {
+                if(!in_array($key, $idArr)) {
+                    continue;
+                }
+            }
             $total += $row->qty * $row->price;
         }
         return $total;
@@ -228,6 +247,21 @@ class CartService
         }
         $count = 0;
         foreach ($items as $row) {
+            $count += $row->qty;
+        }
+        return $count;
+    }
+
+    public function countWithChecked($idArr = NULL)
+    {
+        $items = $this->getCart();
+        $count = 0;
+        foreach ($items as $key=>$row) {
+            if(!is_null($idArr)) {
+                if(!in_array($key, $idArr)) {
+                    continue;
+                }
+            }
             $count += $row->qty;
         }
         return $count;

@@ -168,12 +168,12 @@ class CartController extends Controller
         $outSn = "";
         try {
 
-            if($request->verify_money != app('cart')->name($this->getWhoesCart())->total())
+            if($request->verify_money != app('cart')->name($this->getWhoesCart())->total($request->id))
             {
                 throw new \Exception("下单金额不一致", 1);
             }
 
-            if(0 === app('cart')->name($this->getWhoesCart())->count())
+            if(0 === app('cart')->name($this->getWhoesCart())->countWithChecked($request->id))
             {
                 throw new \Exception("购物车不能为空", 1);
             }
@@ -219,7 +219,7 @@ class CartController extends Controller
 
 
             $orderItem = [];
-            foreach(app('cart')->name($this->getWhoesCart())->all() as $row)  {
+            foreach(app('cart')->name($this->getWhoesCart())->all($request->id) as $row)  {
                 $orderItem[] = [
                     'relevance_code'    =>  $row->relevance_code,
                     'num'               =>  $row->qty,
@@ -235,7 +235,7 @@ class CartController extends Controller
 
             $outSn =  $orderResult->out_sn;
 
-            app('cart')->name($this->getWhoesCart())->destroy();
+            app('cart')->name($this->getWhoesCart())->removeBy($request->id);
 
         } catch (\Exception $e) {
             app('db')->rollback();
