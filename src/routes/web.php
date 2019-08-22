@@ -287,7 +287,7 @@ $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middlewar
         $router->get('/cart', 'CartController@list');// 购物车列表
         $router->get('/cart/count', 'CartController@count');// 购物车数量
         $router->post('/cart', 'CartController@store');// 加入购物车
-        $router->patch('/cart/{id}/{qty}', 'CartController@updateQty');// 修改购物车数量
+        $router->put('/cart/{id}/{qty}', 'CartController@updateQty');// 修改购物车数量
         $router->delete('/cart/{id}', 'CartController@remove');// 删除单个购物车商品
         $router->delete('/cart', 'CartController@destroy');// 删除整个购物车商品
         $router->post('/cart/checkout', 'CartController@checkout');// 下单

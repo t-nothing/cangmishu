@@ -53,10 +53,12 @@ class CartController extends Controller
         try
         {
             $spec->load('productSpec');
+            $pics = json_decode($spec->product->pics, true);
             app('cart')->name($this->getWhoesCart())->add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, [
                 'spec'              =>  $spec->name,
                 'source'            =>  'wechat.mini_program',
-                'relevance_code'    =>  $spec->productSpec->relevance_code
+                'relevance_code'    =>  $spec->productSpec->relevance_code,
+                'pic'               =>  $pics[0]??''
             ]);
 
             return formatRet(200,"添加购物车成功");
