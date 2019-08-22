@@ -29,7 +29,7 @@ class OrderController extends Controller
                     ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic')
                     ->paginate(
                         $request->input('page_size',50),
-                        ['id', 'out_sn', 'status_name', 'remark', 'express_code', 'delivery_date', 'express_code', 
+                        ['id', 'out_sn', 'status', 'remark', 'express_code', 'delivery_date', 'express_code', 
                             'receiver_country', 
                             'receiver_city',
                             'receiver_postcode',
