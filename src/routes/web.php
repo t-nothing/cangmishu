@@ -29,8 +29,6 @@ Route::get('/user/resetPassword/{token_value}', [
 ]);// 忘记密码-重置密码链接
 Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-重置密码接口
 
-
-
 Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
@@ -235,6 +233,8 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/recount', 'RecountController@store');
     Route::get('/recount/{id}', 'RecountController@show');
     Route::delete('/recount/{id}', 'RecountController@destroy');
+    Route::get('/recount/{batch_id}/download/', 'RecountController@download');
+    Route::get('/recount/{batch_id}/pdf/', 'RecountController@pdf');
 
 
 });

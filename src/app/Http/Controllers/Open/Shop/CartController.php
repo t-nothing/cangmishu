@@ -222,6 +222,7 @@ class CartController extends Controller
             foreach(app('cart')->name($this->getWhoesCart())->all($request->id) as $row)  {
                 $orderItem[] = [
                     'relevance_code'    =>  $row->relevance_code,
+                    'pic'               =>  $row->pic,
                     'num'               =>  $row->qty,
                     'sale_price'        =>  $row->price,
                 ];

@@ -54,6 +54,13 @@ class Recount extends Model
     }
 
 
+    /**
+     * @return string
+     */
+    public function getRecountNoBarcodeAttribute()
+    {
+        return 'data:image/png;base64,' . app("DNS1D")->getBarcodePNG($this->recount_no, "C128");
+    }
 
     /*
     |--------------------------------------------------------------------------

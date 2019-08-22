@@ -91,4 +91,55 @@ class RecountController extends Controller
     {
         return false;//不开放
     }
+
+    public function pdf($id, $template = '')
+    {
+        $recount = Recount::with('warehouse')->find($id);
+
+        if(!$recount){
+            return formatRet(500,"盘点单不存在");
+        }
+        if ($recount->owner_id != Auth::ownerId()){
+            return formatRet(500,"没有权限");
+        }
+        $recount->append('recount_no_barcode');
+        $recount->load('stocks');
+
+        // $template = "pdfs.recount.template_".strtolower($template);
+        // if(!in_array(strtolower($template), ['entry','purchase','batchno'])){
+        //     $template = "pdfs.recount";
+        // }
+
+        $template = "pdfs.recount";
+        return view($template, [
+            'data' => $recount->toArray(),
+        ]);
+    }
+
+    /**下载PDF**/
+    public function download(BaseRequests $request, $id, $template = '')
+    {
+
+        $recount = Recount::with('warehouse')->find($id);
+
+        if(!$recount){
+            return formatRet(500,"盘点单不存在");
+        }
+        if ($recount->owner_id != Auth::ownerId()){
+            return formatRet(500,"没有权限");
+        }
+
+        $recount->load('stocks');
+
+        $template = "pdfs.recount";
+        $recount->append('recount_no_barcode');
+
+        $pdf = PDF::setPaper('a4');
+
+
+        $file = $recount->recount_no . '.pdf';
+
+        return $pdf->loadView($template, ['data' => $recount->toArray()])->download($file);
+
+    }
 }
