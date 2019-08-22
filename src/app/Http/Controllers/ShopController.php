@@ -152,7 +152,7 @@ class ShopController extends Controller
             $shop->weapp_qrcode         = sprintf("%s.png", $shop->domain);
             
             $app = app('wechat.mini_program');
-            $response = $app->app_code->get('/shop/'.$shop->id);
+            $response = $app->app_code->get('/pages/index/index?shop='.$shop->id);
 
             if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
 
