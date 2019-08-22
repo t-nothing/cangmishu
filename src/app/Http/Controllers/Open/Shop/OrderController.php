@@ -26,7 +26,7 @@ class OrderController extends Controller
 
         $dataList = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)
                     ->orderBy('id','DESC')
-                    ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency')
+                    ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic')
                     ->paginate(
                         $request->input('page_size',50),
                         ['id', 'out_sn', 'status', 'remark', 'express_code', 'delivery_date', 'express_code', 
@@ -60,7 +60,7 @@ class OrderController extends Controller
             return formatRet(404,"订单不存在", 404);
         }
 
-        $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency");
+        $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic");
         $order->setVisible([
                 'id', 
                 'out_sn', 
