@@ -57,7 +57,7 @@ class OrderController extends Controller
         $order = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)->find($id);
 
         if(!$order){
-            return formatRet(404,"订单不存在", 404);
+            return formatRet(404,"订单不存在", []);
         }
         $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic");
         $order->setVisible([
