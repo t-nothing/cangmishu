@@ -273,6 +273,7 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
 });
 
+$router->get('open/shop/list', 'Open\\Shop\\ShopController@index');// 店铺列表
 //店铺开放型接口
 $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware' => ['shop']], function($router) {
 

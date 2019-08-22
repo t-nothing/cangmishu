@@ -150,6 +150,7 @@ class ShopController extends Controller
             $shop->save();
             $shop->domain               = md5($shop->id);
             $shop->weapp_qrcode         = sprintf("%s.png", $shop->domain);
+            $shop->sort_num             = 0;
             
             $app = app('wechat.mini_program');
             $response = $app->app_code->get('/pages/index/index?shop='.$shop->id);
