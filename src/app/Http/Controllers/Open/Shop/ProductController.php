@@ -20,8 +20,17 @@ class ProductController extends Controller
      **/
     public function list(BaseRequests $request, int $catId = 0)
     {
+        $this->validate($request, [
+            'page'         => 'integer|min:1',
+            'page_size'    => new PageSize(),
+        ]);
+
+        $catId = intval($catId);
         $dataList =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
             ->with("specs")
+            ->when($catId, function($q) use($catId) {
+                return $q->where('product.category_id', $catId);
+            })
             ->where('shop_id', $request->shop->id)
             ->when($request->filled('keywords'),function ($q) use ($request){
                 return $q->hasKeyword($request->input('keywords'));
