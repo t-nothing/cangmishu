@@ -186,7 +186,7 @@ class CartController extends Controller
             $data->shop_id = $request->shop->id;
             $data->shop_user_id = Auth::user()->id;
             $data->warehouse_id =  $request->shop->warehouse_id;
-            $data->order_type = OrderType::where('warehouse_id', $request->shop->warehouse_id)->first()->id??0;
+            $data->order_type = OrderType::where('warehouse_id', $request->shop->warehouse_id)->oldest()->first()->id??0;
             $data->shop_remark = "微店铺下单";
             $data->express_num = "";
 
