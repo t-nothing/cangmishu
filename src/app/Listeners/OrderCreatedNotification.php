@@ -40,7 +40,7 @@ class OrderCreatedNotification  implements ShouldQueue
      * @param  OrderOutReady  $event
      * @return void
      */
-    public function handle(OrderOutReady $event)
+    public function handle(OrderCreated $event)
     {
         $order = $event->order;
 
