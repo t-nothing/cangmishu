@@ -48,8 +48,8 @@ class CreateOrderRequest extends BaseRequests
                         ->where('warehouse_id',$warehouse_id);
                 })
             ],
-            'goods_data.*.num'            => 'required|integer|min:1',
-            'goods_data.*.sale_price'     => 'required|numeric|min:0',
+            'goods_data.*.num'            => 'required|integer|min:1|max:99999',
+            'goods_data.*.sale_price'     => 'required|numeric|min:0|max:99999',
             // 快递单数据
             'delivery_type'               => 'integer|min:1',
             'express_num'                 => 'string|max:255',

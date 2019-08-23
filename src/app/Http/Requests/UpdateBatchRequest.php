@@ -58,8 +58,8 @@ class UpdateBatchRequest extends BaseRequests
                       ->where('warehouse_id',$warehouse_id);
                 })
             ],
-            'product_stock.*.need_num'         => 'required|integer|min:1',
-            'product_stock.*.distributor_code' => ['string','max:255','distinct'],
+            'product_stock.*.need_num'         => 'required|integer|min:1|max:99999',
+            'product_stock.*.distributor_code' => ['string','max:20','distinct'],
             'product_stock.*.remark'           => 'present|string|max:255',
         ];
     }

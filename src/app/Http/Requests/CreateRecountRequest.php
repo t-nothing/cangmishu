@@ -34,7 +34,7 @@ class CreateRecountRequest extends BaseRequests
             ],
             'stock'                    => 'required|array',
             'stock.*.id'               => 'required|integer|min:1',
-            'stock.*.num'              => 'required|integer|min:1',
+            'stock.*.num'              => 'required|integer|min:1|max:99999',
             'remark'                   => 'present|string',
         ];
     }

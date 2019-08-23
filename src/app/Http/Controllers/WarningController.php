@@ -29,7 +29,7 @@ class WarningController extends  Controller
             'warning_email' => 'required|email|max:255',
             'warning_data' => 'required|array',
             'warning_data.*.category_id' => 'required|integer|min:1',
-            'warning_data.*.warning_stock' => 'required|integer|min:1'
+            'warning_data.*.warning_stock' => 'required|integer|min:1|max:1000'
         ]);
         $isSendEmail = false;
         $user = User::where('id', app('auth')->ownerId())->first();

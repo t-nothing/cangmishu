@@ -43,7 +43,7 @@ class UpdateShopProductRequest extends BaseRequests
             'descs.*'                   => 'required|url', 
             'specs'                     => 'present|array',
             'specs.*.name_cn'           => 'required|string|min:1|max:20',
-            'specs.*.sale_price'        => 'required|numeric|min:0',
+            'specs.*.sale_price'        => 'required|numeric|min:0|max:99999',
             'specs.*.id'   => [
                 'required','int','min:1',
                 Rule::exists('shop_product_spec','id')->where(function($q)use ($productId){
