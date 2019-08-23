@@ -15,6 +15,8 @@ use App\Events\StockLocationIn;
 use App\Events\StockLocationPutOn;
 use App\Events\StockLocationPick;
 use App\Events\StockLocationOut;
+use App\Events\OrderCompleted;
+use App\Events\OrderOutReady;
 
 class StoreService
 {
@@ -264,7 +266,7 @@ class StoreService
 
         // 记录出库单拣货完成的时间
         OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-
+        
         return $pickStockResult;
 
         
@@ -290,6 +292,7 @@ class StoreService
 
         // 记录出库单拣货完成的时间
         OrderHistory::addHistory($order, Order::STATUS_WAITING);
+        event(new OrderOutReady($order));
 
     }
 

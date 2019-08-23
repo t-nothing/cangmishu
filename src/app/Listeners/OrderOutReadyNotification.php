@@ -2,13 +2,14 @@
 
 namespace App\Listeners;
 
-use App\Events\OrderCreated;
+use App\Events\OrderOutReady;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
 use EasyWeChat\Kernel\Messages\Text;
 
-class OrderCreatedNotification  implements ShouldQueue
+
+class OrderOutReadyNotification implements ShouldQueue
 {
     /**
      * The name of the queue the job should be sent to.
@@ -52,7 +53,7 @@ class OrderCreatedNotification  implements ShouldQueue
 
                 $service = $app->customer_service;
 
-                $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order->receiver_fullname, $order->out_sn));
+                $text = new Text(sprintf("%s 您好, 您的订单 %s已经准备完毕, 下一步我们将为您准备发货, 请您耐心等待", $order->receiver_fullname, $order->out_sn));
 
                 $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
 

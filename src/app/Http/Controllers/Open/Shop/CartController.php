@@ -181,7 +181,7 @@ class CartController extends Controller
             $data = new BaseRequests;            
 
             $data->express_code  = "";
-            $data->remark = "";
+            $data->remark = $request->input('remark', '');
             $data->shop_id = $request->shop->id;
             $data->shop_user_id = Auth::user()->id;
             $data->warehouse_id =  $request->shop->warehouse_id;

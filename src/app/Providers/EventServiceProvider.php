@@ -49,6 +49,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\OrderCompleted' => [ //更新了快递单号
                 'App\Listeners\OrderCompletedNotification',
             ],
+        'App\Events\OrderOutReady' => [ //拣货完成，准备出库
+                'App\Listeners\OrderOutReadyNotification',
+            ],
         'App\Events\CartAdded' => [ 
                 'App\Listeners\CartAddedNotification',
             ],
