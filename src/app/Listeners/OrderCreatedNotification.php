@@ -44,18 +44,19 @@ class OrderCreatedNotification  implements ShouldQueue
     {
         $order = $event->order;
 
-        if($order->shop_user_id > 0) {
-            $user = ShopUser::find($order->shop_user_id);
+        if($order["shop_user_id"] > 0) {
+            $user = ShopUser::find($order["shop_user_id"]);
             if($user) {
 
-                app('log')->info('开始给用户推送创建订单消息', [$order->out_sn, $order->shop_user_id]);
+                app('log')->info('开始给用户推送创建订单消息', $order["out_sn"], $order["shop_user_id"]);
                 $app = app('wechat.mini_program');
 
                 $service = $app->customer_service;
 
-                $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order->receiver_fullname, $order->out_sn));
+                $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
 
                 $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
+
 
 
             }
@@ -69,7 +70,7 @@ class OrderCreatedNotification  implements ShouldQueue
      * @param  \Exception  $exception
      * @return void
      */
-    public function failed(OrderShipped $event, $exception)
+    public function failed(OrderCreated $event, $exception)
     {
         //
     }
