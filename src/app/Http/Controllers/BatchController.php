@@ -187,13 +187,14 @@ class BatchController extends Controller
             }
         }
 
+        
         app('log')->info('template', [strtolower($template)]);
-        $template = "pdfs.batch.template_".strtolower($template);
+        $templateName = "pdfs.batch.template_".strtolower($template);
         if(!in_array(strtolower($template), ['entry','purchase','batchno'])){
-            $template = "pdfs.batch";
+            $templateName = "pdfs.batch";
         }
-
-        return view($template, [
+        app('log')->info('template', [strtolower($template)]);
+        return view($templateName, [
             'batch' => $batch->toArray(),
             'showInStock'=>1
         ]);
@@ -223,20 +224,20 @@ class BatchController extends Controller
 
         $file = $batch->batch_code . '.pdf';
 
-        $template = "pdfs.batch.template_".strtolower($template);
+        $templateName = "pdfs.batch.template_".strtolower($template);
         if(!in_array(strtolower($template), ['', 'entry','purchase','batchno'])){
-            $template = "pdfs.batch";
+            $templateName = "pdfs.batch";
         }
 
         $pdf = PDF::setPaper('a4');
 
-        if($template == "pdfs.batch.template_batchno" )
+        if($templateName == "pdfs.batch.template_batchno" )
         {
             $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '2')->setOption('margin-bottom', '0');
         }
 
 
-        return $pdf->loadView($template, ['batch' => $batch->toArray(), 'showInStock'=>0])->download($file);
+        return $pdf->loadView($templateName, ['batch' => $batch->toArray(), 'showInStock'=>0])->download($file);
 
     }
 

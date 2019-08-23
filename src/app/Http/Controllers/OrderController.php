@@ -341,13 +341,13 @@ class OrderController extends Controller
         $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
 
       
-        $template = "pdfs.order.template_".strtolower($template);
+        $templateName = "pdfs.order.template_".strtolower($template);
         if(!in_array(strtolower($template), ['out','pick'])){
-            $template = "pdfs.order.template_pick";
+            $templateName = "pdfs.order.template_pick";
         }
 
 
-        return view($template, [
+        return view($templateName, [
             'order' => $order->toArray(),
         ]);
     }
@@ -373,15 +373,15 @@ class OrderController extends Controller
         $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
 
       
-        $template = "pdfs.order.template_".strtolower($template);
+        $templateName = "pdfs.order.template_".strtolower($template);
         if(!in_array(strtolower($template), ['out','pick'])){
-            $template = "pdfs.order.template_pick";
+            $templateName = "pdfs.order.template_pick";
         }
 
         $pdf = PDF::setPaper('a4');
 
         $file = $order->out_sn . '.pdf';
-        return $pdf->loadView($template, ['order' => $order->toArray()])->download($file);
+        return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
 
     }
 }
