@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ShopProductSpec;
 use App\Models\ReceiverAddress;
 use App\Models\SenderAddress;
+use App\Models\OrderType;
 use App\Http\Requests\CreateShopCartCheckoutRequest;
 
 class CartController extends Controller
@@ -66,7 +67,7 @@ class CartController extends Controller
         catch(\Exception $ex)
         {
 
-            print_r($ex->getMessage());
+            // print_r($ex->getMessage());
         }
 
         
@@ -185,11 +186,9 @@ class CartController extends Controller
             $data->shop_id = $request->shop->id;
             $data->shop_user_id = Auth::user()->id;
             $data->warehouse_id =  $request->shop->warehouse_id;
-            $data->order_type = 1;
+            $data->order_type = OrderType::where('warehouse_id', $request->shop->warehouse_id)->first()->id??0;
             $data->shop_remark = "微店铺下单";
-            $data->remark = "用户备注";
             $data->express_num = "";
-            $data->source = "mini_program";
 
 
             $data->receiver = new ReceiverAddress([
