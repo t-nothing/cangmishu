@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Imports\ProductsImport;
 use App\Models\Product;
 use App\Models\ProductSpec;
+use App\Models\Category;
 use App\Models\ShopProductSpec;
 use App\Services\Service\CategoryService;
 use Illuminate\Http\Request;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Validators\ValidationException;
+use Validator;
+
 
 class ProductController extends Controller
 {
@@ -84,6 +87,7 @@ class ProductController extends Controller
         }
 
 
+
         $product = new Product;
         $product->category_id         = $request->category_id;
         $product->name_cn             = $request->name_cn;
@@ -97,15 +101,18 @@ class ProductController extends Controller
         $product->warehouse_id	      = $request->warehouse_id;
         $product->sale_price          = $specs[0]['sale_price'];
         $product->purchase_price      = $specs[0]['purchase_price'];
-
+        DB::beginTransaction();
+  
         try{
             $product->save();
             foreach ($specs as $k => $v) {
                 $specs[$k]['product_id']    = $product->id;
             }
             ProductSpec::insert($specs);
+            DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
+            DB::rollBack();
             app('log')->error('新增货品失败',['msg'=>$e->getMessage()]);
             return formatRet(500,"新增失败");
         }
@@ -232,10 +239,76 @@ class ProductController extends Controller
                 Rule::exists('warehouse','id')->where('owner_id',app('auth')->ownerId())
             ]
         ]);
+
+        $newResult = [];
         try {
             $productImport = new ProductsImport(new CategoryService);
-            app('excel')->import($productImport, $request->file('file'));
-            return formatRet(0, '导入成功');
+            $resultAll = app('excel')->toArray($productImport, $request->file('file'), 'UTF-8');
+           
+            $result = $resultAll[0];
+            // app('log')->info('result', $result);
+            
+            foreach ($result as $key => $row) {
+                // print_r($row);
+
+                $category  = Category::where('name_cn', $row['category_name'])
+                ->where('warehouse_id',app('auth')->warehouse()->id)
+                ->where('owner_id',app('auth')->ownerId())->first();
+                if(!$category) {
+                    return formatRet(0, "{$row['category_name']}分类不存在");
+                }
+
+                $product = [
+                    'warehouse_id'  =>  app('auth')->warehouse()->id,
+                    'name_cn'       =>  $row['name_cn'],
+                    'name_en'       =>  $row['name_cn'],
+                    'remark'        =>  $row['remark'],
+                    'category_id' =>  $category->id,
+                    'owner_id'      =>  app('auth')->ownerId(),
+                ];
+
+                // app('log')->info('product', $product);
+                unset($row['name_cn']);
+                unset($row['remark']);
+                unset($row['category_name']);
+
+
+                if(count($row) % 5 !== 0) {
+
+                    app('log')->info('规格内容长度', $row);
+                    throw new \Exception("导入模板错误", 1);
+                }
+                $specs = array_chunk($row, 5);
+                foreach ($specs as $kk=> $spec) {
+
+                    if(empty($spec[0]) && empty($spec[1])) {
+                        continue;
+                    }
+
+
+
+                    $specRow = [
+                        'name_cn'           =>  $spec[0],
+                        'name_en'           =>  $spec[0],
+                        'net_weight'        =>  trim($spec[4]),
+                        'gross_weight'      =>  trim($spec[4]),
+                        'relevance_code'    =>  $spec[1],
+                        'purchase_price'    =>  trim($spec[2]),
+                        'sale_price'        =>  trim($spec[3]),
+                        'product_id'        =>  0,
+                        'owner_id'          =>  app('auth')->ownerId(),
+                        'warehouse_id'      =>  app('auth')->warehouse()->id,
+                    ];
+
+                    $product['specs'][] =  $specRow;
+                }
+
+                
+                $newResult[] =  $product;
+            }
+
+            // app('log')->info('商品信息xxxxx', $result);
+
         } catch (ValidationException $e) {
             $failures = $e->failures();
             $error = [];
@@ -248,9 +321,41 @@ class ProductController extends Controller
             }
             return formatRet(0, '导入结束,数据验证未通过', $error);
         } catch(\Exception $exception) {
+            
             app('log')->error('货品导入失败', ["msg" => $exception->getMessage()]);
             return formatRet(500, '导入失败');
         }
+
+        $productRequest = new CreateProductRequest;
+
+
+        DB::beginTransaction();
+        try{
+           
+            $products = [];
+            foreach ($newResult as $key => $product) {
+                
+                $validator = Validator::make($product, $productRequest->rules());   
+                if ($validator->fails()) 
+                {
+                    throw new \Exception($validator->errors()->first(), 1);
+                }
+
+                $specs = $product['specs'];
+                unset($product['specs']);
+                $productModel = new Product($product);
+                $productModel->save();
+                $productModel->specs()->createMany($specs);
+            }
+
+            DB::commit();
+            return formatRet(0);
+        }catch (\Exception $e){
+            DB::rollBack();
+            app('log')->error('导入货品失败', ["msg" => $e->getMessage()]);
+            return formatRet(500,"导入货品失败:".$e->getMessage());
+        }
+
     }
 
     public  function  show(BaseRequests $request,$product_id)

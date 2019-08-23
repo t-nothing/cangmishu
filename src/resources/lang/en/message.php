@@ -59,6 +59,7 @@ return [
     'productCategoryNotExist'  =>' Product category not exist!',
     'productCategoryCantUse'  =>' Product category disabled!',
     'relevanceCodeIsUsed'  =>', Product code :relevance_code has been used',
+    'relevanceCodeIsUsedByRow'  =>'In Rows Line :row :relevance_code has been used',
     'productIsNotExist'  =>' Product not exist',
     'cantHandle'  =>' Cannot modify products of rental user',
     'SpecNotExist'  =>' Specification not exist',

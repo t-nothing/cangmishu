@@ -43,13 +43,13 @@ class CreateProductRequest extends BaseRequests
             'remark'                    => 'string|max:255',
             'photos'                    => 'string|max:255',
             'specs'                     => 'required|array',
-            'specs.*.name_cn'           => 'required|string|max:255',
+            'specs.*.name_cn'           => 'required|string|max:50',
             // 'specs.*.net_weight'        => 'present|numeric',
             'specs.*.gross_weight'      => 'present|numeric',
             'specs.*.sale_price'        => 'required|numeric|min:0',
             'specs.*.purchase_price'    => 'required|numeric|min:0',
             'specs.*.relevance_code'    => [
-            'required','string','max:255','distinct',
+            'required','string','max:50','distinct',
                 Rule::unique('product_spec','relevance_code')->where(function($q){
                     $q->where('owner_id',Auth::ownerId());
                 })

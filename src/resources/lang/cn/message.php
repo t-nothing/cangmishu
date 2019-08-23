@@ -60,6 +60,7 @@ return [
     'productCategoryNotExist'  =>'货品分类不存在!!!',
     'productCategoryCantUse'  =>'货品分类被禁用!!!',
     'relevanceCodeIsUsed'  =>'外部编码 :relevance_code 已被使用',
+    'relevanceCodeIsUsedByRow'  =>'第:row 行,外部编码 :relevance_code 已被使用',
     'productIsNotExist'  =>'货品不存在',
     'cantHandle'  =>'不能操作租赁用户产品',
     'SpecNotExist'  =>'货品规格不存在',
