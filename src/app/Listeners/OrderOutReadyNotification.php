@@ -49,6 +49,8 @@ class OrderOutReadyNotification implements ShouldQueue
             $user = ShopUser::find($order->shop_user_id);
             if($user) {
 
+                app('log')->info('开始给用户推送准备出库的订单消息', [$order->out_sn, $order->shop_user_id]);
+
                 $app = app('wechat.mini_program');
 
                 $service = $app->customer_service;
