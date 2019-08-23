@@ -53,10 +53,24 @@ class OrderCreatedNotification  implements ShouldQueue
 
                 $service = $app->customer_service;
 
-                $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
+                $result = $app->template_message->send([
+                    'touser' => $user->weapp_openid,
+                    'template_id' => 'PuDzHjSss8ID5KgDzuQPo-LE90yJwv99czWNtnkiUKY',
+                    'page' => 'page/index/index?shop='.$order['shop_id'],
+                    'form_id' => 'form-id',
+                    'data' => [
+                        'keyword1' => $order['sub_total'],
+                        'keyword2' => $order['out_sn'],
+                        'keyword3' => $order['items'][0]['name_cn']??'仓小铺商品',
+                        'keyword4' => $order['status_name']??'已支付',
+                    ],
+                ]);
 
-                $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
+                // $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
 
+                // $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
+
+                
                 app('log')->info('发送结果', $result);
 
 
