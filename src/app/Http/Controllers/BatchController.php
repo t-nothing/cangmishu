@@ -187,7 +187,7 @@ class BatchController extends Controller
             }
         }
 
-
+        app('log')->info('template', [strtolower($template)]);
         $template = "pdfs.batch.template_".strtolower($template);
         if(!in_array(strtolower($template), ['entry','purchase','batchno'])){
             $template = "pdfs.batch";
