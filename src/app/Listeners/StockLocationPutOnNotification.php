@@ -27,9 +27,9 @@ class StockLocationPutOnNotification
     public function handle(StockLocationPutOn $event)
     {
 
-
-        $stockLocation = $event->stockLocation;
-        $stockLocation->increment('shelf_num', $event->qty); 
+        //这里不需要给货位加库存了！！！
+        // $stockLocation = $event->stockLocation;
+        // $stockLocation->increment('shelf_num', $event->qty); 
         
         $model = $event->stock->load("spec.product");
         $model->increment('shelf_num', $event->qty);

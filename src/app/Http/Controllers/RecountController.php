@@ -41,6 +41,7 @@ class RecountController extends Controller
                             ->when($request->filled('keywords'),function ($q) use ($request){
                                 return $q->hasKeyword($request->input('keywords'));
                             })
+                            ->orderby('id', 'desc')
                             ->paginate($request->input('page_size',10));
         return formatRet(0, '', $batchType->toArray());
     }
