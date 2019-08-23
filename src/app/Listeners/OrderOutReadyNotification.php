@@ -23,7 +23,7 @@ class OrderOutReadyNotification implements ShouldQueue
      *
      * @var int
      */
-    public $delay = 60;
+    public $delay = 5;
 
     /**
      * Create the event listener.
@@ -46,11 +46,11 @@ class OrderOutReadyNotification implements ShouldQueue
         $order = $event->order;
 
         if($order["shop_user_id"] > 0) {
-            
+
             $user = ShopUser::find($order["shop_user_id"]);
             if($user) {
 
-                app('log')->info('开始给用户推送准备出库的订单消息', $order["out_sn"], $order["shop_user_id"]);
+                app('log')->info('开始给用户推送准备出库的订单消息', [$order["out_sn"], $order["shop_user_id"]]);
 
                 $app = app('wechat.mini_program');
 
