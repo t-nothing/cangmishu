@@ -137,7 +137,7 @@ class RecountController extends Controller
         $pdf = PDF::setPaper('a4');
 
 
-        $file = $recount->recount_no . '.pdf';
+        $file = $recount->recount_no . '{$template}.pdf';
 
         return $pdf->loadView($template, ['data' => $recount->toArray()])->download($file);
 

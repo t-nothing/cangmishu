@@ -222,12 +222,11 @@ class BatchController extends Controller
             }
         }
 
-        $file = $batch->batch_code . '.pdf';
-
         $templateName = "pdfs.batch.template_".strtolower($template);
-        if(!in_array(strtolower($template), ['', 'entry','purchase','batchno'])){
+        if(!in_array(strtolower($template), [ 'entry','purchase','batchno'])){
             $templateName = "pdfs.batch";
         }
+
 
         $pdf = PDF::setPaper('a4');
 
@@ -236,7 +235,7 @@ class BatchController extends Controller
             $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '2')->setOption('margin-bottom', '0');
         }
 
-
+        $file = $batch->batch_code . "{$templateName}.pdf";
         return $pdf->loadView($templateName, ['batch' => $batch->toArray(), 'showInStock'=>0])->download($file);
 
     }
