@@ -57,6 +57,7 @@ class OrderCreatedNotification  implements ShouldQueue
 
                 $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
 
+                app('log')->info('发送结果', $result);
 
 
             }
