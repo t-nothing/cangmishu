@@ -136,9 +136,9 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/batch/{batch_id}', 'BatchController@update');
     Route::delete('/batch/{batch_id}', 'BatchController@destroy');
     Route::post('/batch/shelf', 'BatchController@shelf');
-    // Route::get('/batch/{batch_id}/download/', 'BatchController@download');
+    Route::get('/batch/{batch_id}/download/', 'BatchController@download');
     Route::get('/batch/{batch_id}/download/{tempate}', 'BatchController@download');
-    // Route::get('/batch/{batch_id}/pdf/', 'BatchController@pdf');
+    Route::get('/batch/{batch_id}/pdf/', 'BatchController@pdf');
     Route::get('/batch/{batch_id}/pdf/{tempate}', 'BatchController@pdf');
     Route::post('/batchCode', 'BatchController@batchCode');
 
@@ -233,8 +233,8 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/recount', 'RecountController@store');
     Route::get('/recount/{id}', 'RecountController@show');
     Route::delete('/recount/{id}', 'RecountController@destroy');
-    Route::get('/recount/{batch_id}/download/', 'RecountController@download');
-    Route::get('/recount/{batch_id}/pdf/', 'RecountController@pdf');
+    Route::get('/recount/{id}/download/', 'RecountController@download');
+    Route::get('/recount/{id}/pdf/', 'RecountController@pdf');
 
 
 });
