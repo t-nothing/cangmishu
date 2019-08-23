@@ -30,6 +30,11 @@ class StockLocationPickNotification
         app('log')->info('拣货事件', [
             'stock-id'=> $event->stock->id
         ]);
+
+
+        $stockLocation = $event->stockLocation;
+        $stockLocation->decrement('shelf_num', $event->qty); 
+        
         $model = $event->stock->load("spec.product");
         //架子上面减少
         $model->decrement('shelf_num', $event->qty);

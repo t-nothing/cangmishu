@@ -27,6 +27,8 @@ class StockLocationOutNotification
     public function handle(StockLocationOut $event)
     {
         $model = $event->stock->load("spec.product");
+        $stockLocation = $event->stockLocation;
+        
 
         //库存减少
         $model->decrement('stock_num', $event->qty);

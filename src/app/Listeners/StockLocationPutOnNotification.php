@@ -26,6 +26,11 @@ class StockLocationPutOnNotification
      */
     public function handle(StockLocationPutOn $event)
     {
+
+
+        $stockLocation = $event->stockLocation;
+        $stockLocation->increment('shelf_num', $event->qty); 
+        
         $model = $event->stock->load("spec.product");
         $model->increment('shelf_num', $event->qty);
         $model->decrement('floor_num', $event->qty);

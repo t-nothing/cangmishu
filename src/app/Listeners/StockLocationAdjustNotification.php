@@ -30,21 +30,34 @@ class StockLocationAdjustNotification
          * $event->qty;
          * 等于最终数量
          */
-        $model = $event->stock->load("spec.product");
+        // $model = $event->stock->load("spec.product");
+        $model = $event->stock;
 
+
+        $stockLocation = $event->stockLocation;
+
+        //$event->qty 这个是最终库存！！！
         //如果是最终数量 大于 上架库存
         //如货位上面有10个，盘成8个，货位就减2
         //如货位上面有8个，盘成10个，货位就减2
         $diff_num = $event->qty - $model->shelf_num;
         $model->increment('recount_times',1);
-        if($diff_num > 0 ) {
+        if($diff_num < 0 ) {
+
+
+            $stockLocation->decrement('shelf_num', $diff_num);
+
             $model->decrement('stock_num', $diff_num);
             $model->decrement('shelf_num', $diff_num);
             $model->spec->decrement('total_shelf_num', $diff_num);
             $model->spec->decrement('total_stock_num', $diff_num);
             $model->spec->product->decrement('total_shelf_num', $diff_num);
             $model->spec->product->decrement('total_stock_num', $diff_num);
-        } elseif($diff_num < 0 ) {
+        } elseif($diff_num > 0 ) {
+
+
+            $stockLocation->increment('shelf_num', $diff_num);
+
             $model->increment('stock_num', $diff_num);
             $model->increment('shelf_num', $diff_num);
             $model->spec->increment('total_shelf_num', $diff_num);
