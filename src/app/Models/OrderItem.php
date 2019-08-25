@@ -90,12 +90,7 @@ class OrderItem extends Model
         if($lang == 'zh-CN'){
             $lang = 'cn';
         }
-        if (isset($this->spec, $this->spec->product)) {
-            $name = $this->spec->product['name_'.$lang].
-            '('.
-            $this->spec['name_'.$lang].
-            ')';
-        }
+        $name = sprintf("%s:%s", $this->{'name_'.$lang}, $this->{'spec_name_'.$lang});
 
         return $name;
     }

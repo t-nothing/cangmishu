@@ -149,6 +149,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/order/data/{order_id}', 'OrderController@updateData');
     Route::delete('/order/{order_id}', 'OrderController@destroy');
     Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
+    Route::get('/order/export', 'OrderController@export');
     Route::get('/order/{order_id}', 'OrderController@show');
     Route::put('/order/express/{order_id}', 'OrderController@updateExpress'); //更新快递单号
     Route::put('/order/pay/{order_id}', 'OrderController@updatePayStatus'); //更新支付方式

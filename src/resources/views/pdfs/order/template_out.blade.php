@@ -86,7 +86,7 @@
           @forelse ($order['order_items'] as $k => $item)
             <tr>
               <td>{{ $k+1 }}</td>
-              <td>{{ $item['name_cn'] }}</td>
+              <td>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</td>
               <td> {{ $item['relevance_code'] }}</td>
               <td>{{ $item['pick_num'] }}</td>
             </tr>

@@ -95,7 +95,7 @@
             @forelse ($item['stocks'] as $kk => $itemLocation)
             <tr>
               <td>{{ $k+1+$kk }}</td>
-              <td>{{ $item['name_cn'] }}</td>
+              <td>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>

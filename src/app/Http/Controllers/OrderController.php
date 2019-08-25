@@ -17,11 +17,69 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use PDF;
-use App\Exports\SkuExport;
+use App\Exports\OrderExport;
 use App\Events\OrderCancel;
 
 class OrderController extends Controller
 {
+    public function export(BaseRequests $request)
+    {
+        $this->validate($request, [
+            'page' => 'integer|min:1',
+            'page_size' => new PageSize(),
+            'created_at_b' => 'date:Y-m-d',
+            'created_at_e' => 'date:Y-m-d',
+            'status' => 'integer',
+            'keywords' => 'string',
+            'delivery_date' => 'date_format:Y-m-d',
+            'warehouse_id' =>  [
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where(function($q){
+                    $q->where('owner_id',Auth::ownerId());
+                })
+            ]
+        ]);
+        $order = Order::ofWarehouse($request->warehouse_id)
+            ->whose(app('auth')->ownerId());
+        if ($request->filled('created_at_b')) {
+            $order->where('created_at', '>', strtotime($request->created_at_b));
+        }
+
+        if ($request->filled('created_at_e')) {
+            $order->where('created_at', '<', strtotime($request->created_at_e));
+        }
+
+        if ($request->filled('status')) {
+            $order->where('status', $request->status);
+        }
+
+        if ($request->filled('keywords')) {
+            $order->hasKeywords($request->keywords);
+        }
+        $order->when($request->filled('delivery_date'), function($query) use ($request){
+            return $query->whereBetween ("delivery_date",
+                [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
+        });
+
+        $orders = $order->latest()->paginate($request->input('page_size',10));
+
+        foreach ($orders  as $k => $v) {
+            $sum = 0;
+            foreach ($v->orderItems as $k1 => $v1) {
+                $sum += $v1->amount;
+            }
+            $v->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+            $v->append(['out_sn_barcode', 'sub_pick_num', 'sub_order_qty']);
+
+            $v->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+            $v->sum = $sum;
+        }
+
+        $export = new OrderExport();
+        $export->setQuery($orders);
+
+        return app('excel')->download($export, '订单导出'.date('Y-m-d').'.xlsx');
+    }
 
     public function index(BaseRequests $request)
     {
@@ -69,7 +127,7 @@ class OrderController extends Controller
             foreach ($v->orderItems as $k1 => $v1) {
                 $sum += $v1->amount;
             }
-            $v->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+            $v->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
             $v->append(['out_sn_barcode', 'sub_pick_num', 'sub_order_qty']);
 
             $v->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
@@ -85,7 +143,7 @@ class OrderController extends Controller
         if(!$order){
             return formatRet("500",'找不到该出库单');
         }
-        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
         $order->append(['out_sn_barcode']);
 
         $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
@@ -343,7 +401,7 @@ class OrderController extends Controller
             return formatRet(500,"没有权限");
         }
         
-        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
         $order->append(['out_sn_barcode']);
 
         $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
@@ -375,7 +433,7 @@ class OrderController extends Controller
             return formatRet(500,"没有权限");
         }
 
-        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
         $order->append(['out_sn_barcode']);
 
         $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
