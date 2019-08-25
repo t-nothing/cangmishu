@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use PDF;
+use App\Exports\SkuExport;
 
 class OrderController extends Controller
 {
