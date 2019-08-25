@@ -41,6 +41,7 @@ class CartController extends Controller
         $this->validate($request, [
             'spec_id'           => 'required|integer|min:1',
             'qty'               => 'required|integer|min:1',
+            'form_id'           => 'string',
         ]);
 
 
@@ -50,6 +51,12 @@ class CartController extends Controller
             return formatRet(500,"添加购物车失败,商品不存在");
         }
 
+        if($request->filled('form_id')) {
+            ShopWeappFormId::create([
+                'form_id'   => $form_id,
+                'user_id'   => Auth::user()->id
+            ]);
+        }
 
         try
         {
@@ -169,6 +176,13 @@ class CartController extends Controller
         $outSn = "";
         try {
 
+            if($request->filled('form_id')) {
+                ShopWeappFormId::create([
+                    'form_id'   => $form_id,
+                    'user_id'   => Auth::user()->id
+                ]);
+            }
+        
             if($request->verify_money != app('cart')->name($this->getWhoesCart())->total($request->id))
             {
                 throw new \Exception("下单金额不一致", 1);

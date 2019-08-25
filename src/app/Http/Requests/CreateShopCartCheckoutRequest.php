@@ -35,7 +35,8 @@ class CreateShopCartCheckoutRequest extends BaseRequests
             'district'      => 'required|string',
             'address'       => 'required|string',
             'postcode'      => 'string',
-            'remark'        => 'string'
+            'remark'        => 'string',
+            'form_id'       => 'string',
         ];
     }
 }

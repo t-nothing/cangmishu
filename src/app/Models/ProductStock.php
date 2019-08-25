@@ -81,9 +81,9 @@ class ProductStock extends Model
         return $this->hasMany('App\Models\ProductStockLog', 'product_stock_id', 'id');
     }
 
-    public function location()
+    public function locations()
     {
-        return $this->belongsTo('App\Models\WarehouseLocation', 'warehouse_location_id', 'id');
+        return $this->belongsTo('App\Models\ProductStockLocation', 'id', 'stock_id');
     }
 
     /**

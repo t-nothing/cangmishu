@@ -212,6 +212,7 @@ class ProductStockController extends  Controller
 
     /**
      * 导出库存
+     * 根据规格导出库存记录
      */
     public function export(BaseRequests $request)
     {
@@ -235,7 +236,7 @@ class ProductStockController extends  Controller
 
         $option = $request->input('option');
 
-        $specs = ProductSpec::with('owner:id,email,nickname', 'product.category.feature')
+        $specs = ProductSpec::with( 'product.category')
             ->ofWarehouse($warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->when($relevance_code = $request->input('relevance_code'), function ($query) use ($relevance_code) {
@@ -266,6 +267,7 @@ class ProductStockController extends  Controller
             })
             // sortBy
             ->latest()
+            ->limit(5000)//限制一下
             // 分页
             ->select(
                 'id',
@@ -274,7 +276,12 @@ class ProductStockController extends  Controller
                 'name_cn',
                 'name_en',
                 'relevance_code',
-                'owner_id'
+                'owner_id',
+                'total_stock_num',
+                'total_stockin_times',
+                'total_stockin_num',
+                'total_stockout_times',
+                'total_stockout_num'
             );
 
         $export = new StockExport();
@@ -284,7 +291,9 @@ class ProductStockController extends  Controller
 
     }
 
-
+    /**
+     * 导出货品规格列表
+     */
     public function exportBySku(BaseRequests $request)
     {
         $this->validate($request, [
@@ -340,13 +349,7 @@ class ProductStockController extends  Controller
             ->pluck('id')
             ->toArray();
 
-        $stocks = ProductStock::with(['batch', 'location', 'owner:id,nickname'])
-            ->withCount(['logs as edit_count' => function ($query) {
-                $query->where('type_id', ProductStockLog::TYPE_COUNT);
-            }])
-            ->doesntHave('batch', 'and', function ($query) {
-                $query->where('status', Batch::STATUS_PREPARE)->orWhere('status', Batch::STATUS_CANCEL);
-            })
+        $stocks = ProductStock::with(['locations'])
             ->ofWarehouse($warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->whereIn('spec_id', $spec_ids)
