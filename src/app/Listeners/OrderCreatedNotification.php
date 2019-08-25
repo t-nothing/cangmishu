@@ -59,7 +59,7 @@ class OrderCreatedNotification  implements ShouldQueue
                     'touser' => $user->weapp_openid,
                     'template_id' => 'PuDzHjSss8ID5KgDzuQPo-LE90yJwv99czWNtnkiUKY',
                     'page' => 'page/index/index?shop='.$order['shop_id'],
-                    'form_id' => 'form-id',
+                    'form_id' => ShopWeappFormId::getOne($user->id),
                     'data' => [
                         'keyword1' => $order['sub_total'],
                         'keyword2' => $order['out_sn'],
