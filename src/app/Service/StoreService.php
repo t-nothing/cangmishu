@@ -170,6 +170,7 @@ class StoreService
         }
 
         $pickStockResult = [];
+        $subPickNum = 0;
 
         foreach ($pickItems as $k=>$i)
         {
@@ -209,6 +210,8 @@ class StoreService
                 'pick_locations'     =>  $stockInLocations,
                 'pick_num'  =>  $i['pick_num']
             ];
+
+            $subPickNum += $i['pick_num'];
         }
 
         if(count($pickStockResult) ==0) {
@@ -260,6 +263,7 @@ class StoreService
 
         $order->update([
             'status' => Order::STATUS_PICK_DONE,
+            'sub_pick_num'  => $subPickNum,
             'verify_status'=>2,
             'delivery_data'=>time()
         ]);

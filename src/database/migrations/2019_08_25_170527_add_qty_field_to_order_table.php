@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 //
-class ChangeReceiverAddressFieldToOrderTable extends Migration
+class AddQtyFieldToOrderTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,8 @@ class ChangeReceiverAddressFieldToOrderTable extends Migration
     {
         
         Schema::table('order', function (Blueprint $table)  {                 
-            $table->string('receiver_address')->change()->default('')->nullable();  
+            $table->integer('sub_pick_num')->comment('拣货数量')->default(0);
+            $table->integer('sub_order_qty')->comment('下单数量')->default(0);
         });
     }
 

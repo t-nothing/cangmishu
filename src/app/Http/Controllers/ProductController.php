@@ -30,10 +30,11 @@ class ProductController extends Controller
     public function index(IndexProductRequest $request)
     {
         app('log')->info('查询列表',$request->all());
-        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price,total_stock_num'])
+        $product = Product::leftjoin('category', 'category.id','=', 'product.category_id')
+        ->with(['specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price,total_stock_num'])
             ->ofWarehouse($request->warehouse_id)
-            ->where('owner_id',app('auth')->ownerId())
-            ->select(['id','name_cn','name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'updated_at', 'warehouse_id','total_stock_num'])
+            ->where('product.owner_id',app('auth')->ownerId())
+            ->select(['product.id','product.name_cn','product.name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'product.updated_at', 'product.warehouse_id','total_stock_num'])
             ->latest('updated_at');
         if($request->filled('category_id')){
             $product = $product->where('category_id',$request->category_id);
@@ -51,8 +52,12 @@ class ProductController extends Controller
             $product = $product->hasKeyword($request->keywords);
         }
 
-        $products = $product->paginate($request->input('page_size',10));
+        if ($request->filled('show_low_stock') && $request->show_low_stock == 1) {
+            $product = $product->whereRaw('product.total_stock_num <= category.warning_stock');
+        }
 
+        $products = $product->paginate($request->input('page_size',10));
+        
         return formatRet(0, '', $products->toArray());
     }
 

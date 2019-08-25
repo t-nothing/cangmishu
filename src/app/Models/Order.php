@@ -59,8 +59,8 @@ class Order extends Model
     protected $appends = [
         'status_name',
         'verify_status_name',
-        'send_full_address',
-        'receiver_full_address',
+        // 'send_full_address',
+        // 'receiver_full_address',
         'currency'
     ];
 

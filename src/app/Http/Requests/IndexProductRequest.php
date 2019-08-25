@@ -42,7 +42,8 @@ class IndexProductRequest extends BaseRequests
             'updated_at_b' => 'date:Y-m-d',
             'updated_at_e' => 'date:Y-m-d',
             'recount' => 'integer|min:0|max:1',
-            'keywords' => 'sometimes|string'
+            'keywords' => 'sometimes|string',
+            'show_low_stock' => 'sometimes|boolean',
         ];
     }
 }

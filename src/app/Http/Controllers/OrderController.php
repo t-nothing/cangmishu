@@ -122,17 +122,17 @@ class OrderController extends Controller
 
         $orders = $order->latest()->paginate($request->input('page_size',10));
 
-        foreach ($orders  as $k => $v) {
-            $sum = 0;
-            foreach ($v->orderItems as $k1 => $v1) {
-                $sum += $v1->amount;
-            }
-            $v->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
-            $v->append(['out_sn_barcode', 'sub_pick_num', 'sub_order_qty']);
+        // foreach ($orders  as $k => $v) {
+        //     $sum = 0;
+        //     foreach ($v->orderItems as $k1 => $v1) {
+        //         $sum += $v1->amount;
+        //     }
+        //     // $v->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        //     $v->append(['out_sn_barcode', 'sub_pick_num', 'sub_order_qty']);
 
-            $v->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
-            $v->sum = $sum;
-        }
+        //     // $v->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+        //     $v->sum = $sum;
+        // }
 
         return formatRet(0, '', $orders->toArray());
     }

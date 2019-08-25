@@ -143,6 +143,7 @@ class OrderService
             if ($lock->get()) {
 
                 $subTotal = 0;
+                $subQty = 0;
                 $items=[];
                 foreach ($data->goods_data as $k => $v) {
 
@@ -173,7 +174,7 @@ class OrderService
                         'pic' => $v['pic']??'',
                     ];
 
-
+                    $subQty += $v['num'];
                     $subTotal += ($v['sale_price']??0);
                 }
 
@@ -191,7 +192,7 @@ class OrderService
                 $order->remark         = $data->input("remark","");
                 $order->sale_currency  = $data->input("sale_currency","CNY"); 
                 $order->source         = $this->getSource();
-
+                $order->sub_order_qty  = $subQty;
                 // 收件人信息
                 if(!isset($data->receiver))
                 {

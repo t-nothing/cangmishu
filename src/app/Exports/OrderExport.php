@@ -34,7 +34,7 @@ class OrderExport implements FromQuery, WithMapping, WithHeadings, WithStrictNul
             $order->castsTo('created_at'),
             $order->express_num,
             $order->source,
-            $order->items->sum("amount"),
+            $order->sub_order_qty,
             $order->receiver_fullname,
             $order->receiver_phone,
             $order->receiver_province,
