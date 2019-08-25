@@ -33,7 +33,7 @@ class OrderService
     /**
      * 更新快递公司
      **/
-    public function updateExpress($data, $id)
+    public function updateExpress($data, $id, $onlyUpdateDb = false)
     {
         $order = Order::find($id);
         if(!$order) {
@@ -44,17 +44,22 @@ class OrderService
             throw new \Exception("快递公司不合法", 1);
         }
 
-        $order->update(
-            [
+        $arr = [
                 'express_code'  =>  $data->express_code,
                 'express_num'   =>  $data->express_num,
-                'shop_remark'   =>  $data->shop_remark,
+                'shop_remark'   =>  $data->shop_remark??'',
                 'status'        =>  Order::STATUS_SENDING //配送中
-            ]
-        );
+            ];
+        
+        if($onlyUpdateDb) {
+            unset($arr['status']);
+        }
+        $order->update($arr);
 
-        event(new OrderShipped($order));
-        OrderHistory::addHistory($order, Order::STATUS_SENDING);
+        if(!$onlyUpdateDb) {
+            event(new OrderShipped($order));
+            OrderHistory::addHistory($order, Order::STATUS_SENDING);
+        }
 
         return true;
 

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use PDF;
 use App\Exports\SkuExport;
+use App\Events\OrderCancel;
 
 class OrderController extends Controller
 {
@@ -150,6 +151,11 @@ class OrderController extends Controller
         app('db')->beginTransaction();
         try {
             app("store")->pickAndOut($request->all());
+
+            if($request->filled('express_code') && $request->filled('express_num')) {
+                app('order')->updateExpress($request,$id);
+            }
+
             app('db')->commit();
         } catch (\Exception $e) {
             app('db')->rollback();
@@ -216,6 +222,7 @@ class OrderController extends Controller
         }
 
         $order->update(['status'=>Order::STATUS_CANCEL]);
+        event(new OrderCancel($order));
         return formatRet(0,'成功');
     }
 

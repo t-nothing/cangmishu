@@ -58,6 +58,8 @@ class OrderOutReadyNotification implements ShouldQueue
 
                 $text = new Text(sprintf("%s 您好, 您的订单 %s已经准备完毕, 下一步我们将为您准备发货, 请您耐心等待",$order["receiver_fullname"], $order["out_sn"]));
 
+                
+
                 $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
 
                 app('log')->info('发送结果', $result);

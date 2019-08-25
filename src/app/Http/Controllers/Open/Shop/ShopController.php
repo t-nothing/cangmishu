@@ -8,6 +8,7 @@ use App\Http\Requests\BaseRequests;
 use App\Http\Controllers\Controller;
 use App\Rules\PageSize;
 use App\Models\Shop;
+use App\Models\ShopWeappFormId;
 
 class ShopController extends Controller
 {

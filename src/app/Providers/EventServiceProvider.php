@@ -37,6 +37,9 @@ class EventServiceProvider extends ServiceProvider
                 'App\Listeners\StockLocationMoveNotification',
                 'App\Listeners\StockLocationMoveLogNotification',
             ],
+        'App\Events\OrderCancel' => [ //订单取消
+                'App\Listeners\OrderCancelNotification',
+            ],
         'App\Events\OrderCreated' => [ //更新了快递单号
                 'App\Listeners\OrderCreatedNotification',
             ],

@@ -36,6 +36,10 @@ class ShipService
             'other'     =>  '其他'
           );
 
+    function getExpressName($code) {
+        return $this->expressCompany[$code]??'快递';
+    }
+
     /**
      * 快递列表
      **/

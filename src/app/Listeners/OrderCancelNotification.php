@@ -2,11 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Events\OrderShipped;
+use App\Events\OrderCancel;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class OrderShippedNotification
+class OrderCancelNotification  implements ShouldQueue
 {
     /**
      * The name of the queue the job should be sent to.
@@ -35,10 +35,10 @@ class OrderShippedNotification
     /**
      * Handle the event.
      *
-     * @param  OrderOutReady  $event
+     * @param  OrderCancel  $event
      * @return void
      */
-    public function handle(OrderOutReady $event)
+    public function handle(OrderCancel $event)
     {
         $order = $event->order;
 
@@ -53,14 +53,16 @@ class OrderShippedNotification
 
                 $result = $app->template_message->send([
                     'touser' => $user->weapp_openid,
-                    'template_id' => 'eRoqrc6HHi8PR8eZxFfvAjEv4T1Jo5xTih4nviuAUUI',
+                    'template_id' => 'TMupKMzx9wIVvxtS0j6tVzk3p6Bxniu6uvse0YhSl9U',
                     'page' => '/pages/center/center?shop='.$order['shop_id'],
                     'form_id' => ShopWeappFormId::getOne($user->id),
                     'data' => [
-                        'keyword1' => app('ship')->getExpressName($order['express_code']),
-                        'keyword2' => date("Y年m月d日"),
-                        'keyword3' => date("Y年m月d日", $order['create_at']),
+                        'keyword1' => $order['source'],
+                        'keyword2' => $order['out_sn'],
+                        'keyword3' => date("Y-m-d H:i:s", $order["created_at"]),
                         'keyword4' => $order['items'][0]['name_cn']??'仓小铺商品',
+                        'keyword5' => sprintf("%s%s", $order['sale_currency'], $order['subtotal']),
+                        'keyword6' => "后台取消"
                     ],
                 ]);
 
