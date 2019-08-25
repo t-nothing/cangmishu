@@ -54,16 +54,10 @@ class OrderController extends Controller
     public function show(BaseRequests $request, $id)
     {
         app('log')->info('订单详细',['id'=>$id]);
-        $order = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)->find($id);
-
-        if(!$order){
-            return formatRet(404,"订单不存在", []);
-        }
-        $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic");
-        $order->setVisible([
+        $order = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)->select([
                 'id', 
                 'out_sn', 
-                'status_name', 
+                'status', 
                 'remark', 
                 'express_code', 
                 'delivery_date', 
@@ -80,10 +74,27 @@ class OrderController extends Controller
                 'updated_at',
                 'sub_pay',
                 'sub_total',
-                'orderItems'
-            ]);
+                'express_num',
+                'express_code'
+            ])->find($id);
 
+        if(!$order){
+            return formatRet(404,"订单不存在", []);
+        }
+        $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic");
+ 
+        $result = $order->toArray();
+        $result["ship"] = $result['status']>3 ? [
+            "express_name" => app("ship")->getExpressName($result["express_code"]),
+            "express_num" => $result["express_num"],
+        ] : NULL;
+
+        unset($result['express_num']);
+        unset($result['express_code']);
+        unset($result['verify_status_name']);
+        unset($result['send_full_address']);
+        unset($result['delivery_type']);
        
-        return formatRet(0, '', $order->toArray());
+        return formatRet(0, '', $result);
     }
 }

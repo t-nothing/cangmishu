@@ -37,7 +37,7 @@ class ShipService
           );
 
     function getExpressName($code) {
-        return $this->expressCompany[$code]??'快递';
+        return $this->expressCompany[$code]??'';
     }
 
     /**
