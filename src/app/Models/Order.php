@@ -61,6 +61,7 @@ class Order extends Model
         'verify_status_name',
         'send_full_address',
         'receiver_full_address',
+        'currency'
     ];
 
     /*
@@ -232,7 +233,18 @@ class Order extends Model
         return $this->receiver_country.$this->receiver_province.$this->receiver_city.$this->receiver_district.$this->receiver_address;
     }
 
-
+    public function getCurrencyAttribute()
+    {
+        
+        $result = "￥";
+        if($this->default_currency == "USD") {
+            $result = "$";
+        }elseif($this->default_currency == "EUR") {
+            $result = "€";
+        }
+        
+        return $result;
+    }
     /*
     |--------------------------------------------------------------------------
     | Scopes

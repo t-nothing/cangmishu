@@ -13,7 +13,8 @@ class Shop extends Model
     protected $hidden = ['domain','owner_id','deleted_at','announcement_cn', 'announcement_en', 'pay_notice_cn', 'pay_notice_en', 'cart_notice_cn', 'cart_notice_en', 'is_stock_show', 'is_price_show', 'is_allow_over_order', 'email'];
     protected $appends = [
         'name',
-        'remark'
+        'remark',
+        'currency'
     ];
 
     /*
@@ -39,6 +40,19 @@ class Shop extends Model
         $lang = app('translator')->getLocale();
         
         return $this->{'remark_'.$lang}??$this->name_cn;
+    }
+
+    public function getCurrencyAttribute()
+    {
+        
+        $result = "￥";
+        if($this->default_currency == "USD") {
+            $result = "$";
+        }elseif($this->default_currency == "EUR") {
+            $result = "€";
+        }
+        
+        return $result;
     }
 
     /*

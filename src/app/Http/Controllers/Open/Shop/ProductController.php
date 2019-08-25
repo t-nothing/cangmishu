@@ -49,9 +49,10 @@ class ProductController extends Controller
 
             $re = $dataList->toArray();
 
-//
-            $data = collect($re['data'])->map(function($v){
-                unset($v['batch_products']);
+//      
+            $currency = $request->shop->currency;
+            $data = collect($re['data'])->map(function($v) use($currency){
+                $v['currency'] = $currency;
                 return $v;
             })->toArray();
             $re['data'] = $data;

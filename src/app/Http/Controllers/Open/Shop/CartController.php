@@ -67,7 +67,8 @@ class CartController extends Controller
                 'spec'              =>  $spec->name,
                 'source'            =>  'wechat.mini_program',
                 'relevance_code'    =>  $spec->productSpec->relevance_code,
-                'pic'               =>  $pics[0]??''
+                'pic'               =>  $pics[0]??'',
+                'currency'          =>  $request->shop->currency
             ]);
 
             return formatRet(200,"添加购物车成功");
@@ -197,13 +198,14 @@ class CartController extends Controller
             $data = new BaseRequests;            
 
             $data->express_code  = "";
-            $data->remark = $request->input('remark', '');
-            $data->shop_id = $request->shop->id;
-            $data->shop_user_id = Auth::user()->id;
-            $data->warehouse_id =  $request->shop->warehouse_id;
-            $data->order_type = OrderType::where('warehouse_id', $request->shop->warehouse_id)->oldest()->first()->id??0;
-            $data->shop_remark = "微店铺下单";
-            $data->express_num = "";
+            $data->remark           = $request->input('remark', '');
+            $data->shop_id          = $request->shop->id;
+            $data->shop_user_id     = Auth::user()->id;
+            $data->warehouse_id     =  $request->shop->warehouse_id;
+            $data->order_type       = OrderType::where('warehouse_id', $request->shop->warehouse_id)->oldest()->first()->id??0;
+            $data->shop_remark      = "";
+            $data->express_num      = "";
+            $data->sale_currency    =  $request->shop->default_currency;
 
 
             $data->receiver = new ReceiverAddress([

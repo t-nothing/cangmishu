@@ -17,7 +17,7 @@ class ShopController extends Controller
      **/
     public function show(BaseRequests $request)
     {
-        $request->shop->setVisible(['name', 'remark', 'logo', 'banner_background', 'senderAddress']);
+        $request->shop->setVisible(['name', 'remark', 'logo', 'banner_background', 'senderAddress','currency']);
         return formatRet(0, '', $request->shop->toArray());
     }
 

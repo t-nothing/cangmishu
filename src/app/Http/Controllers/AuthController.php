@@ -39,9 +39,6 @@ class AuthController extends  Controller
         $modules =array_unique($modules);
         sort($modules);
         $data['modules'] = $modules;
-
-
-
         return formatRet(0, '', $data);
     }
 

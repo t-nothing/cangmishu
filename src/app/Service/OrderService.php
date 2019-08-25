@@ -159,7 +159,9 @@ class OrderService
                         'amount' => $v['num'],
                         'name_cn' => $spec->product->name_cn??'',
                         'sale_price' => $v['sale_price']??0,
+                        'sale_currency'=> $data->input("sale_currency","CNY"),
                         'purchase_price' => $spec->purchase_price??0,
+                        'purchase_currency' => $spec->purchase_currency??"CNY",
                         'name_en' => $spec->product->name_en??'',
                         'spec_name_cn' => $spec->name_cn,
                         'spec_name_en' => $spec->name_en,
@@ -182,6 +184,7 @@ class OrderService
                 $order->warehouse_id   = $data->warehouse_id;
                 $order->status         = Order::STATUS_DEFAULT;
                 $order->remark         = $data->input("remark","");
+                $order->sale_currency  = $data->input("sale_currency","CNY"); 
                 $order->source         = $this->getSource();
 
                 // 收件人信息

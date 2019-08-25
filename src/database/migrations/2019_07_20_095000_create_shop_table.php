@@ -30,7 +30,7 @@ class CreateShopTable extends Migration
             $table->string('cart_notice_cn')->comment("购物车说明中文")->default('');
             $table->string('cart_notice_en')->comment("购物车说明英文")->default('');
             $table->string('default_lang')->comment('默认语言')->default('zh-cn');
-            $table->string('default_currency')->comment('默认货币')->default('RMB');
+            $table->string('default_currency')->comment('默认货币')->default('CNY');
             $table->tinyInteger("is_closed")->comment("是否关店")->default(0);
             $table->tinyInteger("is_stock_show")->comment("开启实时库存")->default(0);
             $table->tinyInteger("is_price_show")->comment("开启价格显示")->default(1);
