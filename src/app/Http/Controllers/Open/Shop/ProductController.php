@@ -70,6 +70,7 @@ class ProductController extends Controller
             return formatRet(404,'商品不存在', 404);
         }
         $shopProduct->load("specs");
+        $shopProduct->currency = $request->shop->currency;
 
         return formatRet(0,"成功",$shopProduct->toArray());
     }
