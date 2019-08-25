@@ -170,7 +170,6 @@ class StoreService
         }
 
         $pickStockResult = [];
-        $subPickNum = 0;
 
         foreach ($pickItems as $k=>$i)
         {
@@ -211,7 +210,6 @@ class StoreService
                 'pick_num'  =>  $i['pick_num']
             ];
 
-            $subPickNum += $i['pick_num'];
         }
 
         if(count($pickStockResult) ==0) {
@@ -220,6 +218,7 @@ class StoreService
 
         //这里可以先生成拣货单
 
+        $subPickNum = 0;
         foreach ($pickStockResult as $k => $v){
 
             app('log')->info('开始从库位拣货AAA');
@@ -228,6 +227,7 @@ class StoreService
             $v['item']->verify_num = $v['pick_num'];
             $v['item']->save();
 
+            $subPickNum += $i['pick_num'];
             app('log')->info('开始从库位拣货AAA');
 
             foreach ($v['pick_locations'] as $locationStock) {
@@ -261,6 +261,13 @@ class StoreService
  
         }
 
+        app('log')->info('更新出库信息', [
+            'status' => Order::STATUS_PICK_DONE,
+            'sub_pick_num'  => $subPickNum,
+            'verify_status'=>2,
+            'delivery_data'=>time()
+        ]);
+        
         $order->update([
             'status' => Order::STATUS_PICK_DONE,
             'sub_pick_num'  => $subPickNum,

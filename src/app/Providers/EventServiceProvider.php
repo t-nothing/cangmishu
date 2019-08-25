@@ -28,10 +28,12 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\StockLocationOut' => [
                 'App\Listeners\StockLocationOutNotification',
                 'App\Listeners\StockLocationOutLogNotification',
+                'App\Listeners\StockLocationOutWarningNotification',
             ],
         'App\Events\StockLocationAdjust' => [
                 'App\Listeners\StockLocationAdjustNotification',
                 'App\Listeners\StockLocationAdjustLogNotification',
+                'App\Listeners\StockLocationAdjustWarningNotification',
             ],
         'App\Events\StockLocationMove' => [
                 'App\Listeners\StockLocationMoveNotification',

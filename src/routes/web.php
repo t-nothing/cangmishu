@@ -200,7 +200,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     Route::post('warning','WarningController@store');
     Route::get('warning','WarningController@show');
-    Route::delete('warning','WarningController@destroy');
+    // Route::delete('warning','WarningController@destroy');
 
 
     //店铺

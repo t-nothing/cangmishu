@@ -51,7 +51,7 @@ class InventoryWarningMail extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject('库存预警')->view('emails.inventoryWarningMail');
+        return $this->subject('仓秘书库存预警提示')->view('emails.inventoryWarningMail');
     }
 
 }

@@ -52,7 +52,7 @@ class Order extends Model
         'delivery_date' => 'date:Y-m-d',
     ];
 
-    protected  $fillable =['warehouse_id','order_type','delivery_date','delivery_type','status','receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','receiver_fullname','receiver_phone','send_country','send_province','send_city','send_postcode','send_district','send_address','send_fullname','send_phone','express_num','out_sn','express_code','shop_remark','pay_status','pay_type','sub_pay','payment_account_number'];
+    protected  $fillable =['warehouse_id','order_type','delivery_date','delivery_type','status','receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','receiver_fullname','receiver_phone','send_country','send_province','send_city','send_postcode','send_district','send_address','send_fullname','send_phone','express_num','out_sn','express_code','shop_remark','pay_status','pay_type','sub_pay','payment_account_number','sub_pick_num','sub_pick_num'];
 
     protected $guarded = [];
 
@@ -183,22 +183,6 @@ class Order extends Model
         return $name;
     }
 
-    /**
-     * @return int
-     */
-    public function getSubPickNumAttribute()
-    {
-        return $this->orderItems->pluck('pick_num')->sum();
-    }
-
-
-    /**
-     * @return int
-     */
-    public function getSubOrderQtyAttribute()
-    {
-        return $this->orderItems->pluck('amount')->sum();
-    }
 
     public function getOutSnBarcodeAttribute()
     {
@@ -382,7 +366,7 @@ class Order extends Model
 
     public function newMaskCode()
     {
-    	$redis_key = 'wms_mask_code';
+    	$redis_key = 'cms_wms_mask_code';
 
         if (app('cache')->has($redis_key)) {
             return $this->toCode(app('cache')->increment($redis_key));
