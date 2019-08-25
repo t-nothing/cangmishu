@@ -7,6 +7,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
 use EasyWeChat\Kernel\Messages\Text;
+use App\Models\ShopWeappFormId;
+
 
 class OrderCreatedNotification  implements ShouldQueue
 {

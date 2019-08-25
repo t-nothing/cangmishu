@@ -13,6 +13,7 @@ use App\Models\ReceiverAddress;
 use App\Models\SenderAddress;
 use App\Models\OrderType;
 use App\Http\Requests\CreateShopCartCheckoutRequest;
+use App\Models\ShopWeappFormId;
 
 class CartController extends Controller
 {
@@ -182,7 +183,7 @@ class CartController extends Controller
                     'user_id'   => Auth::user()->id
                 ]);
             }
-        
+
             if($request->verify_money != app('cart')->name($this->getWhoesCart())->total($request->id))
             {
                 throw new \Exception("下单金额不一致", 1);
