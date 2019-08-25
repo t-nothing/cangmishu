@@ -46,7 +46,7 @@ class OrderCancelNotification  implements ShouldQueue
             $user = ShopUser::find($order["shop_user_id"]);
             if($user) {
 
-                app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"]]);
+                app('log')->info('开始给用户推送取消订单消息', [$order["out_sn"], $order["shop_user_id"]]);
                 $app = app('wechat.mini_program');
 
                 $service = $app->customer_service;
