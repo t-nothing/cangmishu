@@ -222,7 +222,7 @@ class OrderController extends Controller
         }
 
         $order->update(['status'=>Order::STATUS_CANCEL]);
-        event(new OrderCancel($order));
+        event(new OrderCancel($order->toArray()));
         return formatRet(0,'成功');
     }
 
