@@ -54,7 +54,7 @@ class CartController extends Controller
 
         if($request->filled('form_id')) {
             ShopWeappFormId::create([
-                'form_id'   => $$request->form_id,
+                'form_id'   => $request->form_id,
                 'user_id'   => Auth::user()->id
             ]);
         }
@@ -180,7 +180,7 @@ class CartController extends Controller
 
             if($request->filled('form_id')) {
                 ShopWeappFormId::create([
-                    'form_id'   => $form_id,
+                    'form_id'   => $request->form_id,
                     'user_id'   => Auth::user()->id
                 ]);
             }
