@@ -51,11 +51,12 @@ class StockLocationOutWarningNotification implements ShouldQueue
                 $user = User::find($model->spec->product->owner_id);
 
                 if($user) {
-
-                    $name = $spec->product->name_cn.'规格'.$spec->name_cn;
-                    app('log')->info('准备发送邮件给', ['name'=> $name, 'email'=>$user->email]);
-                    $message = new Mailable($user->email, $name, $model->spec->stock_num);
-                    Mail::send($message);
+                    if($user->warning_email) {
+                        $name = $spec->product->name_cn.'规格'.$spec->name_cn;
+                        app('log')->info('准备发送邮件给', ['name'=> $name, 'email'=>$user->email]);
+                        $message = new Mailable($user->email, $name, $model->spec->stock_num);
+                        Mail::send($message);
+                    }
                 }
             }
         }
