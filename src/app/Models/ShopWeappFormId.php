@@ -47,6 +47,6 @@ class ShopWeappFormId extends Model
         $info->is_used = Self::STATUS_USED;
         // $info->times += $info->times;
         $info->save();
-        return $info['form_id'];
+        return $info->form_id;
     }
 }
