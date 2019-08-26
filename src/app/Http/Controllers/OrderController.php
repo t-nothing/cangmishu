@@ -40,6 +40,7 @@ class OrderController extends Controller
             ]
         ]);
         $order = Order::ofWarehouse($request->warehouse_id)
+            ->with(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
             $order->where('created_at', '>', strtotime($request->created_at_b));
@@ -61,24 +62,12 @@ class OrderController extends Controller
                 [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
         });
 
-        $orders = $order->latest()->paginate($request->input('page_size',10));
-
-        foreach ($orders  as $k => $v) {
-            $sum = 0;
-            foreach ($v->orderItems as $k1 => $v1) {
-                $sum += $v1->amount;
-            }
-            $v->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
-            $v->append(['out_sn_barcode', 'sub_pick_num', 'sub_order_qty']);
-
-            $v->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
-            $v->sum = $sum;
-        }
+        $orders = $order->latest()->limit(5000);
 
         $export = new OrderExport();
         $export->setQuery($orders);
 
-        return app('excel')->download($export, '订单导出'.date('Y-m-d').'.xlsx');
+        return app('excel')->download($export, '仓秘书出库订单导出'.date('Y-m-d').'.xlsx');
     }
 
     public function index(BaseRequests $request)

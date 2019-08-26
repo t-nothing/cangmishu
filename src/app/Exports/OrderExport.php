@@ -29,6 +29,7 @@ class OrderExport implements FromQuery, WithMapping, WithHeadings, WithStrictNul
      */
     public function map($order): array
     {
+        // app('log')->info('map order export', [$order->toArray()]);
         $arr = [
             $order->out_sn,
             $order->castsTo('created_at'),
@@ -43,8 +44,9 @@ class OrderExport implements FromQuery, WithMapping, WithHeadings, WithStrictNul
             $order->receiver_address,
             $order->receiver_postcode,
         ];
-        $items = $order->items;
-        foreach ($items as $key => $value) {
+
+        $newOrders = $order->toArray();
+        foreach ($newOrders['order_items'] as $key => $value) {
             $arr[] = $value["name_cn"]." - ". $value["spec_name_cn"];
             $arr[] = $value["relevance_code"];
             $arr[] = $value["amount"];

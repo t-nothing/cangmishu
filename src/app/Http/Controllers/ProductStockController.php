@@ -56,7 +56,7 @@ class ProductStockController extends  Controller
                 $query->where('product_spec.relevance_code', $relevance_code);
             })
             ->when(($request->filled('show_low_stock') && $request->show_low_stock == 1), function($q) {
-                    return  $q->whereRaw('product_spec.stock_num <= category.warning_stock and category.warning_stock >0');
+                    return  $q->whereRaw('product_spec.total_stock_num <= category.warning_stock and category.warning_stock >0');
                 }
             )
             // API向前兼容
@@ -298,7 +298,7 @@ class ProductStockController extends  Controller
         $export = new StockExport();
         $export->setQuery($specs);
 
-        return app('excel')->download($export, '货品总库存'.date('Y-m-d').'.xlsx');
+        return app('excel')->download($export, '仓秘书货品总库存'.date('Y-m-d').'.xlsx');
 
     }
 
