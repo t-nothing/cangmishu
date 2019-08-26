@@ -7,7 +7,7 @@
   <style type="text/css">
     *{
       font-size: 11px;
-      font-family:Arial,'宋体',simsun;
+      font-family:Arial,'SourceHanSansSC','宋体',simsun;
     }
     .page{
       width: 70mm;
@@ -27,10 +27,7 @@
     }
     .page th{
       width: 65px;
-      -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-      -webkit-justify-content: space-between;
-      justify-content: space-between;
+      text-align: right;
     }
     .page td{
       text-align: left;

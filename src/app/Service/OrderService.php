@@ -175,7 +175,7 @@ class OrderService
                     ];
 
                     $subQty += $v['num'];
-                    $subTotal += ($v['sale_price']??0);
+                    $subTotal += ($v['sale_price']??0) * $v['num'];
                 }
 
                 $order = new Order();
