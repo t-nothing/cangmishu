@@ -10,27 +10,33 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class CartCheckouted
+class CartCheckouted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    /**
+     * 有关配送状态更新的信息。
+     *
+     * @var Order
+     */
+    public $order;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($name, $arr)
+    public function __construct($order)
     {
-        //
+        $this->order = $order;
     }
 
     /**
-     * Get the channels the event should broadcast on.
+     * 获取事件应该广播的频道。
      *
-     * @return \Illuminate\Broadcasting\Channel|array
+     * @return array
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('channel-name');
+        return new PrivateChannel('order.'.$this->order->id);
     }
 }

@@ -53,7 +53,7 @@ class ProductController extends Controller
         }
 
         if ($request->filled('show_low_stock') && $request->show_low_stock == 1) {
-            $product = $product->whereRaw('product.total_stock_num <= category.warning_stock');
+            $product = $product->whereRaw('product.total_stock_num <= category.warning_stock and category.warning_stock >0');
         }
 
         $products = $product->paginate($request->input('page_size',10));

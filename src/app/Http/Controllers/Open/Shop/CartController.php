@@ -14,6 +14,7 @@ use App\Models\SenderAddress;
 use App\Models\OrderType;
 use App\Http\Requests\CreateShopCartCheckoutRequest;
 use App\Models\ShopWeappFormId;
+use App\Events\CartCheckouted;
 
 class CartController extends Controller
 {
@@ -254,11 +255,15 @@ class CartController extends Controller
 
             app('cart')->name($this->getWhoesCart())->removeBy($request->id);
 
+            event(new CartCheckouted($orderResult));
+
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('下单失败',['msg'=>$e->getMessage()]);
             return formatRet(500, '下单失败:'.$e->getMessage());
         }
+
+
         return formatRet(0,'下单成功',[
             'out_sn'  =>  $outSn
         ]);

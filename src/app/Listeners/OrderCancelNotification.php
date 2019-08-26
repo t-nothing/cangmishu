@@ -5,6 +5,8 @@ namespace App\Listeners;
 use App\Events\OrderCancel;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\ShopUser;
+use App\Models\ShopWeappFormId;
 
 class OrderCancelNotification  implements ShouldQueue
 {
