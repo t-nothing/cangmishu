@@ -109,10 +109,8 @@
       </table>
       <div class="row">
         <div class="col-md-12">
-          买家备注：
-          {{ $order['remark'] }} 
-          <br/>
-          卖家备注：{{$order['shop_remark']}}</div>
+          备注：
+          {{ $order['remark'] }} </div>
       </div>
     </div>
   </div>
