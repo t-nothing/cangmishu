@@ -43,8 +43,9 @@ class OrderCancelNotification  implements ShouldQueue
     public function handle(OrderCancel $event)
     {
         $order = $event->order;
+        app('log')->info('order result', $order);
 
-        if($order["shop_user_id"] > 0) {
+        if($order && $order["shop_user_id"] > 0) {
             $user = ShopUser::find($order["shop_user_id"]);
             if($user) {
 
@@ -52,7 +53,11 @@ class OrderCancelNotification  implements ShouldQueue
                 $app = app('wechat.mini_program');
 
                 $service = $app->customer_service;
-
+                $formId = ShopWeappFormId::getOne($user->id);
+                if(empty($formId)) {
+                    app('log')->info('form Id不足');
+                    return;
+                }
                 $result = $app->template_message->send([
                     'touser' => $user->weapp_openid,
                     'template_id' => 'TMupKMzx9wIVvxtS0j6tVzk3p6Bxniu6uvse0YhSl9U',
@@ -61,9 +66,9 @@ class OrderCancelNotification  implements ShouldQueue
                     'data' => [
                         'keyword1' => $order['source'],
                         'keyword2' => $order['out_sn'],
-                        'keyword3' => date("Y-m-d H:i:s", $order["created_at"]),
+                        'keyword3' => $order["created_at"],
                         'keyword4' => $order['items'][0]['name_cn']??'仓小铺商品',
-                        'keyword5' => sprintf("%s%s", $order['sale_currency'], $order['subtotal']),
+                        'keyword5' => sprintf("%s%s", $order['sale_currency'], $order['sub_total']),
                         'keyword6' => "后台取消"
                     ],
                 ]);
@@ -80,5 +85,16 @@ class OrderCancelNotification  implements ShouldQueue
         } else {
             app('log')->info('不需要通知用户订单取消', [$order["out_sn"], $order["shop_user_id"]]);
         }
+    }
+    /**
+     * 处理失败任务。
+     *
+     * @param  \App\Events\OrderShipped  $event
+     * @param  \Exception  $exception
+     * @return void
+     */
+    public function failed(OrderCancel $event, $exception)
+    {
+        //
     }
 }

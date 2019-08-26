@@ -5,6 +5,6 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-php artisan queue:work redis --queue=cangmishu_emails   >> ./storage/logs/cangmishu_emails.log 2>&1 &
+php artisan queue:work redis --queue=cangmishu_emails --tries=3  >> ./storage/logs/cangmishu_emails.log 2>&1 &
 
-php artisan queue:work redis --queue=cangmishu_push >> ./storage/logs/cangmishu_push.log 2>&1 &
+php artisan queue:work redis --queue=cangmishu_push --tries=3>> ./storage/logs/cangmishu_push.log 2>&1 &
