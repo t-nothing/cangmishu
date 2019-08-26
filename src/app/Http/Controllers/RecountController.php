@@ -135,7 +135,7 @@ class RecountController extends Controller
         $template = "pdfs.recount";
         $recount->append('recount_no_barcode');
 
-        $pdf = PDF::setPaper('a4');
+        $pdf = PDF::setPaper('a4', 'Landscape');
 
 
         $file = $recount->recount_no . '{$template}.pdf';
