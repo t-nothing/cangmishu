@@ -7,7 +7,7 @@
   <style type="text/css">
     *{
       font-size: 11px;
-      font-family:Arial,'SourceHanSansSC','宋体',simsun;
+      font-family:Arial,'Source Han Sans SC','Source Han Sans CN','noto sans','宋体',simsun;
     }
     .page{
       width: 70mm;
