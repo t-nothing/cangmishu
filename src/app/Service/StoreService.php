@@ -35,7 +35,7 @@ class StoreService
         $stock_num = 0;
         $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num){
             //入库到虚拟货位
-            $locationStock = $this->InAndMoveTo($warehouse_id,$v, $v['code']);
+            $locationStock = $this->inAndMoveTo($warehouse_id,$v, $v['code']);
 
             $stock_num += $v['stockin_num'];
             //上架
@@ -69,7 +69,7 @@ class StoreService
 
 
     //入库
-    public function InAndMoveTo($warehouse_id,$data, $code)
+    public function inAndMoveTo($warehouse_id,$data, $code)
     {
         $batchProduct = BatchProduct::ofWarehouse($warehouse_id)->findOrFail($data['stock_id']);
         $batchProduct->load(['batch', 'spec.product.category']);
@@ -97,8 +97,8 @@ class StoreService
 
         $batchProduct->distributor_code        = isset($data['distributor_code'])?$data['distributor_code']:"";
         $batchProduct->ean                     = $data['ean'];
-        $batchProduct->expiration_date         = isset($data['expiration_date']) ?strtotime($data['expiration_date']." 00:00:00"): null;
-        $batchProduct->best_before_date        = isset($data['best_before_date']) ?strtotime($data['best_before_date']." 00:00:00"): null;
+        $batchProduct->expiration_date         = isset($data['expiration_date']) && !empty($data['expiration_date']) ?strtotime($data['expiration_date']." 00:00:00"): null;
+        $batchProduct->best_before_date        = isset($data['best_before_date']) && !empty($data['best_before_date'])?strtotime($data['best_before_date']." 00:00:00"): null;
         $batchProduct->production_batch_number = $data['production_batch_number']??'';
         $batchProduct->remark                  = $data['remark'];
 
