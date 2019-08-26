@@ -34,7 +34,7 @@ class ProductController extends Controller
         ->with(['specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price,total_stock_num'])
             ->ofWarehouse($request->warehouse_id)
             ->where('product.owner_id',app('auth')->ownerId())
-            ->select(['product.id','product.name_cn','product.name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'product.updated_at', 'product.warehouse_id','total_stock_num'])
+            ->select(['product.id','product.name_cn','product.name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'product.updated_at', 'product.warehouse_id','total_stock_num', 'category.name_cn as category_name_cn', 'category.name_en as category_name_en'])
             ->latest('updated_at');
         if($request->filled('category_id')){
             $product = $product->where('category_id',$request->category_id);
@@ -57,8 +57,18 @@ class ProductController extends Controller
         }
 
         $products = $product->paginate($request->input('page_size',10));
+
+        $result = $products->toArray();
+        foreach ($result['data'] as $key => $value) {
+            $result['data'][$key]['category'] = [
+                'name_cn'   => $value['category_name_cn'],
+                'name_en'   => $value['category_name_en'],
+            ];
+            unset($value['category_name_cn']);
+            unset($value['category_name_en']);
+        }
         
-        return formatRet(0, '', $products->toArray());
+        return formatRet(0, '', $result);
     }
 
     /**
