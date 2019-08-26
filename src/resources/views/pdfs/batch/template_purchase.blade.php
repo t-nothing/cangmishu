@@ -58,15 +58,16 @@
           <th >货品名称</th>
           <th width="120px">规格型号</th>
           <th width="60px">数量</th>
-          <th width="100px">进货单价</th>
-          <th width="100px">金额</th>
-          <th width="100px">备注</th>
+          <th width="105px">进货单价</th>
+          <th width="105px">金额</th>
+          <!-- <th width="100px">备注</th> -->
         </tr>
       </thead>
       <tbody>
-          <?php $total = 0;?>
+          <?php $total = 0; $remarks = [];?>
         @forelse ($batch['batch_products'] as $k => $product)
           <?php $total += $product['purchase_price'] * $product['need_num'];?>
+          <?php if(!empty($product['remark'])) $remarks[] = sprintf("%s : %s;<br/>",$product['spec']['product']['name_cn'],$product['remark'] );?>
         <tr>
           <td>{{ $k+1 }}</td>
           <td>{{ $product['relevance_code'] }}</td>
@@ -75,7 +76,7 @@
           <td>{{ $product['need_num'] }}</td>
           <td>￥{{ $product['purchase_price'] }}</td>
           <td>￥{{ number_format($product['purchase_price'] * $product['need_num'], 2) }}</td>
-          <td>{{ $product['remark'] }}</td>
+          <!-- <td>{{ $product['remark'] }}</td> -->
         </tr>
         @empty
         @endforelse
@@ -86,7 +87,6 @@
           <td class="text-center"> {{ $batch['need_num'] }}</td>
           <td></td>
           <td class="text-center">￥ {{ number_format($total, 2) }}</td>
-          <td></td>
         </tr>
       </tfoot>
     </table>
@@ -94,7 +94,7 @@
     <table width="100%" border="0"  align="center" class="table table-bordered ">
       <tr>
         <td width="180px">采购备注：</td>
-        <td height="100px"></td>
+        <td height="100px">{{ implode(",", $remarks)}}</td>
       </tr>
     </table>
 
