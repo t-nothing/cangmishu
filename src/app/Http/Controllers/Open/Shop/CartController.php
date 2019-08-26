@@ -40,12 +40,7 @@ class CartController extends Controller
      **/
     private function processFormId(BaseRequests $request){
 
-        $this->validate($request, [
-            'form_id'           => 'array',
-            'form_id.*'         => 'string',
-        ]);
-
-        if($request->filled('form_id')) {
+        if($request->filled('form_id') && !empty($request->form_id)) {
             if(!is_array($request->form_id)) {
                 $request->form_id[] = $request->form_id;
             } 
