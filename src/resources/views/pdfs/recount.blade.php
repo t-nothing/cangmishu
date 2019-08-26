@@ -101,9 +101,9 @@
               <td>{{ $item['shelf_num_orgin'] }}</td>
               <td>{{ $item['shelf_num_now'] }}</td>
               <td>{{ $item['shelf_num_now'] - $item['shelf_num_orgin'] }}</td>
-              <td>{{ $item['total_purcharse_now'] - $item['total_purcharse_orgin']  }}</td>
+              <td>￥{{ number_format($item['total_purcharse_now'] - $item['total_purcharse_orgin'], 2)  }}</td>
               <td>{{ $item['shelf_num_orgin'] - $item['shelf_num_now'] }}</td>
-              <td>{{ $item['total_purcharse_orgin'] - $item['total_purcharse_now'] }}</td>
+              <td>￥{{ number_format($item['total_purcharse_orgin'] - $item['total_purcharse_now'],2) }}</td>
             </tr>
           @empty
           @endforelse
