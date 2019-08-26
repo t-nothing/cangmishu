@@ -74,13 +74,13 @@
           <th nowrap="nowrap">EAN码：</th>
           <td>{{ $product['ean'] }}</td>
         </tr>
-        <?php if($product['expiration_date']){?>
+        <?php if(!is_null($product['expiration_date'])){?>
         <tr>
           <th nowrap="nowrap">保质期：</th>
           <td>{{ date("Y-m-d", $product['expiration_date'])}}</td>
         </tr>
         <?php }?>
-        <?php if($product['best_before_date']){?>
+        <?php if(!is_null($product['best_before_date'])){?>
         <tr>
           <th nowrap="nowrap">最佳食用期：</th>
           <td>{{ date("Y-m-d", $product['best_before_date'])}}</td>

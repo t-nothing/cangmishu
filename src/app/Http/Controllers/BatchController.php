@@ -234,7 +234,7 @@ class BatchController extends Controller
 
         if($templateName == "pdfs.batch.template_batchno" )
         {
-            $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '2')->setOption('margin-bottom', '0');
+            $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '5')->setOption('margin-bottom', '0');
         }
 
         $file = $batch->batch_code . "{$templateName}.pdf";
