@@ -24,6 +24,7 @@
     }
     .page table{
       display: -webkit-box;display: -ms-flexbox;display: -webkit-flex;display: flex;
+      font-size: 11px;
     }
     .page th{
       width: 65px;
