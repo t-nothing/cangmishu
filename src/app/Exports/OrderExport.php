@@ -91,6 +91,16 @@ class OrderExport implements FromQuery, WithMapping, WithHeadings, WithStrictNul
             '订单明细4SKU',
             '订单明细4数量',
             '订单明细4价格',
+
+            '订单明细5名称',
+            '订单明细5SKU',
+            '订单明细5数量',
+            '订单明细5价格',
+
+            '订单明细6名称',
+            '订单明细6SKU',
+            '订单明细6数量',
+            '订单明细6价格',
         ];
     }
 }

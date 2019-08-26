@@ -25,7 +25,7 @@ class WarningController extends  Controller
     public function store(BaseRequests $request)
     {
         $this->validate($request, [
-            'default_warning_stock' => 'required|integer|min:1',
+            // 'default_warning_stock' => 'required|integer|min:1',
             'warning_email' => 'required|email|max:255',
             'warning_data' => 'required|array',
             'warning_data.*.category_id' => 'required|integer|min:1',
@@ -46,7 +46,7 @@ class WarningController extends  Controller
         try{
             $user->update(
                 [
-                    'default_warning_stock' => $request->input('default_warning_stock'), 
+                    'default_warning_stock' => 50, 
                     'warning_email' => $new_email
                 ]
             );
