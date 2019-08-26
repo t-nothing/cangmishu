@@ -14,7 +14,7 @@ class OrderItemStockLocation extends Model
 
     protected $moveQty = 0;
 
-    protected $fillable = ['stock_id', 'warehouse_location_id', 'warehouse_location_code', 'warehouse_id', 'product_stock_location_id', 'item_id', 'pick_num', 'shipment_num'];
+    protected $fillable = ['stock_id', 'warehouse_location_id', 'warehouse_location_code', 'warehouse_id', 'product_stock_location_id', 'item_id', 'pick_num', 'shipment_num','stock_sku', 'relevance_code', 'verify_num'];
 
 
     /**

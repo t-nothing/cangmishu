@@ -90,11 +90,12 @@
           </tr>
         </thead>
         <tbody>
-          <?php $total = 0;?>
+          <?php $total = 0;$index = 0;?>
           @forelse ($order['order_items'] as $k => $item)
             @forelse ($item['stocks'] as $kk => $itemLocation)
+            <?php $index++;?>
             <tr>
-              <td>{{ $k+1+$kk }}</td>
+              <td>{{ ($index) }}</td>
               <td>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
