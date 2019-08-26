@@ -31,6 +31,8 @@ class WarningController extends  Controller
             'warning_data.*.category_id' => 'required|integer|min:1',
             'warning_data.*.warning_stock' => 'required|integer|min:1|max:1000'
         ]);
+
+
         $isSendEmail = false;
         $user = User::where('id', app('auth')->ownerId())->first();
         if (empty($user)) {
@@ -49,11 +51,9 @@ class WarningController extends  Controller
                 ]
             );
             foreach ($request->warning_data as $k => $v) {
-
-                $category = Category::find('id', $v['category_id']);
+                $category = Category::find( $v['category_id']);
                 if(!$category) {
                     throw new \Exception("分类ID未找到", 1);
-                    
                 }
                 if($category->owner_id != app('auth')->ownerId())
                 {
