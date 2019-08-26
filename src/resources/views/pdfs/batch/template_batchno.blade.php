@@ -27,7 +27,7 @@
       font-size: 11px;
     }
     .page th{
-      width: 65px;
+      width: 80px;
       text-align: right;
     }
     .page td{
@@ -74,10 +74,24 @@
           <th nowrap="nowrap">EAN码：</th>
           <td>{{ $product['ean'] }}</td>
         </tr>
+        <?php if($product['expiration_date']){?>
         <tr>
           <th nowrap="nowrap">保质期：</th>
-          <td>{{ $product['expiration_date']??'' }}</td>
+          <td>{{ date("Y-m-d", $product['expiration_date'])}}</td>
         </tr>
+        <?php }?>
+        <?php if($product['best_before_date']){?>
+        <tr>
+          <th nowrap="nowrap">最佳食用期：</th>
+          <td>{{ date("Y-m-d", $product['best_before_date'])}}</td>
+        </tr>
+        <?php }?>
+        <?php if($product['production_batch_number']){?>
+        <tr>
+          <th nowrap="nowrap">生成批次号：</th>
+          <td>{{ $product['production_batch_number']}}</td>
+        </tr>
+        <?php }?>
       </table>
     </div>
     @empty
