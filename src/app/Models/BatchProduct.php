@@ -156,6 +156,14 @@ class BatchProduct extends Model
         return 'data:image/png;base64,' . app("DNS1D")->getBarcodePNG($this->relevance_code, "C128");
     }
 
+    /**
+     * @return string
+     */
+    public function getSkuBarcodeAttribute()
+    {
+        return 'data:image/png;base64,' . app("DNS1D")->getBarcodePNG($this->sku, "C128");
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Relations

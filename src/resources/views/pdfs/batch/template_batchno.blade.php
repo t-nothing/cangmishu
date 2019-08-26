@@ -44,8 +44,8 @@
     @forelse ($batch['batch_products'] as $k => $product)
     <div class="page">
       <div class="barcode">
-        <img src="{{ $product['relevance_code_barcode'] }}" align="center">
-        <p>{{ $product['relevance_code'] }}</p>
+        <img src="{{ $product['sku_barcode'] }}" align="center">
+        <p>{{ $product['sku'] }}</p>
       </div>
 
       <table width="100%" border="0" >
@@ -63,7 +63,7 @@
         </tr>
         <tr>
           <th nowrap="nowrap">SKU编码：</th>
-          <td>{{ $product['sku'] }}</td>
+          <td>{{ $product['relevance_code'] }}</td>
         </tr>
       </table>
       <table width="100%" border="0" >
