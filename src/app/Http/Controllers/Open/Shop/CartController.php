@@ -35,6 +35,16 @@ class CartController extends Controller
         return $key;
     }
 
+    private function processFormId(BaseRequests $request){
+        if($request->filled('form_id')) {
+            ShopWeappFormId::create([
+                'form_id'   => $request->form_id,
+                'user_id'   => Auth::user()->id
+            ]);
+        }
+
+    }
+
     /**
      * 添加购物车
      **/
@@ -53,13 +63,7 @@ class CartController extends Controller
             return formatRet(500,"添加购物车失败,商品不存在");
         }
 
-        if($request->filled('form_id')) {
-            ShopWeappFormId::create([
-                'form_id'   => $request->form_id,
-                'user_id'   => Auth::user()->id
-            ]);
-        }
-
+        $this->processFormId($request);
         try
         {
             $spec->load('productSpec');
@@ -93,6 +97,8 @@ class CartController extends Controller
         
         try
         {
+
+            $this->processFormId($request);
             app('cart')->name($this->getWhoesCart())->update($id, $qty);
 
             return formatRet(200,"更新商品成功");
@@ -114,6 +120,8 @@ class CartController extends Controller
         
         try
         {
+
+            $this->processFormId($request);
             app('cart')->name($this->getWhoesCart())->remove($id);
 
             return formatRet(200,"移除商品成功");
@@ -134,6 +142,8 @@ class CartController extends Controller
     {
         try
         {
+
+            $this->processFormId($request);
             app('cart')->name($this->getWhoesCart())->destroy();
 
             return formatRet(200,"清空购物车成功");
