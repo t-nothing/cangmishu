@@ -77,6 +77,8 @@ class OrderCancelNotification  implements ShouldQueue
 
 
             }
+        } else {
+            app('log')->info('不需要通知用户订单取消', [$order["out_sn"], $order["shop_user_id"]]);
         }
     }
 }
