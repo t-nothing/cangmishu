@@ -197,8 +197,9 @@ class OrderController extends Controller
         try {
             app("store")->pickAndOut($request->all());
 
+
             if($request->filled('express_code') && $request->filled('express_num')) {
-                app('order')->updateExpress($request,$id);
+                app('order')->updateExpress($request,$request->order_id, true);
             }
 
             app('db')->commit();
