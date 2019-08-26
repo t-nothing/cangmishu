@@ -154,8 +154,7 @@ class ProductStockController extends  Controller
             'remark',
             'sku',
             'spec_id',
-            'sku_total_shelf_num',
-            'sku_total_stockin_num',
+            'spec_total_stock_num',
             'type_id',
             'created_at',
         ])->toArray();
@@ -213,7 +212,7 @@ class ProductStockController extends  Controller
             'remark',
             'sku',
             'sku_total_shelf_num',
-            'sku_total_stockin_num',
+            'stock_total_stock_num as sku_total_stock_num',
             'spec_id',
             'type_id',
             'created_at',
