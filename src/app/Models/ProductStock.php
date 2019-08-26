@@ -107,7 +107,7 @@ class ProductStock extends Model
      */
     public function scopeOfWarehouse($query,$warehosue_id)
     {
-        return $query->where('warehouse_id', $warehosue_id);
+        return $query->where('product_spec.warehouse_id', $warehosue_id);
     }
 
 
@@ -117,7 +117,7 @@ class ProductStock extends Model
      */
     public function scopeEnabled($query)
     {
-        return $query->where('status', ProductStock::GOODS_STATUS_ONLINE);
+        return $query->where('product_spec.status', ProductStock::GOODS_STATUS_ONLINE);
     }
 
     /**
@@ -127,7 +127,7 @@ class ProductStock extends Model
      */
     public function scopeHasKeyword($query, $keywords)
     {
-        return $query->where('relevance_code', 'like', '%' . $keywords . '%');
+        return $query->where('rproduct_spec.elevance_code', 'like', '%' . $keywords . '%');
     }
 
     public function scopeSku($query, $sku)
@@ -137,7 +137,7 @@ class ProductStock extends Model
 
     public function scopeWhose($query, $user_id)
     {
-        return $query->where('owner_id', $user_id );
+        return $query->where('product_spec.owner_id', $user_id );
     }
 
 

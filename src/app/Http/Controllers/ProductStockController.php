@@ -5,6 +5,7 @@ use App\Exports\SkuExport;
 use App\Exports\StockExport;
 use App\Http\Requests\BaseRequests;
 use App\Models\Batch;
+use App\Models\Product;
 use App\Models\ProductSpec;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
@@ -50,9 +51,9 @@ class ProductStockController extends  Controller
             ->leftjoin('product', 'product.id','=', 'product_spec.product_id')
             ->leftjoin('category', 'category.id','=', 'product.category_id')
             ->ofWarehouse($warehouse_id)
-            ->where('owner_id', app('auth')->ownerId())
+            ->where('product_spec.owner_id', app('auth')->ownerId())
             ->when($relevance_code = $request->input('relevance_code'), function ($query) use ($relevance_code) {
-                $query->where('relevance_code', $relevance_code);
+                $query->where('product_spec.relevance_code', $relevance_code);
             })
             ->when(($request->filled('show_low_stock') && $request->show_low_stock == 1), function($q) {
                     return  $q->whereRaw('product_spec.stock_num <= category.warning_stock and category.warning_stock >0');
@@ -60,13 +61,16 @@ class ProductStockController extends  Controller
             )
             // API向前兼容
             ->when($keywords = $request->input('keywords'), function ($query) use ($keywords) {
-                $query->hasKeyword($keywords);
+                return $query->where('product_spec.name_cn', 'like', '%' . $keywords . '%')
+                  ->orWhere('product_spec.name_en', 'like', '%' . $keywords . '%')
+                  ->orWhere('product.hs_code', 'like', '%' . $keywords . '%')
+                  ->orWhere('product.origin', 'like', '%' . $keywords . '%');
             })
             ->when($sku = $request->input('sku'), function ($query) use ($sku) {
                 $query->hasSku($sku);
             })
             ->when($product_name = $request->input('product_name'), function ($query) use ($product_name) {
-                $query->hasProductName($product_name);
+                return $query->where('product.name_cn', 'like', "%{$name}%")->orWhere('product.name_en', 'like', "%{$name}%");
             })
             ->when($production_batch_number = $request->input('production_batch_number'), function ($query) use ($production_batch_number) {
                 $query->hasProductBatchNumber($production_batch_number);
@@ -81,20 +85,20 @@ class ProductStockController extends  Controller
             ->when($option == 3, function ($query) use ($warehouse_id, $owner_id) {
                 $query->onlyToBeOnShelf($warehouse_id, $owner_id);
             })
-            ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','total_stock_num'])
+            ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
             // sortBy
             ->latest()
             // 分页
             ->paginate($request->input('page_size',10))->toArray();
 
-
+        $lang = app('translator')->locale()?:'cn';
         if ($results['data']) {
-            $model = new ProductSpec;
             foreach ($results['data'] as $k => $v) {
-                $model->product = $v['product'];
-                $model->name_cn = $v['name_cn'];
-                $model->name_en = $v['name_en'];
-                $results['data'][$k]['product_name'] = $model->product_name;
+
+
+                $product_name_cn = sprintf("%s (%s)" , $v["origin_product_name_cn"],  $v["name_cn"]);
+                $product_name_en = sprintf("%s (%s)" , $v["origin_product_name_en"],  $v["name_en"]);
+                $results['data'][$k]['product_name'] = $lang == 'en'?$product_name_en:$product_name_cn;
             }
         }
         return formatRet(0, '', $results);
