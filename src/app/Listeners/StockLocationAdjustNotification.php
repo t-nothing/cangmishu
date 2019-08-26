@@ -40,22 +40,42 @@ class StockLocationAdjustNotification
         //如果是最终数量 大于 上架库存
         //如货位上面有10个，盘成8个，货位就减2
         //如货位上面有8个，盘成10个，货位就减2
-        // $diff_num = $event->qty - $model->shelf_num;
+
+        $diff_num = $event->qty - $stockLocation->shelf_num;
+
         $model->increment('recount_times',1);
 
         $stockLocation->shelf_num = $event->qty;
         $stockLocation->save();
 
-        $model->stock_num = $event->qty;
-        $model->shelf_num = $event->qty;
-        $model->save();
+        //现在的值，比之前的大,库存都要增加
+        if($diff_num > 0) {
 
-        $model->spec->total_shelf_num = $event->qty;
-        $model->spec->total_stock_num = $event->qty;
-        $model->spec->save();
+            $model->stock_num += $diff_num;
+            $model->shelf_num += $diff_num;
+            $model->save();
 
-        $model->spec->product->total_shelf_num = $event->qty;
-        $model->spec->product->total_stock_num = $event->qty;
-        $model->spec->product->save();
+            $model->spec->total_shelf_num += $diff_num;
+            $model->spec->total_stock_num += $diff_num;
+            $model->spec->save();
+
+            $model->spec->product->total_shelf_num += $diff_num;
+            $model->spec->product->total_stock_num += $diff_num;
+            $model->spec->product->save();
+        } elseif($diff_num < 0) {
+
+            $model->stock_num -= abs($diff_num);
+            $model->shelf_num -= abs($diff_num);
+            $model->save();
+
+            $model->spec->total_shelf_num -= abs($diff_num);
+            $model->spec->total_stock_num -= abs($diff_num);
+            $model->spec->save();
+
+            $model->spec->product->total_shelf_num -= abs($diff_num);
+            $model->spec->product->total_stock_num -= abs($diff_num);
+            $model->spec->product->save();
+        }
+
     }
 }
