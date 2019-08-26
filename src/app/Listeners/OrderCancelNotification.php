@@ -67,16 +67,11 @@ class OrderCancelNotification  implements ShouldQueue
                         'keyword1' => $order['source'],
                         'keyword2' => $order['out_sn'],
                         'keyword3' => $order["created_at"],
-                        'keyword4' => $order['items'][0]['name_cn']??'仓小铺商品',
-                        'keyword5' => sprintf("%s%s", $order['sale_currency'], $order['sub_total']),
-                        'keyword6' => "后台取消"
+                        'keyword4' => $order['order_items'][0]['name_cn']??'仓小铺商品',
+                        'keyword5' => sprintf("%s%s", currency_symbol($order['sale_currency']), $order['sub_total']),
+                        'keyword6' => "店铺取消"
                     ],
                 ]);
-
-                // $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
-
-                // $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
-
                 
                 app('log')->info('发送结果', $result);
 

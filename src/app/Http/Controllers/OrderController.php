@@ -267,6 +267,7 @@ class OrderController extends Controller
             return formatRet(500,"没有权限");
         }
 
+        $order->load("orderItems");
         $order->update(['status'=>Order::STATUS_CANCEL]);
         event(new OrderCancel($order->toArray()));
         return formatRet(0,'成功');

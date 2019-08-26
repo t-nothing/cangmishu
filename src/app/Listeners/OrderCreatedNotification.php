@@ -63,7 +63,7 @@ class OrderCreatedNotification  implements ShouldQueue
                     'data' => [
                         'keyword1' => $order['sub_total'],
                         'keyword2' => $order['out_sn'],
-                        'keyword3' => $order['items'][0]['name_cn']??'仓小铺商品',
+                        'keyword3' => $order['order_items'][0]['name_cn']??'仓小铺商品',
                         'keyword4' => $order['status_name']??'已支付',
                     ],
                 ]);

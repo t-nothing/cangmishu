@@ -279,3 +279,21 @@ if ( ! function_exists('random_string'))
         }
     }
 }
+
+if (! function_exists('currency_symbol')) {
+    /**
+     * 转换货币符号
+     * @param $birthday
+     * @return string
+     */
+    function currency_symbol($default_currency){
+        $result = "￥";
+        if($default_currency == "USD") {
+            $result = "$";
+        }elseif($default_currency == "EUR") {
+            $result = "€";
+        }
+        
+        return $result;
+    }
+}
