@@ -40,12 +40,16 @@ class CartController extends Controller
      **/
     private function processFormId(BaseRequests $request){
 
-        if($request->filled('form_id') && !empty($request->form_id)) {
-            if(!is_array($request->form_id)) {
-                $request->form_id[] = $request->form_id;
+        if($request->filled('form_id')) {
+            $formIdArr = $request->input('form_id', NULL);
+
+            if(!is_null($formIdArr)) return;
+
+            if(!is_array($formIdArr)) {
+                $formIdArr[] = $formIdArr;
             } 
 
-            foreach ($request->form_id as $key => $form_id) {
+            foreach ($formIdArr as $key => $form_id) {
                 ShopWeappFormId::create([
                     'form_id'   => $form_id,
                     'user_id'   => Auth::user()->id
