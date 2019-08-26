@@ -254,7 +254,7 @@ class BatchController extends Controller
                 'warehouse:id,name_cn',
                 'batchType:id,name',
                 'distributor:id,name_cn,name_en',
-                'batchProducts'
+                'batchProducts.spec.product.category'
             ])
             ->where('id',$id)
             ->first();
@@ -273,6 +273,11 @@ class BatchController extends Controller
                 $model->name_cn = $v['spec']['name_cn'];
                 $model->name_en = $v['spec']['name_en'];
                 $data['batch_products'][$k]['spec']['product_name'] = $model->product_name;
+
+
+                $data['batch_products'][$k]['need_production_batch_number'] = $v['spec']['product']['category']['need_production_batch_number'];
+                $data['batch_products'][$k]['need_expiration_date'] = $v['spec']['product']['category']['need_expiration_date'];
+                $data['batch_products'][$k]['need_best_before_date'] = $v['spec']['product']['category']['need_best_before_date'];
             }
         }
 
