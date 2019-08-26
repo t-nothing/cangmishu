@@ -153,6 +153,10 @@ class CartController extends Controller
      **/
     public function list(BaseRequests $request)
     {
+        app('log')->info('token', [
+            'token' => app('request')->header('Authorization', ''),
+            'shop' => app('request')->header('Shop', ''),
+        ]);
         $items = app('cart')->name($this->getWhoesCart())->all();
 
         return formatRet(0, '', $items->toArray());
