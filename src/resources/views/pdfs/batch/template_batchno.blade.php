@@ -13,7 +13,7 @@
       width: 70mm;
       height: 50mm;
       margin: 0px auto;
-      page-break-after: avoid;
+      page-break-after: always;
       overflow: hidden;
     }
     .page .barcode{
@@ -22,8 +22,15 @@
     .page .barcode p{
       margin-bottom: 5px;
     }
+    .page table{
+      display: -webkit-box;display: -ms-flexbox;display: -webkit-flex;display: flex;
+    }
     .page th{
       width: 65px;
+      -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
     }
     .page td{
       text-align: left;
@@ -68,7 +75,7 @@
       </table>
       <table width="100%" border="0" >
         <tr>
-          <th>E&nbsp;A&nbsp;N&nbsp;码：</th>
+          <th>EAN码：</th>
           <td nowrap="nowrap" style="font-size: 8px;">{{ $product['ean'] }}</td>
           <th style="width: 50px">保质期：</th>
           <td style="font-size: 8px;">-</td>
