@@ -99,6 +99,7 @@ class OrderController extends Controller
             ]
         ]);
         $order = Order::ofWarehouse($request->warehouse_id)
+            ->with('orderType')
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
             $order->where('created_at', '>', strtotime($request->created_at_b));
