@@ -35,12 +35,27 @@ class CartController extends Controller
         return $key;
     }
 
+    /**
+     * 接收多个form id
+     **/
     private function processFormId(BaseRequests $request){
+
+        $this->validate($request, [
+            'form_id'           => 'array',
+            'form_id.*'         => 'string',
+        ]);
+
         if($request->filled('form_id')) {
-            ShopWeappFormId::create([
-                'form_id'   => $request->form_id,
-                'user_id'   => Auth::user()->id
-            ]);
+            if(!is_array($request->form_id)) {
+                $request->form_id[] = $request->form_id;
+            } 
+
+            foreach ($request->form_id as $key => $form_id) {
+                ShopWeappFormId::create([
+                    'form_id'   => $form_id,
+                    'user_id'   => Auth::user()->id
+                ]);
+            }
         }
 
     }
@@ -53,7 +68,6 @@ class CartController extends Controller
         $this->validate($request, [
             'spec_id'           => 'required|integer|min:1',
             'qty'               => 'required|integer|min:1',
-            'form_id'           => 'string',
         ]);
 
 
@@ -193,12 +207,13 @@ class CartController extends Controller
         $outSn = "";
         try {
 
-            if($request->filled('form_id')) {
-                ShopWeappFormId::create([
-                    'form_id'   => $request->form_id,
-                    'user_id'   => Auth::user()->id
-                ]);
-            }
+            $this->processFormId($request);
+            // if($request->filled('form_id')) {
+            //     ShopWeappFormId::create([
+            //         'form_id'   => $request->form_id,
+            //         'user_id'   => Auth::user()->id
+            //     ]);
+            // }
 
             if($request->verify_money != app('cart')->name($this->getWhoesCart())->total($request->id))
             {
