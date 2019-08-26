@@ -74,7 +74,7 @@
             <th class="no-print" width="80px">实际数量</th>
             <th class="no-print">入库单批次号</th>
           <?php }?>
-          <th width="100px">金额</th>
+          <th width="100px">进货单价</th>
           <th width="100px">备注</th>
         </tr>
       </thead>
@@ -98,17 +98,6 @@
         @empty
         @endforelse
       </tbody>
-      <tfoot class="text-left">
-        <tr>
-          <td colspan="4">合计：</td>
-          <td class="text-center"> {{ $batch['need_num'] }}</td>
-          <?php if($showInStock??0){?>
-            <td></td><td></td>
-          <?php }?>
-          <td class="text-center">￥ {{ number_format($total, 2) }}</td>
-          <td></td>
-        </tr>
-      </tfoot>
     </table>
 
     <table width="100%" border="0"  align="center">

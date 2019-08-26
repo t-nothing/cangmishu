@@ -58,6 +58,7 @@
           <th >货品名称</th>
           <th width="120px">规格型号</th>
           <th width="60px">数量</th>
+          <th width="100px">进货单价</th>
           <th width="100px">金额</th>
           <th width="100px">备注</th>
         </tr>
@@ -65,7 +66,7 @@
       <tbody>
           <?php $total = 0;?>
         @forelse ($batch['batch_products'] as $k => $product)
-          <?php $total += $product['spec']['purchase_price'];?>
+          <?php $total += $product['spec']['purchase_price'] * $product['need_num'];?>
         <tr>
           <td>{{ $k+1 }}</td>
           <td>{{ $product['relevance_code'] }}</td>
@@ -73,6 +74,7 @@
           <td>{{$product['spec']['name_cn']}}</td>
           <td>{{ $product['need_num'] }}</td>
           <td>￥{{ $product['spec']['purchase_price'] }}</td>
+          <td>￥{{ number_format($product['spec']['purchase_price'] * $product['need_num'], 2) }}</td>
           <td>{{ $product['remark'] }}</td>
         </tr>
         @empty
@@ -82,6 +84,7 @@
         <tr>
           <td colspan="4">合计：</td>
           <td class="text-center"> {{ $batch['need_num'] }}</td>
+          <td></td>
           <td class="text-center">￥ {{ number_format($total, 2) }}</td>
           <td></td>
         </tr>
