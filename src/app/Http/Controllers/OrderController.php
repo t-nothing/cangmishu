@@ -292,6 +292,9 @@ class OrderController extends Controller
         if ($order->owner_id != Auth::ownerId()){
             return formatRet(500,"没有权限");
         }
+        if ($order->status < Order::STATUS_PICKING){
+            return formatRet(500,"只有拣货完成才能修改物流信息");
+        }
 
         try {
             app('order')->updateExpress($request,$id);
