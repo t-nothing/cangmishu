@@ -43,8 +43,8 @@ class ShopProductController extends Controller
             })
             ->latest()->paginate($request->input('page_size',10), [
                 'shop_product.id',
-                'product.name_cn',
-                'product.name_en',
+                'shop_product.name_cn',
+                'shop_product.name_en',
                 'shop_product.sale_price',
                 'shop_product.is_shelf',
                 'shop_product.pics',
