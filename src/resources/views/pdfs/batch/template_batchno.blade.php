@@ -72,13 +72,13 @@
           <th nowrap="nowrap">SKU编码：</th>
           <td>{{ $product['relevance_code'] }}</td>
         </tr>
-      </table>
-      <table width="100%" border="0" >
         <tr>
-          <th>EAN码：</th>
-          <td nowrap="nowrap" style="font-size: 8px;">{{ $product['ean'] }}</td>
-          <th style="width: 50px">保质期：</th>
-          <td style="font-size: 8px;">-</td>
+          <th nowrap="nowrap">EAN码：</th>
+          <td>{{ $product['ean'] }}</td>
+        </tr>
+        <tr>
+          <th nowrap="nowrap">保质期：</th>
+          <td>{{ $product['expiration_date']??'' }}</td>
         </tr>
       </table>
     </div>
