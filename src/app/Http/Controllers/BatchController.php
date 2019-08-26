@@ -220,6 +220,7 @@ class BatchController extends Controller
         if ($batch['batchProducts']) {
             foreach ($batch['batchProducts'] as $k => $v) {
                 $v->append('recommended_location');
+                $v->append('sku_barcode');
             }
         }
 
