@@ -62,7 +62,7 @@ class OrderCancelNotification  implements ShouldQueue
                     'touser' => $user->weapp_openid,
                     'template_id' => 'TMupKMzx9wIVvxtS0j6tVzk3p6Bxniu6uvse0YhSl9U',
                     'page' => '/pages/center/center?shop='.$order['shop_id'],
-                    'form_id' => ShopWeappFormId::getOne($user->id),
+                    'form_id' => $formId,
                     'data' => [
                         'keyword1' => $order['source'],
                         'keyword2' => $order['out_sn'],
