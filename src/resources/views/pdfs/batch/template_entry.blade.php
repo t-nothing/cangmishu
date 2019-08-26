@@ -72,7 +72,7 @@
           <th width="80px">进货数量</th>
           <?php if($showInStock??0){?>
             <th class="no-print" width="80px">实际数量</th>
-            <th class="no-print">入库单批次号</th>
+            <th class="no-print">入库批次号</th>
           <?php }?>
           <th width="100px">进货单价</th>
           <th width="100px">备注</th>
@@ -81,7 +81,7 @@
       <tbody>
           <?php $total = 0;?>
         @forelse ($batch['batch_products'] as $k => $product)
-          <?php $total += $product['spec']['purchase_price'];?>
+          <?php $total += $product['purchase_price'];?>
         <tr>
           <td>{{ $k+1 }}</td>
           <td>{{ $product['relevance_code'] }}</td>
@@ -92,7 +92,7 @@
             <td class="no-print">{{ $product['stockin_num'] }}</td>
             <td class="no-print">{{ $product['sku'] }}</td>
             <?php }?>
-          <td>￥{{ $product['spec']['purchase_price'] }}</td>
+          <td>￥{{ $product['purchase_price'] }}</td>
           <td>{{ $product['remark'] }}</td>
         </tr>
         @empty

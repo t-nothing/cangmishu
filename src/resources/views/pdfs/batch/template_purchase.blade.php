@@ -66,15 +66,15 @@
       <tbody>
           <?php $total = 0;?>
         @forelse ($batch['batch_products'] as $k => $product)
-          <?php $total += $product['spec']['purchase_price'] * $product['need_num'];?>
+          <?php $total += $product['purchase_price'] * $product['need_num'];?>
         <tr>
           <td>{{ $k+1 }}</td>
           <td>{{ $product['relevance_code'] }}</td>
           <td>{{ $product['spec']['product']['name_cn'] }}</td>
           <td>{{$product['spec']['name_cn']}}</td>
           <td>{{ $product['need_num'] }}</td>
-          <td>￥{{ $product['spec']['purchase_price'] }}</td>
-          <td>￥{{ number_format($product['spec']['purchase_price'] * $product['need_num'], 2) }}</td>
+          <td>￥{{ $product['purchase_price'] }}</td>
+          <td>￥{{ number_format($product['purchase_price'] * $product['need_num'], 2) }}</td>
           <td>{{ $product['remark'] }}</td>
         </tr>
         @empty
