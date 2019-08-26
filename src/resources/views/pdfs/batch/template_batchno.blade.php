@@ -16,6 +16,13 @@
       page-break-after: always;
       overflow: hidden;
     }
+    .page.preview{
+      border:1px solid #ccc;
+      margin-bottom: 20px;
+      padding: 5px;
+      width: 84mm;
+      height: 60mm;
+    }
     .page .barcode{
       text-align: center;
     }
@@ -47,7 +54,7 @@
 </head>
 <body>
     @forelse ($batch['batch_products'] as $k => $product)
-    <div class="page">
+    <div class="page<?php if($showInStock) {?> preview<?php }?>">
       <div class="barcode">
         <img src="{{ $product['sku_barcode'] }}" align="center">
         <p>{{ $product['sku'] }}</p>
@@ -94,6 +101,7 @@
         <?php }?>
       </table>
     </div>
+
     @empty
     @endforelse
 </body>
