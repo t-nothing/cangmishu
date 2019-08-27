@@ -33,10 +33,18 @@ class StoreService
         }
 //        dd($stocks);
         $stock_num = 0;
+
+        $batch = Batch::find($batch_id);
+        if($batch->status >= Batch::STATUS_ACCOMPLISH){
+            throw new \Exception("该入库单不可编辑", 1);
+        }
+
+        // app('log')->info('hereAAAAAA');
         $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num){
+            // app('log')->info('herebbbbbbb');
             //入库到虚拟货位
             $locationStock = $this->inAndMoveTo($warehouse_id,$v, $v['code']);
-
+            // app('log')->info('herecccccc');
             $stock_num += $v['stockin_num'];
             //上架
             // $this->moveTo($locationStock,$warehouse_id,$v['code']);
@@ -81,7 +89,7 @@ class StoreService
         if (! $location = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $code)->where('is_enabled',1)->first()) {
             return eRet('货位不存在或未启用('.$code.')');
         }
-
+        // app('log')->info('here1111');
         $category = $batchProduct->spec->product->category;
         if ($category) {
             $rules = [];
@@ -102,6 +110,7 @@ class StoreService
         $batchProduct->production_batch_number = $data['production_batch_number']??'';
         $batchProduct->remark                  = $data['remark'];
 
+        app('log')->info('here');
         // 添加入库单记录
         $productStock = $batchProduct->setStockQty($data["stockin_num"])
                         ->setBoxCode($data["box_code"]??'')
@@ -222,14 +231,14 @@ class StoreService
         $subPickNum = 0;
         foreach ($pickStockResult as $k => $v){
 
-            app('log')->info('开始从库位拣货AAA');
+            // app('log')->info('开始从库位拣货AAA');
             // $v['item']->product_stock_id = $v['stock']->id;
             $v['item']->pick_num = $v['pick_num'];
             $v['item']->verify_num = $v['pick_num'];
             $v['item']->save();
 
             $subPickNum += $i['pick_num'];
-            app('log')->info('开始从库位拣货AAA');
+            // app('log')->info('开始从库位拣货AAA');
 
             foreach ($v['pick_locations'] as $locationStock) {
                 // 添加记录

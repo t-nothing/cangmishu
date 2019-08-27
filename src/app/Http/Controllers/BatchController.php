@@ -162,7 +162,7 @@ class BatchController extends Controller
         }catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"入库上架失败");
+            return formatRet(500,"入库上架失败:".$e->getMessage());
         }
     }
 
