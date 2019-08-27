@@ -44,6 +44,10 @@ class BatchProduct extends Model
      * 商品出厂批次号
      */
     protected $productionBatchNumber;
+    /**
+     * 上架位置
+     */
+    protected $locationId = 0;
 
     /**
      * The accessors to append to the model's array form.
@@ -136,6 +140,17 @@ class BatchProduct extends Model
         return $this->productionBatchNumber;
     }
 
+    public function setLocationId($v)
+    {
+        $this->locationId = $v;
+        return $this;
+    }
+
+    public function getLocationId()
+    {
+        return $this->locationId;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Attributes
@@ -219,7 +234,7 @@ class BatchProduct extends Model
         $stock->expiration_date           = $this->getExpirationDate(); //保质期
         $stock->best_before_date          = $this->getBestBeforeDate();
         $stock->production_batch_number   = $this->getProductionBatchNumber();
-        $stock->warehouse_location_id     = 0;
+        $stock->warehouse_location_id     = $this->getLocationId();
 
         $stock->save();
         //推送上默认位置

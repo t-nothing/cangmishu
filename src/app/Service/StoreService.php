@@ -110,6 +110,7 @@ class StoreService
                         ->setProductionBatchNumber($batchProduct->production_batch_number)
                         ->setExpirationDate($batchProduct->expiration_date)
                         ->setBestBeforeDate($batchProduct->best_before_date)
+                        ->setLocationId($location->id)//目前版本是一对一的
                         ->convertToStock();
 
         // 入库单状态，修改为，入库中

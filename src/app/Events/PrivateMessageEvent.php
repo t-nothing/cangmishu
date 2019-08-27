@@ -1,7 +1,6 @@
 <?php
-
 namespace App\Events;
-
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -9,34 +8,35 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-
-class CartCheckouted implements ShouldBroadcast
+class PrivateMessageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
     /**
-     * 有关配送状态更新的信息。
-     *
-     * @var Order
+     * @var string
      */
-    public $order;
+    public $message;
+    /**
+     * @var User
+     */
+    protected $user;
     /**
      * Create a new event instance.
      *
-     * @return void
+     * @param User $user
+     * @param string $message
      */
-    public function __construct($order)
+    public function __construct(User $user, string $message)
     {
-        $this->order = $order;
+        $this->user = $user;
+        $this->message = $message;
     }
-
     /**
-     * 获取事件应该广播的频道。
+     * Get the channels the event should broadcast on.
      *
-     * @return array
+     * @return \Illuminate\Broadcasting\Channel|array
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('order.'.$this->order);
+        return new PrivateChannel('App.User.' . $this->user->id);
     }
 }
