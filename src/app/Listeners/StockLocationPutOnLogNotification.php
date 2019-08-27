@@ -36,6 +36,7 @@ class StockLocationPutOnLogNotification
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)
+                        ->setOrderSn($option['order_sn']??'')
                         ->log();
         app("log")->info("上架事件日志");
 

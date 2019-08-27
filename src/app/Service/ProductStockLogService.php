@@ -13,10 +13,22 @@ class ProductStockLogService
     protected  $remark;
     protected  $itemId = 0;
     protected  $source = 'web';
+    protected  $orderSn = '';
 
     public function __construct()
     {
         $this->warehouse = app('auth')->warehouse();
+    }
+
+    public function setOrderSn($v)
+    {
+        $this->orderSn = $v;
+        return $this;
+    }
+
+    public function getOrderSn()
+    {
+        return $this->orderSn;
     }
 
     public function setTypeId($v)
@@ -109,6 +121,7 @@ class ProductStockLogService
         $model->operator                    = app('auth')->id();
         $model->source                      = $this->getSource();
         $model->product_stock_location_id   = $stockLoation->id;
+        $model->order_sn                    = $this->getOrderSn();
 
         $model->product_stock_location_code = $stockLoation->warehouse_location_code;
 

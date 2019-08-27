@@ -36,6 +36,7 @@ class BaseStockLocation
 
         $this->qty              = $qty;
         $this->option           = $option;
+        $this->option['origin_stock_location_shelf_num'] = $stockLocation->shelf_num;
     }
 
     /**

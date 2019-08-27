@@ -90,7 +90,9 @@ class RecountService
 
                     ## 第二步调整库存
                     foreach ($op as $key => $v) {
-                        event(new StockLocationAdjust($v["model"], $v["qty"]));
+                        event(new StockLocationAdjust($v["model"], $v["qty"], [
+                            'order_sn'=>$model->recount_no
+                        ]));
                     }
                     $lock->release();
                 }

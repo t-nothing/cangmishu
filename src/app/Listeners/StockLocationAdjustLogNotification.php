@@ -16,7 +16,7 @@ class StockLocationAdjustLogNotification
      */
     public function __construct()
     {
-        //
+        // 
     }
 
     /**
@@ -35,7 +35,8 @@ class StockLocationAdjustLogNotification
                         ->setStockLocation($model)
                         ->setRemark($option['remark']??0)
                         ->setItemId($option['item_id']??0)
-                        ->setNum($qty)
+                        ->setNum($qty - ($option['origin_stock_location_shelf_num']??0) )
+                        ->setOrderSn($option['order_sn']??'')
                         ->log();
     }
 }

@@ -135,9 +135,13 @@ class StoreService
         $locationStock = $productStock->pushToLocation($location->id, $data['stockin_num']);
 
         //入库
-        event(new StockLocationIn($locationStock, $data['stockin_num']));
+        event(new StockLocationIn($locationStock, $data['stockin_num'], [
+            'order_sn'=>$batchProduct->batch_code
+        ]));
         //上架
-        event(new StockLocationPutOn($locationStock, $locationStock->shelf_num));
+        event(new StockLocationPutOn($locationStock, $locationStock->shelf_num, [
+            'order_sn'=>$batchProduct->batch_code
+        ]));
         return $locationStock;
     }
 
@@ -266,7 +270,9 @@ class StoreService
                 OrderItemStockLocation::create($tmp);
 
 
-                event(new StockLocationPick($locationStock, $locationStock['pick_num']));
+                event(new StockLocationPick($locationStock, $locationStock['pick_num'], [
+                    'order_sn'=>$order->out_sn
+                ]));
             }
             
  
@@ -302,7 +308,9 @@ class StoreService
         foreach ($pickStockResult as $k => $v){
 
             foreach ($v['pick_locations'] as $locationStock) {
-                event(new StockLocationOut($locationStock, $locationStock['pick_num']));
+                event(new StockLocationOut($locationStock, $locationStock['pick_num'], [
+                    'order_sn'=>$order->out_sn
+                ]));
             }
  
         }

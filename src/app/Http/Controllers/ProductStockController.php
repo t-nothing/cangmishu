@@ -148,7 +148,7 @@ class ProductStockController extends  Controller
             $log->where('type_id', $request->type_id);
         }
 
-        $data = $log->latest()->paginate($request->input('page_size'), [
+        $data = $log->orderby('created_at', 'desc')->orderby('id', 'desc')->paginate($request->input('page_size'), [
             'id',
             'operation_num',
             'operator',
