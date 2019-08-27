@@ -5,6 +5,9 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\ProductSpec;
 use Illuminate\Support\Facades\DB;
+use App\Mail\InventoryWarningMail as Mailable;
+use App\Models\User;
+use Mail;
 
 class WarningProductStock extends Command
 {
@@ -48,8 +51,17 @@ class WarningProductStock extends Command
         }
         $spec = $spec->toArray();
 
-        print_r($spec['total_stock_num']);exit;
+        $user = User::find($spec['owner_id']);
 
-        echo "通知完成".PHP_EOL;
+        if($user) {
+            if($user->warning_email) {
+
+                $name = $spec["product"]["name_cn"].'规格'.$spec["name_cn"];
+                $message = new Mailable($user->warning_email, $name, $spec['total_stock_num']);
+                $res = Mail::to($user->warning_email)->send($message);
+                print_r($res);
+                echo "发送邮件成功".PHP_EOL;
+            }
+        }
     }
 }
