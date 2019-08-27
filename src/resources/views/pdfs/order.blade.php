@@ -90,12 +90,13 @@
           </tr>
         </thead>
         <tbody>
-          <?php $total = 0;?>
+          <?php $total = 0;$index = 0;?>
           @forelse ($order['order_items'] as $k => $item)
             @forelse ($item['stocks'] as $kk => $itemLocation)
+            <?php $index++;?>
             <tr>
-              <td>{{ $k+1+$kk }}</td>
-              <td>{{ $item['name_cn'] }}</td>
+              <td>{{ ($index) }}</td>
+              <td>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
@@ -109,10 +110,8 @@
       </table>
       <div class="row">
         <div class="col-md-12">
-          买家备注：
-          {{ $order['remark'] }} 
-          <br/>
-          卖家备注：{{$order['shop_remark']}}</div>
+          备注：
+          {{ $order['remark'] }} </div>
       </div>
     </div>
   </div>

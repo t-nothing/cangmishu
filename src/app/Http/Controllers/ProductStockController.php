@@ -47,7 +47,7 @@ class ProductStockController extends  Controller
 
 
 
-        $results = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times,stock_num'])
+        $results = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times,stock_num,id'])
             ->leftjoin('product', 'product.id','=', 'product_spec.product_id')
             ->leftjoin('category', 'category.id','=', 'product.category_id')
             ->ofWarehouse($warehouse_id)

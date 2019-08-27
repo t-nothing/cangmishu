@@ -48,41 +48,7 @@ class WarningProductStock extends Command
         }
         $spec = $spec->toArray();
 
-        print_r($spec);exit;
-
-        switch ($spec["status"]) {
-            case Order::STATUS_CANCEL:
-                event(new OrderCancel($spec));
-                break;
-            case Order::STATUS_DEFAULT:
-
-                event(new OrderCreated($spec));
-                
-                break;
-            case Order::STATUS_PICKING:
-                
-
-                break;
-            case Order::STATUS_PICK_DONE:
-                break;
-            case Order::STATUS_WAITING:
-                event(new OrderOutReady($spec));
-                # code...
-                break;
-            case Order::STATUS_SENDING:
-                
-                event(new OrderShipped($spec));
-                break;
-            case Order::STATUS_SUCCESS:
-                
-                event(new OrderCompleted($spec));
-
-                break;
-            
-            default:
-                # code...
-                break;
-        }
+        print_r($spec['total_stock_num']);exit;
 
         echo "通知完成".PHP_EOL;
     }
