@@ -170,6 +170,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
     Route::get('/stock/spec/log/{stock_id}', 'ProductStockController@getLogsForSpec');
     Route::get('/stock', 'ProductStockController@index');
+    Route::get('/stock/log/types', 'ProductStockController@getLogType');
     Route::get('/export/sku', 'ProductStockController@exportBySku');
     Route::get('/export/stock', 'ProductStockController@export');
 

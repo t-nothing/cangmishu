@@ -10,7 +10,7 @@ class ProductStockLogService
     protected  $typeId;
     protected  $stockLocation;
     protected  $num;
-    protected  $remark;
+    protected  $remark = '';
     protected  $itemId = 0;
     protected  $source = 'web';
     protected  $orderSn = '';

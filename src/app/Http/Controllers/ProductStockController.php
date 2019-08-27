@@ -658,4 +658,12 @@ class ProductStockController extends  Controller
         return formatRet(0,'成功',app("recount")->getLocationBySpec($request->all()));
     }
 
+
+    /**
+     * 日志类型
+     */
+    public function getLogType(){
+        return formatRet(0,'成功', ProductStockLog::getAllType());
+    }
+
 }

@@ -54,7 +54,7 @@ class ProductStockLog extends Model
 			self::TYPE_PICKING => '拣货',
 			self::TYPE_OUTPUT  => '出库',
 			self::TYPE_COUNT   => '盘点',
-			self::TYPE_OFFLINE => '作废',
+			// self::TYPE_OFFLINE => '作废',
     	];
 
         return isset($names[$this->type_id]) ? $names[$this->type_id] : '';
@@ -66,5 +66,25 @@ class ProductStockLog extends Model
     public function ScopeOfWarehouse($query, $warehouse_id)
     {
         return $query->where('warehouse_id', $warehouse_id);
+    }
+
+    public static function getAllType(){
+        $arr =  [
+                self::TYPE_IN   => '入库',
+                self::TYPE_SHELF   => '上架',
+                self::TYPE_PICKING => '拣货',
+                self::TYPE_OUTPUT  => '出库',
+                self::TYPE_COUNT   => '盘点',
+                // self::TYPE_OFFLINE => '作废',
+            ];;
+        $result = [];
+        foreach ($arr as $key => $value) {
+            $result[] = [
+                'id'        =>$key,
+                'name'      =>$value,
+            ];
+        }
+
+        return $result;
     }
 }
