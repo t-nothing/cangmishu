@@ -25,6 +25,7 @@ class CategoryController extends Controller
 
         $categories = Category::OfWarehouse($request->shop->warehouse_id)
                     ->where('is_enabled', 1)
+                    ->whereHas('products')
                     ->orderBy('id','ASC')
                     ->paginate(
                         $request->input('page_size',50),
