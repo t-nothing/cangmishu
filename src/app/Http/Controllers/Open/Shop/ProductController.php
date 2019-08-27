@@ -32,6 +32,7 @@ class ProductController extends Controller
                 return $q->where('product.category_id', $catId);
             })
             ->where('shop_id', $request->shop->id)
+            ->where('is_shelf', 1)
             ->when($request->filled('keywords'),function ($q) use ($request){
                 return $q->hasKeyword($request->input('keywords'));
             })
@@ -64,7 +65,8 @@ class ProductController extends Controller
      **/
     public function show(BaseRequests $request, int $id)
     {
-        $shopProduct = ShopProduct::with("shop")->findOrFail($id);
+        $shopProduct = ShopProduct::with("shop")
+            ->where('is_shelf', 1)->findOrFail($id);
 
         if ( !$shopProduct || !$shopProduct->shop ){
             return formatRet(404,'商品不存在', 404);
