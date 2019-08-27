@@ -45,13 +45,16 @@ class CartController extends Controller
         ]);
 
         if($request->filled('form_id')) {
-            $formIdArr = $request->input('form_id', NULL);
+            $form_id = $request->input('form_id', NULL);
 
-            if(is_null($formIdArr)) return;
+            if(is_null($form_id)) return;
 
-            if(!is_array($formIdArr)) {
-                $formIdArr[] = $formIdArr;
-            } 
+            $formIdArr = [];
+            if(!is_array($form_id)) {
+                $formIdArr[] = $form_id;
+            } else {
+                $formIdArr = $form_id;
+            }
 
             foreach ($formIdArr as $key => $form_id) {
                 ShopWeappFormId::create([
