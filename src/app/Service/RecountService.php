@@ -28,7 +28,7 @@ class RecountService
         {
             $lock = NULL;
             try {
-                $lock = Cache::lock(sprintf("recountStockLocks:%s:%d", $data["warehouse_id"], strtotime(date("Y-m-d H"))));
+                $lock = Cache::lock(sprintf("recountStockLocksV1:%s:%d", $data["warehouse_id"], strtotime(date("Y-m-d H"))));
 
                 //加一个锁防止并发
                 if ($lock->get()) {
@@ -53,11 +53,16 @@ class RecountService
                             'qty'   =>  $v["num"]
                         ];
 
+                        app('log')->info('库存盘点,修改库存为', [
+                            'qty'       =>  $v["num"],
+                            'id'  =>  $stockLoation->id
+                        ]);
+
                         $totalQty += $v["num"];
                         $totalOrginQty += $stockLoation->shelf_num;
 
                         $arr[] = new RecountStock([
-                            'stock_location_id'                    =>  $stockLoation->id,
+                            'stock_location_id'     =>  $stockLoation->id,
                             'name_cn'               =>  $stockLoation->stock->product_name_cn,
                             'name_en'               =>  $stockLoation->stock->product_name_en,
                             'relevance_code'        =>  $stockLoation->stock->spec->relevance_code,

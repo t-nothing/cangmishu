@@ -9,7 +9,7 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use App\Modles\ProductStock;
+use App\Models\ProductStock;
 
 /**
  * 库存事件
@@ -30,10 +30,12 @@ class BaseStockLocation
      */
     public function __construct($stockLocation, int $qty, $option = NULL)
     {
-        $this->stockLocation = $stockLocation;
-        $this->stock = $stockLocation->stock;
-        $this->qty = $qty;
-        $this->option = $option;
+        $this->stockLocation    = $stockLocation;
+        // $this->stock            = ProductStock::with('spec.product')->find($stockLocation->stock->id);
+        $this->stock            = $stockLocation->stock;
+
+        $this->qty              = $qty;
+        $this->option           = $option;
     }
 
     /**

@@ -48,33 +48,42 @@ class StockLocationAdjustNotification
         $stockLocation->shelf_num = $event->qty;
         $stockLocation->save();
 
+        app('log')->info('库存盘点事件后,修改库存为', [
+            'qty'       =>  $event->qty,
+            'diff_num'  =>  $diff_num
+        ]);
+
         //现在的值，比之前的大,库存都要增加
         if($diff_num > 0) {
 
-            $model->stock_num += $diff_num;
-            $model->shelf_num += $diff_num;
-            $model->save();
+            $model->increment('stock_num', $diff_num);
+            $model->increment('shelf_num', $diff_num);
 
-            $model->spec->total_shelf_num += $diff_num;
-            $model->spec->total_stock_num += $diff_num;
-            $model->spec->save();
+            $model->spec->increment('total_shelf_num',$diff_num);
+            $model->spec->increment('total_stock_num',$diff_num);
 
-            $model->spec->product->total_shelf_num += $diff_num;
-            $model->spec->product->total_stock_num += $diff_num;
-            $model->spec->product->save();
+            app('log')->info('商品原库存为+', [
+                'total_shelf_num'       =>  $model->spec->product->total_shelf_num,
+                'total_stock_num'       =>  $model->spec->product->total_stock_num,
+            ]);
+
+            $model->spec->product->increment('total_shelf_num',$diff_num);
+            $model->spec->product->increment('total_stock_num',$diff_num);
         } elseif($diff_num < 0) {
 
-            $model->stock_num -= abs($diff_num);
-            $model->shelf_num -= abs($diff_num);
-            $model->save();
+            $model->decrement('stock_num', abs($diff_num));
+            $model->decrement('shelf_num', abs($diff_num));
 
-            $model->spec->total_shelf_num -= abs($diff_num);
-            $model->spec->total_stock_num -= abs($diff_num);
-            $model->spec->save();
+            $model->spec->decrement('total_shelf_num', abs($diff_num));
+            $model->spec->decrement('total_stock_num', abs($diff_num));
 
-            $model->spec->product->total_shelf_num -= abs($diff_num);
-            $model->spec->product->total_stock_num -= abs($diff_num);
-            $model->spec->product->save();
+            app('log')->info('商品原库存为-', [
+                'total_shelf_num'       =>  $model->spec->product->total_shelf_num,
+                'total_stock_num'       =>  $model->spec->product->total_stock_num,
+            ]);
+
+            $model->spec->product->decrement('total_shelf_num', abs($diff_num));
+            $model->spec->product->decrement('total_stock_num', abs($diff_num));
         }
 
     }
