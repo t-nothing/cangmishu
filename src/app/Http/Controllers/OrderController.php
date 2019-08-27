@@ -218,8 +218,8 @@ class OrderController extends Controller
             0,
             '成功',
             [
-                Order::ORDER_PAY_STAUTS_UNPAY =>  '未支付',
-                Order::ORDER_PAY_STAUTS_REFUND =>  '已退款',
+                Order::ORDER_PAY_STATUS_UNPAY =>  '未支付',
+                Order::ORDER_PAY_STATUS_REFUND =>  '已退款',
                 Order::ORDER_PAY_STAUTS_PAID =>  '已支付',
             ]
         );
