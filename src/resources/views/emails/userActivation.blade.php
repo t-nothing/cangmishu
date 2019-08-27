@@ -8,13 +8,13 @@
         <td colspan="2" style="padding: 50px 30px 10px 30px; color: #7f7f7f;  width:760px; line-height: 30px;word-wrap:break-word">
             Hi {{ $name }},<br/>
             <br>
-            欢迎使用 WMS 系统。<br/>
+            欢迎使用 仓秘书。<br/>
 
 			请确认你的邮箱地址<br/>
 			点击下方按钮或复制下面的链接进行邮箱验证：<br/>
             {{ $url }}<br/>
             <br/>
-            EUT WMS
+            仓秘书
             <div style="padding-top: 30px">
                 <span>此邮件由系统自动发送，请勿直接回复。</span>
             </div>

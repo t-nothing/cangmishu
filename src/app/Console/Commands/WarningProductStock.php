@@ -56,8 +56,8 @@ class WarningProductStock extends Command
         if($user) {
             if($user->warning_email) {
 
-                $name = $spec["product"]["name_cn"].'规格'.$spec["name_cn"];
-                $message = new Mailable($user->warning_email, $name, $spec['total_stock_num']);
+                $product_name = $spec["product"]["name_cn"].'规格'.$spec["name_cn"];
+                $message = new Mailable($user->warning_email, $user->nick_name,  $product_name, $spec['total_stock_num']);
                 $res = Mail::to($user->warning_email)->send($message);
                 print_r($res);
                 echo "发送邮件成功".PHP_EOL;
