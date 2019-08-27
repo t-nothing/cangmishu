@@ -95,7 +95,9 @@
           @forelse ($data['stocks'] as $k => $item)
           <?php
             $pk = ($item['shelf_num_now'] > $item['shelf_num_orgin']) ? 0 : ($item['shelf_num_now'] - $item['shelf_num_orgin']) ;
+            $pk = abs($pk);
             $py = ($item['shelf_num_now'] < $item['shelf_num_orgin']) ? 0 : ($item['shelf_num_now'] - $item['shelf_num_orgin']);
+            $py = abs($py);
           ?>
             <tr>
               <td>{{ $k+1 }}</td>
