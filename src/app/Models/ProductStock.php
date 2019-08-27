@@ -46,7 +46,7 @@ class ProductStock extends Model
         'relevance_code_barcode',
     ];
 
-    protected  $fillable =['owner_id','spec_id','relevance_code','need_num','remark','distributor_id','distributor_code','warehouse_id','status','sku','ean'];
+    protected  $fillable =['owner_id','spec_id','relevance_code','need_num','remark','distributor_id','distributor_code','warehouse_id','status','sku','ean','purchase_price', 'purchase_currency'];
     protected $guarded = [];
 
 

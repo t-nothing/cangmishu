@@ -93,6 +93,10 @@
         <tbody>
           <?php $total = 0;?>
           @forelse ($data['stocks'] as $k => $item)
+          <?php
+            $pk = ($item['shelf_num_now'] > $item['shelf_num_orgin']) ? 0 : ($item['shelf_num_now'] - $item['shelf_num_orgin']) ;
+            $py = ($item['shelf_num_now'] < $item['shelf_num_orgin']) ? 0 : ($item['shelf_num_now'] - $item['shelf_num_orgin']);
+          ?>
             <tr>
               <td>{{ $k+1 }}</td>
               <td>{{ $item['name_cn'] }}</td>
@@ -100,10 +104,10 @@
               <td>{{ $item['stock_sku'] }}</td>
               <td>{{ $item['shelf_num_orgin'] }}</td>
               <td>{{ $item['shelf_num_now'] }}</td>
-              <td>{{ $item['shelf_num_now'] - $item['shelf_num_orgin'] }}</td>
-              <td>￥{{ number_format($item['total_purcharse_now'] - $item['total_purcharse_orgin'], 2)  }}</td>
-              <td>{{ $item['shelf_num_orgin'] - $item['shelf_num_now'] }}</td>
-              <td>￥{{ number_format($item['total_purcharse_orgin'] - $item['total_purcharse_now'],2) }}</td>
+              <td>{{ $pk }}</td> 
+              <td>￥{{ number_format($pk * $item['total_purcharse_orgin']/$item['shelf_num_orgin'], 2)  }}</td>
+              <td>{{ $py }}</td>
+              <td>￥{{ number_format($py * $item['total_purcharse_now']/$item['shelf_num_now'],2) }}</td>
             </tr>
           @empty
           @endforelse

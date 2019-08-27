@@ -111,7 +111,15 @@ class OrderController extends Controller
         });
 
         $orders = $order->latest()->paginate($request->input('page_size',10));
-        return formatRet(0, '', $orders->toArray());
+        $result = $orders->toArray();
+        foreach ($result['data'] as $key => $value) {
+            
+            $result['data'][$key]['track_url'] = "";
+            if($value['status'] >= Order::STATUS_SENDING) {
+                $result['data'][$key]['track_url'] = "https://www.kuaidi100.com/chaxun?com=".$value['express_code']."&nu=".$value['express_num'];
+            }
+        }
+        return formatRet(0, '', $result);
     }
 
     public function show(BaseRequests $request, $order_id)

@@ -225,6 +225,8 @@ class BatchProduct extends Model
         $stock->need_num                  = $this->getStockQty();//入库
         $stock->pieces_num                = $this->pieces_num;
         $stock->remark                    = $this->remark;
+        $stock->purchase_price            = $this->purchase_price;  
+        $stock->purchase_currency         = $this->purchase_currency;  
                 // distributor_id   = $this->distributor_id;
         $stock->distributor_code          = $this->getDistributorCode();
         $stock->warehouse_id              = $this->warehouse_id;
