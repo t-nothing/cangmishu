@@ -218,9 +218,9 @@ class OrderController extends Controller
             0,
             '成功',
             [
-                Order::ORDER_PAY_STATUS_UNPAY =>  '未支付',
-                Order::ORDER_PAY_STATUS_REFUND =>  '已退款',
-                Order::ORDER_PAY_STAUTS_PAID =>  '已支付',
+                ['id'=> Order::ORDER_PAY_STATUS_UNPAY , 'name'=> '未支付'],
+                ['id'=> Order::ORDER_PAY_STATUS_REFUND , 'name'=> '已退款'],
+                ['id'=> Order::ORDER_PAY_STAUTS_PAID , 'name'=> '已支付'],
             ]
         );
     }
@@ -233,11 +233,11 @@ class OrderController extends Controller
             0,
             '成功',
             [
-                Order::ORDER_PAY_TYPE_ALIPAY    =>  '支付宝支付',
-                Order::ORDER_PAY_TYPE_WECHAT    =>  '微信支付',
-                Order::ORDER_PAY_TYPE_BANK      =>  '银行卡支付',
-                Order::ORDER_PAY_TYPE_CASH      =>  '现金支付',
-                Order::ORDER_PAY_TYPE_OTHER     =>  '其他方式',
+                ['id'=>  Order::ORDER_PAY_TYPE_ALIPAY, 'name'=>  '支付宝支付'],
+                ['id'=>  Order::ORDER_PAY_TYPE_WECHAT, 'name'=>  '微信支付'],
+                ['id'=>  Order::ORDER_PAY_TYPE_BANK, 'name'=>  '银行卡支付'],
+                ['id'=>  Order::ORDER_PAY_TYPE_CASH, 'name'=>  '现金支付'],
+                ['id'=>  Order::ORDER_PAY_TYPE_OTHER, 'name'=>  '其他方式'],
             ]
         );
     }
