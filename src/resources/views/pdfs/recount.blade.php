@@ -11,6 +11,9 @@
     h3{
       font-size: 16px;
     }
+    .header-table th{
+      /*text-align: right;*/
+    }
     .table-bordered {
       border: 2px solid #000000;
       page-break-inside: avoid;
@@ -67,12 +70,21 @@
       </div>
       <h3 class="text-center"> 盘点单</h3>
 
-      <div class="row" style="margin-top: 30px;">
-        <div class="col-md-12" >仓库：{{ $data['warehouse']['name_cn'] }}</div>
+      <table style="margin-top: 30px;" width="100%" class="header-table">
+        <tr>
+          <th width="100px">仓库名称：</th>
+          <td>{{ $data['warehouse']['name_cn'] }}</td>
+        </tr>
+        <tr>
+          <th>制单日期：</th>
+          <td>{{ date("Y-m-d", strtotime($data['created_at'])) }}</td>
+        </tr>
+        <tr>
+          <th>制单人员：</th>
+          <td>{{ $data['operator_user']['nickname'] }}</td>
+        </tr>
 
-        <div class="col-md-12">制单日期：{{ date("Y-m-d", strtotime($data['created_at'])) }}</div>
-
-      </div>
+      </table>
       <div style="margin-top: 30px;"></div>
       
     <table class="table  table-bordered text-center" >

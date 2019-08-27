@@ -35,6 +35,12 @@ class Recount extends Model
         'over_time'  => 'date:Y-m-d H:i:s',
     ];
 
+    public function operatorUser()
+    {
+        return $this->belongsTo('App\Models\User', 'owner_id', 'id')->withDefault([
+            'nickname' => '',
+        ]);
+    }
 
     /*
     |--------------------------------------------------------------------------

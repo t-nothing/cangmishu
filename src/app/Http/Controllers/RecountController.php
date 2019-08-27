@@ -95,7 +95,7 @@ class RecountController extends Controller
 
     public function pdf($id, $template = '')
     {
-        $recount = Recount::with('warehouse')->find($id);
+        $recount = Recount::with(['warehouse', 'operatorUser'])->find($id);
 
         if(!$recount){
             return formatRet(500,"盘点单不存在");
@@ -103,7 +103,7 @@ class RecountController extends Controller
         if ($recount->owner_id != Auth::ownerId()){
             return formatRet(500,"没有权限");
         }
-        $recount->append('recount_no_barcode');
+        $recount->append(['recount_no_barcode']);
         $recount->load('stocks');
 
         // $template = "pdfs.recount.template_".strtolower($template);
@@ -121,7 +121,7 @@ class RecountController extends Controller
     public function download(BaseRequests $request, $id, $template = '')
     {
 
-        $recount = Recount::with('warehouse')->find($id);
+        $recount = Recount::with(['warehouse', 'operatorUser'])->find($id);
 
         if(!$recount){
             return formatRet(500,"盘点单不存在");
@@ -133,7 +133,7 @@ class RecountController extends Controller
         $recount->load('stocks');
 
         $template = "pdfs.recount";
-        $recount->append('recount_no_barcode');
+        $recount->append(['recount_no_barcode']);
 
         $pdf = PDF::setPaper('a4', 'Landscape');
 
