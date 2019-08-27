@@ -30,7 +30,6 @@ class CategoryController extends Controller
                         $request->input('page_size',50),
                         ['id', 'name_cn']
                     );
-
         return formatRet(0, '', $categories->toArray());
     }
 }
