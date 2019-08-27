@@ -47,7 +47,7 @@ class CartController extends Controller
         if($request->filled('form_id')) {
             $formIdArr = $request->input('form_id', NULL);
 
-            if(!is_null($formIdArr)) return;
+            if(is_null($formIdArr)) return;
 
             if(!is_array($formIdArr)) {
                 $formIdArr[] = $formIdArr;
