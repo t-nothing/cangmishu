@@ -92,6 +92,7 @@ class OrderService
 
         $order->update(
             [
+                'pay_type'                  =>  $data->pay_type,
                 'pay_status'                =>  $data->pay_status,
                 'sub_pay'                   =>  $data->sub_pay,
                 'payment_account_number'    =>  $data->payment_account_number??'',
