@@ -110,6 +110,10 @@
             $pk = abs($pk);
             $py = ($item['shelf_num_now'] < $item['shelf_num_orgin']) ? 0 : ($item['shelf_num_now'] - $item['shelf_num_orgin']);
             $py = abs($py);
+
+            $pk_money = $item['shelf_num_orgin'] > 0 ? number_format($pk * $item['total_purcharse_orgin']/$item['shelf_num_orgin'], 2) : 0;
+
+            $py_money = $item['shelf_num_now'] > 0 ? number_format($py * $item['total_purcharse_now']/$item['shelf_num_now'],2) :0 ;
           ?>
             <tr>
               <td>{{ $k+1 }}</td>
@@ -119,9 +123,9 @@
               <td>{{ $item['shelf_num_orgin'] }}</td>
               <td>{{ $item['shelf_num_now'] }}</td>
               <td>{{ $pk }}</td> 
-              <td>￥{{ number_format($pk * $item['total_purcharse_orgin']/$item['shelf_num_orgin'], 2)  }}</td>
+              <td>￥{{ $pk_money  }}</td>
               <td>{{ $py }}</td>
-              <td>￥{{ number_format($py * $item['total_purcharse_now']/$item['shelf_num_now'],2) }}</td>
+              <td>￥{{ $py_money }}</td>
             </tr>
           @empty
           @endforelse
