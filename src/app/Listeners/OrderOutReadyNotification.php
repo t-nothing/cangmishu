@@ -7,7 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
 use EasyWeChat\Kernel\Messages\Text;
-
+use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
 
 class OrderOutReadyNotification implements ShouldQueue
 {

@@ -7,6 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
 use App\Models\ShopWeappFormId;
+use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
 
 class OrderShippedNotification
 {
@@ -54,20 +55,27 @@ class OrderShippedNotification
                 $formId = ShopWeappFormId::getOne($user->id);
                 if(empty($formId)) return ;
 
-                $service = $app->customer_service;
 
-                $result = $app->template_message->send([
-                    'touser' => $user->weapp_openid,
-                    'template_id' => 'eRoqrc6HHi8PR8eZxFfvAjEv4T1Jo5xTih4nviuAUUI',
-                    'page' => '/pages/center/center?shop='.$order['shop_id'],
-                    'form_id' => ShopWeappFormId::getOne($user->id),
-                    'data' => [
-                        'keyword1' => app('ship')->getExpressName($order['express_code']),
-                        'keyword2' => date("Y年m月d日"),
-                        'keyword3' => date("Y年m月d日", $order['create_at']),
-                        'keyword4' => $order['order_items'][0]['name_cn']??'仓小铺商品',
-                    ],
-                ]);
+                try
+                {
+                    $result = $app->template_message->send([
+                        'touser' => $user->weapp_openid,
+                        'template_id' => 'eRoqrc6HHi8PR8eZxFfvAjEv4T1Jo5xTih4nviuAUUI',
+                        'page' => '/pages/center/center?shop='.$order['shop_id'],
+                        'form_id' => ShopWeappFormId::getOne($user->id),
+                        'data' => [
+                            'keyword1' => app('ship')->getExpressName($order['express_code']),
+                            'keyword2' => date("Y年m月d日"),
+                            'keyword3' => date("Y年m月d日", $order['create_at']),
+                            'keyword4' => $order['order_items'][0]['name_cn']??'仓小铺商品',
+                        ],
+                    ]);
+
+                }
+                catch(InvalidArgumentException $ex)
+                {
+                    app('log')->info('发送结果失败', $ex->getMessage());
+                }
 
                 // $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
 

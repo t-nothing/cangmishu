@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
 use EasyWeChat\Kernel\Messages\Text;
 use App\Models\ShopWeappFormId;
+use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
 
 
 class OrderCreatedNotification  implements ShouldQueue
@@ -55,18 +56,27 @@ class OrderCreatedNotification  implements ShouldQueue
 
                 $service = $app->customer_service;
 
-                $result = $app->template_message->send([
-                    'touser' => $user->weapp_openid,
-                    'template_id' => 'PuDzHjSss8ID5KgDzuQPo-LE90yJwv99czWNtnkiUKY',
-                    'page' => '/pages/center/center?shop='.$order['shop_id'],
-                    'form_id' => ShopWeappFormId::getOne($user->id),
-                    'data' => [
-                        'keyword1' => $order['sub_total'],
-                        'keyword2' => $order['out_sn'],
-                        'keyword3' => $order['order_items'][0]['name_cn']??'仓小铺商品',
-                        'keyword4' => $order['status_name']??'已支付',
-                    ],
-                ]);
+                try
+                {
+                    $result = $app->template_message->send([
+                        'touser' => $user->weapp_openid,
+                        'template_id' => 'PuDzHjSss8ID5KgDzuQPo-LE90yJwv99czWNtnkiUKY',
+                        'page' => '/pages/center/center?shop='.$order['shop_id'],
+                        'form_id' => ShopWeappFormId::getOne($user->id),
+                        'data' => [
+                            'keyword1' => $order['sub_total'],
+                            'keyword2' => $order['out_sn'],
+                            'keyword3' => $order['order_items'][0]['name_cn']??'仓小铺商品',
+                            'keyword4' => $order['status_name']??'已支付',
+                        ],
+                    ]);
+                }
+                catch(InvalidArgumentException $ex)
+                {
+                    app('log')->info('发送结果失败', $ex->getMessage());
+                }
+
+                
 
                 // $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
 
