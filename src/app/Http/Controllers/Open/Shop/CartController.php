@@ -40,6 +40,10 @@ class CartController extends Controller
      **/
     private function processFormId(BaseRequests $request){
 
+        app('log')->info('token', [
+            'request' => $request->all()
+        ]);
+
         if($request->filled('form_id')) {
             $formIdArr = $request->input('form_id', NULL);
 
