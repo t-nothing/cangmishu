@@ -58,8 +58,8 @@
           <th >货品名称</th>
           <th width="120px">规格型号</th>
           <th width="60px">数量</th>
-          <th width="105px">进货单价</th>
-          <th width="105px">金额</th>
+          <th width="105px">进货单价(元)</th>
+          <th width="105px">金额(元)</th>
           <!-- <th width="100px">备注</th> -->
         </tr>
       </thead>
@@ -74,8 +74,8 @@
           <td>{{ $product['spec']['product']['name_cn'] }}</td>
           <td>{{$product['spec']['name_cn']}}</td>
           <td>{{ $product['need_num'] }}</td>
-          <td>￥{{ $product['purchase_price'] }}</td>
-          <td>￥{{ number_format($product['purchase_price'] * $product['need_num'], 2) }}</td>
+          <td>{{ $product['purchase_price'] }}</td>
+          <td>{{ number_format($product['purchase_price'] * $product['need_num'], 2) }}</td>
           <!-- <td>{{ $product['remark'] }}</td> -->
         </tr>
         @empty

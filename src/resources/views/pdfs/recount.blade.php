@@ -97,9 +97,9 @@
             <th>盘点前数量</th>
             <th>盘点数量</th>
             <th>盘亏</th>
-            <th>盘亏金额（元）</th>
+            <th>盘亏金额(元)</th>
             <th>盘盈</th>
-            <th>盘盈金额（元）</th>
+            <th>盘盈金额(元)</th>
           </tr>
         </thead>
         <tbody>
@@ -123,9 +123,9 @@
               <td>{{ $item['shelf_num_orgin'] }}</td>
               <td>{{ $item['shelf_num_now'] }}</td>
               <td>{{ $pk }}</td> 
-              <td>￥{{ $pk_money  }}</td>
+              <td>{{ $pk_money  }}</td>
               <td>{{ $py }}</td>
-              <td>￥{{ $py_money }}</td>
+              <td>{{ $py_money }}</td>
             </tr>
           @empty
           @endforelse

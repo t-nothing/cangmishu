@@ -74,7 +74,7 @@
             <th class="no-print" width="80px">实际数量</th>
             <th class="no-print">入库批次号</th>
           <?php }?>
-          <th width="100px">进货单价</th>
+          <th width="100px">进货单价(元)</th>
           <th width="100px">备注</th>
         </tr>
       </thead>
@@ -92,7 +92,7 @@
             <td class="no-print">{{ $product['stockin_num'] }}</td>
             <td class="no-print">{{ $product['sku'] }}</td>
             <?php }?>
-          <td>￥{{ $product['purchase_price'] }}</td>
+          <td>{{ $product['purchase_price'] }}</td>
           <td>{{ $product['remark'] }}</td>
         </tr>
         @empty
