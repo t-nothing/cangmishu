@@ -229,6 +229,59 @@ if (! function_exists('encodeseq')) {
 
         return sprintf("%s%03d", $hashHigh, $low);
     }
+
+    function encodeseqExt($num, $w = 2)
+    {
+        // 10000 => A000
+        $hashTab = [
+            0 => 0,
+            1 => 1,
+            2 => 2,
+            3 => 3,
+            4 => 4,
+            5 => 5,
+            6 => 6,
+            7 => 7,
+            8 => 8,
+            9 => 9,
+            10 => 'A',
+            11 => 'B',
+            12 => 'C',
+            13 => 'D',
+            14 => 'E',
+            15 => 'F',
+            16 => 'G',
+            17 => 'H',
+            18 => 'J',
+            19 => 'K',
+            20 => 'L',
+            21 => 'M',
+            22 => 'N',
+            23 => 'O',
+            24 => 'P',
+            25 => 'Q',
+            26 => 'R',
+            27 => 'S',
+            28 => 'T',
+            29 => 'U',
+            30 => 'V',
+            31 => 'W',
+            32 => 'X',
+            33 => 'Y',
+            34 => 'Z',
+        ];
+
+        $high = intval($num % 34);
+        $low = $num % 100;
+
+        if (array_key_exists($high, $hashTab)) {
+            $hashHigh = $hashTab[$high];
+        } else {
+            return "ERROR";
+        }
+
+        return sprintf("%s%02d", $hashHigh, $low);
+    }
 }
 
 // ------------------------------------------------------------------------
@@ -297,3 +350,54 @@ if (! function_exists('currency_symbol')) {
         return $result;
     }
 }
+
+    /**
+    * 返回年代码
+    */
+    function year_code($y = NULL){
+
+        if(is_null($y)) $y = date('Y');
+        $year_code_arr = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+        return $year_code_arr[intval($y)-2016];
+    }
+
+    /**
+    * 返回月代码
+    */
+    function month_code(){
+        $month_code_arr = array('A','A','B','C','D','E','F','G','H','I','J','K','L');
+        return $month_code_arr[date('n')];
+    }
+
+    /**
+    * 返回日代码
+    */
+    function day_code(){
+        $day_code_arr = array('1','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+        return $day_code_arr[date('j')];
+    }
+
+    //十进制转换三十六进制  
+    function enid($int, $format = 8) {  
+
+        $dic = array(  
+        0 => '0', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9',  
+        10 => 'A', 11 => 'B', 12 => 'C', 13 => 'D', 14 => 'E', 15 => 'F', 16 => 'G', 17 => 'H', 18 => 'I',  
+        19 => 'J', 20 => 'K', 21 => 'L', 22 => 'M', 23 => 'N', 24 => 'O', 25 => 'P', 26 => 'Q', 27 => 'R',  
+        28 => 'S', 29 => 'T', 30 => 'U', 31 => 'V', 32 => 'W', 33 => 'X', 34 => 'Y', 35 => 'Z'  
+        );  
+        
+        $arr = array();  
+        $loop = true;  
+        while ($loop)   
+        {  
+            $arr[] = $dic[bcmod($int, 36)];  
+            $int = floor(bcdiv($int, 36));  
+            if ($int == 0) {  
+                $loop = false;  
+            }  
+        }  
+        array_pad($arr, $format, $dic[0]);  
+        return implode('', array_reverse($arr));  
+    }  
+ 

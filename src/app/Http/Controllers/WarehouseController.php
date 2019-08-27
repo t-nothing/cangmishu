@@ -47,8 +47,8 @@ class WarehouseController extends Controller
     {
         app('log')->info('新增仓库',$request->all());
         $user_id = app('auth')->ownerId();
-        $data = $request->all();
-        $data = array_merge($data,['owner_id'=>$user_id]);
+        $data = $request->only('name_cn', 'area', 'city', 'street', 'door_no', 'province', 'is_enabled_lang');
+        $data = array_merge($data,['owner_id'=>$user_id, 'code'=> Warehouse::no($user_id)]);
         try{
             Warehouse::create($data);
         }catch(\Exception $e) {
@@ -64,7 +64,7 @@ class WarehouseController extends Controller
     public function update(UpdateWarehouseRequest $request,$warehouse_id)
     {
         app('log')->info('编辑仓库',$request->all());
-        $data = $request->all();
+        $data = $request->only('name_cn', 'area', 'city', 'street', 'door_no', 'province', 'is_enabled_lang');
         try{
             Warehouse::where('id',$warehouse_id)->update($data);
         }catch(\Exception $e) {
@@ -81,24 +81,24 @@ class WarehouseController extends Controller
 
         try{
             Warehouse::where('id',$warehouse_id)->where('owner_id',$ownerId)->delete();
-            //删除商品
-            Product::where('warehouse_id',$warehouse_id)->forceDelete();
-            //删除规格
-            ProductSpec::where('warehouse_id',$warehouse_id)->forceDelete();
-            //删除货区
-            WarehouseArea::where('warehouse_id',$warehouse_id)->delete();
-            //删除货位
-            WarehouseLocation::where('warehouse_id',$warehouse_id)->delete();
-            //删除入库单
-            Batch::where('warehouse_id',$warehouse_id)->forceDelete();
-            //删除出库单
-            Order::where('warehouse_id',$warehouse_id)->forceDelete();
-            //删除库存
-            ProductStock::where('warehouse_id',$warehouse_id)->forceDelete();
-            //删除分组
-            Groups::where('warehouse_id',$warehouse_id)->forceDelete();
-            //删除order_item
-            OrderItem::where('warehouse_id',$warehouse_id)->forceDelete();
+            // //删除商品
+            // Product::where('warehouse_id',$warehouse_id)->forceDelete();
+            // //删除规格
+            // ProductSpec::where('warehouse_id',$warehouse_id)->forceDelete();
+            // //删除货区
+            // WarehouseArea::where('warehouse_id',$warehouse_id)->delete();
+            // //删除货位
+            // WarehouseLocation::where('warehouse_id',$warehouse_id)->delete();
+            // //删除入库单
+            // Batch::where('warehouse_id',$warehouse_id)->forceDelete();
+            // //删除出库单
+            // Order::where('warehouse_id',$warehouse_id)->forceDelete();
+            // //删除库存
+            // ProductStock::where('warehouse_id',$warehouse_id)->forceDelete();
+            // //删除分组
+            // Groups::where('warehouse_id',$warehouse_id)->forceDelete();
+            // //删除order_item
+            // OrderItem::where('warehouse_id',$warehouse_id)->forceDelete();
         }catch(\Exception $e) {
             app('log')->error('删除仓库失败',['msg'=>$e->getMessage()]);
             return formatRet(500, '失败');

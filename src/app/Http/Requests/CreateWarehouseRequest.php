@@ -33,12 +33,12 @@ class CreateWarehouseRequest extends BaseRequests
                        return  $q->where('owner_id',$owner_id);
                     })
                 ],
-                'code' => [
-                    'required','string','max:255',
-                    Rule::unique('warehouse')->where(function($q) use ($owner_id){
-                        return $q->where('owner_id',$owner_id);
-                    })
-                ],
+                // 'code' => [
+                //     'required','string','max:255',
+                //     Rule::unique('warehouse')->where(function($q) use ($owner_id){
+                //         return $q->where('owner_id',$owner_id);
+                //     })
+                // ],
                 'area'     => 'required|numeric',
                 'city'     => 'sometimes|string|nullable',
                 'street'   => 'sometimes|string|nullable',

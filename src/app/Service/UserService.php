@@ -47,8 +47,8 @@ class UserService{
             $warehouse->owner_id = $user->id;
             $warehouse->name_cn = $request->warehouse_name;
 
-            $initCode = Cache::increment('WAREHOUSE_CODE') + 1000;
-            $warehouse->code = encodeseq($initCode);
+            // $initCode = Cache::increment('WAREHOUSE_CODE') + 1000;
+            $warehouse->code = Warehouse::no($user->id);
             $warehouse->type = Warehouse::TYPE_PERSONAL;
             $warehouse->area = $request->warehouse_area;
             $warehouse->contact_email = $request->email;

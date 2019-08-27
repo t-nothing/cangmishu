@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Warehouse extends Model
 {
@@ -160,5 +161,16 @@ class Warehouse extends Model
 
         return false;
         
+    }
+
+    /**
+     * 只要自己创建人不重复就行了
+     */
+    public static function no($owner_id = 0)
+    {
+        $key = "CMS-WAREHOUSE-".$owner_id;
+        $value = Cache::increment($key);
+        $code =  sprintf("W%02s", enid($value));
+        return $code;
     }
 }

@@ -32,14 +32,14 @@ class UpdateWarehouseRequest extends BaseRequests
                     })
                     ->ignore($this->route('warehouse_id'))
             ],
-            'code' => [
-                'required','string','max:255',
-                Rule::unique('warehouse')
-                    ->where(function ($query) {
-                            return $query->where('owner_id',Auth::ownerId());
-                     })
-                    ->ignore($this->route('warehouse_id'))
-            ],
+            // 'code' => [
+            //     'required','string','max:255',
+            //     Rule::unique('warehouse')
+            //         ->where(function ($query) {
+            //                 return $query->where('owner_id',Auth::ownerId());
+            //          })
+            //         ->ignore($this->route('warehouse_id'))
+            // ],
             'area'     => 'required|numeric',
             'city'     => 'required|string',
             'street'   => 'required|string',
