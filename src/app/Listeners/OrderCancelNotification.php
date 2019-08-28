@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\OrderCancel;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\Shop;
 use App\Models\ShopUser;
 use App\Models\ShopWeappFormId;
 use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
@@ -47,8 +48,10 @@ class OrderCancelNotification  implements ShouldQueue
         app('log')->info('order result', $order);
 
         if($order && $order["shop_user_id"] > 0) {
-            $user = ShopUser::find($order["shop_user_id"]);
-            if($user) {
+            $shop = Shop::with("owner")::find($order["shop_user_id"]);
+            if($shop) {
+
+                $user = $shop->owner;
 
                 app('log')->info('开始给用户推送取消订单消息', [$order["out_sn"], $order["shop_user_id"]]);
                 $app = app('wechat.mini_program');
@@ -71,7 +74,7 @@ class OrderCancelNotification  implements ShouldQueue
                             'keyword1' => $order['source'],
                             'keyword2' => $order['out_sn'],
                             'keyword3' => $order["created_at"],
-                            'keyword4' => $order['order_items'][0]['name_cn']??'仓小铺商品',
+                            'keyword4' => $order['order_items'][0]['name_cn']??$shop->name_cn,
                             'keyword5' => sprintf("%s%s", currency_symbol($order['sale_currency']), $order['sub_total']),
                             'keyword6' => "店铺取消"
                         ],

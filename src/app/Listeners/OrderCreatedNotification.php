@@ -6,6 +6,7 @@ use App\Events\OrderCreated;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
+use App\Models\Shop;
 use EasyWeChat\Kernel\Messages\Text;
 use App\Models\ShopWeappFormId;
 use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
@@ -48,13 +49,13 @@ class OrderCreatedNotification  implements ShouldQueue
         $order = $event->order;
 
         if($order["shop_user_id"] > 0) {
-            $user = ShopUser::find($order["shop_user_id"]);
-            if($user) {
+            $shop = Shop::with("owner")::find($order["shop_user_id"]);
+            if($shop) {
+
+                $user = $shop->owner;
 
                 app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"]]);
                 $app = app('wechat.mini_program');
-
-                $service = $app->customer_service;
 
                 try
                 {
@@ -66,7 +67,7 @@ class OrderCreatedNotification  implements ShouldQueue
                         'data' => [
                             'keyword1' => $order['sub_total'],
                             'keyword2' => $order['out_sn'],
-                            'keyword3' => $order['order_items'][0]['name_cn']??'仓小铺商品',
+                            'keyword3' => $order['order_items'][0]['name_cn']??$shop->name_cn,
                             'keyword4' => $order['status_name']??'已支付',
                         ],
                     ]);

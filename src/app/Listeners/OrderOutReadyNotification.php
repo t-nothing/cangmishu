@@ -6,6 +6,7 @@ use App\Events\OrderOutReady;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
+use App\Models\Shop;
 use EasyWeChat\Kernel\Messages\Text;
 use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
 

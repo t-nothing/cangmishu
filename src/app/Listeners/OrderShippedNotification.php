@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\OrderShipped;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\Shop;
 use App\Models\ShopUser;
 use App\Models\ShopWeappFormId;
 use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
@@ -46,8 +47,10 @@ class OrderShippedNotification
         $order = $event->order;
 
         if($order["shop_user_id"] > 0) {
-            $user = ShopUser::find($order["shop_user_id"]);
-            if($user) {
+            $shop = Shop::with("owner")::find($order["shop_user_id"]);
+            if($shop) {
+
+                $user = $shop->owner;
 
                 app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"]]);
                 $app = app('wechat.mini_program');
@@ -62,12 +65,12 @@ class OrderShippedNotification
                         'touser' => $user->weapp_openid,
                         'template_id' => 'eRoqrc6HHi8PR8eZxFfvAjEv4T1Jo5xTih4nviuAUUI',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
-                        'form_id' => ShopWeappFormId::getOne($user->id),
+                        'form_id' => $formId,
                         'data' => [
                             'keyword1' => app('ship')->getExpressName($order['express_code']),
                             'keyword2' => date("Y年m月d日"),
-                            'keyword3' => date("Y年m月d日", $order['create_at']),
-                            'keyword4' => $order['order_items'][0]['name_cn']??'仓小铺商品',
+                            'keyword3' => date("Y年m月d日", strtotime($order['create_at'])),
+                            'keyword4' => $order['order_items'][0]['name_cn']??$shop->name_cn,
                         ],
                     ]);
 
