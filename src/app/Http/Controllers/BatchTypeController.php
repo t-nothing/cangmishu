@@ -14,13 +14,14 @@ class BatchTypeController extends Controller
     public function index(BaseRequests $request)
     {
         $this->validate($request, [
+            'warehouse_id' => 'required|integer|min:1',
             'page'         => 'integer|min:1',
             'is_enabled'   => 'boolean'
         ]);
 
         $batchType = BatchType::with('warehouseArea')
                               ->ofWhose(Auth::ownerId())
-                              ->ofWarehouse(Auth::warehouseId())
+                              ->ofWarehouse($request->warehouse_id)
                               ->when($request->filled('is_enabled'),function($q)use($request) {
                                     $q->where('is_enabled', $request->is_enabled);
                               })
