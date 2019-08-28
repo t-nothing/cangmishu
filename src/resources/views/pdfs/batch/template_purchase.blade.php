@@ -54,7 +54,7 @@
       <thead>
         <tr>
           <th width="60px">序号</th>
-          <th width="120px">货品编号</th>
+          <th width="120px">SKU编码</th>
           <th >货品名称</th>
           <th width="120px">规格型号</th>
           <th width="60px">数量</th>
