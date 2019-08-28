@@ -219,15 +219,7 @@ class Order extends Model
 
     public function getCurrencyAttribute()
     {
-        
-        $result = "￥";
-        if($this->default_currency == "USD") {
-            $result = "$";
-        }elseif($this->default_currency == "EUR") {
-            $result = "€";
-        }
-        
-        return $result;
+        return currency_symbol($this->sale_currency);
     }
     /*
     |--------------------------------------------------------------------------
