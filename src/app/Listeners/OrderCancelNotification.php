@@ -48,10 +48,10 @@ class OrderCancelNotification  implements ShouldQueue
         app('log')->info('order result', $order);
 
         if($order && $order["shop_user_id"] > 0) {
-            $shop = Shop::with("owner")->find($order["shop_id"]);
-            if($shop) {
+            $user = ShopUser::find($order["shop_user_id"]);
+            if($user) {
 
-                $user = $shop->owner;
+                $shop = Shop::find($order["shop_id"]);
 
                 app('log')->info('开始给用户推送取消订单消息', [$order["out_sn"], $order["shop_user_id"]]);
                 $app = app('wechat.mini_program');
@@ -96,7 +96,7 @@ class OrderCancelNotification  implements ShouldQueue
                             'keyword5' => sprintf("%s%s", currency_symbol($order['sale_currency']), $order['sub_total']),
                             'keyword6' => "店铺取消"
                         ],
-                    ]));
+                    ]);
                     app('log')->info('发送结果失败', [$ex->getMessage()]);
                 }
                 
