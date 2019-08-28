@@ -24,7 +24,7 @@ class CategoryController extends Controller
         ]);
 
         $categories = Category::with('feature:id,name_cn,name_en')
-                    ->ofWhose(Auth::ownerId())
+                    ->ofWarehouse(Auth::warehouseId())
                     ->when($request->filled('is_enabled'),function($q)use($request) {
                         $q->where('is_enabled', $request->is_enabled);
                     })
@@ -49,18 +49,8 @@ class CategoryController extends Controller
         try{
             $data = $request->all();
             $data["name_en"] = $request->input('name_en', $request->name_cn);
-            $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
+            $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>Auth::warehouseId()]);
             $category = Category::create($data);
-
-            //新增库存报警
-            $owner = User::find(Auth::ownerId());
-            $warn_stock= $owner->default_warning_stock;
-            $userCategoryData = [
-                'user_id' => Auth::ownerId(),
-                'category_id' => $category->id,
-                'warning_stock'  => $warn_stock
-            ];
-            UserCategoryWarning::create($userCategoryData);
             DB::commit();
             return formatRet(0);
         }catch (\Exception $e){

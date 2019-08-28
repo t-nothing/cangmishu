@@ -47,7 +47,6 @@ class Category extends Model
         return $query->where('owner_id', $owner_id);
     }
 
-
     public  function getNeedExpirationDateNameAttribute()
     {
         return $this->need_expiration_date?"保质期":"";

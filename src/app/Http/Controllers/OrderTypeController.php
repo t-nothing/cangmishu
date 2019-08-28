@@ -20,6 +20,7 @@ class OrderTypeController extends Controller
             'is_enabled'   => 'boolean',
         ]);
         $orderTypes = OrderType::ofWhose(Auth::ownerId())
+                              ->ofWarehouse(Auth::warehouseId())  
                               ->when($request->filled('is_enabled'),function($q)use($request) {
                                   $q->where('is_enabled', $request->is_enabled);
                               })

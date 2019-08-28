@@ -30,7 +30,7 @@ class Shop
         $shopInfo = Model::find($shopId);
 
         if (!$shopInfo) {
-            app('log')->info('店铺不存在', [$shopInfo->id]);
+            app('log')->info('店铺不存在', [$shopId]);
             throw new AuthorizationException('店铺不存在');
         }
 

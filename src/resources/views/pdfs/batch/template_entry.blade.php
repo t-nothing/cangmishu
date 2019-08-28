@@ -66,7 +66,7 @@
       <thead>
         <tr>
           <th width="60px">序号</th>
-          <th width="120px">货品编号</th>
+          <th width="120px">SKU编码</th>
           <th >货品名称</th>
           <th width="120px">规格型号</th>
           <th width="80px">进货数量</th>
@@ -84,7 +84,8 @@
           <?php $total += $product['purchase_price'];?>
         <tr>
           <td>{{ $k+1 }}</td>
-          <td>{{ $product['relevance_code'] }}</td>
+          <td><img src="{{ $product['relevance_code_barcode'] }}">
+              <p>{{ $product['relevance_code'] }}</p></td>
           <td>{{ $product['spec']['product']['name_cn'] }}</td>
           <td>{{$product['spec']['name_cn']}}</td>
           <td>{{ $product['need_num'] }}</td>

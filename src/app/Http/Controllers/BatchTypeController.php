@@ -20,6 +20,7 @@ class BatchTypeController extends Controller
 
         $batchType = BatchType::with('warehouseArea')
                               ->ofWhose(Auth::ownerId())
+                              ->ofWarehouse(Auth::warehouseId())
                               ->when($request->filled('is_enabled'),function($q)use($request) {
                                     $q->where('is_enabled', $request->is_enabled);
                               })

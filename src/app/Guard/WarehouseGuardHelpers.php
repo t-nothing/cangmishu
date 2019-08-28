@@ -82,6 +82,12 @@ trait WarehouseGuardHelpers
         return $owner;
     }
 
+    public function warehouseId()
+    {
+        //判断当前账户是否为员工账户
+        return $this->user()->default_warehouse_id??0;
+    }
+
     
     public function shopId()
     {
