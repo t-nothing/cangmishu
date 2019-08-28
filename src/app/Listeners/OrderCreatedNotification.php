@@ -49,7 +49,7 @@ class OrderCreatedNotification  implements ShouldQueue
         $order = $event->order;
 
         if($order["shop_user_id"] > 0) {
-            $shop = Shop::with("owner")::find($order["shop_user_id"]);
+            $shop = Shop::with("owner")->find($order["shop_user_id"]);
             if($shop) {
 
                 $user = $shop->owner;
