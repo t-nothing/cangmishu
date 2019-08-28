@@ -66,7 +66,7 @@
       <thead>
         <tr>
           <th width="60px">序号</th>
-          <th width="120px">SKU编码</th>
+          <th width="180px">SKU编码</th>
           <th >货品名称</th>
           <th width="120px">规格型号</th>
           <th width="80px">进货数量</th>
@@ -75,13 +75,13 @@
             <th class="no-print">入库批次号</th>
           <?php }?>
           <th width="100px">进货单价(元)</th>
-          <th width="100px">备注</th>
         </tr>
       </thead>
       <tbody>
-          <?php $total = 0;?>
+          <?php $total = 0; $remarks = [];?>
         @forelse ($batch['batch_products'] as $k => $product)
           <?php $total += $product['purchase_price'];?>
+          <?php if(!empty($product['remark'])) $remarks[] = sprintf("%s : %s;<br/>",$product['spec']['product']['name_cn'],$product['remark'] );?>
         <tr>
           <td>{{ $k+1 }}</td>
           <td><img src="{{ $product['relevance_code_barcode'] }}">
@@ -94,11 +94,17 @@
             <td class="no-print">{{ $product['sku'] }}</td>
             <?php }?>
           <td>{{ $product['purchase_price'] }}</td>
-          <td>{{ $product['remark'] }}</td>
         </tr>
         @empty
         @endforelse
       </tbody>
+    </table>
+
+    <table width="100%" border="0"  align="center" class="table table-bordered ">
+      <tr>
+        <td width="240px">入库备注：</td>
+        <td height="100px">{{ implode(",", $remarks)}}</td>
+      </tr>
     </table>
 
     <table width="100%" border="0"  align="center">
