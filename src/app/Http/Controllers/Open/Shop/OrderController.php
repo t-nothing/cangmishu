@@ -42,7 +42,8 @@ class OrderController extends Controller
                             'created_at',
                             'updated_at',
                             'sub_pay',
-                            'sub_total'
+                            'sub_total',
+                            'sale_currency'
                         ]
                     );
 
@@ -77,7 +78,8 @@ class OrderController extends Controller
                 'sub_pay',
                 'sub_total',
                 'express_num',
-                'express_code'
+                'express_code',
+                'sale_currency'
             ])->find($id);
 
         if(!$order){

@@ -70,7 +70,7 @@ class ProductStockController extends  Controller
                 $query->hasSku($sku);
             })
             ->when($product_name = $request->input('product_name'), function ($query) use ($product_name) {
-                return $query->where('product.name_cn', 'like', "%{$name}%")->orWhere('product.name_en', 'like', "%{$name}%");
+                return $query->where('product.name_cn', 'like', "%{$product_name}%")->orWhere('product.name_en', 'like', "%{$product_name}%")->orWhere('product_spec.relevance_code',  $product_name);
             })
             ->when($production_batch_number = $request->input('production_batch_number'), function ($query) use ($production_batch_number) {
                 $query->hasProductBatchNumber($production_batch_number);

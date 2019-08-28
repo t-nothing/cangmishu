@@ -89,8 +89,8 @@ class Product extends Model
              return $q->whereHas('specs',function ($qq) use ($keywords){
                         $qq->where('relevance_code', 'like','%' .$keywords . '%');
                     })
-                    ->orwhere('name_cn', 'like', '%' . $keywords . '%')
-                    ->orWhere('name_en', 'like', '%' . $keywords . '%');
+                    ->orwhere('product.name_cn', 'like', '%' . $keywords . '%')
+                    ->orWhere('product.name_en', 'like', '%' . $keywords . '%');
         });
         return $query;
     }
