@@ -31,6 +31,7 @@
       font-size: 15px;
       position: absolute;
       right: 0px;
+      top:50px;
       text-align: center;
     }
 
@@ -70,7 +71,24 @@
         <div class="col-md-12" style="font-size:16px;">{{ $order['order_type']['name'] }}</div>
         <div class="col-md-12">制单日期：{{ date("Y-m-d", strtotime($order['created_at'])) }}</div>
       </div>
-      <div style="margin-top: 30px;"></div>
+      <table class="table  table-bordered" style="margin-top: 30px; border:1px solid #000 ">
+        <tr>
+          <td width="50%">
+            <b>发件信息：</b><br/><br/>
+            发件人姓名：{{ $order['send_fullname'] }}<br/>
+            发件人电话：{{ $order['send_phone'] }}<br/>
+            发件人地址：{{ $order['send_province'] }}{{ $order['send_city'] }}{{ $order['send_district'] }}{{ $order['send_address'] }}
+          </td>
+          <td>
+            <b>收件信息：</b><br/><br/>
+            收件人姓名：{{ $order['receiver_fullname'] }}<br/>
+            收件人电话：{{ $order['receiver_phone'] }}<br/>
+            收件人地址：{{ $order['receiver_province'] }}{{ $order['receiver_city'] }}{{ $order['receiver_district'] }}{{ $order['receiver_address'] }}
+          </td>
+        </tr>
+      </table>
+
+
       
     <table class="table  table-bordered text-center" >
         <thead>
