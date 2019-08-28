@@ -139,7 +139,7 @@ class OrderService
         $user_id = ($userId == 0) ?Auth::ownerId():$userId;
         
         try {
-            $lock = Cache::lock(sprintf("orderCreateUserLock:%s", $user_id));
+            $lock = Cache::lock(sprintf("orderCreateUserLockV1:%s", $user_id));
             //加一个锁防止并发
             if ($lock->get()) {
 
