@@ -78,6 +78,7 @@
             <th>#</th>
             <th>商品名称及规格</th>
             <th>SKU编码</th>
+            <th>下单数量</th>
             <th>出库数量</th>
           </tr>
         </thead>
@@ -88,6 +89,7 @@
               <td>{{ $k+1 }}</td>
               <td>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</td>
               <td> {{ $item['relevance_code'] }}</td>
+              <td>{{ $item['amount'] }}</td>
               <td>{{ $item['pick_num'] }}</td>
             </tr>
           @empty
