@@ -64,9 +64,7 @@ class OrderItem extends Model
 
     public function spec()
     {
-        return $this->belongsTo('App\Models\ProductSpec', 'relevance_code', 'relevance_code')
-            ->where('warehouse_id', $this->warehouse_id)
-            ->where('owner_id', $this->owner_id);
+        return $this->belongsTo('App\Models\ProductSpec', 'spec_id', 'id');
     }
 
     public function feature()

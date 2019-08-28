@@ -173,6 +173,7 @@ class OrderService
                         'spec_name_cn' => $spec->name_cn,
                         'spec_name_en' => $spec->name_en,
                         'pic' => $v['pic']??'',
+                        'spec_id'=>$v['spec_id'],
                     ];
 
                     $subQty += $v['num'];
