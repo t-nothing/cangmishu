@@ -124,14 +124,11 @@ class OrderController extends Controller
 
     public function show(BaseRequests $request, $order_id)
     {
-        $order = Order::with(['orderItems.spec','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])->find($order_id);
+        $order = Order::with(['orderItems.spec:id,total_shelf_num','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])->find($order_id);
         if(!$order){
             return formatRet("500",'找不到该出库单');
         }
         $order->append(['out_sn_barcode']);
-        foreach ($order->orderItems as $key => $value) {
-            // $value->load("spec:relevance_code,total_stock_num");
-        }
 
         // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
         $order = $order->toArray();
