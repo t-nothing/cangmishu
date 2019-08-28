@@ -62,7 +62,8 @@ class OrderCancelNotification  implements ShouldQueue
                     app('log')->info('form Id不足');
                     return;
                 }
-
+                
+                $result = [];
                 try
                 {
                     $result = $app->template_message->send([

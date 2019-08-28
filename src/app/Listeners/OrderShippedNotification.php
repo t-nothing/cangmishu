@@ -57,7 +57,8 @@ class OrderShippedNotification
 
                 $formId = ShopWeappFormId::getOne($user->id);
                 if(empty($formId)) return ;
-
+                
+                $result = [];
 
                 try
                 {
