@@ -48,7 +48,7 @@ class OrderCancelNotification  implements ShouldQueue
         app('log')->info('order result', $order);
 
         if($order && $order["shop_user_id"] > 0) {
-            $shop = Shop::with("owner")->find($order["shop_user_id"]);
+            $shop = Shop::with("owner")->find($order["shop_id"]);
             if($shop) {
 
                 $user = $shop->owner;
