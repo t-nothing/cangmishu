@@ -54,7 +54,7 @@ class OrderCreatedNotification  implements ShouldQueue
 
                 $user = $shop->owner;
 
-                app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"]]);
+                app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"], $shop->name_cn]);
                 $app = app('wechat.mini_program');
 
                 try
@@ -74,7 +74,19 @@ class OrderCreatedNotification  implements ShouldQueue
                 }
                 catch(InvalidArgumentException $ex)
                 {
-                    app('log')->info('发送结果失败', $ex->getMessage());
+                    app('log')->info('发送结内容', [
+                        'touser' => $user->weapp_openid,
+                        'template_id' => 'PuDzHjSss8ID5KgDzuQPo-LE90yJwv99czWNtnkiUKY',
+                        'page' => '/pages/center/center?shop='.$order['shop_id'],
+                        'form_id' => ShopWeappFormId::getOne($user->id),
+                        'data' => [
+                            'keyword1' => $order['sub_total'],
+                            'keyword2' => $order['out_sn'],
+                            'keyword3' => $order['order_items'][0]['name_cn']??$shop->name_cn,
+                            'keyword4' => $order['status_name']??'已支付',
+                        ],
+                    ]);
+                    app('log')->info('发送结果失败', [$ex->getMessage()]);
                 }
 
                 

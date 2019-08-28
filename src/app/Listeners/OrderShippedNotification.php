@@ -77,7 +77,19 @@ class OrderShippedNotification
                 }
                 catch(InvalidArgumentException $ex)
                 {
-                    app('log')->info('发送结果失败', $ex->getMessage());
+                    app('log')->info('发送结内容', [
+                        'touser' => $user->weapp_openid,
+                        'template_id' => 'eRoqrc6HHi8PR8eZxFfvAjEv4T1Jo5xTih4nviuAUUI',
+                        'page' => '/pages/center/center?shop='.$order['shop_id'],
+                        'form_id' => $formId,
+                        'data' => [
+                            'keyword1' => app('ship')->getExpressName($order['express_code']),
+                            'keyword2' => date("Y年m月d日"),
+                            'keyword3' => date("Y年m月d日", strtotime($order['create_at'])),
+                            'keyword4' => $order['order_items'][0]['name_cn']??$shop->name_cn,
+                        ],
+                    ]);
+                    app('log')->info('发送结果失败', [$ex->getMessage()]);
                 }
 
                 // $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
