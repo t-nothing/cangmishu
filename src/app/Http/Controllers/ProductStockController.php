@@ -87,7 +87,8 @@ class ProductStockController extends  Controller
             })
             ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
             // sortBy
-            ->latest()
+            ->orderBy('product_spec.created_at', 'desc')
+            ->orderBy('product_spec.id', 'desc')
             // 分页
             ->paginate($request->input('page_size',10))->toArray();
 
