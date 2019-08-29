@@ -36,8 +36,8 @@ class TestThirdPartRequest extends TestCase
             return md5($orig);
         };
 
-        $app_key = "testkey";
-        $app_secret = "testsecret";
+        $app_key = "K005";
+        $app_secret = '$2y$10$QOaZ8TslnMUxoRIafF5QvOMnGYOFNi7Z7eWEkxAAX647kYGZys9Mq';
 
         $params = array(
             'app_key'               =>  $app_key,

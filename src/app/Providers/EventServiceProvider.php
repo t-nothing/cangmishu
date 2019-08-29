@@ -87,6 +87,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\CartDestroyed' => [ 
                 'App\Listeners\CartDestroyedNotification',
             ],
+        'App\Events\AppAccountCreated' => [ 
+                'App\Listeners\AppAccountCreatedNotification',
+            ],
     ];
 
     /**

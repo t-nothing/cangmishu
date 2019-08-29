@@ -302,11 +302,10 @@ $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middlewar
 //API 第三方开放接口
 $router->group(['prefix' => 'open/api', 'namespace' => 'Open\\Api', 'middleware' => ['auth:third-party']], function($router) {
 
-    $router->get('/stock/sku', 'StockController@show');// 根据SKU查询库存
-    $router->get('/stock/location', 'CategoryController@list');// 根据货位查询库存
-    $router->get('/stock/product', 'CategoryController@list');// 根据商品查询库存
+    $router->get('/stock/spec', 'StockController@spec');// 根据SKU查询库存
+    $router->get('/stock/location', 'StockController@location');// 根据货位查询库存
 
-    $router->post('/order', 'CartController@store');// 下单
-    $router->get('/order', 'CartController@list');// 查询订单
+    $router->post('/order', 'OrderController@store');// 下单
+    $router->get('/order/info', 'OrderController@show');// 查询订单
     $router->delete('/order', 'CartController@destory');// 取消订单
 });

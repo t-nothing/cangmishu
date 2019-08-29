@@ -88,6 +88,8 @@ class ThirdParty implements Guard
 
         unset($requestData['sign']);
 
+        // print_r($requestData);
+
         $max_expire = 120; // 秒
         // if (ENVIRONMENT != 'production') {
         //     $max_expire *= 1000;
@@ -103,6 +105,8 @@ class ThirdParty implements Guard
         if (!$info) {
             return false;
         }
+
+        ksort($requestData);
 
         $_sign = $info->app_secret . http_build_query($requestData);
         $sign_str = md5($_sign);
@@ -161,6 +165,15 @@ class ThirdParty implements Guard
     public function warehouse()
     {
         return $this->user()->warehouse;
+    }
+
+    public function warehouseId()
+    {
+        return $this->user()->warehouse->id;
+    }
+
+    public function ownerId(){
+        return $this->user()->warehouse->owner_id;
     }
 
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 use Illuminate\Foundation\Auth\User;
 use App\Models\Warehouse;
+use Hash;
 
 class AppAccount extends User
 {
@@ -12,7 +13,7 @@ class AppAccount extends User
 
     public function warehouse()
     {
-        return $this->hasMany('App\Models\Warehouse', 'id', 'warehouse_id');
+        return $this->hasOne('App\Models\Warehouse', 'id', 'warehouse_id');
     }
 
     public function getAuthIdentifierName()
@@ -76,5 +77,14 @@ class AppAccount extends User
     public function getRememberTokenName()
     {
 
+    }
+
+
+    /**
+     * 生成APP 密钥
+     **/
+    public static function generateAppSecret($warehouse_id, $key)
+    {
+        return Hash::make(sprintf("%s%s%s", $key, rand(100, 999), $warehouse_id));
     }
 }
