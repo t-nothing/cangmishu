@@ -232,7 +232,7 @@ class BatchProduct extends Model
         $stock->warehouse_id              = $this->warehouse_id;
         $stock->batch_id                  = $this->batch_id;
         $stock->status                    = Product::PRODUCT_STATUS_ONLINE;
-        $stock->sku                       = ProductSpec::newSku($this->spec);
+        $stock->sku                       = $this->sku; //ProductSpec::newSku($this->spec);
         $stock->expiration_date           = $this->getExpirationDate(); //保质期
         $stock->best_before_date          = $this->getBestBeforeDate();
         $stock->production_batch_number   = $this->getProductionBatchNumber();
