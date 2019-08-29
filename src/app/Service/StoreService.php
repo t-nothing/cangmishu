@@ -136,11 +136,11 @@ class StoreService
 
         //入库
         event(new StockLocationIn($locationStock, $data['stockin_num'], [
-            'order_sn'=>$batchProduct->batch_code
+            'order_sn'=>$batchProduct->batch->batch_code
         ]));
         //上架
         event(new StockLocationPutOn($locationStock, $locationStock->shelf_num, [
-            'order_sn'=>$batchProduct->batch_code
+            'order_sn'=>$batchProduct->batch->batch_code
         ]));
         return $locationStock;
     }

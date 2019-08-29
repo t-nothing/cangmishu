@@ -34,7 +34,7 @@ class StockController extends Controller
 
         $dataList = ProductSpec::with('product:id,name_cn')->whereIn('relevance_code', $skuArr)->where('warehouse_id', Auth::warehouseId())->latest()->select(['product_id','total_stock_num as qty', 'relevance_code as spec_sku', 'total_stockin_times as stockin_times', 'total_stockout_times as stockout_times'])->paginate($request->input('page_size',10))->toArray();
 
-        return formatRet(0, '', $dataList);
+        return formatRet(200, '成功', $dataList);
       
     }
 
