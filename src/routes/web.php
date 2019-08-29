@@ -307,5 +307,5 @@ $router->group(['prefix' => 'open/api', 'namespace' => 'Open\\Api', 'middleware'
 
     $router->post('/order', 'OrderController@store');// 下单
     $router->get('/order/info', 'OrderController@show');// 查询订单
-    $router->post('/order/cancel', 'CartController@destory');// 取消订单
+    $router->post('/order/cancel', 'OrderController@cancel');// 取消订单
 });

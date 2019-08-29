@@ -11,13 +11,16 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\OrderType;
 use App\Models\ReceiverAddress;
 use App\Models\SenderAddress;
+use App\Models\Order;
 use App\Http\Requests\CreateThirdPartyOrderRequest;
+use App\Http\Requests\GetThirdPartyOrderRequest;
+
 
 class OrderController extends Controller
 {
 
     /**
-     * 结算提交订单
+     * 第三方下单
      **/
     public function store(CreateThirdPartyOrderRequest $request)
     {
@@ -91,5 +94,39 @@ class OrderController extends Controller
         return formatRet(200,'下单成功',[
             'out_sn'  =>  $outSn
         ]);
+    }
+
+    /**
+     * 查询订单
+     **/
+    public function show(GetThirdPartyOrderRequest $request)
+    {
+        $order = Order::with(['orderItems:order_id,name_cn,spec_name_cn,relevance_code as sku,amount as qty,sale_price,sale_currency','warehouse:id,name_cn', 'orderType:id,name'])->ofWarehouse(Auth::warehouseId())->where('out_sn',$request->out_sn)->select('id','out_sn','source','status','remark','shop_remark','express_code','delivery_date','receiver_country','receiver_city','receiver_postcode','receiver_district','receiver_address','receiver_fullname','receiver_phone','send_country','send_city','send_postcode','send_district','send_address','send_fullname','send_phone','receiver_province','created_at','order_type','express_num','warehouse_id','verify_status','send_province','sub_total','sub_pay','pay_currency','pay_status','pay_type','payment_account_number','sale_currency','sub_order_qty')->get();
+        if(!$order){
+            return formatRet("500",'找不到该出库单');
+        }
+
+        $order = $order->toArray();
+
+       return formatRet(200,"成功",$order);
+    }
+
+    /**
+     * 取消订单
+     **/
+    public function cancel(GetThirdPartyOrderRequest $request)
+    {
+        $order = Order::ofWarehouse(Auth::warehouseId())->where('out_sn',$request->out_sn)->first();
+        if(!$order){
+            return formatRet("500",'找不到该出库单');
+        }
+
+        if($order->status != Order::STATUS_DEFAULT){
+            return formatRet("500",'当前状态不支持取消');
+        }
+        $order->status = Order::STATUS_CANCEL;
+        $order->save();
+
+       return formatRet(200,"成功");
     }
 }
