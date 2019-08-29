@@ -9,6 +9,7 @@
         ksort($query);
         unset($query['sign']); //这个sign不需要
         $orig = $secret . http_build_query($query);
+        print_r($orig);exit;
         return md5($orig);
     };
 

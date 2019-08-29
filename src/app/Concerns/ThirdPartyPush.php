@@ -35,7 +35,7 @@ trait ThirdPartyPush {
             'timestamp'             =>  time()+20 //过期时间
         );
 
-        $query['type'] = $type; //stockChange orderShipped orderCancel
+        $query['method'] = $type; //stockChange orderShipped orderCancel
         $params = array_merge($params, $query);
 
         $params['sign'] = $this->makeSign($params, $app_secret);
