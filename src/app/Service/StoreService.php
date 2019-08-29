@@ -199,6 +199,11 @@ class StoreService
                 throw new \Exception("拣货数量超出应捡数目", 1);
             }
 
+            //如果拣货数量是0就跳过
+            if($i['pick_num'] == 0) {
+                continue;
+            }
+
  
             //如过没有记录则去数据库拿
             $stockInLocations = app('stock')->getStockByAmount($i['pick_num'], $order->owner_id, $item->relevance_code);

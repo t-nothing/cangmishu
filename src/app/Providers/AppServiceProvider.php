@@ -21,9 +21,13 @@ use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use App\Observers\CategoryObserver;
 use App\Models\Category;
+use App\Guard\ThirdParty;
+use Illuminate\Auth\CreatesUserProviders;
+use Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
+    use CreatesUserProviders;
     /**
      * Bootstrap any application services.
      *
@@ -63,6 +67,19 @@ class AppServiceProvider extends ServiceProvider
             );
 
         }
+
+        Auth::extend('third-party', function ($app, $name, $config) {
+            $guard = new ThirdParty(
+                $this->createUserProvider($config['provider'] ?? null),
+                $app['request'],
+                'third-party-token',
+                'third-party-token'
+            );
+
+            $app->refresh('request', $guard, 'setRequest');
+
+            return $guard;
+        });
 
     }
 

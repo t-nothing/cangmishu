@@ -53,6 +53,10 @@ return [
             'driver' => 'passport',
             'provider' => 'shop',
         ],
+        'third-party' => [
+            'driver' => 'third-party',
+            'provider' => 'third-party',
+        ],
     ],
 
     /*
@@ -80,6 +84,10 @@ return [
         'shop' => [
             'driver' => 'eloquent',
             'model' => \App\Models\ShopUser::class,
+        ],
+        'third-party' => [
+            'driver' => 'eloquent',
+            'model' => \App\Models\AppAccount::class,
         ],
 
 
