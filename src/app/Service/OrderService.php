@@ -143,6 +143,21 @@ class OrderService
             //加一个锁防止并发
             if ($lock->get()) {
 
+                //如果是外部传进来的
+                if(isset($data->out_sn) && !empty($data->out_sn)) {
+
+                    $out_sn = $data->out_sn;
+                    $exists = Order::where('out_sn', $out_sn)->where('warehouse_id', $data->warehouse_id)->lockForUpdate()->first();
+
+                    if($exists) {
+                        throw new \Exception("{$out_sn} 已经存在", 1);
+                        
+                    }
+                } else {
+                    $out_sn = Order::generateOutSn();
+                }
+
+
                 $subTotal = 0;
                 $subQty = 0;
                 $items=[];
@@ -231,9 +246,9 @@ class OrderService
                 $order->send_address  = $sender->address;
                 $order->send_fullname = $sender->fullname;
                 $order->send_phone    = $sender->phone;
+                $order->out_sn = $out_sn;
 
-
-                $order->out_sn = Order::generateOutSn();
+                
                 $order->express_num = $data->express_num;
                 $order->shop_id    = $data->shop_id??0;
                 $order->shop_user_id    = $data->shop_user_id??0;

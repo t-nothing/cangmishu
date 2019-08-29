@@ -30,6 +30,7 @@ class OrderController extends Controller
                     ->paginate(
                         $request->input('page_size',50),
                         ['id', 'out_sn', 'status', 'remark', 'express_code', 'delivery_date', 'express_code', 
+                            'express_num',
                             'receiver_country', 
                             'receiver_city',
                             'receiver_postcode',
@@ -46,8 +47,15 @@ class OrderController extends Controller
                             'sale_currency'
                         ]
                     );
+        $dataList = $dataList->toArray();
+        foreach ($dataList['data'] as $key => &$result) {
+            $result["ship"] = $result['status']>3 && !empty($result["express_num"]) ? [
+                "express_name" => app("ship")->getExpressName($result["express_code"]),
+                "express_num" => $result["express_num"],
+            ] : NULL;
+        }
 
-        return formatRet(0, '', $dataList->toArray());
+        return formatRet(0, '', $dataList);
     }
 
     /**
@@ -88,7 +96,7 @@ class OrderController extends Controller
         $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic");
  
         $result = $order->toArray();
-        $result["ship"] = $result['status']>3 ? [
+        $result["ship"] = $result['status']>3 && !empty($result["express_num"]) ? [
             "express_name" => app("ship")->getExpressName($result["express_code"]),
             "express_num" => $result["express_num"],
         ] : NULL;

@@ -54,15 +54,14 @@ class Handler extends ExceptionHandler
         if($request->wantsJson() ||$request->expectsJson()){
             $e =  $this->prepareException($e);
             switch ($e){
+                case  $e instanceof HttpResponseException:
                 case $e instanceof  ValidationException:
-                   $re = collect($e->errors())->values()->flatten(1)->toArray();
+                    $re = collect($e->errors())->values()->flatten(1)->toArray();
                     return  response()->json([
                         'msg' => $re[0],
                         'status' =>422 ,
                         'data' => null,
                     ],422);
-                case  $e instanceof HttpResponseException:
-                    return $e->getResponse();
                 case  $e instanceof AuthenticationException:
                     return  response()->json([
                         'msg' =>'用户身份校验未通过',

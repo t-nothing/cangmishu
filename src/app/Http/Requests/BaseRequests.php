@@ -19,12 +19,13 @@ class BaseRequests extends  FormRequest
 {
     var $warehouseId ;
 
-    protected function failedValidation(Validator $validator)
-    {
-        $message = collect($validator->errors()->toArray())->flatten(1)->toArray();
-        throw new HttpResponseException(response()->json(['code'=>422,'msg'=>$message[0],'data'=>null],
-            422, [], JSON_UNESCAPED_UNICODE));
-    }
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     // print_r(collect($validator->errors()->toArray())->flatten(1)->toArray());exit;
+    //     $message = collect($validator->errors()->toArray())->flatten(1)->toArray();
+    //     throw new HttpResponseException(response()->json(['code'=>422,'msg'=>$message[0],'data'=>null],
+    //         422, [], JSON_UNESCAPED_UNICODE));
+    // }
 
 
     protected function failedAuthorization()

@@ -3,12 +3,14 @@
  * 在线下单
  */
 
-namespace App\Http\Controllers\Open\Shop;
+namespace App\Http\Controllers\Open\Api;
 use App\Http\Requests\BaseRequests;
 use App\Http\Controllers\Controller;
 use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
 use App\Models\OrderType;
+use App\Models\ReceiverAddress;
+use App\Models\SenderAddress;
 use App\Http\Requests\CreateThirdPartyOrderRequest;
 
 class OrderController extends Controller
@@ -17,73 +19,67 @@ class OrderController extends Controller
     /**
      * 结算提交订单
      **/
-    public function checkout(CreateThirdPartyOrderRequest $request)
+    public function store(CreateThirdPartyOrderRequest $request)
     {
         app('log')->info('第三方API接口下单',$request->all());
         app('db')->beginTransaction();
-        $outSn = "";
+
         try {
 
             $data = new BaseRequests;            
 
             $data->express_code  = "";
-            $data->remark           = $request->input('remark', '');
-            $data->shop_id          = $request->shop->id;
-            $data->shop_user_id     = Auth::user()->id;
-            $data->warehouse_id     =  $request->shop->warehouse_id;
-            $data->order_type       = OrderType::where('warehouse_id', $request->shop->warehouse_id)->oldest()->first()->id??0;
+            $data->remark           = $request->remark??'';
+            $data->warehouse_id     = Auth::warehouseId();
+            $data->order_type       = OrderType::where('warehouse_id', Auth::warehouseId())->oldest()->first()->id??0;
             $data->shop_remark      = "";
             $data->express_num      = "";
-            $data->sale_currency    =  $request->shop->default_currency;
-
+            $data->sale_currency    =  $request->items[0]->sale_currency??'CNY';
+            $data->out_sn           = $request->out_sn??'';
 
             $data->receiver = new ReceiverAddress([
-                "country"       =>  $request->country,
-                "province"      =>  $request->province,
-                "city"          =>  $request->city,
-                "postcode"      =>  $request->postcode,
-                "district"      =>  $request->district,
-                "address"       =>  $request->address,
-                "fullname"      =>  $request->fullname,
-                "phone"         =>  $request->phone,
+                "country"       =>  $request->receiver_country,
+                "province"      =>  $request->receiver_province,
+                "city"          =>  $request->receiver_city,
+                "postcode"      =>  $request->receiver_postcode,
+                "district"      =>  $request->receiver_district,
+                "address"       =>  $request->receiver_address,
+                "fullname"      =>  $request->receiver_fullname,
+                "phone"         =>  $request->receiver_phone,
             ]);
 
             //查找店铺默认发件人
 
             $data->sender = new SenderAddress([
-                "country"       =>  $request->shop->senderAddress->country,
-                "province"      =>  $request->shop->senderAddress->province,
-                "city"          =>  $request->shop->senderAddress->city,
-                "postcode"      =>  $request->shop->senderAddress->postcode,
-                "district"      =>  $request->shop->senderAddress->district,
-                "address"       =>  $request->shop->senderAddress->address,
-                "fullname"      =>  $request->shop->senderAddress->fullname,
-                "phone"         =>  $request->shop->senderAddress->phone
+                "country"       =>  $request->sender_country,
+                "province"      =>  $request->sender_province,
+                "city"          =>  $request->sender_city,
+                "postcode"      =>  $request->sender_postcode,
+                "district"      =>  $request->sender_district,
+                "address"       =>  $request->sender_address,
+                "fullname"      =>  $request->sender_fullname,
+                "phone"         =>  $request->sender_phone
             ]);
 
 
 
             $orderItem = [];
-            foreach(app('cart')->name($this->getWhoesCart())->all($request->id) as $row)  {
+            foreach($request->items as $item)  {
                 $orderItem[] = [
-                    'relevance_code'    =>  $row->relevance_code,
-                    'pic'               =>  $row->pic,
-                    'num'               =>  $row->qty,
-                    'sale_price'        =>  $row->price,
+                    'relevance_code'    =>  $item["sku"],
+                    'pic'               =>  $item["pic"]??'',
+                    'num'               =>  $item["qty"],
+                    'sale_price'        =>  $item["sale_price"]??0,
+                    'sale_currency'        =>  $item["sale_currency"]??'CNY',
                 ];
             }
 
-           
             $data->goods_data = collect($orderItem);
             
-            $orderResult = app('order')->setSource($request->shop->name_cn)->create($data, $request->shop->owner_id);
+            $orderResult = app('order')->setSource($request->source??'API')->create($data, Auth::OwnerId());
             app('db')->commit();
 
             $outSn =  $orderResult->out_sn;
-
-            app('cart')->name($this->getWhoesCart())->removeBy($request->id);
-
-            event(new CartCheckouted($orderResult));
 
         } catch (\Exception $e) {
             app('db')->rollback();
@@ -92,7 +88,7 @@ class OrderController extends Controller
         }
 
 
-        return formatRet(0,'下单成功',[
+        return formatRet(200,'下单成功',[
             'out_sn'  =>  $outSn
         ]);
     }
