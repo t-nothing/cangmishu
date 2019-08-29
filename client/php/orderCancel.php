@@ -33,9 +33,9 @@
     try
     {
         $client = new GuzzleHttp\Client(['verify' => false]);
-        $res = $client->request('post', $url, 
+        $res = $client->request('get', $url, 
             [ 
-                "form_params" => $params
+                "query" => $params
             ]
         );
 

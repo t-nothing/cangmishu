@@ -29,11 +29,13 @@ class EventServiceProvider extends ServiceProvider
                 'App\Listeners\StockLocationOutNotification',
                 'App\Listeners\StockLocationOutLogNotification',
                 'App\Listeners\StockLocationOutWarningNotification',
+                'App\Listeners\StockLocationOutWarningPushThirdParty',
             ],
         'App\Events\StockLocationAdjust' => [
                 'App\Listeners\StockLocationAdjustNotification',
                 'App\Listeners\StockLocationAdjustLogNotification',
                 'App\Listeners\StockLocationAdjustWarningNotification',
+                'App\Listeners\StockLocationAdjustWarningPushThirdParty',
             ],
         'App\Events\StockLocationMove' => [
                 'App\Listeners\StockLocationMoveNotification',
@@ -41,6 +43,7 @@ class EventServiceProvider extends ServiceProvider
             ],
         'App\Events\OrderCancel' => [ //订单取消
                 'App\Listeners\OrderCancelNotification',
+                'App\Listeners\OrderCancelPushThirdParty',
             ],
         'App\Events\OrderCreated' => [ //更新了快递单号
                 'App\Listeners\OrderCreatedNotification',
@@ -50,8 +53,9 @@ class EventServiceProvider extends ServiceProvider
             ],
         'App\Events\OrderShipped' => [ //更新了快递单号
                 'App\Listeners\OrderShippedNotification',
+                'App\Listeners\OrderShippedPushThirdParty',
             ],
-        'App\Events\OrderCompleted' => [ //更新了快递单号
+        'App\Events\OrderCompleted' => [ //订单完成
                 'App\Listeners\OrderCompletedNotification',
             ],
         'App\Events\OrderOutReady' => [ //拣货完成，准备出库

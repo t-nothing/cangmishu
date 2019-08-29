@@ -8,3 +8,6 @@ export PATH
 php artisan queue:work redis --queue=cangmishu_emails --tries=3  >> ./storage/logs/cangmishu_emails.log 2>&1 &
 
 php artisan queue:work redis --queue=cangmishu_push --tries=3>> ./storage/logs/cangmishu_push.log 2>&1 &
+
+php artisan queue:work redis --queue=cangmishu_push_third_party --tries=1>> ./storage/logs/cangmishu_push_third_party.log 2>&1 &
+
