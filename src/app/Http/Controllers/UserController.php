@@ -46,9 +46,9 @@ class UserController extends  Controller
     public  function getEmailVerifyCode(BaseRequests $request)
     {
         $this->validate($request,[
-            'email'=>['required','email',Rule::unique('user','email')],
-            'captcha_key' =>  'required|string|min:1',
-            'captcha' =>  'required|string'
+            'email'         =>['required','email',Rule::unique('user','email')],
+            'captcha_key'   =>  'required|string|min:1',
+            'captcha'       =>  'required|string'
         ]);
 
         if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
@@ -103,6 +103,9 @@ class UserController extends  Controller
         return formatRet(0, "查询成功", $res);
     }
 
+    /**
+     * 重设密码
+     */
     public function resetPassword(BaseRequests $request,$user_id){
         $this->validate($request, [
             'password'=>'required|max:255|confirmed',
@@ -111,7 +114,7 @@ class UserController extends  Controller
         app('log')->info('user',['request'=>$request->all(),'user_id'=>$user_id]);
         $user = User::find($user_id);
         if(!$user){
-            return formatRet(500,"请选择用户");
+            return formatRet(500,"用户不存在");
         }
         $auth = Auth::user();
         if($user->boss_id !=0){
