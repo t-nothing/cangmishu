@@ -176,8 +176,12 @@ class JwtGuard implements Guard
      */
     public function login(array $credentials = [], $onlyAdmin = false)
     {
+        if(empty($credentials['email']))
+        {
+            eRet('用户名、邮箱或密码不正确');
+        }
 //        $user = $this->provider->retrieveByCredentials($credentials);
-        $user= User::with(['defaultWarehouse:id,name_cn'])->where('nickname',$credentials['email'])->orWhere('email',$credentials['email'])->first();
+        $user= User::with(['defaultWarehouse:id,name_cn'])->where('phone',$credentials['email'])->orWhere('email',$credentials['email'])->first();
         if(!$user){
             eRet('用户名、邮箱或密码不正确');
         }
