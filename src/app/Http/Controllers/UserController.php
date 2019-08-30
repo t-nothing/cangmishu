@@ -40,7 +40,7 @@ class UserController extends  Controller
             app('log')->error($e->getMessage());
             return formatRet(500, $e->getMessage());
         }
-        return formatRet(0, '已保存到系统', $user->toArray());
+        return formatRet(0, '注册成功', $user->toArray());
     }
 
     public  function getEmailVerifyCode(BaseRequests $request)
