@@ -124,7 +124,7 @@ class OrderController extends Controller
 
     public function show(BaseRequests $request, $order_id)
     {
-        $order = Order::ofWarehouse($request->warehouse_id)->with(['orderItems.spec:id,total_shelf_num','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])->find($order_id);
+        $order = Order::where('owner_id',Auth::ownerId())->with(['orderItems.spec:id,total_shelf_num','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])->find($order_id);
         if(!$order){
             return formatRet("500",'找不到该出库单');
         }
