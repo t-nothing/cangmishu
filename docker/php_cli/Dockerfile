@@ -33,6 +33,15 @@ COPY ./simsun.ttc /usr/share/fonts/
 
 RUN chmod +x /usr/local/bin/wkhtmltopdf
 
+RUN apt-get install cron -y
+#RUN apt-get install rsyslog -y
+
+COPY ./crontab /tmp
+
+RUN cat /tmp/crontab >> /etc/crontab
+
+CMD ["sh", "-c", "service cron restart"]
+
 WORKDIR /var/www/html/
 
 COPY ./start-queue.sh /usr/local/bin
