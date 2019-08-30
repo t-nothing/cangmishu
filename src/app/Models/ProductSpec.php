@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductSpec extends Model
 {
+    use SoftDeletes;
 	protected $table = 'product_spec';
     protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'relevance_code', 'product_id','net_weight','gross_weight','is_warning', 'sale_price', 'purchase_price'];
 
