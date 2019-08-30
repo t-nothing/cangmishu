@@ -79,7 +79,6 @@ class JwtGuard implements Guard
 
         $token_value = $this->getTokenForRequest();
 
-
         if (! empty($token_value)) {
             $token = Token::valid()->where('token_value', '=', $token_value)->first();
 
@@ -107,7 +106,6 @@ class JwtGuard implements Guard
         if (Str::startsWith($token, 'Bearer ')) {
             return Str::substr($token, 7);
         }
-
         return $token;
     }
 
