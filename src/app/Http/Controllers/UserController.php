@@ -16,7 +16,7 @@ class UserController extends  Controller
     /**
      * 激活并注册
      */
-    public function Register(CreateUserRequest $request)
+    public function register(CreateUserRequest $request)
     {
 
         $type = $request->type;

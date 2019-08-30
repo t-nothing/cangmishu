@@ -143,7 +143,7 @@ return [
         'production' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['cangmishu', 'cangmishu_push', 'cangmishu_email', 'cangmishu_push_third_party'],
+                'queue' => ['cangmishu', 'cangmishu_push', 'cangmishu_emails', 'cangmishu_push_third_party'],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3, 
@@ -153,7 +153,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['cangmishu', 'cangmishu_push', 'cangmishu_email', 'cangmishu_push_third_party'],
+                'queue' => ['cangmishu', 'cangmishu_push', 'cangmishu_emails', 'cangmishu_push_third_party'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
