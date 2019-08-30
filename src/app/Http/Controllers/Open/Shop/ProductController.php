@@ -18,7 +18,7 @@ class ProductController extends Controller
     /**
      * 商品首页
      **/
-    public function list(BaseRequests $request, int $catId = 0)
+    public function list(BaseRequests $request,  $catId = 0)
     {
         $this->validate($request, [
             'page'         => 'integer|min:1',
