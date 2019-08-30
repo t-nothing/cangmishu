@@ -32,6 +32,11 @@ class Category extends Model
         return $this->hasMany('App\Models\Product', 'category_id', 'id');
     }
 
+    public function shopProducts()
+    {
+        return $this->hasMany('App\Models\ShopProduct', 'category_id', 'id');
+    }
+
     public function feature()
     {
         return $this->belongsTo('App\Models\WarehouseFeature', 'warehouse_feature_id', 'id');

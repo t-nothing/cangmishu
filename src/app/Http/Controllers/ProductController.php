@@ -10,6 +10,7 @@ use App\Imports\ProductsImport;
 use App\Models\Product;
 use App\Models\ProductSpec;
 use App\Models\Category;
+use App\Models\ShopProduct;
 use App\Models\ShopProductSpec;
 use App\Services\Service\CategoryService;
 use Illuminate\Http\Request;
@@ -205,6 +206,10 @@ class ProductController extends Controller
                 }
             }
 
+
+            //同步商品库分类ID
+            ShopProduct::where('product_id', $product->id)->update('category_id', $product->category_id);
+
             DB::commit();
             return formatRet(0,'编辑商品成功');
         }catch(\Exception $e) {
@@ -231,6 +236,8 @@ class ProductController extends Controller
 
         DB::beginTransaction();
         try{
+            ShopProduct::where('product_id', $product_id)->delete();
+            ShopProductSpec::where('product_id', $product_id)->delete();
             // $product->specs()->stocks()->delete();
             $product->specs()->delete();
             $product->delete();
