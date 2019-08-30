@@ -146,7 +146,7 @@ return [
                 'queue' => ['cangmishu', 'cangmishu_push', 'cangmishu_email', 'cangmishu_push_third_party'],
                 'balance' => 'simple',
                 'processes' => 10,
-                'tries' => 3,
+                'tries' => 3, 
             ],
         ],
 
