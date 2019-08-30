@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Exceptions\BusinessException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductStock extends Model
 {
+  
+    use SoftDeletes;
     const GOODS_STATUS_PREPARE = 1; // 待入库的
     const GOODS_STATUS_ONLINE  = 2; // 正常商品，可以售卖
     const GOODS_STATUS_OFFLINE = 3; // 在仓库，不卖了，下架了

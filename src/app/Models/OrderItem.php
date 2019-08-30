@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Models\Model;
 use App\Models\ProductStock;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderItem extends Model
 {
+    use SoftDeletes;
     protected $table = 'order_item';
 
     protected $guarded = [];
