@@ -27,17 +27,17 @@ class StockLocationPickLogNotification
      */
     public function handle(StockLocationPick $event)
     {
-        $model = $event->stockLocation;
-        $option = $event->option;
-        $qty = $event->qty;
+        // $model = $event->stockLocation;
+        // $option = $event->option;
+        // $qty = $event->qty;
 
-        app("stockLog")->setTypeId(ProductStockLog::TYPE_PICKING)
-                        ->setStockLocation($model)
-                        ->setRemark($option['remark']??0)
-                        ->setItemId($option['item_id']??0)
-                        ->setNum(abs($qty) * -1)
-                        ->setOrderSn($option['order_sn']??'')
-                        ->log();
+        // app("stockLog")->setTypeId(ProductStockLog::TYPE_PICKING)
+        //                 ->setStockLocation($model)
+        //                 ->setRemark($option['remark']??0)
+        //                 ->setItemId($option['item_id']??0)
+        //                 ->setNum(abs($qty) * -1)
+        //                 ->setOrderSn($option['order_sn']??'')
+        //                 ->log();
 
         app("log")->info("拣货事件日志");
     }
