@@ -27,7 +27,6 @@ class CaptchaController extends Controller
         $arr = [
             'captcha'       => $builder->inline(90),
             'captcha_key'   => $key,
-            'value'         => $data
         ];
         return formatRet(0, '', $arr);
       
