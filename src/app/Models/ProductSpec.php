@@ -255,22 +255,22 @@ class ProductSpec extends Model
 
 	static function newSku($spec)
 	{
-	  $warehouse_code = app('auth')->warehouse()->code;
-	  $category_id    = $spec->product->category_id;
-	  $spec_id        = $spec->id;
-	  $redis_key      = 'wms_cangmishu_spec'.$spec_id;
-	  $is_exists      =  Redis::Exists($redis_key);
-	  if(!$is_exists){
-		  $sku_mark = SkuMarkLog::where('warehouse_code',$warehouse_code)->where('spec_id',$spec_id)->orderBy('id')->pluck('sku_mark')->first();
-		  $sku_mark = empty($sku_mark) ? 1 :$sku_mark;
-		  Redis::set($redis_key,$sku_mark);
-	  }
-	  $skuLog = new SkuMarkLog();
-	  $skuLog->warehouse_code = $warehouse_code;
-	  $skuLog->spec_id        = $spec_id;
-	  $skuLog->sku_mark       =  Redis::get($redis_key);
-	  $skuLog->save();
+        $warehouse_code = app('auth')->warehouse()->code;
+        $category_id    = $spec->product->category_id;
+        $spec_id        = $spec->id;
+        $redis_key      = 'wms_cangmishu_spec'.$spec_id;
+        $is_exists      =  Redis::Exists($redis_key);
+        if(!$is_exists){
+            $sku_mark = SkuMarkLog::where('warehouse_code',$warehouse_code)->where('spec_id',$spec_id)->orderBy('id', 'desc')->pluck('sku_mark')->first();
+            $sku_mark = empty($sku_mark) ? 1 :$sku_mark;
+            Redis::set($redis_key,$sku_mark+1);
+        }
+        $skuLog = new SkuMarkLog();
+        $skuLog->warehouse_code = $warehouse_code;
+        $skuLog->spec_id        = $spec_id;
+        $skuLog->sku_mark       =  Redis::get($redis_key);
+        $skuLog->save();
 
-	  return $warehouse_code. sprintf("%02x", $category_id).sprintf("%05x", $spec_id). sprintf("%04x", Redis::Incr($redis_key));
+        return $warehouse_code. sprintf("%02x", $category_id).sprintf("%05x", $spec_id). sprintf("%04x", Redis::Incr($redis_key));
 	}  
 }
