@@ -96,6 +96,7 @@ class UserService{
             $feature->is_enabled   = 1;
             $feature->logo         = "";
             $feature->remark       = "自动创建特性";
+            $feature->owner_id         =  $user->id;
 
             if (! $feature->save()) {
                 throw new \Exception("默认特性创建失败", 1);
@@ -106,6 +107,7 @@ class UserService{
             $warehouseArea = new WarehouseArea;
             $warehouseArea->warehouse_id = $warehouse->id;
             $warehouseArea->warehouse_feature_id = $feature->id;
+            $warehouseArea->owner_id     =  $user->id;
             $warehouseArea->code         = "AREA";
             $warehouseArea->name_cn      = "默认货区";
             $warehouseArea->name_en      = "Default Area";
@@ -131,6 +133,7 @@ class UserService{
             $location->col               = 2;
             $location->floor             = 2;
             $location->remark            = "自动创建货位";
+            $location->owner_id         =  $user->id;
 
             if (! $location->save()) {
                 throw new \Exception("默认货位创建失败", 1);
