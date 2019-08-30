@@ -44,7 +44,7 @@ class AuthenticateController extends  Controller
             'nick_name'         => 'required|string',
             'gender'            => 'required|string',
             'country'           => 'required|string',
-            'city'              => 'required|string',
+            'city'              => 'string',
             'avatar_url'        => 'required|url',
             'language'          => 'required|string',
             'mobile'             => 'string',

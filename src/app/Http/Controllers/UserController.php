@@ -38,13 +38,28 @@ class UserController extends  Controller
         return formatRet(0, '已保存到系统', $user->toArray());
     }
 
-    public  function getCode(BaseRequests $request)
+    public  function getEmailVerifyCode(BaseRequests $request)
     {
         $this->validate($request,[
-            'email'=>'required|email'
+            'email'=>'required|email',
+            'captcha_key' =>  'required|string|min:1',
+            'captcha' =>  'required|string'
         ]);
 
-        $code = app('user')->getCode();
+        $code = app('user')->getRandCode();
+        app('user')->createUserVerifyCode($code,$request->email);
+        return formatRet("0","发送成功");
+    }
+
+    public  function getSmsVerifyCode(BaseRequests $request)
+    {
+        $this->validate($request,[
+            'mobile'        =>  'required|mobile',
+            'captcha_key'   =>  'required|string|min:1',
+            'captcha'       =>  'required|string'
+        ]);
+
+        $code = app('user')->getRandCode();
         app('user')->createUserVerifyCode($code,$request->email);
         return formatRet("0","发送成功");
 

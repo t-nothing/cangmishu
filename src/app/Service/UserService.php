@@ -219,7 +219,7 @@ class UserService{
         return $user;
     }
 
-    public function getCode(){
+    public function getRandCode(){
         $chars='0123456789';
         mt_srand((double)microtime()*1000000*getmypid());
         $CheckCode="";
@@ -227,6 +227,7 @@ class UserService{
             $CheckCode.=substr($chars,(mt_rand()%strlen($chars)),1);
         return $CheckCode;
     }
+
     public function createUserVerifyCode($code ,$email)
     {
         VerifyCode::updateOrCreate(['email' => $email], ['code' => $code,'expired_at'=>time()+5*60]);
