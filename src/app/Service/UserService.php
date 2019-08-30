@@ -45,7 +45,7 @@ class UserService{
 
             #先创建一个用户
             $user->email    = $email;
-            $user->phone    = $mobile;
+            $user->phone    = $mobile??'';
             $user->password = Hash::make($request->password);
             $nickname = explode("@",$email);
             $user->nickname = $nickname[0];
