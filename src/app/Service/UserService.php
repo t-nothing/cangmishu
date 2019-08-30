@@ -19,6 +19,7 @@ use App\Models\UserCategoryWarning;
 use App\Models\OrderType;
 use App\Models\Distributor;
 use Illuminate\Support\Facades\Mail;
+use App\Jobs\Sms;
 
 
 class UserService{
@@ -32,10 +33,21 @@ class UserService{
         app('db')->beginTransaction();
         try {
 
+            $type   = $request->type;
+            $code   = $request->code;
+            $mobile = $request->mobile;
+            $email  = $request->email;
+
+            if($type === "mobile" && empty($email))
+            {
+                $email = sprintf("%s@cangmishu.com", $mobile);
+            }
+
             #先创建一个用户
-            $user->email    = $request->email;
+            $user->email    = $email;
+            $user->phone    = $mobile;
             $user->password = Hash::make($request->password);
-            $nickname = explode("@",$request->email);
+            $nickname = explode("@",$email);
             $user->nickname = $nickname[0];
             $user->avatar = env("APP_URL")."/images/default_avatar.png";
             $user->save();
@@ -45,15 +57,15 @@ class UserService{
             #创建一个默认仓库
             $warehouse = new Warehouse();
             $warehouse->owner_id = $user->id;
-            $warehouse->name_cn = $request->warehouse_name;
+            $warehouse->name_cn = empty($request->warehouse_name)?'我的仓库':$request->warehouse_name;
 
             // $initCode = Cache::increment('WAREHOUSE_CODE') + 1000;
             $warehouse->code = Warehouse::no($user->id);
             $warehouse->type = Warehouse::TYPE_PERSONAL;
-            $warehouse->area = $request->warehouse_area;
-            $warehouse->contact_email = $request->email;
+            $warehouse->area = $request->warehouse_area??200;
+            $warehouse->contact_email = $email;
             $warehouse->status = true;
-            $warehouse->apply_num = 0;
+            $warehouse->apply_num = 1;
             $warehouse->operator = $user->id;
             $warehouse->contact_user = $user->id;
             $warehouse->contact_number = "";
@@ -61,8 +73,6 @@ class UserService{
             // 仓库被创建时，如果是公共，则无使用者；如果是私有，则是创建者
             $warehouse->is_used = 1;
             $warehouse->user_id = $user->id;
-            
-
 
             if (!$warehouse->save()) {
                 throw new \Exception("创建仓库失败", 1);
@@ -183,17 +193,17 @@ class UserService{
                 throw new \Exception("默认货品分类创建失败", 1);
             }
        
-            $userCategory = new  UserCategoryWarning();
-            $userCategoryData = [
-                'user_id' => $user->id,
-                'category_id' => $category->id,
-                'warning_stock'  => env("DEFAULT_WARNING_STOCK",50)
-            ];
-            $user->default_warning_stock = env("DEFAULT_WARNING_STOCK",50);
-            $user->save();
+            // $userCategory = new  UserCategoryWarning();
+            // $userCategoryData = [
+            //     'user_id' => $user->id,
+            //     'category_id' => $category->id,
+            //     'warning_stock'  => env("DEFAULT_WARNING_STOCK",50)
+            // ];
+            // $user->default_warning_stock = env("DEFAULT_WARNING_STOCK",50);
+            // $user->save();
 
-            //用户分类预警新增
-            $userCategory::create($userCategoryData);
+            // //用户分类预警新增
+            // $userCategory::create($userCategoryData);
 
             #添加供应商
             $distributor = new Distributor;
@@ -235,17 +245,13 @@ class UserService{
         $qrCode =env("APP_URL")."/images/qrCode.png";
         $message = new VerifyCodeEmail($code,$logo,$qrCode);
         $message->onQueue('cangmishu_emails');
-         Mail::to($email)->send($message);
+        Mail::to($email)->send($message);
     }
 
     public function createUserSMSVerifyCode($code ,$mobile)
     {
-        // VerifyCode::updateOrCreate(['email' => $mobile], ['code' => $code,'expired_at'=>time()+5*60]);
-        // $logo=env("APP_URL")."/images/logo.png";
-        // $qrCode =env("APP_URL")."/images/qrCode.png";
-        // $message = new VerifyCodeEmail($code,$logo,$qrCode);
-        // $message->onQueue('cangmishu_emails');
-        //  Mail::to($email)->send($message);
+        VerifyCode::updateOrCreate(['email' => $mobile], ['code' => $code,'expired_at'=>time()+5*60]);
+        Sms::dispatch('register', $mobile, $code)->onQueue('cangmishu_push');
     }
 
 }

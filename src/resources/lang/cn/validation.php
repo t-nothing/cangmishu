@@ -170,8 +170,8 @@ return [
         'product_stock'           =>'库存记录',
         'batch_id'                =>'入库单',
         'captcha'                 =>'验证码',
-        'mobile'                  =>'手机号'
-
+        'mobile'                  =>'手机号',
+        'captcha_key'             =>'验证码标识',
 
     ],
 ];

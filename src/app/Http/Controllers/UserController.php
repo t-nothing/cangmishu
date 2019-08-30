@@ -18,11 +18,19 @@ class UserController extends  Controller
      */
     public function Register(CreateUserRequest $request)
     {
-        
 
-        $code = $request->input('code');
-        $email = $request->input('email');
-        $verify_code = VerifyCode::where('code',$code)->where('email',$email)->where('expired_at','>',time())->first();
+        $type = $request->type;
+        $code = $request->code;
+        $mobile = $request->mobile;
+        $email = $request->email;
+
+        $codeFieldValue = $email;
+        if($type === "mobile")
+        {
+            $codeFieldValue = $mobile;
+        }
+
+        $verify_code = VerifyCode::where('code',$code)->where('email',$codeFieldValue)->where('expired_at','>',time())->first();
         if(!$verify_code){
             return formatRet(500, "验证码已过期或不存在");
         }
@@ -38,7 +46,7 @@ class UserController extends  Controller
     public  function getEmailVerifyCode(BaseRequests $request)
     {
         $this->validate($request,[
-            'email'=>'required|email',
+            'email'=>['required','email',Rule::unique('user','email')],
             'captcha_key' =>  'required|string|min:1',
             'captcha' =>  'required|string'
         ]);
@@ -56,7 +64,7 @@ class UserController extends  Controller
     public  function getSmsVerifyCode(BaseRequests $request)
     {
         $this->validate($request,[
-            'mobile'        =>  'required|mobile',
+            'mobile'        =>  ['required','mobile',Rule::unique('user','phone')],
             'captcha_key'   =>  'required|string|min:1',
             'captcha'       =>  'required|string'
         ]);
@@ -67,7 +75,7 @@ class UserController extends  Controller
         Cache::tags(['captcha'])->forget($request->captcha_key);
 
         $code = app('user')->getRandCode();
-        app('user')->createUserSMSVerifyCode($code,$request->email);
+        app('user')->createUserSMSVerifyCode($code,$request->mobile);
         return formatRet("0","发送成功");
 
     }

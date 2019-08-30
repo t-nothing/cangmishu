@@ -24,11 +24,13 @@ class CreateUserRequest extends BaseRequests
     public function rules()
     {
         return [
-            'email'    =>  ['required','email',Rule::unique('user','email')],
-            'password' => 'required|string|min:6',
-            'code'     => 'string|min:6',
-            'warehouse_name' =>  ['required','string','min:4'],
-            'warehouse_area' => 'required|numeric',
+            'type'              => ['required',Rule::in(['email', 'mobile'])],
+            'mobile'             =>['required_if:type,mobile','mobile',Rule::unique('user','phone')],
+            'email'             => ['required_if:type,email','email',Rule::unique('user','email')],
+            'password'          => 'required|string|min:6',
+            'code'              => 'required|numeric|min:4',
+            'warehouse_name'    => 'string|max:20',
+            'warehouse_area'    => 'numeric',
         ];
     }
 
