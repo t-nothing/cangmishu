@@ -228,7 +228,7 @@ class UserService{
         return $CheckCode;
     }
 
-    public function createUserVerifyCode($code ,$email)
+    public function createUserEmailVerifyCode($code ,$email)
     {
         VerifyCode::updateOrCreate(['email' => $email], ['code' => $code,'expired_at'=>time()+5*60]);
         $logo=env("APP_URL")."/images/logo.png";
@@ -236,6 +236,16 @@ class UserService{
         $message = new VerifyCodeEmail($code,$logo,$qrCode);
         $message->onQueue('cangmishu_emails');
          Mail::to($email)->send($message);
+    }
+
+    public function createUserSMSVerifyCode($code ,$mobile)
+    {
+        // VerifyCode::updateOrCreate(['email' => $mobile], ['code' => $code,'expired_at'=>time()+5*60]);
+        // $logo=env("APP_URL")."/images/logo.png";
+        // $qrCode =env("APP_URL")."/images/qrCode.png";
+        // $message = new VerifyCodeEmail($code,$logo,$qrCode);
+        // $message->onQueue('cangmishu_emails');
+        //  Mail::to($email)->send($message);
     }
 
 }

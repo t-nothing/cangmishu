@@ -18,10 +18,7 @@ class UserController extends  Controller
      */
     public function Register(CreateUserRequest $request)
     {
-        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
-            return formatRet(500, '图片验证失败');
-        }
-        Cache::tags(['captcha'])->forget($request->captcha_key);
+        
 
         $code = $request->input('code');
         $email = $request->input('email');
@@ -46,8 +43,13 @@ class UserController extends  Controller
             'captcha' =>  'required|string'
         ]);
 
+        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+            return formatRet(500, '图片验证失败');
+        }
+        Cache::tags(['captcha'])->forget($request->captcha_key);
+
         $code = app('user')->getRandCode();
-        app('user')->createUserVerifyCode($code,$request->email);
+        app('user')->createUserEmailVerifyCode($code,$request->email);
         return formatRet("0","发送成功");
     }
 
@@ -59,8 +61,13 @@ class UserController extends  Controller
             'captcha'       =>  'required|string'
         ]);
 
+        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+            return formatRet(500, '图片验证失败');
+        }
+        Cache::tags(['captcha'])->forget($request->captcha_key);
+
         $code = app('user')->getRandCode();
-        app('user')->createUserVerifyCode($code,$request->email);
+        app('user')->createUserSMSVerifyCode($code,$request->email);
         return formatRet("0","发送成功");
 
     }
