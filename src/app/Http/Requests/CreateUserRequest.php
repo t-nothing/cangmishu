@@ -29,6 +29,8 @@ class CreateUserRequest extends BaseRequests
             'code'     => 'string|min:6',
             'warehouse_name' =>  ['required','string','min:4'],
             'warehouse_area' => 'required|numeric',
+            'captcha_key' =>  'required|string|min:1',
+            'captcha' =>  'required|string'
         ];
     }
 

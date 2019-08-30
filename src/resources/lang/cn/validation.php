@@ -85,6 +85,8 @@ return [
     'unique'               => ':attribute 已经存在。',
     'uploaded'             => ':attribute 上传失败。',
     'url'                  => ':attribute 格式不正确。',
+    'captcha'              => ':attribute 不正确。',
+    'captcha_api'          => ':attribute 不正确。',
 
     /*
     |--------------------------------------------------------------------------
@@ -166,6 +168,7 @@ return [
         'batch_code'              =>'入库单编码',
         'product_stock'           =>'库存记录',
         'batch_id'                =>'入库单',
+        'captcha'                 =>'验证码'
 
 
 

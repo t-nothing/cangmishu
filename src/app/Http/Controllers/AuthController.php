@@ -25,6 +25,7 @@ class AuthController extends  Controller
             'email'    => 'required',
             'password' => 'required|string',
         ]);
+
         $guard = app('auth')->guard();
 
         if (! $data = $guard->login($guard->credentials())) {

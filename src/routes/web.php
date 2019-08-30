@@ -271,6 +271,8 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
     Route::any('wechat', 'WeChatController@serve');
     Route::get('/express', 'ExpressController@list');//快递公司列表
+    Route::get('captcha', 'CaptchaController@show');
+    Route::post('captcha', 'CaptchaController@valid');
 
 });
 

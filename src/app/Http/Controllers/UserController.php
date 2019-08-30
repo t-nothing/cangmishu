@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends  Controller
 {
@@ -17,6 +18,11 @@ class UserController extends  Controller
      */
     public function Register(CreateUserRequest $request)
     {
+        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+            return formatRet(500, '图片验证失败');
+        }
+        Cache::tags(['captcha'])->forget($request->captcha_key);
+
         $code = $request->input('code');
         $email = $request->input('email');
         $verify_code = VerifyCode::where('code',$code)->where('email',$email)->where('expired_at','>',time())->first();
