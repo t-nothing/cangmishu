@@ -16,7 +16,7 @@ use App\Services\Service\ProductStockLogService;
 use App\Services\Service\ShipService;
 use App\Services\Service\RecountService;
 use App\Services\Service\CartService;
-use App\Services\Service\UserService;
+use App\Services\UserService;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use App\Observers\CategoryObserver;
