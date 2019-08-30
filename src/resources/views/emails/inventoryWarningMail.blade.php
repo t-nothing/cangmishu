@@ -4,7 +4,7 @@
 <body>
 <table width="800px" align="center" bgcolor="#f3f1f2" style="font-size: 14px;word-wrap:break-word">
     <tr>
-        <td style="height: 80px;"><img style="margin: 0 0 0 20px;" src="{{$logo}}" alt=""></td>
+        <td style="height: 80px;"><img style="margin: 0 0 0 20px;" src="{{$logo??''}}" alt=""></td>
     </tr>
     <tr bgcolor="white">
         <td colspan="2" style="padding: 50px 30px 10px 30px; color: #7f7f7f;  width:760px; line-height: 30px;word-wrap:break-word">

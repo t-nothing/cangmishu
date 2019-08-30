@@ -11,3 +11,4 @@ php artisan queue:work redis --queue=cangmishu_push --tries=3>> ./storage/logs/c
 
 php artisan queue:work redis --queue=cangmishu_push_third_party --tries=1>> ./storage/logs/cangmishu_push_third_party.log 2>&1 &
 
+#php artisan vendor:publish --provider="Laravel\Horizon\HorizonServiceProvider"
