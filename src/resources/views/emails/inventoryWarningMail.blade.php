@@ -12,7 +12,7 @@
             <br>
             您好，仓秘书 提醒您：
             <br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;您的商品: {{ $product_name }} 已达预警库存，当前库存{{ $stock }}。请及时补货！
+            &nbsp;&nbsp;&nbsp;&nbsp;您的商品: <span style="font-size: 18px; font-weight: bolder; color: red;"> {{ $product_name }}</span> 已达预警库存，当前库存<span style="font-size: 18px; font-weight: bolder; color: red;"> {{ $stock }} </span>。请及时补货！
             <br/>
             <div style="padding-top: 30px">
                 <span>此邮件由系统自动发送，请勿直接回复。</span>
