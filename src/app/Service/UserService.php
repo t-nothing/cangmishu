@@ -69,6 +69,7 @@ class UserService{
             $warehouse->operator = $user->id;
             $warehouse->contact_user = $user->id;
             $warehouse->contact_number = "";
+            $warehouse->is_used = 1;
 
             // 仓库被创建时，如果是公共，则无使用者；如果是私有，则是创建者
             $warehouse->is_used = 1;
