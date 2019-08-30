@@ -208,7 +208,7 @@ class ProductController extends Controller
 
 
             //同步商品库分类ID
-            ShopProduct::where('product_id', $product->id)->update('category_id', $product->category_id);
+            ShopProduct::where('product_id', $product->id)->update(['category_id'=> $product->category_id]);
 
             DB::commit();
             return formatRet(0,'编辑商品成功');
