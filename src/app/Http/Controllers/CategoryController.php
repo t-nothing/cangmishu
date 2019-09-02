@@ -20,11 +20,13 @@ class CategoryController extends Controller
             'page'         => 'integer|min:1',
             'page_size'    => new PageSize(),
             'is_enabled'   => 'boolean',
-            'no_pager'     => 'boolean'
+            'no_pager'     => 'boolean',
+            'warehouse_id' => 'required|integer|min:1',
         ]);
 
         $categories = Category::with('feature:id,name_cn,name_en')
-                    ->ofWarehouse(Auth::warehouseId())
+                    ->ofWarehouse($request->warehouse_id)
+                    ->where('owner_id',Auth::ownerId())
                     ->when($request->filled('is_enabled'),function($q)use($request) {
                         $q->where('is_enabled', $request->is_enabled);
                     })

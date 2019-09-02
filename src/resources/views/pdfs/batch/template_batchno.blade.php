@@ -19,7 +19,7 @@
     .page.preview{
       border:1px solid #ccc;
       margin-bottom: 20px;
-      padding: 5px;
+      padding: 15px 5px 5px 5px;
       width: 84mm;
       height: 60mm;
     }
@@ -56,7 +56,7 @@
     @forelse ($batch['batch_products'] as $k => $product)
     <div class="page<?php if($showInStock) {?> preview<?php }?>">
       <div class="barcode">
-        <img src="{{ $product['sku_barcode'] }}" align="center">
+        <img src="{{ $product['sku_barcode'] }}" align="center" width="90%" >
         <p>{{ $product['sku'] }}</p>
       </div>
 
@@ -95,7 +95,7 @@
         <?php }?>
         <?php if($product['production_batch_number']){?>
         <tr>
-          <th nowrap="nowrap">生成批次号：</th>
+          <th nowrap="nowrap">生产批次号：</th>
           <td>{{ $product['production_batch_number']}}</td>
         </tr>
         <?php }?>
