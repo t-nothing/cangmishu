@@ -25,7 +25,6 @@
     }
     .page .barcode{
       text-align: center;
-      padding-top: 10px;
     }
     .page .barcode p{
       margin-bottom: 5px;
