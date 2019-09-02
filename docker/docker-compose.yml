@@ -21,7 +21,7 @@ services:
       expose:
         - "9000"
       depends_on:
-        - cangmishu-redis
+        - redis
 
 ### PHP-CLI Container #######################################
 
@@ -33,7 +33,7 @@ services:
       volumes:
         - ../src:/var/www/html
       depends_on:
-        - cangmishu-redis
+        - redis
       tty: true
 
 ### Nginx Server Container ##################################
@@ -50,7 +50,7 @@ services:
           - "${NGINX_HTTP_PORT}:80"
           - "${NGINX_HTTPS_PORT}:443"
       depends_on:
-          - cangmishu-php-fpm
+          - php-fpm
 
 
 ### Redis Container #########################################
