@@ -70,7 +70,7 @@ class OrderShippedNotification
                         'data' => [
                             'keyword1' => app('ship')->getExpressName($order['express_code']),
                             'keyword2' => date("Y年m月d日"),
-                            'keyword3' => date("Y年m月d日", strtotime($order['create_at'])),
+                            'keyword3' => date("Y年m月d日", $order['create_at']),
                             'keyword4' => $order['order_items'][0]['name_cn']??$shop->name_cn,
                         ],
                     ]);
