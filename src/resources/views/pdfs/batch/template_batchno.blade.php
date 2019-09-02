@@ -95,7 +95,7 @@
         <?php }?>
         <?php if($product['production_batch_number']){?>
         <tr>
-          <th nowrap="nowrap">生成批次号：</th>
+          <th nowrap="nowrap">生产批次号：</th>
           <td>{{ $product['production_batch_number']}}</td>
         </tr>
         <?php }?>
