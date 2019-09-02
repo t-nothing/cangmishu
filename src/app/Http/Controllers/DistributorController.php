@@ -52,18 +52,18 @@ class DistributorController extends Controller
                     return $query->where('user_id',Auth::ownerId());
                 }),
             ],
-            'name_en' =>[
-                'required','string','max:50',
-                Rule::unique('distributor')->where(function ($query) {
-                    return $query->where('user_id',Auth::ownerId());
-                }),
-            ],
+            // 'name_en' =>[
+            //     'required','string','max:50',
+            //     Rule::unique('distributor')->where(function ($query) {
+            //         return $query->where('user_id',Auth::ownerId());
+            //     }),
+            // ],
         ]);
 
         $distributor = new Distributor;
         $distributor->user_id = Auth::id();
         $distributor->name_cn = $request->name_cn;
-        $distributor->name_en = $request->name_en;
+        $distributor->name_en = $request->name_en??$request->name_cn;
 
         if ($distributor->save()) {
             return formatRet(0);
@@ -87,13 +87,13 @@ class DistributorController extends Controller
                 })
                     ->ignore($distributor_id)
             ],
-            'name_en'        =>  [
-                'required','string','max:50',
-                Rule::unique('distributor')->where(function ($query)use($distributor_id) {
-                    return $query->where('user_id',Auth::ownerId());
-                })
-                    ->ignore($distributor_id)
-            ],
+            // 'name_en'        =>  [
+            //     'required','string','max:50',
+            //     Rule::unique('distributor')->where(function ($query)use($distributor_id) {
+            //         return $query->where('user_id',Auth::ownerId());
+            //     })
+            //         ->ignore($distributor_id)
+            // ],
         ]);
 
         if (! $distributor = Distributor::find($distributor_id)) {
@@ -101,7 +101,7 @@ class DistributorController extends Controller
         }
 
         $distributor->name_cn = $request->name_cn;
-        $distributor->name_en = $request->name_en;
+        $distributor->name_en = $request->name_en??$request->name_cn;
 
         if ($distributor->save()) {
             return formatRet(0);
