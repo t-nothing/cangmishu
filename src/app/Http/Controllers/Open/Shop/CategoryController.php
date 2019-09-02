@@ -25,7 +25,7 @@ class CategoryController extends Controller
 
         $categories = Category::OfWarehouse($request->shop->warehouse_id)
                     ->where('is_enabled', 1)
-                    ->whereRaw("exists (select id from shop_product where category_id = category.id and shop_id = {$request->shop->id})")
+                    ->whereRaw("exists (select id from shop_product where category_id = category.id and shop_id = {$request->shop->id} and shop_product.is_shelf = 1)")
                     ->orderBy('id','ASC')
                     ->paginate(
                         $request->input('page_size',50),
