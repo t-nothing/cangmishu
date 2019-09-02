@@ -19,7 +19,7 @@
     .page.preview{
       border:1px solid #ccc;
       margin-bottom: 20px;
-      padding: 5px;
+      padding: 15px 5px 5px 5px;
       width: 84mm;
       height: 60mm;
     }
