@@ -36,7 +36,7 @@ class UpdateWarehouseAreaRequest extends BaseRequests
 
             ],
             'code'           => [
-                'required', new AlphaNumDash(), 'max:255',
+                'required', 'string', 'max:255',
                 Rule::unique('warehouse_area')->where(function($q){
                     $q->where('owner_id',Auth::ownerId());
                 })->ignore($this->route('areas_id'))
