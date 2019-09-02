@@ -52,7 +52,7 @@ class OrderShippedNotification
 
                 $shop = Shop::find($order["shop_id"]);
 
-                app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"]]);
+                app('log')->info('开始给用户推送发货订单消息', [$order["out_sn"], $order["shop_user_id"]]);
                 $app = app('wechat.mini_program');
 
                 $formId = ShopWeappFormId::getOne($user->id);
