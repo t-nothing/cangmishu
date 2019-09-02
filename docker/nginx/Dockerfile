@@ -7,8 +7,3 @@ RUN mkdir -p /etc/nginx/ssl
 ##正式服服配置
 COPY  ./ssl/fullchain1.pem  /etc/nginx/ssl
 COPY  ./ssl/privkey1.pem  /etc/nginx/ssl
-
-
-##开发服配置
-COPY ./ssl/fullchain.cer  /etc/nginx/ssl
-COPY ./ssl/*.cangmishu.com.key /etc/nginx/ssl
