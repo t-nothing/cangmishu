@@ -5,6 +5,10 @@ namespace App\Listeners;
 use App\Events\OrderCompleted;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\Shop;
+use App\Models\ShopUser;
+use App\Models\ShopWeappFormId;
+use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
 
 class OrderCompletedNotification
 {
