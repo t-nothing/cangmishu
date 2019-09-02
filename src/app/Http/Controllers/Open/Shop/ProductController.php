@@ -32,7 +32,7 @@ class ProductController extends Controller
                 return $q->where('product.category_id', $catId);
             })
             ->where('shop_id', $request->shop->id)
-            ->where('is_shelf', 1)
+            ->where('shop_product.is_shelf', 1)
             ->when($request->filled('keywords'),function ($q) use ($request){
                 return $q->hasKeyword($request->input('keywords'));
             })
