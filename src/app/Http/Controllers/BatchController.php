@@ -237,7 +237,8 @@ class BatchController extends Controller
             $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '5')->setOption('margin-bottom', '0');
         }
 
-        $file = $batch->batch_code . "{$templateName}.pdf";
+        $file = sprintf("%s_%s.pdf", $batch->batch_code, template_download_name($templateName));
+
         return $pdf->loadView($templateName, ['batch' => $batch->toArray(), 'showInStock'=>0])->download($file);
 
     }

@@ -351,6 +351,7 @@ if (! function_exists('currency_symbol')) {
     }
 }
 
+if (! function_exists('year_code')) {
     /**
     * 返回年代码
     */
@@ -360,7 +361,9 @@ if (! function_exists('currency_symbol')) {
         $year_code_arr = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
         return $year_code_arr[intval($y)-2016];
     }
+}
 
+if (! function_exists('month_code')) {
     /**
     * 返回月代码
     */
@@ -368,7 +371,9 @@ if (! function_exists('currency_symbol')) {
         $month_code_arr = array('A','A','B','C','D','E','F','G','H','I','J','K','L');
         return $month_code_arr[date('n')];
     }
+}
 
+if (! function_exists('day_code')) {
     /**
     * 返回日代码
     */
@@ -376,7 +381,9 @@ if (! function_exists('currency_symbol')) {
         $day_code_arr = array('1','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
         return $day_code_arr[date('j')];
     }
+}
 
+if (! function_exists('enid')) {
     //十进制转换三十六进制  
     function enid($int, $format = 8) {  
 
@@ -399,5 +406,49 @@ if (! function_exists('currency_symbol')) {
         }  
         array_pad($arr, $format, $dic[0]);  
         return implode('', array_reverse($arr));  
-    }  
+    }
+}
+
+
+if (! function_exists('template_download_name')) {
+    /**
+    * 下载文件名称
+    */
+    function template_download_name($v){
+        
+        $name = "";
+        switch ($v) {
+            case 'pdfs.order.template_pick':
+                $name = "拣货单";
+                break;
+            case 'pdfs.order.template_out':
+                $name = "出库单";
+                break;
+
+            case 'pdfs.batch.template_batchno':
+                $name = "批次标签";
+                break;
+
+            case 'pdfs.batch':
+            case 'pdfs.batch.template_entry':
+                $name = "入库单";
+                break;
+
+            case 'pdfs.batch.template_purchase':
+                $name = "采购单";
+                break;
+
+            case 'pdfs.recount':
+                $name = "盘点单";
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
+        return $name;
+    }
+}
+
  
