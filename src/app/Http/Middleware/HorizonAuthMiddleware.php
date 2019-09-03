@@ -24,9 +24,7 @@ class HorizonAuthMiddleware
 
     public function handle($request, Closure $next)
     {
-        print_r($request->user());exit;
         throw new AuthorizationException('您没有权限访问');
-        print_r(Auth::user()->id);
         $shopId = $this->getShopIdRequest($request);
 
         $shopInfo = Model::find($shopId);

@@ -69,6 +69,7 @@ class Handler extends ExceptionHandler
                         'data' => null,
                     ],401);
                 case   $this->isHttpException($e):
+                    // if($exception->getStatusCode() == 403 && $request->is('horizon*')) return redirect('/admin-horizon-login');
                     return  response()->json([
                         'msg' =>$e->getMessage(),
                         'status' =>$e->getStatusCode() ,

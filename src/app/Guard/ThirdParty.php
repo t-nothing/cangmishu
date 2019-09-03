@@ -73,7 +73,6 @@ class ThirdParty implements Guard
         $app_key = $this->request->input('app_key', '');
         $timestamp = intval($this->request->input('timestamp', 0));
 
-
         if ($timestamp <= 0) {
             return false;
         }
