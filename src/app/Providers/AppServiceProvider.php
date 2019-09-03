@@ -25,6 +25,7 @@ use App\Guard\ThirdParty;
 use Illuminate\Auth\CreatesUserProviders;
 use Auth;
 use Illuminate\Support\Facades\Schema;
+use Laravel\Horizon\Horizon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -88,7 +89,6 @@ class AppServiceProvider extends ServiceProvider
 
 
         Schema::defaultStringLength(191);
-
     }
 
     /**
