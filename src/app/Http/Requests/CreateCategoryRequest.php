@@ -34,7 +34,7 @@ class CreateCategoryRequest extends BaseRequests
             'name_cn'         => [
                 'required','string','max:50',
                 Rule::unique('category')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
+                    return $query->where('owner_id',Auth::ownerId())->where('warehouse_id',$this->warehouse_id);
                 }),
             ],
             'is_enabled'                   => 'required|boolean',
