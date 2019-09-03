@@ -103,6 +103,11 @@ class JwtGuard implements Guard
             $token = $this->request->query($this->inputKey);
         }
 
+        if (empty($token)) {
+            $token = $this->request->session()->get($this->inputKey);
+        }
+
+
         if (Str::startsWith($token, 'Bearer ')) {
             return Str::substr($token, 7);
         }
