@@ -84,7 +84,7 @@ class AuthenticateController extends  Controller
             $user->city             = $city;
             $user->language         = $language;
             $user->city             = $city;
-            $user->is_show_other_shop  = 0;
+            $user->is_show_other_shop  = 1;
             $user->save();
         }
 
