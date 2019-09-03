@@ -32,23 +32,12 @@ class CartCheckouted implements ShouldBroadcast
     }
 
     /**
-     * 获取事件应该广播的频道。
+     * Get the channels the event should broadcast on.
      *
-     * @return array
+     * @return \Illuminate\Broadcasting\Channel|array
      */
     public function broadcastOn()
     {
-        return new Channel('rss');//PrivateChannel('order.'.$this->order);
-    }
-
-    /**
-     * 指定广播数据。
-     *
-     * @return array
-     */
-    public function broadcastWith()
-    {
-        // 返回当前时间
-        return ['name' => Carbon::now()->toDateTimeString()];
+        return new PrivateChannel('channel-name');
     }
 }
