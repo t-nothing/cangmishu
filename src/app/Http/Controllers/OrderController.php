@@ -435,7 +435,9 @@ class OrderController extends Controller
 
         $pdf = PDF::setPaper('a4');
 
-        $file = $order->out_sn . "_{$templateName}.pdf";
+        // $file = $order->out_sn . "_{$templateName}.pdf";
+        $file = sprintf("%s_%s.pdf", $order->out_sn, template_download_name($templateName));
+        
         return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
 
     }
