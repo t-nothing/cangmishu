@@ -70,4 +70,23 @@ class UpdateShopRequest extends BaseRequests
         return $arr;
     }
 
+
+    public function attributes()
+    {
+        return [
+            'name_cn'               => '店铺名称',
+            'logo'                  => '店铺标识',
+            'default_lang'          => '默认语言',
+            'default_currency'      => '默认货币',
+            'remark'                => '店铺简介',
+            'contact.fullname'      => '店主姓名',
+            'contact.phone'         => '店主联系方式',
+            'contact.country'       => '店主国家',
+            'contact.province'      => '店主省',
+            'contact.city'          => '店主市',
+            'contact.district'      => '店主区',
+            'contact.address'       => '店主详细地址',
+        ];
+    }
+
 }
