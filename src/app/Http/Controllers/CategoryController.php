@@ -51,7 +51,7 @@ class CategoryController extends Controller
         try{
             $data = $request->all();
             $data["name_en"] = $request->name_cn;
-            $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>Auth::warehouseId()]);
+            $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>$request->warehouse_id]);
             $category = Category::create($data);
             DB::commit();
             return formatRet(0);
