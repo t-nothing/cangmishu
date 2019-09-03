@@ -39,12 +39,11 @@ class WarningController extends  Controller
             return formatRet(500, '用户不存在!');
         }
         $user_id = app('auth')->ownerId();
-        $new_email = $request->input('warning_email');
-        $old_email = $user['warning_email'];
+        $new_email = $request->warning_email;
 
         app("db")->beginTransaction();
         try{
-            $user->update(
+            User::where('id', app('auth')->ownerId())->update(
                 [
                     'default_warning_stock' => 50, 
                     'warning_email' => $new_email
