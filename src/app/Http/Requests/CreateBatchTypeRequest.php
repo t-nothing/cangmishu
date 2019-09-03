@@ -35,7 +35,7 @@ class CreateBatchTypeRequest extends BaseRequests
             'name'         => [
                 'required','string','max:50',
                 Rule::unique('batch_type')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
+                    return $query->where('owner_id',Auth::ownerId())->where('warehouse_id',$this->warehouse_id);
                 }),
             ],
             'is_enabled'   => 'required|boolean',
