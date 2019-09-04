@@ -242,6 +242,25 @@ class OrderController extends Controller
     }
 
     /**
+     * 订单状态列表
+     */
+    public function statusList(){
+        return formatRet(
+            0,
+            '成功',
+            [
+                ['id'=>  Order::STATUS_CANCEL, 'name'=>  '订单已取消'],
+                ['id'=>  Order::STATUS_DEFAULT, 'name'=>  '待确认'],
+                // ['id'=>  Order::STATUS_PICKING, 'name'=>  '拣货中'],
+                // ['id'=>  Order::STATUS_PICK_DONE, 'name'=>  '已出库'],
+                ['id'=>  Order::STATUS_WAITING, 'name'=>  '待发货'],
+                ['id'=>  Order::STATUS_SENDING, 'name'=>  '配送中'],
+                ['id'=>  Order::STATUS_SUCCESS, 'name'=>  '已签收'],
+            ]
+        );
+    }
+
+    /**
      * 取消订单
      */
     public function cancelOrder(BaseRequests $request,$order_id)

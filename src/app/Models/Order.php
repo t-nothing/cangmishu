@@ -152,7 +152,7 @@ class Order extends Model
                $name = '配送中';
                break;
             case Order::STATUS_SUCCESS:
-               $name = '已收货';
+               $name = '已签收';
                break;
             default:
                 break;
