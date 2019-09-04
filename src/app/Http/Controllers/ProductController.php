@@ -285,7 +285,7 @@ class ProductController extends Controller
                     'name_cn'       =>  $row['name_cn'],
                     'name_en'       =>  $row['name_cn'],
                     'remark'        =>  $row['remark'],
-                    'category_id' =>  $category->id,
+                    'category_id'   =>  $category->id,
                     'owner_id'      =>  app('auth')->ownerId(),
                 ];
 
@@ -314,7 +314,7 @@ class ProductController extends Controller
                         'name_en'           =>  $spec[0],
                         'net_weight'        =>  trim($spec[4]),
                         'gross_weight'      =>  trim($spec[4]),
-                        'relevance_code'    =>  $spec[1],
+                        'relevance_code'    =>  trim($spec[1]),
                         'purchase_price'    =>  trim($spec[2]),
                         'sale_price'        =>  trim($spec[3]),
                         'product_id'        =>  0,
@@ -347,6 +347,7 @@ class ProductController extends Controller
             app('log')->error('货品导入失败', ["msg" => $exception->getMessage()]);
             return formatRet(500, '导入失败');
         }
+
 
         $productRequest = new CreateProductRequest;
 
