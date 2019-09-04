@@ -17,26 +17,7 @@ use EasyWeChat\Factory;
 
 class AuthController extends  Controller
 {
-    /**
-     * 开放平台自动登录
-     */
-    public function wechatLogin(BaseRequests $request)
-    {
-        $app = app('wechat.open_platform');
-        $app->getPreAuthorizationUrl('https://easywechat.com/callback'); // 传入回调URI即可
 
-        return formatRet(0, '', $data);
-    }
-
-    public function wechatQr()
-    {
-        $wechat = app('wechat.official_account');
-
-        $result = $wechat->qrcode->temporary('foo', 600);
-        $qrcodeUrl = $wechat->qrcode->url($result['ticket']);
-
-        return view('wechatQr', compact('qrcodeUrl'));
-    }
     /**
      * 登入
      */
