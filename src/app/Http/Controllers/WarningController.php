@@ -19,7 +19,7 @@ class WarningController extends  Controller
             'warehouse_id' => 'required|int|min:1',
         ]);
 
-        $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->select('warning_email')->first();
+        $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('id', $request->warehouse_id)->select('warning_email')->first();
         if(!$warehouse) {
             return formatRet(500, '仓库不存在!');
         }
@@ -43,7 +43,7 @@ class WarningController extends  Controller
 
 
         $isSendEmail = false;
-        $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->select('warning_email')->first();
+        $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('id', $request->warehouse_id)->select('warning_email')->first();
         if(!$warehouse) {
             return formatRet(500, '仓库不存在!');
         }
@@ -52,7 +52,7 @@ class WarningController extends  Controller
 
         app("db")->beginTransaction();
         try{
-            Warehouse::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->update(
+            Warehouse::where('owner_id',Auth::ownerId())->where('id', $request->warehouse_id)->update(
                 [
                     'warning_email' => $new_email
                 ]
