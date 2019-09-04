@@ -179,4 +179,22 @@ class Warehouse extends Model
         $code =  sprintf("W%02s", enid($value));
         return $code;
     }
+
+    /**
+     * 预警邮件
+     **/
+    public static function warningEmail(int $id)
+    {
+        try
+        {
+            return Warehouse::find($id)->warningEmail;
+        }
+        catch(\Exception $ex)
+        {
+            
+        }
+
+        return null;
+        
+    }
 }

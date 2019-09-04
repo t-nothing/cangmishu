@@ -7,6 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Mail\InventoryWarningMail as Mailable;
 use App\Models\User;
+use App\Models\Warehouse;
 use Mail;
 
 class StockLocationAdjustWarningNotification implements ShouldQueue
@@ -55,11 +56,12 @@ class StockLocationAdjustWarningNotification implements ShouldQueue
 
                 $user = User::find($model->spec->product->owner_id);
 
+                $warning_email = Warehouse::warningEmail($model->spec->warehouse_id);
                 if($user) {
-                    if($user->warning_email) {
+                    if($warning_email) {
                         $product_name = $model->spec->product->name_cn.'规格'.$model->spec->name_cn;
-                        app('log')->info('准备发送邮件给', ['name'=> $product_name, 'email'=>$user->warning_email]);
-                        $message = new Mailable($user->warning_email, $user->nick_name, $product_name, $model->spec->total_stock_num);
+                        app('log')->info('准备发送邮件给', ['name'=> $product_name, 'email'=>$warning_email]);
+                        $message = new Mailable($warning_email, $user->nick_name, $product_name, $model->spec->total_stock_num);
                         Mail::send($message);
                     }
                 }
