@@ -9,7 +9,7 @@ class Product extends Model
 {
     use SoftDeletes;
     protected $table = 'product';
-    protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'category_id','remark','photos'];
+    protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'category_id','remark','photos', 'sale_price', 'purchase_price'];
 
     const PRODUCT_STATUS_PREPARE = 1; // 待入库的
     const PRODUCT_STATUS_ONLINE = 2; // 正常商品，可以售卖
