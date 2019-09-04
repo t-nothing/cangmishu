@@ -150,6 +150,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/order', 'OrderController@store');
     Route::put('/order/cancel/{order_id}', 'OrderController@cancelOrder');
     Route::put('/order/data/{order_id}', 'OrderController@updateData');
+    Route::get('/order/status', 'OrderController@statusList'); //订单状态列表
     Route::delete('/order/{order_id}', 'OrderController@destroy');
     Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
     Route::get('/order/export', 'OrderController@export');
@@ -273,6 +274,7 @@ $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) 
 $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
     Route::any('wechat', 'WeChatController@serve');
+    Route::any('wechat/{id}', 'WeChatController@serve');
     Route::get('/express', 'ExpressController@list');//快递公司列表
     Route::get('captcha', 'CaptchaController@show');
     Route::post('captcha', 'CaptchaController@valid');
