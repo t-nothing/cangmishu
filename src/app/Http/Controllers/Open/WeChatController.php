@@ -10,9 +10,68 @@ use Log;
 use App\Models\User;
 use App\Models\Token;
 use App\Events\WechatScanLogined;
+use Illuminate\Http\Request;
+use EasyWeChat\Factory;
+use App\Http\Requests\BaseRequests;
 
 class WeChatController extends Controller
 {
+
+    /**
+     * 开放平台自动登录
+     */
+    public function wechatLogin(BaseRequests $request)
+    {
+
+        $info = config('wechat.open_platform.default');
+
+        $openPlatform = Factory::openPlatform($info);
+
+        $openPlatform->getPreAuthorizationUrl('https://api.changmishu.com/open/wechat/scan/login_callback'); // 传入回调URI即可
+
+
+
+        exit;
+        $url = sprintf("https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=STATE#wechat_redirect", 
+            $info['app_id'],
+            urlencode('https://api.changmishu.com/open/wechat/scan/login_callback'),
+            'snsapi_login'
+        );
+
+        redirect_url($url);
+    }
+
+    public function wechatLoginCallback(BaseRequests $request)
+    {
+
+        $this->validate($request, [
+            'code'      => 'required|string',
+            'state'     => 'required|string',
+        ]);
+
+        //https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
+
+        $info = config('wechat.open_platform.default');
+
+        $url = sprintf("https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=STATE#wechat_redirect", 
+            $info['app_id'],
+            urlencode('https://api.changmishu.com/open/wechat/scan/login_callback'),
+            'snsapi_login'
+        );
+
+        redirect_url($url);
+    }
+
+
+    public function wechatQr()
+    {
+        $wechat = app('wechat.official_account');
+
+        $result = $wechat->qrcode->temporary('foo', 600);
+        $qrcodeUrl = $wechat->qrcode->url($result['ticket']);
+
+        return view('wechatQr', compact('qrcodeUrl'));
+    }
 
     /**
      * 处理微信的请求消息
