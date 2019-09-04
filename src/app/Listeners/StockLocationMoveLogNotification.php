@@ -33,7 +33,7 @@ class StockLocationMoveLogNotification
 
         app("stockLog")->setTypeId(ProductStockLog::TYPE_MOVE)
                         ->setStockLocation($model)
-                        ->setRemark($option['remark']??0)
+                        ->setRemark($option['remark']??'')
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty)
                         ->log();
