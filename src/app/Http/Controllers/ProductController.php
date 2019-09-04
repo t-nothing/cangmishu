@@ -282,9 +282,9 @@ class ProductController extends Controller
 
                 $product = [
                     'warehouse_id'  =>  app('auth')->warehouse()->id,
-                    'name_cn'       =>  $row['name_cn'],
-                    'name_en'       =>  $row['name_cn'],
-                    'remark'        =>  $row['remark'],
+                    'name_cn'       =>  trim($row['name_cn']),
+                    'name_en'       =>  trim($row['name_cn']),
+                    'remark'        =>  trim($row['remark']),
                     'category_id'   =>  $category->id,
                     'owner_id'      =>  app('auth')->ownerId(),
                 ];
@@ -310,8 +310,8 @@ class ProductController extends Controller
 
 
                     $specRow = [
-                        'name_cn'           =>  $spec[0],
-                        'name_en'           =>  $spec[0],
+                        'name_cn'           =>  trim($spec[0]),
+                        'name_en'           =>  trim($spec[0]),
                         'net_weight'        =>  trim($spec[4]),
                         'gross_weight'      =>  trim($spec[4]),
                         'relevance_code'    =>  trim($spec[1]),
