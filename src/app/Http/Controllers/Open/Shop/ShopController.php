@@ -33,6 +33,7 @@ class ShopController extends Controller
         ]);
 
         $list = Shop::where('is_closed', 0)
+                    ->where('sort_num', '>', 0) //只显示推荐的
                     ->orderBy('sort_num','desc')
                     ->orderBy('id','ASC')
                     ->paginate(

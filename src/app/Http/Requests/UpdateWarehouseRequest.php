@@ -45,7 +45,7 @@ class UpdateWarehouseRequest extends BaseRequests
             'street'   => 'required|string',
             'door_no'  => 'required|string',
             'province' => 'required|string',
-            'is_enabled_lang' => 'required|int|max:1|min:0',
+            // 'is_enabled_lang' => 'required|int|max:1|min:0',
         ];
     }
 }

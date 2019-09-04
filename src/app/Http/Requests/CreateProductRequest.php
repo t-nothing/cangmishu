@@ -64,4 +64,20 @@ class CreateProductRequest extends BaseRequests
 
         return $arr;
     }
+
+
+    public function attributes()
+    {
+        return [
+            'name_cn'               => '商品名称',
+            'category_id'           => '分类标识',
+            'warehouse_id'          => '仓库标识',
+            'specs.*.name_cn'       => '规格名称',
+            'specs.*.gross_weight'  => '规格毛重',
+            'specs.*.sale_price'    => '规格销售价格',
+            'specs.*.purchase_price'=> '规格进货价格',
+            'specs.*.relevance_code'=> '外部编码',
+        ];
+    }
+
 }

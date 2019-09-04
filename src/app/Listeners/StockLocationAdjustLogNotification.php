@@ -33,7 +33,7 @@ class StockLocationAdjustLogNotification
 
         app("stockLog")->setTypeId(ProductStockLog::TYPE_COUNT)
                         ->setStockLocation($model)
-                        ->setRemark($option['remark']??0)
+                        ->setRemark($option['remark']??'')
                         ->setItemId($option['item_id']??0)
                         ->setNum($qty - ($option['origin_stock_location_shelf_num']??0) )
                         ->setOrderSn($option['order_sn']??'')
