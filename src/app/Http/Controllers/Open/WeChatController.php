@@ -41,7 +41,7 @@ class WeChatController extends Controller
                 $openid = $message['FromUserName'];
 
                 $user = User::where('wechat_openid', $openid)->first();
-
+                \Log::info('扫码登录', $message);
                 if ($user) {
                     // TODO: 这里根据情况加入其它鉴权逻辑
 
