@@ -16,7 +16,7 @@ class WarningController extends  Controller
     public function show(BaseRequests $request)
     {
         $this->validate($request, [
-            'warehouse_id' => 'required|int|min:255',
+            'warehouse_id' => 'required|int|min:1',
         ]);
 
         $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->select('warning_email')->first();
@@ -34,7 +34,7 @@ class WarningController extends  Controller
     public function store(BaseRequests $request)
     {
         $this->validate($request, [
-            'warehouse_id' => 'required|int|min:255',
+            'warehouse_id' => 'required|int|min:1',
             'warning_email' => 'required|email|max:255',
             'warning_data' => 'required|array',
             'warning_data.*.category_id' => 'required|integer|min:1',
