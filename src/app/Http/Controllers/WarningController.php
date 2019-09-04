@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BaseRequests;
 use App\Mail\ChangeWarningEmail;
 use App\Models\Category;
+use App\Models\Warehouse;
 use App\Models\User;
 use App\Models\UserCategoryWarning;
 use Illuminate\Support\Facades\Auth;
@@ -12,11 +13,19 @@ use Illuminate\Support\Facades\Mail;
 
 class WarningController extends  Controller
 {
-    public function show()
+    public function show(BaseRequests $request)
     {
-        $warning_email = Auth::user()->warning_email;
+        $this->validate($request, [
+            'warehouse_id' => 'required|int|min:255',
+        ]);
+
+        $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->select('warning_email')->first();
+        if(!$warehouse) {
+            return formatRet(500, '仓库不存在!');
+        }
+        $warning_email = $warehouse->warning_email;
         $default_warning_stock =  Auth::user()->default_warning_stock;
-        $warning_data = Category::where('owner_id',Auth::ownerId())->select(['id','name_cn','name_en','warning_stock'])->get();
+        $warning_data = Category::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->select(['id','name_cn','name_en','warning_stock'])->get();
         return formatRet(0,'',compact('warning_email','warning_data','default_warning_stock'));
     }
 
@@ -25,7 +34,7 @@ class WarningController extends  Controller
     public function store(BaseRequests $request)
     {
         $this->validate($request, [
-            // 'default_warning_stock' => 'required|integer|min:1',
+            'warehouse_id' => 'required|int|min:255',
             'warning_email' => 'required|email|max:255',
             'warning_data' => 'required|array',
             'warning_data.*.category_id' => 'required|integer|min:1',
@@ -34,18 +43,17 @@ class WarningController extends  Controller
 
 
         $isSendEmail = false;
-        $user = User::where('id', app('auth')->ownerId())->first();
-        if (empty($user)) {
-            return formatRet(500, '用户不存在!');
+        $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->select('warning_email')->first();
+        if(!$warehouse) {
+            return formatRet(500, '仓库不存在!');
         }
         $user_id = app('auth')->ownerId();
         $new_email = $request->warning_email;
 
         app("db")->beginTransaction();
         try{
-            User::where('id', app('auth')->ownerId())->update(
+            Warehouse::where('owner_id',Auth::ownerId())->where('warehouse_id', $request->warehouse_id)->update(
                 [
-                    'default_warning_stock' => 50, 
                     'warning_email' => $new_email
                 ]
             );

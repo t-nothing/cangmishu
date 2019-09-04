@@ -17,6 +17,8 @@ Route::get('/', function () {
 
 // 用户认证
 Route::post('/login', 'AuthController@login');
+Route::get('/wechatQr', 'AuthController@wechatQr');
+
 Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
 Route::post('/emailCode', 'UserController@getEmailVerifyCode');

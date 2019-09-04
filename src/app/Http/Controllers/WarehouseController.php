@@ -66,7 +66,7 @@ class WarehouseController extends Controller
         app('log')->info('编辑仓库',$request->all());
         $data = $request->only('name_cn', 'area', 'city', 'street', 'door_no', 'province', 'is_enabled_lang');
         try{
-            Warehouse::where('id',$warehouse_id)->update($data);
+            Warehouse::where('id',$warehouse_id)->where('owner_id', app('auth')->ownerId())->update($data);
         }catch(\Exception $e) {
             app('log')->error('编辑仓库失败',['msg'=>$e->getMessage()]);
             return formatRet(500, '失败');
