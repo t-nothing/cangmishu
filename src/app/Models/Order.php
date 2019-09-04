@@ -137,7 +137,7 @@ class Order extends Model
                 $name = '订单已取消';
                 break;
             case Order::STATUS_DEFAULT:
-                $name = '待审核';
+                $name = '待确认';
                 break;
             case Order::STATUS_PICKING:
                $name = '拣货中';
