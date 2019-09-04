@@ -72,7 +72,7 @@ class ProductStockLog extends Model
         $arr =  [
                 self::TYPE_IN   => '入库',
                 self::TYPE_SHELF   => '上架',
-                self::TYPE_PICKING => '拣货',
+                // self::TYPE_PICKING => '拣货',
                 self::TYPE_OUTPUT  => '出库',
                 self::TYPE_COUNT   => '盘点',
                 // self::TYPE_OFFLINE => '作废',
