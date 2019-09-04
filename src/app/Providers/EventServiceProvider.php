@@ -13,6 +13,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        'App\Events\WechatScanLogined' => [
+                'App\Listeners\WechatScanLoginedNotification',
+            ],
         'App\Events\StockLocationIn' => [
                 'App\Listeners\StockLocationInNotification',
                 'App\Listeners\StockLocationInLogNotification',
