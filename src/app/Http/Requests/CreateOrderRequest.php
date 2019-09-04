@@ -70,4 +70,15 @@ class CreateOrderRequest extends BaseRequests
         ];
     }
 
+    public function attributes()
+    {
+        return [
+            'order_type'                        => '出库单类型',
+            'receiver_id'                       => '收件人',
+            'sender_id'                         => '发件人',
+            'goods_data.*.num'                  => '出库数量',
+            'goods_data.*.sale_price'           => '销售价格',
+            'goods_data.*.relevance_code'       => '商品规格',
+        ];
+    }
 }
