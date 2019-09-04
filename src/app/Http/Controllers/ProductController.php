@@ -239,8 +239,9 @@ class ProductController extends Controller
             ShopProduct::where('product_id', $product_id)->delete();
             ShopProductSpec::where('product_id', $product_id)->delete();
             // $product->specs()->stocks()->delete();
-            $product->specs()->delete();
-            $product->delete();
+            
+            $product->specs()->forceDelete();
+            $product->forceDelete();
             DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
@@ -301,6 +302,8 @@ class ProductController extends Controller
                     throw new \Exception("导入模板错误", 1);
                 }
                 $specs = array_chunk($row, 5);
+                $product_purchase_price = 0;
+                $product_sale_price = 0;
                 foreach ($specs as $kk=> $spec) {
 
                     if(empty($spec[0]) && empty($spec[1])) {
@@ -322,8 +325,15 @@ class ProductController extends Controller
                         'warehouse_id'      =>  app('auth')->warehouse()->id,
                     ];
 
+
+                    $product_purchase_price = trim($spec[2]);
+                    $product_sale_price = trim($spec[3]);
+
                     $product['specs'][] =  $specRow;
                 }
+
+                $product['purchase_price']  = $product_purchase_price;
+                $product['sale_price']      = $product_sale_price;
 
                 
                 $newResult[] =  $product;
@@ -358,10 +368,10 @@ class ProductController extends Controller
             $products = [];
             foreach ($newResult as $key => $product) {
                 
-                $validator = Validator::make($product, $productRequest->rules());   
+                $validator = Validator::make($product, $productRequest->rules(), [], $productRequest->attributes());   
                 if ($validator->fails()) 
                 {
-                    throw new \Exception($validator->errors()->first(), 1);
+                    throw new \Exception("第".($key+1)."行" . $validator->errors()->first(), 1);
                 }
 
                 $specs = $product['specs'];

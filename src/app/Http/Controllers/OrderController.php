@@ -242,6 +242,25 @@ class OrderController extends Controller
     }
 
     /**
+     * 订单状态列表
+     */
+    public function statusList(){
+        return formatRet(
+            0,
+            '成功',
+            [
+                ['id'=>  Order::STATUS_CANCEL, 'name'=>  '订单已取消'],
+                ['id'=>  Order::STATUS_DEFAULT, 'name'=>  '待确认'],
+                // ['id'=>  Order::STATUS_PICKING, 'name'=>  '拣货中'],
+                // ['id'=>  Order::STATUS_PICK_DONE, 'name'=>  '已出库'],
+                ['id'=>  Order::STATUS_WAITING, 'name'=>  '待发货'],
+                ['id'=>  Order::STATUS_SENDING, 'name'=>  '配送中'],
+                ['id'=>  Order::STATUS_SUCCESS, 'name'=>  '已签收'],
+            ]
+        );
+    }
+
+    /**
      * 取消订单
      */
     public function cancelOrder(BaseRequests $request,$order_id)
@@ -279,6 +298,10 @@ class OrderController extends Controller
             'express_code'           => 'required|string|string|max:255',
             'express_num'            => 'required|string|max:255',
             'shop_remark'            => 'string|max:255',
+        ], [], [
+            'express_code'           => '快递公司',
+            'express_num'            => '快递单号',
+            'shop_remark'            => '备注',
         ]);
 
         $order = Order::find($id);
@@ -313,7 +336,12 @@ class OrderController extends Controller
             'pay_status'                => 'required|integer|min:0',
             'pay_type'                  => 'required|integer|min:1',
             'sub_pay'                   => 'required|numeric|min:0',
-            'payment_account_number'    => 'string',
+            'payment_account_number'    => 'string|max:100',
+        ], [], [
+            'pay_status'                => '支付状态',
+            'pay_type'                  => '支付类型',
+            'sub_pay'                   => '实收金额',
+            'payment_account_number'    => '流水单号',
         ]);
         
         $order = Order::find($id);

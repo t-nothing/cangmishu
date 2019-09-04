@@ -40,7 +40,7 @@ class ShopWeappFormId extends Model
      * 得到一个有效的FORM ID
      */
     public static function getOne($userId){
-        $info =  Self::where('user_id', $userId)->where('is_used', Self::STATUS_UNUSE)->oldest()->first();
+        $info =  Self::where('user_id', $userId)->where('is_used', Self::STATUS_UNUSE)->latest()->first();
         if(!$info) {
             return "";
         }
