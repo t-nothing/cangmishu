@@ -239,8 +239,9 @@ class ProductController extends Controller
             ShopProduct::where('product_id', $product_id)->delete();
             ShopProductSpec::where('product_id', $product_id)->delete();
             // $product->specs()->stocks()->delete();
-            $product->specs()->delete();
-            $product->delete();
+            
+            $product->specs()->forceDelete();
+            $product->forceDelete();
             DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
