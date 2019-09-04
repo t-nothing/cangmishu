@@ -196,9 +196,9 @@ class JwtGuard implements Guard
             eRet('帐户被锁，禁止登入！');
         }
 
-        if (!$user->isActivated()) {
-            eRet('帐户尚未激活，禁止登入！');
-        }
+        // if (!$user->isActivated()) {
+        //     eRet('帐户尚未激活，禁止登入！');
+        // }
 
 
         if ($this->hasValidCredentials($user, $credentials)) {
