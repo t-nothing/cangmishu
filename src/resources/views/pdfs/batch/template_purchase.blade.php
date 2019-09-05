@@ -67,7 +67,7 @@
           <?php $total = 0; $remarks = [];?>
         @forelse ($batch['batch_products'] as $k => $product)
           <?php $total += $product['purchase_price'] * $product['need_num'];?>
-          <?php if(!empty($product['remark'])) $remarks[] = sprintf("%s : %s;<br/>",$product['spec']['product']['name_cn'],$product['remark'] );?>
+          <?php if(!empty($product['remark'])) $remarks[] = sprintf("%s : %s;",$product['spec']['product']['name_cn'],$product['remark'] );?>
         <tr>
           <td>{{ $k+1 }}</td>
           <td>{{ $product['relevance_code'] }}</td>
@@ -94,7 +94,7 @@
     <table width="100%" border="0"  align="center" class="table table-bordered ">
       <tr>
         <td width="180px">采购备注：</td>
-        <td height="100px">{{ implode(",", $remarks)}}</td>
+        <td height="100px"><?php echo  implode("<br/>", $remarks)?></td>
       </tr>
     </table>
 
