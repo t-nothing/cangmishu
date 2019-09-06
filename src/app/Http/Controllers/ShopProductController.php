@@ -88,6 +88,7 @@ class ShopProductController extends Controller
                 $spec = ShopProductSpec::where("shop_product_id", $id)->where("id", $s["id"])->firstOrFail();
                 $spec->name_cn      = $s["name_cn"];
                 $spec->name_en      = $s["name_en"]??$s["name_cn"];
+                $spec->is_self      = $s["is_self"]??1;
                 $spec->sale_price   = $s["sale_price"];
                 $spec->save();
             }
