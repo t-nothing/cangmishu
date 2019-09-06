@@ -84,6 +84,7 @@ class ShopProductController extends Controller
             $shopProduct->pics          = json_encode($request->pics, true);
             $shopProduct->descs         = json_encode($request->descs, true);
             
+            $unshelf_count = 0;
             foreach ($request->specs as $s) {
                 $spec = ShopProductSpec::where("shop_product_id", $id)->where("id", $s["id"])->firstOrFail();
                 $spec->name_cn      = $s["name_cn"];
@@ -91,6 +92,12 @@ class ShopProductController extends Controller
                 $spec->is_shelf      = $s["is_shelf"]??1;
                 $spec->sale_price   = $s["sale_price"];
                 $spec->save();
+
+                if(!$spec->is_shelf) $unshelf_count ++;
+            }
+
+            if($unshelf_count == count($request->specs)) {
+                $shopProduct->is_shelf      = 0;
             }
             $shopProduct->sale_price    = $request->specs[0]["sale_price"];
             $shopProduct->save();
