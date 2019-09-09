@@ -162,7 +162,7 @@ class WeChatController extends Controller
 
                         if (Cache::tags(['wechat'])->has($qrKey)) {
 
-                            $data = Cache::tags(['wechat'])->get($request->qr_key);
+                            $data = Cache::tags(['wechat'])->get($qrKey);
                             if($data['is_valid']) {
                                 return '请不要重复扫描';
                             }
