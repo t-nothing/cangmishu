@@ -73,9 +73,9 @@ class WeChatController extends Controller
             'is_valid'      =>  false,
             'user_id'       =>  0,
             'token'         =>  null,
-        ], 120);
+        ], 1200);
 
-        $result = $wechat->qrcode->temporary("{$key}", 120);
+        $result = $wechat->qrcode->temporary("{$key}", 1200);
         $qrcodeUrl = $wechat->qrcode->url($result['ticket']);
         $arr = [
             'qr'       => 'data:png;base64,'.base64_encode(file_get_contents($qrcodeUrl)),
