@@ -24,8 +24,9 @@ class AuthController extends  Controller
     public function login(BaseRequests $request)
     {
         $this->validate($request, [
-            'email'    => 'required|string',
-            'password' => 'required|string',
+            'email'     => 'required|string',
+            'password'  => 'required|string',
+            'qr_key'    => 'string',
         ]);
 
         $guard = app('auth')->guard();
@@ -35,6 +36,16 @@ class AuthController extends  Controller
         }
 
         $data['user'] = $guard->user();
+
+        //如果有填写qrkey
+        if($request->filled('qr_key')) {
+            if (Cache::tags(['wechat'])->has($request->qr_key)) {
+                $data = Cache::tags(['wechat'])->get($request->qr_key);
+                if($data['is_valid']) {
+                    User::find($guard->user()->id)->update("wechat_openid", $data['open_id']);
+                }
+            }
+        }
         
         //获取用户权限
         $modules =app('module')->getModulesByUser($guard->user(),$guard->user()->default_warehouse_id);

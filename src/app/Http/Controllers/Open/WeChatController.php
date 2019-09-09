@@ -53,6 +53,9 @@ class WeChatController extends Controller
         if (Cache::tags(['wechat'])->has($request->qr_key)) {
             $data = Cache::tags(['wechat'])->get($request->qr_key);
             if($data['is_valid']) {
+
+                unset($data['open_id']);
+                unset($data['wechat_user']);
                 return formatRet(0, '扫描成功', $data);
             }
             
@@ -171,6 +174,8 @@ class WeChatController extends Controller
                                 'is_valid'      =>  true,
                                 'user_id'       =>  $userId,
                                 'token'         =>  $token,
+                                'open_id'       =>  $openid,
+                                'wechat_user'   =>  $wechatUser
                             ], 180);
 
                             return $token?'老用户欢迎回来':'欢迎使用仓秘书，请进行帐号绑定';
