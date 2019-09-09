@@ -30,9 +30,34 @@ class UserController extends  Controller
             $codeFieldValue = $mobile;
         }
 
-        $verify_code = VerifyCode::where('code',$code)->where('email',$codeFieldValue)->where('expired_at','>',time())->first();
-        if(!$verify_code){
-            return formatRet(500, "验证码已过期或不存在");
+        if($type == "wechat") {
+            if (Cache::tags(['wechat'])->has($code)) {
+                $data = Cache::tags(['wechat'])->get($code);
+                if(!$data['is_valid']) {
+                    return formatRet(500, "验证码已过期或不存在");
+                }
+
+                if($data['user_id'] >0) {
+                    return formatRet(500, "请不要重复绑定");
+                }
+
+                //生成一个随机邮箱
+                //{"subscribe":1,"openid":"o8kADjzoCmeTkNfQpMG1o7bZ-R8w","nickname":"胡斌杰","sex":1,"language":"zh_CN","city":"长沙","province":"湖南","country":"中国","headimgurl":"http://thirdwx.qlogo.cn/mmopen/Q3auHgzwzM7JjWb1gibEs5kvAKAgyjic08eKDa74RaIMbX08V8rlNaWskBZNF0sRnOhyQWrMnENgmMrOAV9noXYQ/132","subscribe_time":1568025988,"unionid":"osj6R5-kslcC3x03-K1Kf-FthFMM","remark":"","groupid":0,"tagid_list":[],"subscribe_scene":"ADD_SCENE_QR_CODE","qr_scene":0,"qr_scene_str":"44d3b27b9bbd013afc9269206f415b5e"}
+                $request->merge([
+                    'email'         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
+                    'province'      =>  $data['wechat_user']['province']??'',
+                    'country'       =>  $data['wechat_user']['country']??'',
+                    'city'          =>  $data['wechat_user']['city']??'',
+                    'avatar'        =>  $data['wechat_user']['headimgurl']??'',
+                    'nickname'      =>  $data['wechat_user']['nickname']??'',
+                ]);//合并参数
+                
+            }
+        } else {
+            $verify_code = VerifyCode::where('code',$code)->where('email',$codeFieldValue)->where('expired_at','>',time())->first();
+            if(!$verify_code){
+                return formatRet(500, "验证码已过期或不存在");
+            }
         }
         try {
             $user = app('user')->quickRegister($request);
@@ -40,6 +65,7 @@ class UserController extends  Controller
             app('log')->error($e->getMessage());
             return formatRet(500, $e->getMessage());
         }
+
         return formatRet(0, '注册成功', $user->toArray());
     }
 

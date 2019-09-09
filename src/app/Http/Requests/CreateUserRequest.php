@@ -27,7 +27,6 @@ class CreateUserRequest extends BaseRequests
             'type'              => ['required',Rule::in(['email', 'mobile', 'wechat'])],
             'mobile'            => ['required_if:type,mobile','mobile',Rule::unique('user','phone')],
             'email'             => ['required_if:type,email','email',Rule::unique('user','email')],
-            'qr_key'            => ['required_if:type,wechat','string'],
             'password'          => 'required|string|min:6',
             'code'              => 'required|numeric|min:4',
             'warehouse_name'    => 'string|max:20',
