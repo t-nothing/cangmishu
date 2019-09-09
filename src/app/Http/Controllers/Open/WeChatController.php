@@ -114,12 +114,13 @@ class WeChatController extends Controller
                     $qrKey = $message['EventKey']??'';
 
                     if(!empty($qrKey)) {
-
-                        
+                        \Log::info('扫码登录', $message);
+                        $wechatUser = $app->user->get($openid);
+                        \Log::info('扫码用户', $wechatUser);
                         $userId = 0;
                         $user = User::where('wechat_openid', $openid)->first();
                         $token = null;
-                        \Log::info('扫码登录', $message);
+                        
                         if ($user) {
                             // TODO: 这里根据情况加入其它鉴权逻辑
                             \Log::info('找到用户', $user->toArray());
