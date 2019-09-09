@@ -141,7 +141,7 @@ class WeChatController extends Controller
                                 'token'         =>  $token,
                             ], 180);
 
-                            return '欢迎回来';
+                            return $token?'老用户欢迎回来':'欢迎使用仓秘书，请进行帐号绑定';
                         }
 
                         return '登录过期，请重新扫描';
