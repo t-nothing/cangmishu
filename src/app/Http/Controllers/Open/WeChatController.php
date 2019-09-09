@@ -74,7 +74,7 @@ class WeChatController extends Controller
             'token'         =>  null,
         ], 180);
 
-        $result = $wechat->qrcode->temporary("qrKey={$key}", 600);
+        $result = $wechat->qrcode->temporary("{$key}", 600);
         $qrcodeUrl = $wechat->qrcode->url($result['ticket']);
         $arr = [
             'qr'       => 'data:png;base64,'.base64_encode(file_get_contents($qrcodeUrl)),
@@ -110,7 +110,7 @@ class WeChatController extends Controller
             if ($message['Event'] === 'SCAN' && $config == "wechat.official_account") {
                 $openid = $message['FromUserName'];
 
-                    $qrKey = $message['qrKey']??'';
+                    $qrKey = $message['EventKey']??'';
 
                     if(!empty($qrKey)) {
 
