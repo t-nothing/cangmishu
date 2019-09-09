@@ -106,7 +106,7 @@ class WeChatController extends Controller
         }
 
         $app = app($config);
-        $app->server->push(function($message) use($config) {
+        $app->server->push(function($message) use($config, $app) {
             \Log::info('扫码登录外面', $message);
             if ($message['Event'] === 'SCAN' && $config == "wechat.official_account") {
                 $openid = $message['FromUserName'];
@@ -116,7 +116,7 @@ class WeChatController extends Controller
                     if(!empty($qrKey)) {
                         \Log::info('扫码登录', $message);
                         $wechatUser = $app->user->get($openid);
-                        \Log::info('扫码用户', $wechatUser->toArray());
+                        \Log::info('扫码用户', $wechatUser);
                         $userId = 0;
                         $user = User::where('wechat_openid', $openid)->first();
                         $token = null;
