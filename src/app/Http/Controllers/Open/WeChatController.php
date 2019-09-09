@@ -116,7 +116,7 @@ class WeChatController extends Controller
                     if(!empty($qrKey)) {
                         \Log::info('扫码登录', $message);
                         $wechatUser = $app->user->get($openid);
-                        \Log::info('扫码用户', $wechatUser);
+                        \Log::info('扫码用户', $wechatUser->toArray());
                         $userId = 0;
                         $user = User::where('wechat_openid', $openid)->first();
                         $token = null;
