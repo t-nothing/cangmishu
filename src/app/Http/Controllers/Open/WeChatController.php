@@ -180,7 +180,7 @@ class WeChatController extends Controller
                     }
             } else {
                 // TODO： 用户不存在时，可以直接回返登录失败，也可以创建新的用户并登录该用户再返回
-                return "你好，欢迎登陆仓秘书！\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n无需付费，人人都用得起的专业仓储+订货管理系统 \n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统\n直达通道→http://my.cangmishu.com \n不定期进行功能迭代更新，如果您有意见或建议可以直接将您的建议打包好发给我哦！\n";
+                return "你好，欢迎登陆仓秘书！\n\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n\n无需付费，人人都用得起的专业仓储+订货管理系统 \n\n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统\n直达通道→https://my.cangmishu.com \n\n不定期进行功能迭代更新，如果您有意见或建议可以直接将您的建议打包好发给我哦！\n <img src='https://www.cangmishu.com/static/images/Wechatcard2.png' />";
             }
         }, \EasyWeChat\Kernel\Messages\Message::EVENT);
 
