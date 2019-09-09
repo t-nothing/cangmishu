@@ -121,7 +121,7 @@ class WeChatController extends Controller
                         \Log::info('扫码登录', $message);
                         if ($user) {
                             // TODO: 这里根据情况加入其它鉴权逻辑
-
+                            \Log::info('找到用户', $user->toArray());
                             // 使用 laravel-passport 的个人访问令牌
                             $token = $user->createToken($user, Token::TYPE_ACCESS_TOKEN);
 
