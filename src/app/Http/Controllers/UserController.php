@@ -19,10 +19,10 @@ class UserController extends  Controller
     public function register(CreateUserRequest $request)
     {
 
-        $type = $request->type;
-        $code = $request->code;
-        $mobile = $request->mobile;
-        $email = $request->email;
+        $type       = $request->type;
+        $code       = $request->code;
+        $mobile     = $request->mobile;
+        $email      = $request->email;
 
         $codeFieldValue = $email;
         if($type === "mobile")
