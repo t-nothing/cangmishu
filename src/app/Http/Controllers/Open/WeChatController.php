@@ -92,7 +92,7 @@ class WeChatController extends Controller
      *
      * @return string
      */
-    public function serve($id = 'mini_program')
+    public function serve(BaseRequests $request, $id = 'mini_program')
     {
         Log::info('request arrived.'); # 注意：Log 为 Laravel 组件，所以它记的日志去 Laravel 日志看，而不是 EasyWeChat 日志
 
