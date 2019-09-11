@@ -111,7 +111,7 @@ class WeChatController extends Controller
         $app = app($config);
         $app->server->push(function($message) use($config, $app) {
             \Log::info('扫码登录外面', $message);
-            if ($message['Event'] === 'SCAN' && $config == "wechat.official_account") {
+            if (in_array($message['Event'], ['SCAN', 'SUBSRIBE']) && $config == "wechat.official_account") {
                 $openid = $message['FromUserName'];
 
                     $qrKey = $message['EventKey']??'';
@@ -123,6 +123,29 @@ class WeChatController extends Controller
                         $userId = 0;
                         $user = User::where('wechat_openid', $openid)->first();
                         $token = null;
+
+
+                        /**
+                         * 生成一个新的 token，token 哈希来保证唯一性。
+                         *
+                         * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+                         * @return \App\Models\Token|null
+                         */
+                        $createToken = function($user, $type)
+                        {
+                            $token = new Token;
+                            $token->token_type = $type;
+                            $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
+                            $token->expired_at = Carbon::now()->addWeek();
+                            $token->owner_user_id = $user->getAuthIdentifier();
+                            $token->is_valid = Token::VALID;
+
+                            if ($token->save()) {
+                                return $token;
+                            }
+
+                            return;
+                        };
                         
                         if ($user) {
                             // TODO: 这里根据情况加入其它鉴权逻辑
@@ -130,29 +153,7 @@ class WeChatController extends Controller
                             // 使用 laravel-passport 的个人访问令牌
                             
 
-                                /**
-                                 * 生成一个新的 token，token 哈希来保证唯一性。
-                                 *
-                                 * @param  \Illuminate\Contracts\Auth\Authenticatable $user
-                                 * @return \App\Models\Token|null
-                                 */
-                                $createToken = function($user, $type)
-                                {
-                                    $token = new Token;
-                                    $token->token_type = $type;
-                                    $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-                                    $token->expired_at = Carbon::now()->addWeek();
-                                    $token->owner_user_id = $user->getAuthIdentifier();
-                                    $token->is_valid = Token::VALID;
-
-                                    if ($token->save()) {
-                                        return $token;
-                                    }
-
-                                    return;
-                                };
-
-                                $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+                            $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
 
                             // 广播扫码登录的消息，以便前端处理
                             // event(new WechatScanLogined($token));
@@ -161,6 +162,27 @@ class WeChatController extends Controller
                             // return '登录成功！';
 
                             $userId = $user->id;
+                        } else {
+                            //创建一个新用户
+                            $request->merge([
+                                'email'         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
+                                'province'      =>  $wechatUser['province']??'',
+                                'country'       =>  $wechatUser['country']??'',
+                                'city'          =>  $wechatUser['city']??'',
+                                'avatar'        =>  $wechatUser['headimgurl']??'',
+                                'nickname'      =>  $wechatUser['nickname']??'',
+                            ]);//合并参数
+
+                            try 
+                            {
+                                $user = app('user')->quickRegister($request);
+                                $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+                            } 
+                            catch (\Exception $e) 
+                            {
+                                app('log')->error($e->getMessage());
+                                // return formatRet(500, $e->getMessage());
+                            }
                         }
 
                         if (Cache::tags(['wechat'])->has($qrKey)) {
@@ -178,17 +200,16 @@ class WeChatController extends Controller
                                 'wechat_user'   =>  $wechatUser
                             ], 180);
 
-                            return $token?'老用户欢迎回来':'欢迎使用仓秘书，请进行帐号绑定';
+                            return $token?'欢迎使用仓秘书':'欢迎使用仓秘书';
                         }
 
-                        return '登录过期，请重新扫描';
                     }
-            } else {
-                // TODO： 用户不存在时，可以直接回返登录失败，也可以创建新的用户并登录该用户再返回
+
                 return "你好，欢迎登陆仓秘书！\n\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n\n无需付费，人人都用得起的专业仓储+订货管理系统 \n\n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统\n直达通道→https://www.cangmishu.com \n\n不定期进行功能迭代更新，如果您有意见或建议可以直接将您的建议打包好发给我哦！\n https://www.cangmishu.com/static/images/Wechatcard2.png";
-            }
+            } 
         }, \EasyWeChat\Kernel\Messages\Message::EVENT);
 
         return $app->server->serve();
     }
+
 }
