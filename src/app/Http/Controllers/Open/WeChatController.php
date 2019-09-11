@@ -193,7 +193,8 @@ class WeChatController extends Controller
                             } 
                             catch (\Exception $e) 
                             {
-                                app('log')->error($e->getMessage());
+                                \Log::info($e->getMessage());
+                                // app('log')->error($e->getMessage());
                                 // return formatRet(500, $e->getMessage());
                             }
                         }
