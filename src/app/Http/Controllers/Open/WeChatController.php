@@ -16,6 +16,8 @@ use App\Http\Requests\BaseRequests;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use EasyWeChat\Kernel\Messages\Media;
+use EasyWeChat\Kernel\Messages\Image;
+
 
 
 class WeChatController extends Controller
