@@ -15,6 +15,8 @@ use EasyWeChat\Factory;
 use App\Http\Requests\BaseRequests;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use EasyWeChat\Kernel\Messages\Media;
+
 
 class WeChatController extends Controller
 {
@@ -24,7 +26,10 @@ class WeChatController extends Controller
      */
     public function wechatLogin(BaseRequests $request)
     {
+        $app = app('wechat.official_account');
+        $list = $app->material->list('image', 0, 10);
 
+        print_r($list);
         // $info = config('wechat.open_platform.default');
 
         // $openPlatform = Factory::openPlatform($info);
@@ -114,7 +119,11 @@ class WeChatController extends Controller
         $app = app($config);
         $app->server->push(function($message) use($config, $app, $request) {
             \Log::info('扫码登录外面', $message);
-            if (in_array(strtoupper($message['Event']), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
+
+            if($message['MsgType'] == "产品") {
+                return new Image('media-id');
+            }
+            if (in_array(strtoupper($message['Event']??''), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
                     $openid = $message['FromUserName'];
 
                     \Log::info('扫码登录', $message);
