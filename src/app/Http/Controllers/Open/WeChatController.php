@@ -217,7 +217,7 @@ class WeChatController extends Controller
 
                 return $str;
             } 
-        }, \EasyWeChat\Kernel\Messages\Message::EVENT);
+        });
 
         return $app->server->serve();
     }
