@@ -26,10 +26,10 @@ class WeChatController extends Controller
      */
     public function wechatLogin(BaseRequests $request)
     {
-        $app = app('wechat.official_account');
-        $list = $app->material->list('image', 0, 10);
+        // $app = app('wechat.official_account');
+        // $list = $app->material->list('image', 0, 10);
 
-        print_r($list);
+        // print_r($list);
         // $info = config('wechat.open_platform.default');
 
         // $openPlatform = Factory::openPlatform($info);
@@ -120,7 +120,7 @@ class WeChatController extends Controller
         $app->server->push(function($message) use($config, $app, $request) {
             \Log::info('扫码登录外面', $message);
 
-            if($message['MsgType'] == "产品") {
+            if($message['Content'] == "产品") {
                 return new Image('Y2UZBJIujBqIsLIduCiNC7TFRrXq40xlonzxaJWEah8');
             }
             if (in_array(strtoupper($message['Event']??''), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
