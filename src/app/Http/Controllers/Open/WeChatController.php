@@ -127,6 +127,7 @@ class WeChatController extends Controller
                         ], 1200);
                     }
 
+                    $isNewUser = false;
                     if(!empty($qrKey) ) {
                         \Log::info('扫码登录', $message);
                         $wechatUser = $app->user->get($openid);
@@ -183,6 +184,7 @@ class WeChatController extends Controller
                                 'city'          =>  $wechatUser['city']??'',
                                 'avatar'        =>  $wechatUser['headimgurl']??'',
                                 'nickname'      =>  $wechatUser['nickname']??'',
+                                'wechat_openid' =>  $openid,
                             ]);//合并参数
                             \Log::info('合并注册信息');
                             try 
@@ -197,6 +199,7 @@ class WeChatController extends Controller
                                 // app('log')->error($e->getMessage());
                                 // return formatRet(500, $e->getMessage());
                             }
+                            $isNewUser = true;
                         }
 
                         Cache::tags(['wechat'])->put($qrKey, [
@@ -207,21 +210,11 @@ class WeChatController extends Controller
                                 'wechat_user'   =>  $wechatUser
                             ], 180);
 
-                        if (Cache::tags(['wechat'])->has($qrKey)) {
-
-                            $data = Cache::tags(['wechat'])->get($qrKey);
-                            if($data['is_valid']) {
-                                return '请不要重复扫描';
-                            }
-
-                            
-
-                            return $token?'欢迎使用仓秘书':'欢迎使用仓秘书';
-                        }
+                        return $isNewUser?"你好，欢迎登陆仓秘书！\n\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n\n无需付费，人人都用得起的专业仓储+订货管理系统 \n\n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统\n直达通道→https://www.cangmishu.com \n\n不定期进行功能迭代更新，如果您有意见或建议可以直接将您的建议打包好发给我哦！\n":'欢迎使用仓秘书';
 
                     }
 
-                return "你好，欢迎登陆仓秘书！\n\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n\n无需付费，人人都用得起的专业仓储+订货管理系统 \n\n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统\n直达通道→https://www.cangmishu.com \n\n不定期进行功能迭代更新，如果您有意见或建议可以直接将您的建议打包好发给我哦！\n https://www.cangmishu.com/static/images/Wechatcard2.png";
+                return "你好，欢迎登陆仓秘书！\n\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n\n无需付费，人人都用得起的专业仓储+订货管理系统 \n\n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统\n直达通道→https://www.cangmishu.com \n\n不定期进行功能迭代更新，如果您有意见或建议可以直接将您的建议打包好发给我哦！\n";
             } 
         }, \EasyWeChat\Kernel\Messages\Message::EVENT);
 
