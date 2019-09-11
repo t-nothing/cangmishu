@@ -61,7 +61,7 @@ class WeChatController extends Controller
             
         }
 
-        return formatRet(200, '等待中...');
+        return formatRet(0, '等待中...');
         
     }
 
