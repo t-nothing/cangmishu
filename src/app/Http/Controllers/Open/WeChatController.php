@@ -225,9 +225,9 @@ class WeChatController extends Controller
                         return $isNewUser?$str:'欢迎使用仓秘书';
 
                     }
-
-                return $str;
             } 
+
+            return $str;
         });
 
         return $app->server->serve();
