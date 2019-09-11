@@ -126,105 +126,107 @@ class WeChatController extends Controller
                 return new Image('Y2UZBJIujBqIsLIduCiNC7TFRrXq40xlonzxaJWEah8');
             }
             if (in_array(strtoupper($message['Event']??''), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
-                    $openid = $message['FromUserName'];
+                $openid = $message['FromUserName'];
 
-                    \Log::info('扫码登录', $message);
-                    $wechatUser = $app->user->get($openid);
-                    \Log::info('扫码用户', $wechatUser);
+                \Log::info('扫码登录', $message);
+                $wechatUser = $app->user->get($openid);
+                \Log::info('扫码用户', $wechatUser);
 
-                    $qrKey = $message['EventKey']??$wechatUser['qr_scene_str'];
-                    $qrKey = str_replace("qrscene_", "", $qrKey);
-                    //如果是关注，就随机生成一个
+                $qrKey = $message['EventKey']??$wechatUser['qr_scene_str'];
+                $qrKey = str_replace("qrscene_", "", $qrKey);
+                //如果是关注，就随机生成一个
 
-                    $isNewUser = false;
-                    if(!empty($qrKey) ) {
+                $isNewUser = false;
+                if(!empty($qrKey) ) {
 
-                        $userId = 0;
-                        $user = User::where('wechat_openid', $openid)->first();
-                        $token = null;
+                    $userId = 0;
+                    $user = User::where('wechat_openid', $openid)->first();
+                    $token = null;
 
 
-                        /**
-                         * 生成一个新的 token，token 哈希来保证唯一性。
-                         *
-                         * @param  \Illuminate\Contracts\Auth\Authenticatable $user
-                         * @return \App\Models\Token|null
-                         */
-                        $createToken = function($user, $type)
-                        {
-                            $token = new Token;
-                            $token->token_type = $type;
-                            $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-                            $token->expired_at = Carbon::now()->addWeek();
-                            $token->owner_user_id = $user->getAuthIdentifier();
-                            $token->is_valid = Token::VALID;
+                    /**
+                     * 生成一个新的 token，token 哈希来保证唯一性。
+                     *
+                     * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+                     * @return \App\Models\Token|null
+                     */
+                    $createToken = function($user, $type)
+                    {
+                        $token = new Token;
+                        $token->token_type = $type;
+                        $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
+                        $token->expired_at = Carbon::now()->addWeek();
+                        $token->owner_user_id = $user->getAuthIdentifier();
+                        $token->is_valid = Token::VALID;
 
-                            if ($token->save()) {
-                                return $token;
-                            }
-
-                            return;
-                        };
-                        
-                        if ($user) {
-                            // TODO: 这里根据情况加入其它鉴权逻辑
-                            \Log::info('找到用户', $user->toArray());
-                            // 使用 laravel-passport 的个人访问令牌
-                            
-
-                            $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
-
-                            // 广播扫码登录的消息，以便前端处理
-                            // event(new WechatScanLogined($token));
-
-                            // \Log::info('haha login');
-                            // return '登录成功！';
-
-                            $userId = $user->id;
-                        } else {
-                            \Log::info('自动注册一个新用户');
-                            //创建一个新用户
-                            $request->merge([
-                                'email'         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
-                                'province'      =>  $wechatUser['province']??'',
-                                'country'       =>  $wechatUser['country']??'',
-                                'city'          =>  $wechatUser['city']??'',
-                                'avatar'        =>  $wechatUser['headimgurl']??'',
-                                'nickname'      =>  $wechatUser['nickname']??'',
-                                'wechat_openid' =>  $openid,
-                            ]);//合并参数
-                            \Log::info('合并注册信息');
-                            try 
-                            {
-                                \Log::info('开始注册');
-                                $user = app('user')->quickRegister($request);
-                                $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
-                                $userId = $user->id;
-                            } 
-                            catch (\Exception $e) 
-                            {
-                                \Log::info($e->getMessage());
-                                // app('log')->error($e->getMessage());
-                                // return formatRet(500, $e->getMessage());
-                            }
-                            $isNewUser = true;
+                        if ($token->save()) {
+                            return $token;
                         }
 
-                        Cache::tags(['wechat'])->put($qrKey, [
-                                'is_valid'      =>  true,
-                                'user_id'       =>  $userId,
-                                'token'         =>  $token,
-                                'user'          =>  User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId),
-                                'open_id'       =>  $openid,
-                                'modules'       =>  [],
-                                'wechat_user'   =>  $wechatUser
-                            ], 180);
+                        return;
+                    };
+                    
+                    if ($user) {
+                        // TODO: 这里根据情况加入其它鉴权逻辑
+                        \Log::info('找到用户', $user->toArray());
+                        // 使用 laravel-passport 的个人访问令牌
+                        
 
-                        \Log::info('登录用户信息', [$qrKey]);
+                        $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
 
-                        return $isNewUser?$str:'欢迎使用仓秘书';
+                        // 广播扫码登录的消息，以便前端处理
+                        // event(new WechatScanLogined($token));
 
+                        // \Log::info('haha login');
+                        // return '登录成功！';
+
+                        $userId = $user->id;
+                    } else {
+                        \Log::info('自动注册一个新用户');
+                        //创建一个新用户
+                        $request->merge([
+                            'email'         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
+                            'province'      =>  $wechatUser['province']??'',
+                            'country'       =>  $wechatUser['country']??'',
+                            'city'          =>  $wechatUser['city']??'',
+                            'avatar'        =>  $wechatUser['headimgurl']??'',
+                            'nickname'      =>  $wechatUser['nickname']??'',
+                            'wechat_openid' =>  $openid,
+                        ]);//合并参数
+                        \Log::info('合并注册信息');
+                        try 
+                        {
+                            \Log::info('开始注册');
+                            $user = app('user')->quickRegister($request);
+                            $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+                            $userId = $user->id;
+                        } 
+                        catch (\Exception $e) 
+                        {
+                            \Log::info($e->getMessage());
+                            // app('log')->error($e->getMessage());
+                            // return formatRet(500, $e->getMessage());
+                        }
+                        $isNewUser = true;
                     }
+
+                    Cache::tags(['wechat'])->put($qrKey, [
+                            'is_valid'      =>  true,
+                            'user_id'       =>  $userId,
+                            'token'         =>  $token,
+                            'user'          =>  User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId),
+                            'open_id'       =>  $openid,
+                            'modules'       =>  [],
+                            'wechat_user'   =>  $wechatUser
+                        ], 180);
+
+                    \Log::info('登录用户信息', [$qrKey]);
+
+                    return $isNewUser?$str:'欢迎使用仓秘书';
+
+                }
+
+                return $str;
             } 
 
             return $str;
