@@ -273,7 +273,7 @@ $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) 
 $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
     Route::any('wechat', 'WeChatController@serve');
-    // Route::any('wechat/login', 'WeChatController@wechatLogin');
+    Route::any('wechat/login', 'WeChatController@wechatLogin');
     Route::get('wechat/qr', 'WeChatController@wechatQr');
     Route::any('wechat/scan/login_callback', 'WeChatController@wechatQrCallback');
     Route::any('wechat/{id}', 'WeChatController@serve');
