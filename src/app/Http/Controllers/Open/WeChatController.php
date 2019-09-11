@@ -111,7 +111,7 @@ class WeChatController extends Controller
         $app = app($config);
         $app->server->push(function($message) use($config, $app) {
             \Log::info('扫码登录外面', $message);
-            if (in_array(strtoupper($message['Event']), ['SCAN', 'SUBSRIBE']) && $config == "wechat.official_account") {
+            if (in_array(strtoupper($message['Event']), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
                 $openid = $message['FromUserName'];
 
                     $qrKey = $message['EventKey']??'';
