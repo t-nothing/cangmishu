@@ -114,24 +114,17 @@ class WeChatController extends Controller
             if (in_array(strtoupper($message['Event']), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
                     $openid = $message['FromUserName'];
 
-                    $qrKey = $message['EventKey']??'';
+                    \Log::info('扫码登录', $message);
+                    $wechatUser = $app->user->get($openid);
+                    \Log::info('扫码用户', $wechatUser);
+                        
+                    $qrKey = $message['EventKey']??$wechatUser['qr_scene_str'];
 
                     //如果是关注，就随机生成一个
-                    if(empty($qrKey) && strtoupper($message['Event']) == "SUBSCRIBE") {
-                        $key = Cache::increment('CMS-WECHAT-KEY');
-                        $qrKey = md5(md5($key).'cms');
-                        Cache::tags(['wechat'])->put($qrKey, [
-                            'is_valid'      =>  false,
-                            'user_id'       =>  0,
-                            'token'         =>  null,
-                        ], 1200);
-                    }
 
                     $isNewUser = false;
                     if(!empty($qrKey) ) {
-                        \Log::info('扫码登录', $message);
-                        $wechatUser = $app->user->get($openid);
-                        \Log::info('扫码用户', $wechatUser);
+
                         $userId = 0;
                         $user = User::where('wechat_openid', $openid)->first();
                         $token = null;
