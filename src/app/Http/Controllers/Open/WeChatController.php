@@ -119,7 +119,7 @@ class WeChatController extends Controller
                     \Log::info('扫码用户', $wechatUser);
 
                     $qrKey = $message['EventKey']??$wechatUser['qr_scene_str'];
-
+                    $qrKey = str_replace("qrscene_", "", $qrKey);
                     //如果是关注，就随机生成一个
 
                     $isNewUser = false;
