@@ -192,6 +192,7 @@ class WeChatController extends Controller
                                 \Log::info('开始注册');
                                 $user = app('user')->quickRegister($request);
                                 $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+                                $userId = $user->id;
                             } 
                             catch (\Exception $e) 
                             {
@@ -206,6 +207,7 @@ class WeChatController extends Controller
                                 'is_valid'      =>  true,
                                 'user_id'       =>  $userId,
                                 'token'         =>  $token,
+                                'user'          =>  User::with(['defaultWarehouse:id,name_cn'])->find($userId),
                                 'open_id'       =>  $openid,
                                 'wechat_user'   =>  $wechatUser
                             ], 180);
