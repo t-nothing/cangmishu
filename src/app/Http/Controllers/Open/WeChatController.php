@@ -184,7 +184,7 @@ class WeChatController extends Controller
                                 'avatar'        =>  $wechatUser['headimgurl']??'',
                                 'nickname'      =>  $wechatUser['nickname']??'',
                             ]);//合并参数
-
+                            \Log::info('合并注册信息');
                             try 
                             {
                                 \Log::info('开始注册');
