@@ -213,6 +213,8 @@ class WeChatController extends Controller
                                 'wechat_user'   =>  $wechatUser
                             ], 180);
 
+                        \Log::info('登录用户信息', User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname'])->find($userId)->toArray());
+
                         return $isNewUser?"你好，欢迎登陆仓秘书！\n\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n\n无需付费，人人都用得起的专业仓储+订货管理系统 \n\n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统\n直达通道→https://www.cangmishu.com \n\n不定期进行功能迭代更新，如果您有意见或建议可以直接将您的建议打包好发给我哦！\n":'欢迎使用仓秘书';
 
                     }
