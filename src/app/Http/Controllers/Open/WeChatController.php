@@ -174,6 +174,7 @@ class WeChatController extends Controller
 
                             $userId = $user->id;
                         } else {
+                            \Log::info('自动注册一个新用户');
                             //创建一个新用户
                             $request->merge([
                                 'email'         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
@@ -186,7 +187,7 @@ class WeChatController extends Controller
 
                             try 
                             {
-                                \Log::info('自动注册一个新用户');
+                                \Log::info('开始注册');
                                 $user = app('user')->quickRegister($request);
                                 $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
                             } 
