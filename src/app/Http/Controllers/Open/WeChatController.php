@@ -121,7 +121,7 @@ class WeChatController extends Controller
             \Log::info('扫码登录外面', $message);
 
             if($message['MsgType'] == "产品") {
-                return new Image('media-id');
+                return new Image('Y2UZBJIujBqIsLIduCiNC7TFRrXq40xlonzxaJWEah8');
             }
             if (in_array(strtoupper($message['Event']??''), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
                     $openid = $message['FromUserName'];
