@@ -37,7 +37,7 @@ class AuthController extends  Controller
 
         $data['user'] = $guard->user();
         
-        $filtered = collect($data['user'])->only(['avatar', 'email','boss_id','id', 'nickname']);
+        $filtered = collect($data['user'])->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
         $data['user'] = $filtered->all();
         //如果有填写qrkey
         if($request->filled('qr_key')) {
