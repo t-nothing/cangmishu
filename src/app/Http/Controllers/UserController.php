@@ -50,6 +50,7 @@ class UserController extends  Controller
                     'city'          =>  $data['wechat_user']['city']??'',
                     'avatar'        =>  $data['wechat_user']['headimgurl']??'',
                     'nickname'      =>  $data['wechat_user']['nickname']??'',
+                    'wechat_openid' =>  $data['open_id']??'',
                 ]);//合并参数
                 
             }
