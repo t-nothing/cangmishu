@@ -207,8 +207,9 @@ class WeChatController extends Controller
                                 'is_valid'      =>  true,
                                 'user_id'       =>  $userId,
                                 'token'         =>  $token,
-                                'user'          =>  User::with(['defaultWarehouse:id,name_cn'])->find($userId),
+                                'user'          =>  User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname'])->find($userId),
                                 'open_id'       =>  $openid,
+                                'modules'       =>  [],
                                 'wechat_user'   =>  $wechatUser
                             ], 180);
 
