@@ -112,11 +112,22 @@ class WeChatController extends Controller
         $app->server->push(function($message) use($config, $app) {
             \Log::info('扫码登录外面', $message);
             if (in_array(strtoupper($message['Event']), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
-                $openid = $message['FromUserName'];
+                    $openid = $message['FromUserName'];
 
                     $qrKey = $message['EventKey']??'';
 
-                    if(!empty($qrKey)) {
+                    //如果是关注，就随机生成一个
+                    if(empty($qrKey) && strtoupper($message['Event']) == "SUBSCRIBE") {
+                        $key = Cache::increment('CMS-WECHAT-KEY');
+                        $qrKey = md5(md5($key).'cms');
+                        Cache::tags(['wechat'])->put($qrKey, [
+                            'is_valid'      =>  false,
+                            'user_id'       =>  0,
+                            'token'         =>  null,
+                        ], 1200);
+                    }
+
+                    if(!empty($qrKey) ) {
                         \Log::info('扫码登录', $message);
                         $wechatUser = $app->user->get($openid);
                         \Log::info('扫码用户', $wechatUser);
@@ -175,6 +186,7 @@ class WeChatController extends Controller
 
                             try 
                             {
+                                \Log::info('自动注册一个新用户');
                                 $user = app('user')->quickRegister($request);
                                 $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
                             } 
@@ -185,6 +197,14 @@ class WeChatController extends Controller
                             }
                         }
 
+                        Cache::tags(['wechat'])->put($qrKey, [
+                                'is_valid'      =>  true,
+                                'user_id'       =>  $userId,
+                                'token'         =>  $token,
+                                'open_id'       =>  $openid,
+                                'wechat_user'   =>  $wechatUser
+                            ], 180);
+
                         if (Cache::tags(['wechat'])->has($qrKey)) {
 
                             $data = Cache::tags(['wechat'])->get($qrKey);
@@ -192,13 +212,7 @@ class WeChatController extends Controller
                                 return '请不要重复扫描';
                             }
 
-                            Cache::tags(['wechat'])->put($qrKey, [
-                                'is_valid'      =>  true,
-                                'user_id'       =>  $userId,
-                                'token'         =>  $token,
-                                'open_id'       =>  $openid,
-                                'wechat_user'   =>  $wechatUser
-                            ], 180);
+                            
 
                             return $token?'欢迎使用仓秘书':'欢迎使用仓秘书';
                         }
