@@ -33,10 +33,10 @@ class UserService{
         app('db')->beginTransaction();
         try {
 
-            $type   = $request->type;
-            $code   = $request->code;
-            $mobile = $request->mobile;
-            $email  = $request->email;
+            $type           = $request->type;
+            $code           = $request->code;
+            $mobile         = $request->mobile;
+            $email          = $request->email;
 
             if($type === "mobile" && empty($email))
             {
@@ -44,36 +44,38 @@ class UserService{
             }
 
             #先创建一个用户
-            $user->email    = $email;
-            $user->phone    = $mobile??'';
-            $user->password = Hash::make($request->password);
-            $nickname = explode("@",$email);
-            $user->nickname = $nickname[0];
-            $user->avatar = env("APP_URL")."/images/default_avatar.png";
+            $user->email                = $email;
+            $user->phone                = $mobile??'';
+            $user->password             = Hash::make($request->password);
+            $nickname                   = explode("@",$email);
+            $user->nickname             = $request->nickname??$nickname[0];
+            $user->avatar               = $request->avatar??env("APP_URL")."/images/default_avatar.png";
+            $user->wechat_openid        = $request->wechat_openid??'';
             $user->save();
 
             $user->setActivated();
 
             #创建一个默认仓库
-            $warehouse = new Warehouse();
-            $warehouse->owner_id = $user->id;
-            $warehouse->name_cn = empty($request->warehouse_name)?'我的仓库':$request->warehouse_name;
+            $warehouse                  = new Warehouse();
+            $warehouse->owner_id        = $user->id;
+            $warehouse->name_cn         = empty($request->warehouse_name)?'我的仓库':$request->warehouse_name;
 
             // $initCode = Cache::increment('WAREHOUSE_CODE') + 1000;
-            $warehouse->code = Warehouse::no($user->id);
-            $warehouse->type = Warehouse::TYPE_PERSONAL;
-            $warehouse->area = $request->warehouse_area??200;
-            $warehouse->contact_email = $email;
-            $warehouse->status = true;
-            $warehouse->apply_num = 1;
-            $warehouse->operator = $user->id;
-            $warehouse->contact_user = $user->id;
-            $warehouse->contact_number = "";
-            $warehouse->is_used = 1;
+            $warehouse->code            = Warehouse::no($user->id);
+            $warehouse->type            = Warehouse::TYPE_PERSONAL;
+            $warehouse->area            = $request->warehouse_area??200;
+            $warehouse->contact_email   = $email;
+            $warehouse->status          = true;
+            $warehouse->apply_num       = 1;
+            $warehouse->operator        = $user->id;
+            $warehouse->contact_user    = $request->nickname??'';
+            $warehouse->contact_number  = "";
+            $warehouse->country         = $request->country??"";
+            $warehouse->city            = $request->city??"";
 
             // 仓库被创建时，如果是公共，则无使用者；如果是私有，则是创建者
-            $warehouse->is_used = 1;
-            $warehouse->user_id = $user->id;
+            $warehouse->is_used         = 1;
+            $warehouse->user_id         = $user->id;
 
             if (!$warehouse->save()) {
                 throw new \Exception("创建仓库失败", 1);

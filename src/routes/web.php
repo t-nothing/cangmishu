@@ -274,8 +274,8 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
     Route::any('wechat', 'WeChatController@serve');
     Route::any('wechat/login', 'WeChatController@wechatLogin');
-    Route::any('wechat/qr', 'WeChatController@wechatQr');
-    Route::any('wechat/scan/login_callback', 'WeChatController@wechatLoginCallback');
+    Route::get('wechat/qr', 'WeChatController@wechatQr');
+    Route::any('wechat/scan/login_callback', 'WeChatController@wechatQrCallback');
     Route::any('wechat/{id}', 'WeChatController@serve');
     Route::get('/express', 'ExpressController@list');//快递公司列表
     Route::get('captcha', 'CaptchaController@show');
