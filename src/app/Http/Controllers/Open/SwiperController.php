@@ -19,13 +19,13 @@ class SwiperController extends Controller
             "id"            =>  1,
             "caption"       =>  "合作 谁是你的菜",
             "link_url"      =>  "",
-            "image_url"     =>  Storage::url('images/swiper/8e50c65fda145e6dd1bf4fb7ee0fcecc.jpg'),
+            "image_url"     =>  secure_asset('images/swiper/8e50c65fda145e6dd1bf4fb7ee0fcecc.jpg'),
         ];
         $arr[] = [
             "id"            =>  2,
             "caption"       =>  "活动 美食节",
             "link_url"      =>  "",
-            "image_url"     =>  asset('images/swiper/65091eebc48899298171c2eb6696fe27.jpg'),
+            "image_url"     =>  secure_asset('images/swiper/65091eebc48899298171c2eb6696fe27.jpg'),
         ];
         $arr[] = [
             "id"            =>  3,
