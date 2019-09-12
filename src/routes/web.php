@@ -282,7 +282,7 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
     Route::post('captcha', 'CaptchaController@valid');
 
 
-    Route::get('swiper', 'SwiperController@list');
+    Route::get('swiper/{platform}', 'SwiperController@list');
 
 });
 
