@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Open;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BaseRequests;
+use Illuminate\Support\Facades\Storage;
 
 
 class SwiperController extends Controller
