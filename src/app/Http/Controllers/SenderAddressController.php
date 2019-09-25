@@ -46,7 +46,7 @@ class SenderAddressController extends  Controller
         }catch (\Exception $e){
             DB::rollBack();
             app('log')->info('仓秘书添加发件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"添加发件人信息失败");
+            return formatRet(500, trans("message.senderAddFailed"));
         }
     }
 
@@ -62,7 +62,7 @@ class SenderAddressController extends  Controller
         }catch (\Exception $e){
             DB::rollBack();
             app('log')->info('仓秘书编辑发件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑发件人地址失败");
+            return formatRet(500, trans("message.senderUpdateFailed"));
         }
     }
 
@@ -72,17 +72,17 @@ class SenderAddressController extends  Controller
 
         $address = SenderAddress::find($address_id);
         if(!$address){
-            return formatRet(500,"发件人地址不存在");
+            return formatRet(500, trans("message.senderNotExist"));
         }
         if ($address->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
         try{
             $address->delete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('仓秘书删除发件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除发件人地址失败");
+            return formatRet(500, trans("message.senderDeleteFailed"));
         }
     }
 
@@ -91,8 +91,8 @@ class SenderAddressController extends  Controller
         app('log')->info('查看收件人地址', ['id' => $address_id]);
         $address = SenderAddress::where('owner_id',Auth::ownerId())->find($address_id);
         if(!$address){
-            return formatRet(500,"地址不存在");
+            return formatRet(500, trans("message.senderNotExist"));
         }
-        return formatRet(0,"成功",$address->toArray());
+        return formatRet(0,"",$address->toArray());
     }
 }

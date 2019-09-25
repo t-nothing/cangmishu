@@ -28,7 +28,7 @@ class HomePageController extends Controller
         if (!$request->filled('warehouse_id')) {
             $warehouse = Warehouse::whose(app('auth')->ownerId())->latest()->first();
             if (!$warehouse) {
-                return formatRet(0, '暂无任何数据');
+                return formatRet(0, trans("message.404NotFound"));
             }
             $warehouse_id = $warehouse->id;
         } else {
@@ -70,7 +70,7 @@ class HomePageController extends Controller
         if (!$request->filled('warehouse_id')) {
             $warehouse = Warehouse::where('owner_id',app('auth')->ownerId())->latest()->first();
             if (!$warehouse) {
-                return formatRet(0, '暂无任何数据');
+                return formatRet(0, trans("message.404NotFound"));
             }
             $warehouse_id = $warehouse->id;
         } else {

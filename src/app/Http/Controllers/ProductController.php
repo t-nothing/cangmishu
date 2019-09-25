@@ -98,7 +98,7 @@ class ProductController extends Controller
             ];
             $exists = ProductSpec::whose(app('auth')->ownerId())->where('relevance_code', $spec['relevance_code'])->first();
             if ($exists) {
-                return formatRet(500, trans('message.relevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
+                return formatRet(500, trans('message.productRelevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
             }
         }
 
@@ -111,7 +111,7 @@ class ProductController extends Controller
         $product->hs_code             = $request->hs_code;
         $product->origin              = $request->origin;
         $product->display_link        = $request->input('display_link');
-        $product->remark              = $request->input('remark');
+        $product->remark              = $request->input('remark', '');
         $product->photos              = $request->input('photos');
         $product->owner_id            = Auth::ownerId();
         $product->warehouse_id	      = $request->warehouse_id;
@@ -130,7 +130,7 @@ class ProductController extends Controller
         }catch (\Exception $e){
             DB::rollBack();
             app('log')->error('新增货品失败',['msg'=>$e->getMessage()]);
-            return formatRet(500,"新增失败");
+            return formatRet(500, trans("message.productAddFailed"));
         }
     }
 
@@ -163,12 +163,12 @@ class ProductController extends Controller
             foreach ($request->specs as $spec) {
 
                 if(!in_array($spec["id"], $existIdArr)) {
-                    throw new \Exception("不存在的规格ID", 1);
+                    throw new \Exception(trans("message.productSpecNotExists"), 1);
                 }
 
                 $exists = ProductSpec::whose(Auth::ownerId())->where('relevance_code', $spec['relevance_code'])->where('id','!=', $spec['id'])->first();
                 if ($exists) {
-                    return formatRet(500, trans('message.relevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
+                    return formatRet(500, trans('message.productRelevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
                 }
 
                 $data = [
@@ -198,7 +198,7 @@ class ProductController extends Controller
             foreach ($willRemoveIdArr as $key => $id) {
                 $spec = ProductSpec::where('id',$id)->has('stocks')->get();
                 if(count($spec) >0 ){
-                    return formatRet(500, "不允许删除此规格,规格下面的库存");
+                    return formatRet(500, trans("message.productSpecCannotDelete",["spec_name"=>$spec['name_cn']]));
                 } else {
                     //将多余的删除掉
                     ProductSpec::where('id', $id)->where('owner_id', Auth::ownerId())->delete();
@@ -211,11 +211,11 @@ class ProductController extends Controller
             ShopProduct::where('product_id', $product->id)->update(['category_id'=> $product->category_id]);
 
             DB::commit();
-            return formatRet(0,'编辑商品成功');
+            return formatRet(0, trans("message.success"));
         }catch(\Exception $e) {
             DB::rollBack();
             app('log')->error('编辑商品失败',['msg' => $e->getMessage()]);
-            return formatRet(500, '编辑商品失败');
+            return formatRet(500, trans("message.productUpdateFailed"));
         }
     }
 
@@ -226,12 +226,12 @@ class ProductController extends Controller
         $product = Product::where('owner_id', app('auth')->ownerId())->find($product_id);
 
         if(!$product){
-            return formatRet(500,"货品不存在");
+            return formatRet(500, trans("message.productNotExist"));
         }
 
         $spec = ProductSpec::where('product_id',$product->id)->has('stocks')->get();
         if(count($spec) >0 ){
-            return formatRet(500,"不允许删除此商品");
+            return formatRet(500, trans("message.productCannotDelete"));
         }
 
         DB::beginTransaction();
@@ -247,7 +247,7 @@ class ProductController extends Controller
         }catch (\Exception $e){
             DB::rollBack();
             app('log')->error('删除货品失败', ["msg" => $e->getMessage()]);
-            return formatRet(500,"删除货品失败");
+            return formatRet(500, trans("message.productDeleteFailed"));
         }
     }
 

@@ -304,7 +304,7 @@ class ProductStockController extends  Controller
         $export = new StockExport();
         $export->setQuery($specs);
 
-        return app('excel')->download($export, '仓秘书货品总库存'.date('Y-m-d').'.xlsx');
+        return app('excel')->download($export, trans("message.productStockExportCaption").date('Y-m-d').'.xlsx');
 
     }
 
@@ -375,7 +375,7 @@ class ProductStockController extends  Controller
         $export = new SkuExport();
         $export->setQuery($stocks);
 
-        return app('excel')->download($export, 'SKU 库存'.date('Y-m-d').'.xlsx');
+        return app('excel')->download($export, trans("message.productSkuExportCaption").date('Y-m-d').'.xlsx');
     }
 
     /**
@@ -440,7 +440,7 @@ class ProductStockController extends  Controller
         $result = $stocks->toArray();
         unset($result['data']);
         $result['data'] = $re;
-        return formatRet(0, '成功', $result);
+        return formatRet(0, '', $result);
     }
 
 
@@ -579,7 +579,7 @@ class ProductStockController extends  Controller
         }
         $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number','need_expiration_date_name','need_best_before_date_name','need_production_batch_number_name','product_name']);
         $stock->setHidden(['spec']);
-        return formatRet(0,'成功',$stock->toArray());
+        return formatRet(0,'',$stock->toArray());
 
     }
 
@@ -637,7 +637,7 @@ class ProductStockController extends  Controller
         $result = $stocks->toArray();
         unset($result['data']);
         $result['data'] = $arr;
-        return formatRet(0, '成功', $result);
+        return formatRet(0, '', $result);
     }
 
     /**
@@ -656,7 +656,7 @@ class ProductStockController extends  Controller
         ]);
 
 
-        return formatRet(0,'成功',app("recount")->getLocationBySpec($request->all()));
+        return formatRet(0,'',app("recount")->getLocationBySpec($request->all()));
     }
 
 
@@ -664,7 +664,7 @@ class ProductStockController extends  Controller
      * 日志类型
      */
     public function getLogType(){
-        return formatRet(0,'成功', ProductStockLog::getAllType());
+        return formatRet(0,'', ProductStockLog::getAllType());
     }
 
 }

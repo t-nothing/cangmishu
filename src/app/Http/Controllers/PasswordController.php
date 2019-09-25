@@ -21,12 +21,12 @@ class PasswordController extends Controller
         $user = User::where('email', '=', $request->email)->first();
 
         if (empty($user)) {
-            return formatRet(404, "邮箱输入错误", [], 404);
+            return formatRet(404, trans("message.userEmailNotExist"), [], 404);
         }
 
         app('auth')->guard()->createUserResetActivation($user);// 发送重置邮件
 
-        return formatRet(0, "邮件已发送");
+        return formatRet(0, trans("message.userEmailSendSuccess"));
     }
 
     // 忘记密码-重置密码链接
@@ -74,25 +74,25 @@ class PasswordController extends Controller
             ->first();
 
         if (!$token) {
-            return formatRet(404, '无效的token!', [], 404);
+            return formatRet(404,  trans("message.userEmailTokenInvalid"), [], 404);
         }
 
         if (!$user = User::find($token->owner_user_id)) {
-            return formatRet(404, '用户不存在', [], 404);
+            return formatRet(404, trans("message.userNotExist"), [], 404);
         }
 
         if ($user->isLocked()) {
-            return formatRet(1, '账户被锁');
+            return formatRet(1, trans("message.userIsLocked"));
         }
 
         $user->password = Hash::make($request->password);
 
         if ($user->save()) {
             $token->delete();
-            return formatRet(0, '重置密码成功');
+            return formatRet(0, trans("message.userChangePasswordSuccess"));
         }
 
-        return formatRet(500, '重置密码失败');
+        return formatRet(500, trans("message.userChangePasswordFailed"));
     }
 
     //个人中心-修改密码
@@ -104,7 +104,7 @@ class PasswordController extends Controller
         ]);
 
         if ($request->password_old == $request->password) {
-            return formatRet(1, trans('message.newPassSameWithOld!'));
+            return formatRet(500, trans('message.userNewPassSameWithOld'));
         }
 
         $guard = app('auth')->guard();
@@ -112,7 +112,7 @@ class PasswordController extends Controller
         $user = User::where('id', $guard->user()->getAuthIdentifier())->first();
 
         if (!$guard->isValidPassWord(['email' => $user->email, 'password' => $request->password_old])) {
-            return formatRet(2, trans('message.oldPassIsWrong'));
+            return formatRet(500, trans('message.userPassWordIsWrong'));
         }
 
         $token = Token::where('owner_user_id', '=', $user->id)
@@ -122,7 +122,7 @@ class PasswordController extends Controller
             ->first();
 
         if (!$token) {
-            return formatRet(404, 'Invalid token!', [], 404);
+            return formatRet(404, trans("message.tokenInvalid"), [], 404);
         }
 
         $user->password = Hash::make($request->password);

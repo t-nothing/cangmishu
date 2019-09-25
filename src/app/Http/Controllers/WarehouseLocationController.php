@@ -40,7 +40,7 @@ class WarehouseLocationController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('新增仓库货位失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增仓库货位失败");
+            return formatRet(500, trans("message.warehouseLocationAddFailed"));
         }
     }
 
@@ -53,7 +53,7 @@ class WarehouseLocationController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑仓库货位失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑仓库货位失败");
+            return formatRet(500, trans("message.warehouseLocationUpdateFailed"));
         }
     }
 
@@ -62,22 +62,22 @@ class WarehouseLocationController extends Controller
         app('log')->info('删除仓库货位',['id'=>$warehouse_location_id]);
         $area = WarehouseLocation::find($warehouse_location_id);
         if(!$area){
-            return formatRet(500,"仓库货位不存在");
+            return formatRet(500, trans("message.warehouseLocationNotExist"));
         }
         if ($area->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $stocks = ProductStock::where('warehouse_location_id',$warehouse_location_id)->where('shelf_num','>',0)->get();
         if(count($stocks)){
-            return formatRet(500,"此货区下有货品存在，不能删除");
+            return formatRet(500, trans("message.warehouseLocationCannotDelete"));
         }
         try{
             WarehouseLocation::where('id',$warehouse_location_id)->delete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('删除仓库货位失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除仓库货位失败");
+            return formatRet(500, trans("message.warehouseLocationDeleteFailed"));
         }
     }
 }
