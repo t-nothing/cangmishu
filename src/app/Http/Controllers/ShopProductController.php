@@ -108,7 +108,7 @@ class ShopProductController extends Controller
         {
             app('db')->rollback();
             app('log')->error('修改商品失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"修改商品失败");
+            return formatRet(500, trans("message.shopProductUpdateFailed"));
         }
 
         return formatRet(0);
@@ -131,7 +131,7 @@ class ShopProductController extends Controller
         if(count($diffArr))
         {
             app('log')->info('店铺商品新增',$request->all());
-            return formatRet(500,"新增商品失败,商品信息不存在");
+            return formatRet(500, trans("message.shopProductAddFailed"));
         }
 
         app('db')->beginTransaction();
@@ -203,7 +203,7 @@ class ShopProductController extends Controller
         {
             app('db')->rollback();
             app('log')->error('新增商品失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增商品失败");
+            return formatRet(500, trans("message.shopProductAddFailed"));
         }
 
         return formatRet(0);
@@ -226,7 +226,7 @@ class ShopProductController extends Controller
             foreach ($shopProducts as $key => $shopProduct) {
 
                 if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
-                    return formatRet(500,'用户不存在或无权限编辑');
+                    return formatRet(500, trans("message.noPermission"));
                 }
                 
                 $shopProduct->specs()->delete();
@@ -237,7 +237,7 @@ class ShopProductController extends Controller
 
         } catch (\Exception $e) {
             app('db')->rollback();
-            return formatRet(500,'删除店铺商品失败');
+            return formatRet(500, trans("message.shopProductDeleteFailed"));
         }
         return formatRet(0);
     }
@@ -251,7 +251,7 @@ class ShopProductController extends Controller
         $shopProduct = ShopProduct::with("shop")->findOrFail($id);
 
         if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
-            return formatRet(500,'用户不存在或无权限编辑');
+            return formatRet(500, trans("message.noPermission"));
         }
         $shopProduct->load("specs");
 
@@ -263,7 +263,7 @@ class ShopProductController extends Controller
         $shopProduct->pics = json_decode($shopProduct->pics, true)??[];
         $shopProduct->descs = json_decode($shopProduct->descs, true)??[];
 
-        return formatRet(0,"成功",$shopProduct->toArray());
+        return formatRet(0,"",$shopProduct->toArray());
     }
 
     /**
@@ -286,7 +286,7 @@ class ShopProductController extends Controller
             app('db')->beginTransaction();
             foreach ($shopProducts as $key => $shopProduct) {
                 if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
-                    return formatRet(500,'用户不存在或无权限编辑');
+                    return formatRet(500,trans("message.noPermission"));
                 }
 
                 $shopProduct->specs()->update(['is_shelf'=>$request->is_shelf]);
@@ -298,7 +298,7 @@ class ShopProductController extends Controller
 
         } catch (\Exception $e) {
             app('db')->rollback();
-            return formatRet(500,'操作商品失败');
+            return formatRet(500, trans("message.shopProductShlefFailed"));
         }
         return formatRet(0);
     }

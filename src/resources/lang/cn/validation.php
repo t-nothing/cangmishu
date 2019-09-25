@@ -11,7 +11,7 @@ return [
     | the validator class. Some of these rules have multiple versions such
     | as the size rules. Feel free to tweak each of these messages here.
     |
-    */
+    */ 
 
     'accepted'             => 'The :attribute 必须接受。',
     'active_url'           => 'The :attribute 不是一个有效的网址。',
@@ -151,7 +151,7 @@ return [
         'size'                    => '大小',
         'code'                    => '编号',
         'is_enabled'              => '是否启用',
-        'warehouse_id'            => '仓库',
+        'warehouse_id'            => '仓库', 
         'warehouse_area_id'       => '货区',
         'warehouse_feature_id'    => '特性',
         'verify_num'              => '验货数量',
@@ -166,12 +166,25 @@ return [
         'product_stock.*.distributor_code' => '供应商货号',
         'distributor_id'          =>'供应商',
         'type_id'                 =>'类型',
+        'status'                  =>'状态',
         'batch_code'              =>'入库单编码',
         'product_stock'           =>'库存记录',
         'batch_id'                =>'入库单',
         'captcha'                 =>'验证码',
         'mobile'                  =>'手机号',
         'captcha_key'             =>'验证码标识',
+        'created_at_b'            =>'开始日期',
+        'created_at_e'            =>'结束日期',
+        'keywords'                =>'关键词',
+        'page'                    =>'页码',
+        'page_size'               =>'分页大小',
+        'express_code'            =>'快递公司',
+        'express_num'            =>'快递单号',
+        'shop_remark'            =>'备注',
+        'pay_status'                => '支付状态',
+        'pay_type'                  => '支付类型',
+        'sub_pay'                   => '实收金额',
+        'payment_account_number'    => '流水单号',
 
     ],
 ];

@@ -69,7 +69,7 @@ class DistributorController extends Controller
             return formatRet(0);
         }
 
-        return formatRet(500, '失败');
+        return formatRet(500, trans("message.distributorAddFailed"));
     }
 
     /**
@@ -97,7 +97,7 @@ class DistributorController extends Controller
         ]);
 
         if (! $distributor = Distributor::find($distributor_id)) {
-            return formatRet(404, '供应商不存在', [], 404);
+            return formatRet(404, trans("message.distributorNotExist"), [], 404);
         }
 
         $distributor->name_cn = $request->name_cn;
@@ -106,7 +106,7 @@ class DistributorController extends Controller
         if ($distributor->save()) {
             return formatRet(0);
         }
-        return formatRet(500, '失败');
+        return formatRet(500, trans("message.distributorUpdateFailed"));
     }
 
     /**
@@ -117,12 +117,12 @@ class DistributorController extends Controller
     public function destroy( $distributor_id)
     {
         if (! $distributor = Distributor::whose(Auth::id())->find($distributor_id)) {
-            return formatRet(404, '供应商不存在', [], 404);
+            return formatRet(404, trans("message.distributorNotExist"), [], 404);
         }
 
         if ($distributor->delete()) {
             return formatRet(0);
         }
-        return formatRet(500, '失败');
+        return formatRet(500, trans("message.distributorDeleteFailed"));
     }
 }

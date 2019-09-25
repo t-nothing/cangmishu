@@ -20,11 +20,11 @@ if (! function_exists('formatRet')) {
     function formatRet($code, $message = '', array $data = [], $status = 200, array $headers = [], $options = 0)
     {
         if($code == 0 && !$message){
-            $message = "成功";
+            $message = trans("message.success");
         }
 
         if($code !=0 && !$message){
-            $message = "失败";
+            $message = trans("message.failed");
         }
         $rt = [
             'status' => $code,

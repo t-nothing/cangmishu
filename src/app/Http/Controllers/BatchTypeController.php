@@ -44,7 +44,7 @@ class BatchTypeController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('新增入库单分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增入库单分类失败");
+            return formatRet(500, trans("message.batchTypeAddFailed"));
         }
     }
 
@@ -63,7 +63,7 @@ class BatchTypeController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑入库单分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑入库单分类失败");
+            return formatRet(500, trans("message.batchTypeUpdateFailed"));
         }
     }
 
@@ -73,21 +73,21 @@ class BatchTypeController extends Controller
         $batch = BatchType::find($batch_type_id);
 
         if(!$batch){
-            return formatRet(500,"入库单分类不存在");
+            return formatRet(500, trans("message.batchTypeNotExist"));
         }
         if ($batch->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
         $count = $batch->batches->count();
         if($count >0){
-            return formatRet(500,"此入库单分类下存在入库单，不允许删除");
+            return formatRet(500, trans("message.batchTypeCannotDelete"));
         }
         try{
             BatchType::where('id',$batch_type_id)->delete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('删除入库单分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除入库单分类失败");
+            return formatRet(500, trans("message.batchTypeDeleteFailed"));
         }
     }
 }

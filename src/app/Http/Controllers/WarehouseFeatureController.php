@@ -33,7 +33,7 @@ class WarehouseFeatureController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('新增仓库特性失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增仓库特性失败");
+            return formatRet(500, trans("message.warehouseFeatureAddFailed"));
         }
     }
 
@@ -46,7 +46,7 @@ class WarehouseFeatureController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑仓库特性失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑仓库特性失败");
+            return formatRet(500, trans("message.warehouseFeatureUpdateFailed"));
         }
     }
 
@@ -55,17 +55,17 @@ class WarehouseFeatureController extends Controller
         app('log')->info('删除仓库特性',['id'=>$warehouse_feature_id]);
         $feature = WarehouseFeature::find($warehouse_feature_id);
         if(!$feature){
-            return formatRet(500,"仓库特性不存在");
+            return formatRet(500, trans("message.warehouseFeatureNotExist"));
         }
         if ($feature->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
         try{
             WarehouseFeature::where('id',$warehouse_feature_id)->delete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('删除仓库特性失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除仓库特性失败");
+            return formatRet(500, trans("message.warehouseFeatureDeleteFailed"));
         }
     }
 }

@@ -67,7 +67,7 @@ class OrderController extends Controller
         $export = new OrderExport();
         $export->setQuery($orders);
 
-        return app('excel')->download($export, '仓秘书出库订单导出'.date('Y-m-d').'.xlsx');
+        return app('excel')->download($export,  trans("message.orderExportCaption").date('Y-m-d').'.xlsx');
     }
 
     public function index(BaseRequests $request)
@@ -126,14 +126,14 @@ class OrderController extends Controller
     {
         $order = Order::where('owner_id',Auth::ownerId())->with(['orderItems.spec:id,total_shelf_num','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])->find($order_id);
         if(!$order){
-            return formatRet("500",'找不到该出库单');
+            return formatRet("500", trans("message.orderNotExist"));
         }
         $order->append(['out_sn_barcode']);
 
         // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
         $order = $order->toArray();
 
-       return formatRet(0,"成功",$order);
+       return formatRet(0, trans("message.success"),$order);
     }
 
 
@@ -145,16 +145,16 @@ class OrderController extends Controller
             $order = app('order')->setSource("自建")->create($request);
             if(!isset($order->out_sn))
             {
-                throw new \Exception("出库单新增失败", 1);
+                throw new \Exception(trans("message.orderAddFailed"), 1);
                 
             }
             app('db')->commit();
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('新增出库单失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '出库单新增失败');
+            return formatRet(500, trans("message.orderAddFailed"));
         }
-        return formatRet(0,'出库单新增成功');
+        return formatRet(0,trans("message.orderAddSuccess"));
     }
 
 //    public function destroy(BaseRequests $request,$order_id)
@@ -171,10 +171,10 @@ class OrderController extends Controller
 //
 //        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
 //        if(!$order){
-//            return formatRet(500,"订单不存在");
+//            return formatRet(500, trans("message.orderNotExist"));
 //        }
 //        if ($order->owner_id != Auth::ownerId()){
-//            return formatRet(500,"没有权限");
+//            return formatRet(500, trans("message.noPermission"));
 //        }
 //        try{
 //            Order::where('id',$order_id)->delete();
@@ -203,10 +203,10 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('出库拣货失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '出库拣货失败:'.$e->getMessage());
+            return formatRet(500, trans("message.orderPickingFailed", ["message"=>$e->getMessage()]));
         }
         
-        return formatRet(0,'出库拣货成功');
+        return formatRet(0, trans("message.orderPickingSuccess"));
     }
 
     /**
@@ -215,11 +215,11 @@ class OrderController extends Controller
     public function payStatusList(){
         return formatRet(
             0,
-            '成功',
+            trans("message.success"),
             [
-                ['id'=> Order::ORDER_PAY_STATUS_UNPAY , 'name'=> '未支付'],
-                ['id'=> Order::ORDER_PAY_STATUS_REFUND , 'name'=> '已退款'],
-                ['id'=> Order::ORDER_PAY_STAUTS_PAID , 'name'=> '已支付'],
+                ['id'=> Order::ORDER_PAY_STATUS_UNPAY , 'name'=> trans("message.orderStatusUnpay")],
+                ['id'=> Order::ORDER_PAY_STATUS_REFUND , 'name'=> trans("message.orderStatusRefund")],
+                ['id'=> Order::ORDER_PAY_STAUTS_PAID , 'name'=> trans("message.orderStatusPaid")],
             ]
         );
     }
@@ -230,13 +230,13 @@ class OrderController extends Controller
     public function payTypeList(){
         return formatRet(
             0,
-            '成功',
+            trans("message.success"),
             [
-                ['id'=>  Order::ORDER_PAY_TYPE_ALIPAY, 'name'=>  '支付宝支付'],
-                ['id'=>  Order::ORDER_PAY_TYPE_WECHAT, 'name'=>  '微信支付'],
-                ['id'=>  Order::ORDER_PAY_TYPE_BANK, 'name'=>  '银行卡支付'],
-                ['id'=>  Order::ORDER_PAY_TYPE_CASH, 'name'=>  '现金支付'],
-                ['id'=>  Order::ORDER_PAY_TYPE_OTHER, 'name'=>  '其他方式'],
+                ['id'=>  Order::ORDER_PAY_TYPE_ALIPAY, 'name'=>  trans("message.orderPaymentAlipay")],
+                ['id'=>  Order::ORDER_PAY_TYPE_WECHAT, 'name'=>  trans("message.orderPaymentWechat")],
+                ['id'=>  Order::ORDER_PAY_TYPE_BANK, 'name'=> trans("message.orderPaymentBank")],
+                ['id'=>  Order::ORDER_PAY_TYPE_CASH, 'name'=>  trans("message.orderPaymentCash")],
+                ['id'=>  Order::ORDER_PAY_TYPE_OTHER, 'name'=>  trans("message.orderPaymentOther")],
             ]
         );
     }
@@ -247,15 +247,15 @@ class OrderController extends Controller
     public function statusList(){
         return formatRet(
             0,
-            '成功',
+            trans("message.success"),
             [
-                ['id'=>  Order::STATUS_CANCEL, 'name'=>  '订单已取消'],
-                ['id'=>  Order::STATUS_DEFAULT, 'name'=>  '待确认'],
+                ['id'=>  Order::STATUS_CANCEL, 'name'=>  trans("message.orderStatusCancel")],
+                ['id'=>  Order::STATUS_DEFAULT, 'name'=>  trans("message.orderStatusUnConfirm")],
                 // ['id'=>  Order::STATUS_PICKING, 'name'=>  '拣货中'],
                 // ['id'=>  Order::STATUS_PICK_DONE, 'name'=>  '已出库'],
-                ['id'=>  Order::STATUS_WAITING, 'name'=>  '待发货'],
-                ['id'=>  Order::STATUS_SENDING, 'name'=>  '配送中'],
-                ['id'=>  Order::STATUS_SUCCESS, 'name'=>  '已签收'],
+                ['id'=>  Order::STATUS_WAITING, 'name'=>  trans("message.orderStatusUnSend")],
+                ['id'=>  Order::STATUS_SENDING, 'name'=>  trans("message.orderStatusSending")],
+                ['id'=>  Order::STATUS_SUCCESS, 'name'=>  trans("message.orderStatusSuccess")],
             ]
         );
     }
@@ -277,16 +277,16 @@ class OrderController extends Controller
         ]);
         $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
         if(!$order){
-            return formatRet(500,"订单不存在");
+            return formatRet(500, trans("message.orderNotExist"));
         }
         if ($order->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $order->load("orderItems");
         $order->update(['status'=>Order::STATUS_CANCEL]);
         event(new OrderCancel($order->toArray()));
-        return formatRet(0,'成功');
+        return formatRet(0,trans("message.success"));
     }
 
     /**
@@ -298,21 +298,17 @@ class OrderController extends Controller
             'express_code'           => 'required|string|string|max:255',
             'express_num'            => 'required|string|max:255',
             'shop_remark'            => 'string|max:255',
-        ], [], [
-            'express_code'           => '快递公司',
-            'express_num'            => '快递单号',
-            'shop_remark'            => '备注',
         ]);
 
         $order = Order::find($id);
         if(!$order){
-            return formatRet(500,"订单不存在");
+            return formatRet(500, trans("message.orderNotExist"));
         }
         if ($order->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
         if ($order->status < Order::STATUS_PICKING){
-            return formatRet(500,"只有拣货完成才能修改物流信息");
+            return formatRet(500, trans("message.orderOpStopByUnPick"));
         }
 
         try {
@@ -321,9 +317,9 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('更新发货信息失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '更新发货信息失败');
+            return formatRet(500,  trans("message.failed"));
         }
-        return formatRet(0,'成功');
+        return formatRet(0,trans("message.success"));
 
     }
 
@@ -337,19 +333,14 @@ class OrderController extends Controller
             'pay_type'                  => 'required|integer|min:1',
             'sub_pay'                   => 'required|numeric|min:0',
             'payment_account_number'    => 'string|max:100',
-        ], [], [
-            'pay_status'                => '支付状态',
-            'pay_type'                  => '支付类型',
-            'sub_pay'                   => '实收金额',
-            'payment_account_number'    => '流水单号',
         ]);
         
         $order = Order::find($id);
         if(!$order){
-            return formatRet(500,"订单不存在");
+            return formatRet(500, trans("message.orderNotExist"));
         }
         if ($order->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         try {
@@ -358,9 +349,9 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '更新支付信息失败');
+            return formatRet(500, trans("message.failed"));
         }
-        return formatRet(0,'成功');
+        return formatRet(0,trans("message.success"));
     }
 
     /**
@@ -369,10 +360,10 @@ class OrderController extends Controller
     public function completed(BaseRequests $request,$id ){
         $order = Order::find($id);
         if(!$order){
-            return formatRet(500,"订单不存在");
+            return formatRet(500, trans("message.orderNotExist"));
         }
         if ($order->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
         try {
             app('order')->updateRceived($request,$id);
@@ -380,9 +371,9 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '签收失败');
+            return formatRet(500, trans("message.failed"));
         }
-        return formatRet(0,'成功');
+        return formatRet(0,trans("message.success"));
     }
 
     public function  UpdateData(UpdateOrderRequest $request,$order_id )
@@ -390,16 +381,16 @@ class OrderController extends Controller
         app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
         $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
         if(!$order){
-            return formatRet(500,"订单不存在");
+            return formatRet(500, trans("message.orderNotExist"));
         }
         try {
             app('order')->updateData($request,$order);
             app('db')->commit();
-            return formatRet(0,'成功');
+            return formatRet(0,trans("message.success"));
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('修改出库单数据失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '修改出库单数据失败');
+            return formatRet(500, trans("message.failed"));
         }
     }
 
@@ -411,11 +402,11 @@ class OrderController extends Controller
 
         $order = Order::find($id);
         if(!$order){
-            return formatRet("500",'找不到该出库单');
+            return formatRet("500", trans("message.orderNotExist"));
         }
 
         if ($order->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
         
         $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
@@ -443,11 +434,11 @@ class OrderController extends Controller
     {
         $order = Order::find($id);
         if(!$order){
-            return formatRet("500",'找不到该出库单');
+            return formatRet("500", trans("message.orderNotExist"));
         }
 
         if ($order->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);

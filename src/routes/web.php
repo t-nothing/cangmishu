@@ -281,6 +281,9 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
     Route::get('captcha', 'CaptchaController@show');
     Route::post('captcha', 'CaptchaController@valid');
 
+
+    Route::get('swiper/{platform}', 'SwiperController@list');
+
 });
 
 $router->get('open/shop/list', 'Open\\Shop\\ShopController@index');// 店铺列表
