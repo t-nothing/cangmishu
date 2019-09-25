@@ -61,7 +61,7 @@ class RecountController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('新增盘点单失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增盘点单失败");
+            return formatRet(500, trans("message.recountAddFailed"));
         }
     }
 
@@ -74,10 +74,10 @@ class RecountController extends Controller
         $recount = Recount::find($id);
 
         if(!$recount){
-            return formatRet(500,"盘点单不存在");
+            return formatRet(500,  trans("message.recountNotExist"));
         }
         if ($recount->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $recount->load('stocks');
@@ -98,10 +98,10 @@ class RecountController extends Controller
         $recount = Recount::with(['warehouse', 'operatorUser'])->find($id);
 
         if(!$recount){
-            return formatRet(500,"盘点单不存在");
+            return formatRet(500, trans("message.recountNotExist"));
         }
         if ($recount->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
         $recount->append(['recount_no_barcode']);
         $recount->load('stocks');
@@ -124,10 +124,10 @@ class RecountController extends Controller
         $recount = Recount::with(['warehouse', 'operatorUser'])->find($id);
 
         if(!$recount){
-            return formatRet(500,"盘点单不存在");
+            return formatRet(500, trans("message.recountNotExist"));
         }
         if ($recount->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $recount->load('stocks');

@@ -115,7 +115,7 @@ class ShopController extends Controller
         {
             app('db')->rollback();
             app('log')->error('修改店铺失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"修改店铺失败");
+            return formatRet(500, trans("message.shopUpdateFailed"));
         }
 
         return formatRet(0);
@@ -202,7 +202,7 @@ class ShopController extends Controller
         {
             app('db')->rollback();
             app('log')->error('新增店铺失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增店铺失败");
+            return formatRet(500, trans("message.shopAddFailed"));
         }
 
         return formatRet(0);
@@ -216,7 +216,7 @@ class ShopController extends Controller
         $shop = Shop::find($id);
 
         if (! $shop || $shop->owner_id != Auth::id()){
-            return formatRet(500,'店铺不存在或无权限编辑');
+            return formatRet(500, trans("message.shopNotExist"));
         }
 
         app('db')->beginTransaction();
@@ -228,7 +228,7 @@ class ShopController extends Controller
 
         } catch (\Exception $e) {
             app('db')->rollback();
-            return formatRet(500,'删除店铺失败');
+            return formatRet(500, trans("message.shopDeleteFailed"));
         }
         return formatRet(0);
     }
@@ -241,11 +241,11 @@ class ShopController extends Controller
         $shop = Shop::find($id);
 
         if (! $shop || $shop->owner_id != Auth::id()){
-            return formatRet(500,'店铺不存在或无权限编辑');
+            return formatRet(500, trans("message.shopNotExist"));
         }
 
         $shop->load("senderAddress");
 
-        return formatRet(0,"成功",$shop->toArray());
+        return formatRet(0,"",$shop->toArray());
     }
 }

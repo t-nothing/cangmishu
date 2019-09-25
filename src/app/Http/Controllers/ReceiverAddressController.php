@@ -32,7 +32,7 @@ class ReceiverAddressController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('仓秘书添加收件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"添加收件人信息失败");
+            return formatRet(500, trans("message.receiverAddFailed"));
         }
     }
 
@@ -45,7 +45,7 @@ class ReceiverAddressController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('仓秘书编辑收件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑收件人地址失败");
+            return formatRet(500, trans("message.receiverUpdateFailed"));
         }
     }
 
@@ -54,17 +54,17 @@ class ReceiverAddressController extends Controller
         app('log')->info('删除收件人地址',['id'=>$address_id]);
         $address = ReceiverAddress::find($address_id);
         if(!$address){
-            return formatRet(500,"收件地址不存在");
+            return formatRet(500, trans("message.receiverNotExist"));
         }
         if ($address->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500,  trans("message.noPermission"));
         }
         try{
             $address->delete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('仓秘书删除收件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除收件人地址失败");
+            return formatRet(500, trans("message.receiverDeleteFailed"));
         }
     }
 
@@ -75,8 +75,8 @@ class ReceiverAddressController extends Controller
 
         $address = ReceiverAddress::where('owner_id',Auth::ownerId())->find($address_id);
         if(!$address){
-            return formatRet(500,"地址不存在");
+            return formatRet(500, trans("message.receiverNotExist"));
         }
-        return formatRet(0,"成功",$address->toArray());
+        return formatRet(0,"",$address->toArray());
     }
 }

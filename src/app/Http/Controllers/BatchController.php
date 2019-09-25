@@ -89,7 +89,7 @@ class BatchController extends Controller
         }catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('新增入库单失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增入库单失败");
+            return formatRet(500, trans('message.batchAddFailed'));
         }
     }
 
@@ -98,11 +98,11 @@ class BatchController extends Controller
      **/
     public function  update(UpdateBatchRequest $request,$batch_id)
     {
-        app('log')->info('新增入库单', $request->all());
+        app('log')->info('修改入库单', $request->all());
 
         $batch = Batch::find($batch_id);
         if($batch->status != 1){
-            return formatRet(500,'该入库单不可编辑');
+            return formatRet(500, trans('message.batchCannotEdit'));
         }
         app('db')->beginTransaction();
         try{
@@ -112,8 +112,8 @@ class BatchController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('db')->rollback();
-            app('log')->error('新增入库单失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增入库单失败");
+            app('log')->error('修改入库单失败',['msg' =>$e->getMessage()]);
+            return formatRet(500, trans('message.batchUpdateFailed'));
         }
     }
 
@@ -127,13 +127,13 @@ class BatchController extends Controller
         $batch = Batch::find($batch_id);
 
         if(!$batch){
-            return formatRet(500,'入库单不存在或已被删除');
+            return formatRet(500, trans('message.batchNotExist')); //'入库单不存在或已被删除'
         }
         if($batch->status != Batch::STATUS_PREPARE ){
-            return formatRet(500,'不允许删除');
+            return formatRet(500, trans('message.batchCannotDelete'));//'不允许删除'
         }
         if($batch->owner_id != Auth::ownerId()){
-            return formatRet(500,'没有权限');
+            return formatRet(500, trans('message.noPermission'));
         }
         try{
           $batch->delete();
@@ -142,7 +142,7 @@ class BatchController extends Controller
         }catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('删除入库单失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除入库单失败");
+            return formatRet(500, trans("message.batchDeleteFailed"));//"删除入库单失败"
         }
     }
 
@@ -162,7 +162,8 @@ class BatchController extends Controller
         }catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"入库上架失败:".$e->getMessage());
+            //"入库上架失败:".$e->getMessage()
+            return formatRet(500, trans("message.batchOnshelfFailed"));
         }
     }
 
@@ -170,11 +171,11 @@ class BatchController extends Controller
     public function pdf($batch_id, $template = '')
     {
         if (! $batch = Batch::find($batch_id)) {
-            return formatRet(404, '入库单不存在', [], 404);
+            return formatRet(404, trans('message.batchNotExist'), [], 404);
         }
 
         if($batch->owner_id != Auth::ownerId()){
-            return formatRet(500,'没有权限');
+            return formatRet(500, trans('message.noPermission'));
         }
 
         $batch->load(['batchProducts', 'distributor', 'warehouse', 'batchType', 'operatorUser']);
@@ -206,11 +207,11 @@ class BatchController extends Controller
     {
 
         if (! $batch = Batch::where('owner_id',Auth::ownerId())->find($batch_id)) {
-            return formatRet(404, '入库单不存在或者没有权限操作', [], 404);
+            return formatRet(404, trans('message.batchNotExist'), [], 404);
         }
 
         if($batch->owner_id != Auth::ownerId()){
-            return formatRet(500,'没有权限');
+            return formatRet(500, trans('message.noPermission'));
         }
 
         $batch->load(['batchProducts', 'distributor', 'warehouse', 'batchType', 'operatorUser']);
@@ -262,7 +263,7 @@ class BatchController extends Controller
             ->where('id',$id)
             ->first();
         if(!$batch){
-            return formatRet(500,"入库单不存在");
+            return formatRet(500, trans('message.batchNotExist'));
         }
         $batch->append(['batch_code_barcode']);
 

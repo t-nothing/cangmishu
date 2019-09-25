@@ -40,7 +40,7 @@ class OrderTypeController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('新增出库单分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增出库单分类失败");
+            return formatRet(500, trans("message.orderTypeAddFailed"));
         }
     }
 
@@ -56,7 +56,7 @@ class OrderTypeController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑出库单分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑出库单分类失败");
+            return formatRet(500, trans("message.orderTypeUpdateFailed"));
         }
     }
 
@@ -65,22 +65,22 @@ class OrderTypeController extends Controller
         app('log')->info('删除出库单分类',['id'=>$order_type_id]);
         $type = OrderType::find($order_type_id);
         if(!$type){
-            return formatRet(500,"出库单分类不存在");
+            return formatRet(500, trans("message.orderTypeNotExist"));
         }
         if ($type->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $count = $type->orders->count();
         if($count >0){
-            return formatRet(500,"此入库单分类下存在入库单，不允许删除");
+            return formatRet(500, trans("message.orderTypeCannotDelete"));
         }
         try{
             OrderType::where('id',$order_type_id)->delete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('删除出库单分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除出库单分类失败");
+            return formatRet(500, trans("message.orderTypeDeleteFailed"));
         }
     }
 }

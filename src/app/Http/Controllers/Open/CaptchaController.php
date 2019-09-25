@@ -41,11 +41,11 @@ class CaptchaController extends Controller
 
 
         if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
-            return formatRet(500, '验证失败');
+            return formatRet(500, message("message.failed"));
         }
         Cache::tags(['captcha'])->forget($request->captcha_key);
 
-        return formatRet(0, '成功');
+        return formatRet(0, message("message.success"));
       
     }
 }

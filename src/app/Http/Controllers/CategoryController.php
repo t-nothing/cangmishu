@@ -58,7 +58,7 @@ class CategoryController extends Controller
         }catch (\Exception $e){
             DB::rollBack();
             app('log')->error('新增货品分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增货品分类失败");
+            return formatRet(500, trans("message.productCategoryAddFailed"));
         }
     }
 
@@ -72,7 +72,7 @@ class CategoryController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑货品分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑货品分类失败");
+            return formatRet(500, trans("message.productCategoryUpdateFailed"));
         }
     }
 
@@ -81,15 +81,15 @@ class CategoryController extends Controller
         app('log')->info('删除货品分类',['id'=>$category_id]);
         $category = Category::find($category_id);
         if(!$category){
-            return formatRet(500,"货品分类不存在");
+            return formatRet(500, trans("message.productCategoryNotExist"));
         }
         if ($category->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $product_count = $category->products()->count();
         if($product_count){
-            return formatRet(500,"该分类下存在货品，不允许删除");
+            return formatRet(500, trans("message.productCategoryCannotDelete"));
         }
         try{
             $category->delete();
@@ -97,7 +97,7 @@ class CategoryController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('删除货品分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除货品分类失败");
+            return formatRet(500, trans("productCategoryDeleteFailed"));
         }
     }
 }
