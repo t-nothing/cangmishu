@@ -18,6 +18,8 @@ use App\Models\Category;
 use App\Models\UserCategoryWarning;
 use App\Models\OrderType;
 use App\Models\Distributor;
+use App\Models\Product;
+use App\Models\ProductSpec;
 use Illuminate\Support\Facades\Mail;
 use App\Jobs\Sms;
 
@@ -225,6 +227,41 @@ class UserService{
             if (!$distributor->save()) {
                 throw new \Exception("默认供应商创建失败", 1);
             }
+
+
+            $product = new Product;
+            $product->category_id         = $category->id;
+            $product->name_cn             = "我的第一个商品";
+            $product->name_en             = "我的第一个商品";
+            $product->hs_code             = "";
+            $product->origin              = "中国";
+            $product->display_link        = "";
+            $product->remark              = $request->input('remark', '');
+            $product->photos              = "https://api.cangmishu.com/storage/imgs/h9AeqOsyWvOnMJ0jrWdgKALbO8uahfXXKWwUWHvL.jpeg";
+            $product->owner_id            = $user->id;
+            $product->warehouse_id        = $warehouse->id;
+            $product->sale_price          = 100;
+            $product->purchase_price      = 80;
+
+            $specs[] = [
+                'product_id'     => 0,
+                'name_cn'        => "规格一",
+                'name_en'        => "规格一",
+                'net_weight'     => "800",
+                'gross_weight'   => "800",
+                'relevance_code' => "myskucode",
+                'sale_price'     => 100,
+                'purchase_price' => 80,
+                'owner_id'       => $user->id,
+                'warehouse_id'   => $warehouse->id,
+                'is_warning'     => 1
+            ];
+
+            $product->save();
+            foreach ($specs as $k => $v) {
+                $specs[$k]['product_id']    = $product->id;
+            }
+            ProductSpec::insert($specs);
 
             app('db')->commit();
         } catch (\Exception $e) {
