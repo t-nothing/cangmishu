@@ -53,7 +53,7 @@ class WarehouseController extends Controller
             Warehouse::create($data);
         }catch(\Exception $e) {
             app('log')->error('新增仓库失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '失败');
+            return formatRet(500, trans("message.warehouseAddFailed"));
         }
         return formatRet(0, '');
     }
@@ -69,7 +69,7 @@ class WarehouseController extends Controller
             Warehouse::where('id',$warehouse_id)->where('owner_id', app('auth')->ownerId())->update($data);
         }catch(\Exception $e) {
             app('log')->error('编辑仓库失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '失败');
+            return formatRet(500, trans("message.warehouseUpdateFailed"));
         }
         return formatRet(0, '');
     }
@@ -101,7 +101,7 @@ class WarehouseController extends Controller
             // OrderItem::where('warehouse_id',$warehouse_id)->forceDelete();
         }catch(\Exception $e) {
             app('log')->error('删除仓库失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '失败');
+            return formatRet(500, trans("message.warehouseDeleteFailed"));
         }
     }
 
@@ -114,18 +114,18 @@ class WarehouseController extends Controller
             //如果是员工账户
             $warehouse = $user->groups->warehouse;
             if($warehouse->id != $warehouse_id){
-                return formatRet(500,"无权设置");
+                return formatRet(500, trans("message.noPermission"));
             }
         }else{
             $warehouse = Warehouse::where('owner_id', $user->id)->where('id', $warehouse_id)->first();
             if(!$warehouse){
-                return formatRet(500,"仓库不存在或无权限查看");
+                return formatRet(500, trans("message.warehouseNotExist"));
             }
         }
         $user->default_warehouse_id = $warehouse_id;
         $user->save();
 
-        return formatRet(0,"设置成功");
+        return formatRet(0, trans("message.success"));
     }
 
 }

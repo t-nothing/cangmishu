@@ -66,7 +66,7 @@ class AppController extends  Controller
         }catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('新增APP失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增APP失败");
+            return formatRet(500, trans("message.appKeyAddFailed"));
         }
     }
 
@@ -80,11 +80,11 @@ class AppController extends  Controller
         $model = AppAccount::find($id);
 
         if(!$model){
-            return formatRet(500,'APP KEY不存在或已被删除');
+            return formatRet(500, trans("message.appKeyNotExist"));
         }
         
         if($model->owner_id != Auth::ownerId()){
-            return formatRet(500,'没有权限');
+            return formatRet(500, trans("message.noPermission"));
         }
         try{
           $model->delete();
@@ -92,7 +92,7 @@ class AppController extends  Controller
         }catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('删除APP KEY失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除APP KEY失败");
+            return formatRet(500, trans("message.appKeyDeleteFailed"));
         }
     }
 

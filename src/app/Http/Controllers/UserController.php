@@ -34,11 +34,11 @@ class UserController extends  Controller
             if (Cache::tags(['wechat'])->has($code)) {
                 $data = Cache::tags(['wechat'])->get($code);
                 if(!$data['is_valid']) {
-                    return formatRet(500, "验证码已过期或不存在");
+                    return formatRet(500, trans("message.userRegisterExpired"));
                 }
 
                 if($data['user_id'] >0) {
-                    return formatRet(500, "请不要重复绑定");
+                    return formatRet(500, trans("message.userBindRepeat"));
                 }
 
                 //生成一个随机邮箱
@@ -57,7 +57,7 @@ class UserController extends  Controller
         } else {
             $verify_code = VerifyCode::where('code',$code)->where('email',$codeFieldValue)->where('expired_at','>',time())->first();
             if(!$verify_code){
-                return formatRet(500, "验证码已过期或不存在");
+                return formatRet(500, trans("message.userRegisterExpired"));
             }
         }
         try {
@@ -67,7 +67,7 @@ class UserController extends  Controller
             return formatRet(500, $e->getMessage());
         }
 
-        return formatRet(0, '注册成功', $user->toArray());
+        return formatRet(0, trans("message.userRegisterSuccess"), $user->toArray());
     }
 
     public  function getEmailVerifyCode(BaseRequests $request)
@@ -79,13 +79,13 @@ class UserController extends  Controller
         ]);
 
         if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
-            return formatRet(500, '图片验证失败');
+            return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
         }
         Cache::tags(['captcha'])->forget($request->captcha_key);
 
         $code = app('user')->getRandCode();
         app('user')->createUserEmailVerifyCode($code,$request->email);
-        return formatRet("0","发送成功");
+        return formatRet("0", trans("message.userRegisterEmailVerifyCodeFailed"));
     }
 
     public  function getSmsVerifyCode(BaseRequests $request)
@@ -97,13 +97,13 @@ class UserController extends  Controller
         ]);
 
         if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
-            return formatRet(500, '图片验证失败');
+            return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
         }
         Cache::tags(['captcha'])->forget($request->captcha_key);
 
         $code = app('user')->getRandCode();
         app('user')->createUserSMSVerifyCode($code,$request->mobile);
-        return formatRet("0","发送成功");
+        return formatRet("0", trans("message.userRegisterSendSuccess"));
 
     }
 
@@ -119,15 +119,16 @@ class UserController extends  Controller
 
         $user = User::find($user_id);
         if($user_id != Auth::id()){
-            return formatRet('无权修改');
+            return formatRet(500, trans("message.noPermission"));
         }
         if(!$user){
-            return formatRet(500, "用户不存在");
+
+            return formatRet(500, trans("message.userNotExist"));
         }
         $warehouse_id =$request->input('warehouse_id');
         $res= app('module')->getModulesByUser($user ,$warehouse_id);
         $res = collect($res)->pluck('id')->toArray();
-        return formatRet(0, "查询成功", $res);
+        return formatRet(0, trans("message.success"), $res);
     }
 
     /**
@@ -141,22 +142,22 @@ class UserController extends  Controller
         app('log')->info('user',['request'=>$request->all(),'user_id'=>$user_id]);
         $user = User::find($user_id);
         if(!$user){
-            return formatRet(500,"用户不存在");
+            return formatRet(500, trans("message.userNotExist"));
         }
         $auth = Auth::user();
         if($user->boss_id !=0){
             if($user->boss_id !=$auth->id){
-                return formatRet(500,"无权修改");
+                return formatRet(500, trans("message.noPermission"));
             }
         }else{
             if($user->id != $auth->id){
-                return formatRet(500,"无权修改");
+                return formatRet(500, trans("message.noPermission"));
             }
         }
 
         $user->password = Hash::make($request->password);
         if (! $user->save()) {
-            return formatRet(500,'操作失败');
+            return formatRet(500, trans("message.failed"));
         }
 
         return formatRet(0);
@@ -170,12 +171,12 @@ class UserController extends  Controller
 
         $user = User::find($user_id);
         if($user_id != Auth::id()){
-            return formatRet('无权修改');
+            return formatRet(500, trans("message.noPermission"));
         }
         $user->nickname = $request->nickname;
 //        $user->avatar = $request->avatar;
         if (! $user->save()) {
-            return formatRet(500,'操作失败');
+            return formatRet(500, trans("message.failed"));
         }
         return formatRet(0);
     }
@@ -187,11 +188,11 @@ class UserController extends  Controller
 
         $user = User::find($user_id);
         if($user_id != Auth::id()){
-            return formatRet('无权修改');
+            return formatRet(500, trans("message.noPermission"));
         }
         $user->avatar = $request->avatar;
         if (! $user->save()) {
-            return formatRet(500,'操作失败');
+            return formatRet(500, trans("message.failed"));
         }
         return formatRet(0);
     }
@@ -200,9 +201,9 @@ class UserController extends  Controller
     {
         $user = User::find($user_id);
         if($user_id != Auth::id()){
-            return formatRet('无权查看');
+            return formatRet(500, trans("message.noPermission"));
         }
-        return formatRet(0,'成功',$user->toArray());
+        return formatRet(0,trans("message.success"),$user->toArray());
     }
 
 

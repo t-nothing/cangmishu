@@ -21,7 +21,7 @@ class WarningController extends  Controller
 
         $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('id', $request->warehouse_id)->select('warning_email')->first();
         if(!$warehouse) {
-            return formatRet(500, '仓库不存在!');
+            return formatRet(500, trans("message.warehouseNotExist"));
         }
         $warning_email = $warehouse->warning_email;
         $default_warning_stock =  Auth::user()->default_warning_stock;
@@ -45,7 +45,7 @@ class WarningController extends  Controller
         $isSendEmail = false;
         $warehouse = Warehouse::where('owner_id',Auth::ownerId())->where('id', $request->warehouse_id)->select('warning_email')->first();
         if(!$warehouse) {
-            return formatRet(500, '仓库不存在!');
+            return formatRet(500, trans("message.warehouseNotExist"));
         }
         $user_id = app('auth')->ownerId();
         $new_email = $request->warning_email;
@@ -73,15 +73,16 @@ class WarningController extends  Controller
             app("db")->commit();
         }catch(\Exception $ex) {
             app("db")->rollback();
-            return formatRet(1, $ex->getMessage());
+            app("log")->error($ex->getMessage());
+            return formatRet(500, trans("message.failed"));
         }
         
-        return formatRet(0, '修改库存预警成功!');
+        return formatRet(0, trans("message.success"));
     }
 
     public  function destroy(BaseRequests $request)
     {
-        return formatRet(0, '不支持删除预警!');
+        return formatRet(0, trans("message.warehouseWarningDeleteFailed"));
     }
 
 }

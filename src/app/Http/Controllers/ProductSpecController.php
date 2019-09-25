@@ -90,7 +90,7 @@ class ProductSpecController extends Controller
 
         $product = Product::whose(Auth::ownerId())->find($request->product_id);
         if (empty($product)) {
-            return formatRet(404, '货品不存在', [], 404);
+            return formatRet(404, trans("message.productNotExist"), [], 404);
         }
 
         $this->validate($request, [
@@ -130,7 +130,7 @@ class ProductSpecController extends Controller
         ]);
 
         if (! $spec = ProductSpec::whereIn('owner_id', app('auth')->ownerId())->find($request->spec_id)) {
-            return formatRet(404, '商品规格不存在', [], 404);
+            return formatRet(404, trans("message.productSpecNotExists"), [], 404);
         }
 
         $this->validate($request, [
@@ -150,7 +150,7 @@ class ProductSpecController extends Controller
             return formatRet(0);
         }
 
-        return formatRet(500, '失败');
+        return formatRet(500, trans("message.failed"));
     }
 
     /**
@@ -176,7 +176,7 @@ class ProductSpecController extends Controller
         try {
             $productSpecImport = new ProductSpecImport(new ProductService);
             app('excel')->import($productSpecImport, $request->file('file'));
-            return formatRet(0, '导入成功');
+            return formatRet(0, trans("message.productImportsuccess"));
         } catch (ValidationException $e) {
             $failures = $e->failures();
             $error = [];
@@ -187,10 +187,10 @@ class ProductSpecController extends Controller
                     'error' => $failure->errors()
                 ];
             }
-            return formatRet(0, '导入结束,数据验证未通过', $error);
+            return formatRet(0, trans("message.productImportStop"), $error);
         } catch(\Exception $exception) {
             info('货品规格导入失败', ["message" => $exception->getMessage()]);
-            return formatRet(500, '导入失败');
+            return formatRet(500, trans("message.failed"));
         }
 
     }
