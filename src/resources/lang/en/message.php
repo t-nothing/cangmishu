@@ -85,7 +85,7 @@ return [
     'userNewPassSameWithOld'  =>'Change the password to be different from the original password.',
     'userPassWordIsWrong'  =>'The original password is wrong',
     'userNameFormatInvalid'   =>  'Username can only contain numbers, letters, and underscores',
-    'userSMSExpired'=>'Verification code has expired',
+    'userSMSExpired'=>'Verification code has expired or does not exist',
 
 
     'userRegisterExpired'=>'Verification code has expired or does not exist',
