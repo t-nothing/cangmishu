@@ -19,6 +19,55 @@ class AuthController extends  Controller
 {
 
     /**
+     * 手机短信验证码登录
+     **/
+    public function smsLogin(BaseRequests $request)
+    {
+        $this->validate($request, [
+            'mobile'     => 'required|mobile|string',
+            'code'      => 'required|string',
+        ]);
+
+        $user = User::where('phone', $request->mobile)->first();
+
+        /**
+         * 生成一个新的 token，token 哈希来保证唯一性。
+         *
+         * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+         * @return \App\Models\Token|null
+         */
+        $createToken = function($user, $type)
+        {
+            $token = new Token;
+            $token->token_type = $type;
+            $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
+            $token->expired_at = Carbon::now()->addWeek();
+            $token->owner_user_id = $user->getAuthIdentifier();
+            $token->is_valid = Token::VALID;
+
+            if ($token->save()) {
+                return $token;
+            }
+
+            return;
+        };
+
+        if(!$user) {
+            return formatRet(500, trans("message.userNotExsts"));
+        }
+
+   
+        \Log::info('找到用户', $user->toArray());
+        $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+        $userId = $user->id;
+
+        $data['token'] = $token;
+        $data['modules'] = [];
+        $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+
+        return formatRet(0, '', $data);
+    }
+    /**
      * 登入
      */
     public function login(BaseRequests $request)
