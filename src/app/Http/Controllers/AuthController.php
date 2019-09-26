@@ -28,7 +28,7 @@ class AuthController extends  Controller
     public  function getSmsVerifyCode(BaseRequests $request)
     {
         $this->validate($request,[
-            'mobile'        =>  ['required','mobile',Rule::exist('user','phone')],
+            'mobile'        =>  ['required','mobile'],
             'captcha_key'   =>  'required|string|min:1',
             'captcha'       =>  'required|string'
         ]);
@@ -38,6 +38,13 @@ class AuthController extends  Controller
                 return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
             }
             Cache::tags(['captcha'])->forget($request->captcha_key);
+        }
+
+        $user = User::where('phone', $request->mobile)->first();
+
+        if(!$user) {
+            \Log::info('找到不用户', $request->all());
+            return formatRet(500, trans("message.userNotExist"));
         }
 
         $code = app('user')->getRandCode();
