@@ -34,7 +34,7 @@ class HomePageController extends Controller
             $warehouse_id = intval($request->input('warehouse_id'));
         }
 
-        $warehouse = Warehouse::where("user_id", app('auth')->ownerId())->find($warehouse_id);
+        $warehouse = Warehouse::where("owner_id", app('auth')->ownerId())->find($warehouse_id);
         if (!$warehouse) {
             return formatRet(0, trans("message.404NotFound"));
         }
@@ -102,6 +102,7 @@ class HomePageController extends Controller
             "product" => $product,
             "order" => $order, 
             "todo" => $todo,
+            'warehouse_id' => $warehouse_id,
         ];
         return formatRet(0, '', $homePageAnalyze);
 
@@ -127,7 +128,7 @@ class HomePageController extends Controller
             $warehouse_id = intval($request->input('warehouse_id'));
         }
 
-        $warehouse = Warehouse::where("user_id", app('auth')->ownerId())->find($warehouse_id);
+        $warehouse = Warehouse::where("owner_id", app('auth')->ownerId())->find($warehouse_id);
         if (!$warehouse) {
             return formatRet(0, trans("message.404NotFound"));
         }
