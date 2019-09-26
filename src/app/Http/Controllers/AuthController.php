@@ -14,6 +14,9 @@ use App\Models\GroupModuleRel;
 use App\Models\Modules;
 use Illuminate\Http\Request;
 use EasyWeChat\Factory;
+use App\Models\User;
+use App\Models\Token;
+use Log;
 
 class AuthController extends  Controller
 {
