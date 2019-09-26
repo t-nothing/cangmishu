@@ -49,7 +49,7 @@ class AuthController extends  Controller
 
         $code = app('user')->getRandCode();
         app('user')->createUserSMSVerifyCode($code,$request->mobile);
-        return formatRet("0", trans("message.userRegisterSendSuccess"));
+        return formatRet(0, trans("message.userRegisterSendSuccess"));
 
     }
 
@@ -123,10 +123,12 @@ class AuthController extends  Controller
         $guard = app('auth')->guard();
 
         if (! $data = $guard->login($guard->credentials())) {
+            \Log::info('登录失败', $request->all());
             return formatRet(500, $guard->sendFailedLoginResponse());
         }
 
         $data['user'] = $guard->user();
+
         
         $filtered = collect($data['user'])->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
         $data['user'] = $filtered->all();
