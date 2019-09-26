@@ -83,6 +83,7 @@ return [
     'userNewPassSameWithOld'  =>'修改密码需不同与原密码',
     'userPassWordIsWrong'  =>'原密码错误',
     'userNameFormatInvalid'   =>  '用户名只能包含数字、字母和下划线',
+    'userSMSExpired'=>'短信验证码已过期',
 
     'userRegisterExpired'=>'验证码已过期或不存在',
     'userBindRepeat'=>'请不要重复绑定',
