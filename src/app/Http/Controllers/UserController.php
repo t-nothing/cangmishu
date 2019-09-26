@@ -85,7 +85,7 @@ class UserController extends  Controller
 
         $code = app('user')->getRandCode();
         app('user')->createUserEmailVerifyCode($code,$request->email);
-        return formatRet("0", trans("message.userRegisterEmailVerifyCodeFailed"));
+        return formatRet(0, trans("message.userRegisterEmailVerifyCodeFailed"));
     }
 
     public  function getSmsVerifyCode(BaseRequests $request)
@@ -105,7 +105,7 @@ class UserController extends  Controller
 
         $code = app('user')->getRandCode();
         app('user')->createUserSMSVerifyCode($code,$request->mobile);
-        return formatRet("0", trans("message.userRegisterSendSuccess"));
+        return formatRet(0, trans("message.userRegisterSendSuccess"));
 
     }
 
