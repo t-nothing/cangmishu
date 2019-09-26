@@ -19,9 +19,31 @@ use App\Models\Token;
 use App\Models\VerifyCode;
 use Carbon\Carbon;
 use Log;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends  Controller
 {
+
+    public  function getSmsVerifyCode(BaseRequests $request)
+    {
+        $this->validate($request,[
+            'mobile'        =>  ['required','mobile',Rule::exist('user','phone')],
+            'captcha_key'   =>  'required|string|min:1',
+            'captcha'       =>  'required|string'
+        ]);
+
+        if($request->captcha_key != "app") {
+            if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+                return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
+            }
+            Cache::tags(['captcha'])->forget($request->captcha_key);
+        }
+
+        $code = app('user')->getRandCode();
+        app('user')->createUserSMSVerifyCode($code,$request->mobile);
+        return formatRet("0", trans("message.userRegisterSendSuccess"));
+
+    }
 
     /**
      * 手机短信验证码登录
