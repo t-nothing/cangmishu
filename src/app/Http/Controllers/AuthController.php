@@ -56,6 +56,7 @@ class AuthController extends  Controller
         };
 
         if(!$user) {
+            \Log::info('找到不用户', $request->all());
             return formatRet(500, trans("message.userNotExist"));
         }
 
