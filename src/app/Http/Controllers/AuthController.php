@@ -31,7 +31,6 @@ class AuthController extends  Controller
             'code'      => 'required|string',
         ]);
 
-        $user = User::where('phone', $request->mobile)->first();
 
         /**
          * 生成一个新的 token，token 哈希来保证唯一性。
@@ -59,6 +58,8 @@ class AuthController extends  Controller
         if(!$verify_code){
             return formatRet(500, trans("message.userSMSExpired"));
         }
+
+        $user = User::where('phone', $request->mobile)->first();
 
         if(!$user) {
             \Log::info('找到不用户', $request->all());
