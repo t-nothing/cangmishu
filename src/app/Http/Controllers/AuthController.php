@@ -20,6 +20,7 @@ use App\Models\VerifyCode;
 use Carbon\Carbon;
 use Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 
 class AuthController extends  Controller
 {
