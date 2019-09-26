@@ -56,7 +56,7 @@ class AuthController extends  Controller
         };
 
         if(!$user) {
-            return formatRet(500, trans("message.userNotExsts"));
+            return formatRet(500, trans("message.userNotExist"));
         }
 
    
