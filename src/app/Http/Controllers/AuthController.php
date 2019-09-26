@@ -17,6 +17,7 @@ use EasyWeChat\Factory;
 use App\Models\User;
 use App\Models\Token;
 use App\Models\VerifyCode;
+use Carbon\Carbon;
 use Log;
 
 class AuthController extends  Controller
