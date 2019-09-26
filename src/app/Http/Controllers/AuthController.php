@@ -55,7 +55,7 @@ class AuthController extends  Controller
             return;
         };
 
-        $verify_code = VerifyCode::where('code',$request->code)->where('email',$request->code)->where('expired_at','>',time())->first();
+        $verify_code = VerifyCode::where('code',$request->code)->where('email',$request->mobile)->where('expired_at','>',time())->first();
         if(!$verify_code){
             return formatRet(500, trans("message.userSMSExpired"));
         }
