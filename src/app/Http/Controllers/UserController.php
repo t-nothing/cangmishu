@@ -96,10 +96,12 @@ class UserController extends  Controller
             'captcha'       =>  'required|string'
         ]);
 
-        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
-            return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
+        if($request->captcha_key != "app") {
+            if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+                return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
+            }
+            Cache::tags(['captcha'])->forget($request->captcha_key);
         }
-        Cache::tags(['captcha'])->forget($request->captcha_key);
 
         $code = app('user')->getRandCode();
         app('user')->createUserSMSVerifyCode($code,$request->mobile);
