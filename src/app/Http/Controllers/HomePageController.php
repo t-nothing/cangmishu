@@ -84,7 +84,7 @@ class HomePageController extends Controller
 
         $sql = "select 
 (select count(product.id) as count from product,category where product.category_id = category.id and  product.total_stock_num <= category.warning_stock and category.warning_stock >0 and product.warehouse_id = ?) as stock_warning,
-(select count(id) from `batch` where warehouse_id = ? and `status` <= ".Batch::STATUS_ACCOMPLISH.") as unshelf,
+(select count(id) from `batch` where warehouse_id = ? and `status` = ".Batch::STATUS_PREPARE.") as unshelf,
 (select count(id) from `order` where warehouse_id = ? and `status` <= ".Order::STATUS_PICK_DONE.") as unconfirm";
         $todo = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
 
