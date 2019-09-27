@@ -20,9 +20,14 @@ class CaptchaController extends Controller
         $builder->build();
         $data = $builder->getPhrase();
 
-        $key = Cache::increment('CMS-CAPTCHA-KEY');
+        $key = Cache::increment('CMS-CAPTCHA-KEY'.date("Ymd"));
         $key = md5(md5($key).'cms');
-        Cache::tags(['captcha'])->put($key, $data, 60);
+        Cache::put($key, $data, 60);
+
+        app('log')->info('验证码错误', [
+                'cache'=>Cache::get($key),
+                'key'=>$key
+            ]);
 
         $arr = [
             'captcha'       => $builder->inline(90),
@@ -40,10 +45,10 @@ class CaptchaController extends Controller
         ]);
 
 
-        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+        if (strtoupper(Cache::get($request->captcha_key)) != strtoupper($request->captcha)) {
             return formatRet(500, message("message.failed"));
         }
-        Cache::tags(['captcha'])->forget($request->captcha_key);
+        Cache::forget($request->captcha_key);
 
         return formatRet(0, message("message.success"));
       
