@@ -74,8 +74,8 @@ class UserController extends  Controller
     {
         $this->validate($request,[
             'email'         =>['required','email',Rule::unique('user','email')],
-            'captcha_key'   =>  'required|string|min:1',
-            'captcha'       =>  'required|string'
+            'captcha_key'   =>  'required|string|trim|min:1',
+            'captcha'       =>  'required|string|trim'
         ]);
 
         if (strtoupper(Cache::get($request->captcha_key)) != strtoupper($request->captcha)) {
