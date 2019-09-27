@@ -22,7 +22,7 @@ class CaptchaController extends Controller
 
         $key = Cache::increment('CMS-CAPTCHA-KEY')."-".date("Ymd");
         $key = md5(md5($key).'cms');
-        Cache::put($key, $data, 60);
+        Cache::put($key, $data, 120);
 
         app('log')->info('验证码生成', [
                 'cache'=>Cache::get($key),
