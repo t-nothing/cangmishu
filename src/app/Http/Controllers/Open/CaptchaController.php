@@ -20,11 +20,11 @@ class CaptchaController extends Controller
         $builder->build();
         $data = $builder->getPhrase();
 
-        $key = Cache::increment('CMS-CAPTCHA-KEY'.date("Ymd"));
+        $key = Cache::increment('CMS-CAPTCHA-KEY')."-".date("Ymd");
         $key = md5(md5($key).'cms');
         Cache::put($key, $data, 60);
 
-        app('log')->info('验证码错误', [
+        app('log')->info('验证码生成', [
                 'cache'=>Cache::get($key),
                 'key'=>$key
             ]);
