@@ -85,7 +85,7 @@ class UserController extends  Controller
             ]);
             return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
         }
-        Cache::forget($request->captcha_key);
+        // Cache::forget($request->captcha_key);
 
         $code = app('user')->getRandCode();
         app('user')->createUserEmailVerifyCode($code,$request->email);
@@ -104,7 +104,7 @@ class UserController extends  Controller
             if (strtoupper(Cache::get($request->captcha_key)) != strtoupper($request->captcha)) {
                 return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
             }
-            Cache::forget($request->captcha_key);
+            // Cache::forget($request->captcha_key);
         }
 
         $code = app('user')->getRandCode();
