@@ -74,11 +74,11 @@ class UserController extends  Controller
     {
         $this->validate($request,[
             'email'         =>['required','email',Rule::unique('user','email')],
-            'captcha_key'   =>  'required|string|trim|min:1',
-            'captcha'       =>  'required|string|trim'
+            'captcha_key'   =>  'required|string|min:1',
+            'captcha'       =>  'required|string'
         ]);
 
-        if (strtoupper(Cache::get($request->captcha_key)) != strtoupper($request->captcha)) {
+        if (strtoupper(Cache::get(trim($request->captcha_key))) != strtoupper(trim($request->captcha))) {
             app('log')->info('验证码错误', [
                 'cache'=>Cache::get($request->captcha_key),
                 'request'=>$request->captcha,
