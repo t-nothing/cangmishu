@@ -24,6 +24,13 @@ class CaptchaController extends Controller
         $key = md5(md5($key).date("Ymd").'cms');
         Cache::tags(['captcha'])->put($key, $data, 60);
 
+
+        app('log')->info('验证码生成', [
+                'cache'=>Cache::get($key),
+                'key'=>$key
+            ]);
+
+
         $arr = [
             'captcha'       => $builder->inline(90),
             'captcha_key'   => $key,
@@ -40,10 +47,10 @@ class CaptchaController extends Controller
         ]);
 
 
-        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+        if (strtoupper(Cache::get($request->captcha_key)) != strtoupper($request->captcha)) {
             return formatRet(500, message("message.failed"));
         }
-        Cache::tags(['captcha'])->forget($request->captcha_key);
+        Cache::forget($request->captcha_key);
 
         return formatRet(0, message("message.success"));
       

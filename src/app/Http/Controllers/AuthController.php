@@ -14,10 +14,101 @@ use App\Models\GroupModuleRel;
 use App\Models\Modules;
 use Illuminate\Http\Request;
 use EasyWeChat\Factory;
+use App\Models\User;
+use App\Models\Token;
+use App\Models\VerifyCode;
+use Carbon\Carbon;
+use Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 
 class AuthController extends  Controller
 {
 
+    public  function getSmsVerifyCode(BaseRequests $request)
+    {
+        $this->validate($request,[
+            'mobile'        =>  ['required','mobile'],
+            'captcha_key'   =>  'required|string|min:1',
+            'captcha'       =>  'required|string'
+        ]);
+
+        if($request->captcha_key != "app") {
+            if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+                return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
+            }
+            Cache::tags(['captcha'])->forget($request->captcha_key);
+        }
+
+        $user = User::where('phone', $request->mobile)->first();
+
+        if(!$user) {
+            \Log::info('找到不用户', $request->all());
+            return formatRet(500, trans("message.userNotExist"));
+        }
+
+        $code = app('user')->getRandCode();
+        app('user')->createUserSMSVerifyCode($code,$request->mobile);
+        return formatRet(0, trans("message.userRegisterSendSuccess"));
+
+    }
+
+    /**
+     * 手机短信验证码登录
+     **/
+    public function smsLogin(BaseRequests $request)
+    {
+        $this->validate($request, [
+            'mobile'     => 'required|mobile|string',
+            'code'      => 'required|string',
+        ]);
+
+
+        /**
+         * 生成一个新的 token，token 哈希来保证唯一性。
+         *
+         * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+         * @return \App\Models\Token|null
+         */
+        $createToken = function($user, $type)
+        {
+            $token = new Token;
+            $token->token_type = $type;
+            $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
+            $token->expired_at = Carbon::now()->addWeek();
+            $token->owner_user_id = $user->getAuthIdentifier();
+            $token->is_valid = Token::VALID;
+
+            if ($token->save()) {
+                return $token;
+            }
+
+            return;
+        };
+
+        $verify_code = VerifyCode::where('code',$request->code)->where('email',$request->mobile)->where('expired_at','>',time())->first();
+        if(!$verify_code){
+            return formatRet(500, trans("message.userSMSExpired"));
+        }
+
+        $user = User::where('phone', $request->mobile)->first();
+
+        if(!$user) {
+            \Log::info('找到不用户', $request->all());
+            return formatRet(500, trans("message.userNotExist"));
+        }
+
+   
+        \Log::info('找到用户', $user->toArray());
+        $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+        $userId = $user->id;
+
+        $data['token'] = $token;
+        $data['modules'] = [];
+        $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+
+        return formatRet(0, '', $data);
+    }
     /**
      * 登入
      */
@@ -32,10 +123,12 @@ class AuthController extends  Controller
         $guard = app('auth')->guard();
 
         if (! $data = $guard->login($guard->credentials())) {
+            \Log::info('登录失败', $request->all());
             return formatRet(500, $guard->sendFailedLoginResponse());
         }
 
         $data['user'] = $guard->user();
+
         
         $filtered = collect($data['user'])->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
         $data['user'] = $filtered->all();

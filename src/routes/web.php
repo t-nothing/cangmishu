@@ -17,6 +17,8 @@ Route::get('/', function () {
 
 // 用户认证
 Route::post('/login', 'AuthController@login');
+Route::post('/smsLogin', 'AuthController@smsLogin');
+Route::post('/smsLoginCode', 'AuthController@getSMSVerifyCode');
 
 Route::post('/logout', 'AuthController@logout');
 Route::post('/register', 'UserController@register');
