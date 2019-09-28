@@ -21,7 +21,7 @@ class CaptchaController extends Controller
         $data = $builder->getPhrase();
 
         $key = Cache::increment('CMS-CAPTCHA-KEY');
-        $key = md5(md5($key).'cms');
+        $key = md5(md5($key).date("Ymd").'cms');
         Cache::tags(['captcha'])->put($key, $data, 60);
 
         $arr = [
