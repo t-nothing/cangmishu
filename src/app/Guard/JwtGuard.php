@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Log;
 
 class JwtGuard implements Guard
 {
@@ -181,14 +182,17 @@ class JwtGuard implements Guard
     {
         if(empty($credentials['email']))
         {
+            \Log::info('用户名、邮箱或密码不正确 A', $credentials);
             eRet('用户名、邮箱或密码不正确');
         }
 //        $user = $this->provider->retrieveByCredentials($credentials);
         $user= User::with(['defaultWarehouse:id,name_cn'])->where('phone',$credentials['email'])->orWhere('email',$credentials['email'])->first();
         if(!$user){
+            \Log::info('用户名、邮箱或密码不正确 B', $credentials);
             eRet('用户名、邮箱或密码不正确');
         }
         if(!Hash::check($credentials['password'], $user->password)){
+            \Log::info('用户名、邮箱或密码不正确 C', $credentials);
             eRet('用户名、邮箱或密码不正确');
         }
 

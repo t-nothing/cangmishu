@@ -74,14 +74,13 @@ class UserController extends  Controller
     {
         $this->validate($request,[
             'email'         =>['required','email',Rule::unique('user','email')],
-            'captcha_key'   =>  'required|string|min:1',
-            'captcha'       =>  'required|string'
         ]);
+
 
 
         $code = app('user')->getRandCode();
         app('user')->createUserEmailVerifyCode($code,$request->email);
-        return formatRet("0", trans("message.userRegisterEmailVerifyCodeFailed"));
+        return formatRet(0, "");
     }
 
     public  function getSmsVerifyCode(BaseRequests $request)
@@ -92,14 +91,16 @@ class UserController extends  Controller
             'captcha'       =>  'required|string'
         ]);
 
-        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
-            return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
+        if($request->captcha_key != "app") {
+            if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
+                return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
+            }
+            Cache::forget($request->captcha_key);
         }
-        Cache::tags(['captcha'])->forget($request->captcha_key);
 
         $code = app('user')->getRandCode();
         app('user')->createUserSMSVerifyCode($code,$request->mobile);
-        return formatRet("0", trans("message.userRegisterSendSuccess"));
+        return formatRet(0, trans("message.userRegisterSendSuccess"));
 
     }
 
