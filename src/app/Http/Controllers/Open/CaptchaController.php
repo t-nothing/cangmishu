@@ -47,7 +47,7 @@ class CaptchaController extends Controller
         ]);
 
 
-        if (strtoupper(Cache::get($request->captcha_key)) != strtoupper($request->captcha)) {
+        if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
             return formatRet(500, message("message.failed"));
         }
         Cache::forget($request->captcha_key);
