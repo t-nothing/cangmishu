@@ -1,11 +1,43 @@
 <?php
 return [
-    '404NotFound' => 'Cannot find anything',
+    '404NotFound' => 'Cannot find anything', 
     'success' =>'Succeed',
     'failed' => 'Failed', 
     'tokenInvalid' =>'Bad Request',
     'noPermission' =>'Bad Request',
     'activeAccount'=>'User is not activated, please activate your account by click at the link in your mail',
+
+    'batchPage'=>'Inbound',
+    'batchPageDate'=>'Date',
+    'batchPageWarehouse'=>'Warehouse',
+    'batchPageType'=>'Type',
+    'batchPageDistributor'=>'Supplier',
+    'batchPageRemark'=>'Remark',
+    'batchPageNo'=>'No.',
+    'batchPageSku'=>'SKU',
+    'batchPageProductName'=>'Name',
+    'batchPageSpecName'=>'Spec',
+    'batchPagePurcharseQty'=>'Expected quantity',
+    'batchPageActualQty'=>'Inbounded Quantity',
+    'batchPageBatchNo'=>'Barcode',
+    'batchPagePurcharsePrice'=>'Unit price',
+    'batchPageInRemark'=>'Remark',
+    'batchPageTreasurer'=>'Financial',
+    'batchPageManager'=>'Manager',
+    'batchPageKeeper'=>'Warehouse Keeper',
+    'batchPageInDate'=>'Date',
+    'batchPageEan'=>'Ean',
+    'batchPageExpireAt'=>'EXP',//EXP
+    'batchPageExpireBbd'=>'BBD',
+    'batchPageExpireMfd'=>'Batch No.',
+
+    'batchPurcharse'=>'Purcharse Requisition',
+    'batchPurcharseDepartment'=>'Depertment',
+    'batchPurcharsePrice'=>'Amount',
+    'batchPurcharseTotal'=>'Totla',
+    'batchPurcharseRemark'=>'Remark',
+    'batchPurcharseInitiator'=>'Initiator',
+    'batchPurcharseDivisionHead'=>'Division Head',
 
     'batchAddFailed' => 'Failed', #
     'batchUpdateFailed' => 'Failed',#

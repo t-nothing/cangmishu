@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <title>入库单</title>
+  <title>@lang('messages.batchPage')</title>
   <style type="text/css">
     *{
       font-size: 13px;
@@ -64,10 +64,10 @@
         <img src="{{ $batch['batch_code_barcode'] }}">
         <p>{{ $batch['batch_code'] }}</p>
       </div>
-      <h3 class="text-center"> {{ $batch['warehouse']['name_cn'] }}入库单</h3>
+      <h3 class="text-center"> {{ $batch['warehouse']['name_cn'] }} @lang('messages.batchPage')</h3>
 
       <div class="row" style="margin-top: 30px;">
-        <div class="col-md-4">制单日期：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</div>
+        <div class="col-md-4">>@lang('messages.batchPageDate')：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</div>
         <div class="col-md-8 text-right">类型：{{ $batch['batch_type']['name'] }}</div>
       </div>
       <div class="row">

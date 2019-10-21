@@ -1,11 +1,44 @@
 <?php
 return [
-    '404NotFound' => '什么也没有找到',
+    '404NotFound' => '什么也没有找到', 
     'success' =>'成功',
     'failed' => '操作失败', 
     'tokenInvalid' =>'无效请求',
     'noPermission' =>'没有权限',
     'activeAccount'=>'用户未激活，请登陆到邮箱激活',
+
+    'batchPage'=>'入库单',
+    'batchPageDate'=>'制单日期',
+    'batchPageWarehouse'=>'仓库',
+    'batchPageType'=>'类型',
+    'batchPageDistributor'=>'供应商',
+    'batchPageRemark'=>'备注',
+    'batchPageNo'=>'序号',
+    'batchPageSku'=>'SKU编码',
+    'batchPageProductName'=>'货品名称',
+    'batchPageSpecName'=>'规格型号',
+    'batchPagePurcharseQty'=>'进货数量',
+    'batchPageActualQty'=>'实际数量',
+    'batchPageBatchNo'=>'入库批次号',
+    'batchPagePurcharsePrice'=>'进货单价(元)',
+    'batchPageInRemark'=>'入库备注',
+    'batchPageTreasurer'=>'财务主管',
+    'batchPageManager'=>'部门经理',
+    'batchPageKeeper'=>'仓库保管人',
+    'batchPageInDate'=>'入库时间',
+    'batchPageEan'=>'Ean码',
+    'batchPageExpireAt'=>'保质期',//EXP
+    'batchPageExpireBbd'=>'最佳食用期',
+    'batchPageExpireMfd'=>'生产批次号',
+
+    'batchPurcharse'=>'采购申请单',
+    'batchPurcharseDepartment'=>'采购部门',
+    'batchPurcharsePrice'=>'金额(元)',
+    'batchPurcharseTotal'=>'合计',
+    'batchPurcharseRemark'=>'采购备注',
+    'batchPurcharseInitiator'=>'采购人签名',
+    'batchPurcharseDivisionHead'=>'负责人签名',
+
 
     'batchAddFailed' => '添加入库单失败', #
     'batchUpdateFailed' => '修改入库单失败',#
