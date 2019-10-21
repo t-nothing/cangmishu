@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <title>入库批次号</title>
+  <title>@lang("message.batchPageBatchNo")</title>
   <style type="text/css">
     *{
       font-size: 11px;
@@ -62,40 +62,40 @@
 
       <table width="100%" border="0" >
         <tr>
-          <th nowrap="nowrap">货品名称：</th>
+          <th nowrap="nowrap">@lang('message.batchPageProductName')：</th>
           <td>{{ $product['spec']['product']['name_cn'] }} （{{$product['spec']['name_cn']}}）</td>
         </tr>
         <tr>
-          <th nowrap="nowrap">入库编号：</th>
+          <th nowrap="nowrap">@lang('message.batchPageBatchNo')：</th>
           <td>{{ $batch['confirmation_number'] }}</td>
         </tr>
         <tr>
-          <th nowrap="nowrap">入库时间：</th>
+          <th nowrap="nowrap">@lang('message.batchPageInDate')：</th>
           <td>{{ $batch['created_at'] }}</td>
         </tr>
         <tr>
-          <th nowrap="nowrap">SKU编码：</th>
+          <th nowrap="nowrap">@lang('message.batchPageSku')：</th>
           <td>{{ $product['relevance_code'] }}</td>
         </tr>
         <tr>
-          <th nowrap="nowrap">EAN码：</th>
+          <th nowrap="nowrap">@lang('message.batchPageEan')：</th>
           <td>{{ $product['ean'] }}</td>
         </tr>
         <?php if(!is_null($product['expiration_date'])){?>
         <tr>
-          <th nowrap="nowrap">保质期：</th>
+          <th nowrap="nowrap">@lang('message.batchPageExpireAt')：</th>
           <td>{{ date("Y-m-d", $product['expiration_date'])}}</td>
         </tr>
         <?php }?>
         <?php if(!is_null($product['best_before_date'])){?>
         <tr>
-          <th nowrap="nowrap">最佳食用期：</th>
+          <th nowrap="nowrap">@lang('message.batchPageExpireBbd')：</th>
           <td>{{ date("Y-m-d", $product['best_before_date'])}}</td>
         </tr>
         <?php }?>
         <?php if($product['production_batch_number']){?>
         <tr>
-          <th nowrap="nowrap">生产批次号：</th>
+          <th nowrap="nowrap">@lang('message.batchPageExpireMfd')：</th>
           <td>{{ $product['production_batch_number']}}</td>
         </tr>
         <?php }?>

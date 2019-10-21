@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <title>入库单</title>
+  <title>@lang('message.batchPage')</title>
   <style type="text/css">
     *{
       font-size: 13px;
@@ -47,34 +47,35 @@
 
       </div>
      </div>
-    <h2 align="center">入&nbsp;&nbsp;库&nbsp;&nbsp;单</h2>
+    <h2 align="center">@lang('message.batchPage') </h2>
     <table width="100%" border="0" align="center" style="margin-top: 30px;">
       <tr>
-        <td width="33%">制单日期：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</td>
-        <td width="33%">仓库：{{ $batch['warehouse']['name_cn'] }}</td>
-        <td>类型：{{ $batch['batch_type']['name'] }}</td>
+        <td width="33%">@lang('message.batchPageDate') 
+：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</td>
+        <td width="33%">@lang('message.batchPageWarehouse')：{{ $batch['warehouse']['name_cn'] }}</td>
+        <td>@lang('message.batchPageType')：{{ $batch['batch_type']['name'] }}</td>
       </tr>
     </table>
     <table width="100%" border="0"  align="center">
       <tr>
-        <td width="33%">供应商：{{ $batch['distributor']['name_cn'] }}</td>
-        <td>备注：{{ $batch['remark'] }}</td>
+        <td width="33%">@lang('message.batchPageDistributor')：{{ $batch['distributor']['name_cn'] }}</td>
+        <td>@lang('message.batchPageRemark')：{{ $batch['remark'] }}</td>
       </tr>
     </table>
     
     <table class="table  table-bordered text-center" style="margin-top: 30px;">
       <thead>
         <tr>
-          <th width="60px">序号</th>
-          <th width="180px">SKU编码</th>
-          <th >货品名称</th>
-          <th width="120px">规格型号</th>
-          <th width="80px">进货数量</th>
+          <th width="60px">@lang('message.batchPageNo')</th>
+          <th width="180px">@lang('message.batchPageSku')</th>
+          <th >@lang('message.batchPageProductName')</th>
+          <th width="120px">@lang('message.batchPageSpecName')</th>
+          <th width="80px">@lang('message.batchPagePurcharseQty')</th>
           <?php if($showInStock??0){?>
-            <th class="no-print" width="80px">实际数量</th>
-            <th class="no-print">入库批次号</th>
+            <th class="no-print" width="80px">@lang('message.batchPageActualQty')</th>
+            <th class="no-print">@lang('message.batchPageBatchNo')</th>
           <?php }?>
-          <th width="100px">进货单价(元)</th>
+          <th width="100px">@lang('message.batchPagePurcharsePrice')</th>
         </tr>
       </thead>
       <tbody>
@@ -102,16 +103,16 @@
 
     <table width="100%" border="0"  align="center" class="table table-bordered ">
       <tr>
-        <td width="240px">入库备注：</td>
+        <td width="240px">@lang('message.batchPageInRemark')：</td>
         <td height="100px"><?php echo  implode("<br/>", $remarks)?></td>
       </tr>
     </table>
 
     <table width="100%" border="0"  align="center">
       <tr>
-        <td width="33%">财务主管：</td>
-        <td width="33%">部门经理：</td>
-        <td >仓库保管人：</td>
+        <td width="33%">@lang('message.batchPageTreasurer')：</td>
+        <td width="33%">@lang('message.batchPageManager')：</td>
+        <td >@lang('message.batchPageKeeper')：</td>
       </tr>
     </table>
   </div>
