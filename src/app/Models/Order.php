@@ -134,31 +134,31 @@ class Order extends Model
 
         switch ($this->status) {
             case Order::STATUS_CANCEL:
-                $name = '订单已取消';
+                $name = "message.orderStatusCancel";
                 break;
             case Order::STATUS_DEFAULT:
-                $name = '待确认';
+                $name = "message.orderStatusUnConfirm";
                 break;
             case Order::STATUS_PICKING:
-               $name = '拣货中';
+               $name = "message.orderStatusPicking";
                break;
             case Order::STATUS_PICK_DONE:
-                $name = '已出库';
+                $name = "message.orderStatusOutbound";
                 break;
             case Order::STATUS_WAITING:
-               $name = '待发货';
+               $name = "message.orderStatusUnSend";
                break;
             case Order::STATUS_SENDING:
-               $name = '配送中';
+               $name = "message.orderStatusSending";
                break;
             case Order::STATUS_SUCCESS:
-               $name = '已签收';
+               $name = "message.orderStatusSuccess";
                break;
             default:
                 break;
         }
 
-        return $name;
+        return trans($name);
     }
 
     /**
@@ -170,19 +170,20 @@ class Order extends Model
 
         switch ($this->verify_status) {
             case Order::VERIFY_STATUS_INIT:
-                $name = '未验货';
+                $name = "message.orderStatusSuccess";
                 break;
             case Order::VERIFY_STATUS_DONE:
-                $name = '已验货';
+                $name = '';
+                $name = "message.orderVerifyNone";
                 break;
             case Order::VERIFY_STATUS_ERR:
-                $name = '验货有误';
+                $name = "message.orderVerifyWrong";
                 break;
             default:
                 break;
         }
 
-        return $name;
+        return trans($name);
     }
 
 

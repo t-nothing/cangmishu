@@ -85,7 +85,8 @@ class Batch extends Model
      */
     public function getStatusNameAttribute()
     {
-        return $this->translateStatusTo($this->status);
+        $lang = app('translator')->getLocale();
+        return $this->translateStatusTo($this->status, $lang);
     }
 
     /**
@@ -115,7 +116,7 @@ class Batch extends Model
     public function getTransportationTypeNameAttribute()
     {
         $k = $this->transportation_type;
-        $lang = 'cn';
+        $lang = app('translator')->getLocale();
 
         $translations = [
             Batch::TRANSPORTATION_TYPE_SHIP => [

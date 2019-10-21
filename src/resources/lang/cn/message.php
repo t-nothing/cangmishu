@@ -59,6 +59,12 @@ return [
     'orderStatusCancel'=>'订单取消',
     'orderOpStopByUnPick'=>'只有拣货完成才能修改物流信息',
 
+    'orderStatusPicking'=>'拣货中',
+    'orderStatusOutbound'=>'已出库',
+    'orderVerifyNone'=>'未验货',
+    'orderVerifyDone'=>'已验货',
+    'orderVerifyWrong'=>'验货有误',
+
     'openOrderAddFailed' =>'下单失败 :message',
     'openOrderAddSuccess' =>'下单成功',
     'openOrderNotExist' =>'订单不存在',
