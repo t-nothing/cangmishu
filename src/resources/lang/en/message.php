@@ -3,9 +3,15 @@ return [
     '404NotFound' => 'Cannot find anything', 
     'success' =>'Succeed',
     'failed' => 'Failed', 
-    'tokenInvalid' =>'Bad Request',
+    'tokenInvalid' =>'Bad Request', 
     'noPermission' =>'Bad Request',
     'activeAccount'=>'User is not activated, please activate your account by click at the link in your mail',
+
+    'statusBatchIn'=>'Inbound',
+    'statusShelf'=>'OnShelf',
+    'statusPick'=>'Picking',
+    'statusOutbound'=>'Outbound',
+    'statusRecount'=>'Stock taking',
 
     'batchPage'=>'Inbound',
     'batchPageDate'=>'Date',

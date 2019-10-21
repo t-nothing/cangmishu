@@ -3,9 +3,15 @@ return [
     '404NotFound' => '什么也没有找到', 
     'success' =>'成功',
     'failed' => '操作失败', 
-    'tokenInvalid' =>'无效请求',
+    'tokenInvalid' =>'无效请求', 
     'noPermission' =>'没有权限',
     'activeAccount'=>'用户未激活，请登陆到邮箱激活',
+
+    'statusBatchIn'=>'入库',
+    'statusShelf'=>'上架',
+    'statusPick'=>'拣货',
+    'statusOutbound'=>'出库',
+    'statusRecount'=>'盘点',
 
     'batchPage'=>'入库单',
     'batchPageDate'=>'制单日期',
