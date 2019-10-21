@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <title>拣货单</title>
+  <title>@lang('message.orderPagePicking')</title>
   <style type="text/css">
     *{
       font-size: 13px;
@@ -65,15 +65,15 @@
         <img src="{{ $order['out_sn_barcode'] }}">
         <p>{{ $order['out_sn'] }}</p>
       </div>
-      <h3 class="text-center"> 拣货单</h3>
+      <h3 class="text-center"> @lang('message.orderPagePicking')</h3>
 
       <div class="row" style="margin-top: 30px;">
         <div class="col-md-6" style="font-size:16px;">{{ $order['order_type']['name'] }}</div>
       </div>
       <div class="row" >
-        <div class="col-md-12" >仓库：{{ $order['warehouse']['name_cn'] }}</div>
+        <div class="col-md-12" >@lang('message.orderPageWarehouse'): {{ $order['warehouse']['name_cn'] }}</div>
 
-        <div class="col-md-12">制单日期：{{ date("Y-m-d", strtotime($order['created_at'])) }}</div>
+        <div class="col-md-12">@lang('message.orderPageDate'): {{ date("Y-m-d", strtotime($order['created_at'])) }}</div>
 
       </div>
       <div style="margin-top: 30px;"></div>
@@ -82,11 +82,11 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>商品名称及规格</th>
-            <th>入库批次</th>
-            <th>SKU编码</th>
-            <th>货位</th>
-            <th>拣货数量</th>
+            <th>@lang('message.orderPageProduct')</th>
+            <th>@lang('message.batchPageBatchNo')</th>
+            <th>@lang('message.orderPageSku')</th>
+            <th>@lang('message.orderPageWarehouseLocation')</th>
+            <th>@lang('message.orderPagePickqty')</th>
           </tr>
         </thead>
         <tbody>
@@ -110,7 +110,7 @@
       </table>
       <div class="row">
         <div class="col-md-12">
-          备注：
+          @lang('message.orderPageRemark'): 
           {{ $order['remark'] }} </div>
       </div>
     </div>

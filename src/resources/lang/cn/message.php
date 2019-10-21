@@ -67,6 +67,28 @@ return [
     'distributorDeleteFailed' => '删除供应商失败',#
     'distributorCannotDelete'=>'该供应商下存在货品，不允许删除',
 
+    'orderPage'=>'出库单',
+    'orderPageDate'=>'制单日期',
+    'orderPageSenderInfo'=>'发件人信息',
+    'orderPageSenderName'=>'发件人姓名',
+    'orderPageSenderPhone'=>'发件人电话',
+    'orderPageSenderAddress'=>'发件人地址',
+
+    'orderPageReceiverInfo'=>'收件信息',
+    'orderPageReceiverName'=>'收件人姓名',
+    'orderPageReceiverPhone'=>'收件人电话',
+    'orderPageReceiverAddress'=>'收件人地址',
+    'orderPageProduct'=>'商品名称及规格',
+    'orderPageSku'=>'SKU编码',
+    'orderPageOrderQty'=>'下单数量',
+    'orderPageOutboundQty'=>'出库数量',
+    'orderPageRemark'=>'备注',
+    'orderPageWarehouse'=>'仓库',
+    'orderPageWarehouseLocation'=>'货位',
+
+    'orderPagePicking'=>'拣货单',
+    'orderPagePickqty'=>'拣货数量',
+
     'orderAddFailed' =>'添加出库单失败',
     'orderAddSuccess' =>'添加出库单成功',
     'orderUpdateFailed' => '修改供应商失败',#
