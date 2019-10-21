@@ -33,9 +33,9 @@ class Localization
      */
     public function getLocaleForRequest($request)
     {
-        $locale = $request->header('Lang');
+        $locale = $request->header('Language');
         if (is_null($locale)) {
-            $locale = $request->header('Lang');
+            $locale = $request->header('Language');
         }
         
         if (! is_null($locale)) {

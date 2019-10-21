@@ -57,6 +57,13 @@ return [
     'orderPaymentCash'=>'Cash',
     'orderPaymentOther'=>'Other',
     'orderStatusCancel'=>'Cancel',
+
+    'orderStatusPicking'=>'Picking',
+    'orderStatusOutbound'=>'Outbound',
+    'orderVerifyNone'=>'UnVerify',
+    'orderVerifyDone'=>'Verified',
+    'orderVerifyWrong'=>'Verify wrong',
+
     'orderOpStopByUnPick'=>'Only when the picking is completed can the logistics information be modified.',
 
     'openOrderAddFailed' =>'Failed :message',
