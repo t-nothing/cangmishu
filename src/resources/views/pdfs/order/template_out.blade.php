@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <title>出库单</title>
+  <title>@lang('message.orderPage')</title>
   <style type="text/css">
     *{
       font-size: 13px;
@@ -65,25 +65,25 @@
         <img src="{{ $order['out_sn_barcode'] }}">
         <p>{{ $order['out_sn'] }}</p>
       </div>
-      <h3 class="text-center">出库单</h3>
+      <h3 class="text-center">@lang('message.orderPage')</h3>
 
       <div class="row" style="margin-top: 30px;">
         <div class="col-md-12" style="font-size:16px;">{{ $order['order_type']['name'] }}</div>
-        <div class="col-md-12">制单日期：{{ date("Y-m-d", strtotime($order['created_at'])) }}</div>
+        <div class="col-md-12">@lang('message.orderPageDate'): {{ date("Y-m-d", strtotime($order['created_at'])) }}</div>
       </div>
       <table class="table  table-bordered" style="margin-top: 30px; border:1px solid #000 ">
         <tr>
           <td width="50%">
-            <b>发件信息：</b><br/><br/>
-            发件人姓名：{{ $order['send_fullname'] }}<br/>
-            发件人电话：{{ $order['send_phone'] }}<br/>
-            发件人地址：{{ $order['send_province'] }}{{ $order['send_city'] }}{{ $order['send_district'] }}{{ $order['send_address'] }}
+            <b>@lang('message.orderPageSenderInfo')</b><br/><br/>
+            @lang('message.orderPageSenderName'): {{ $order['send_fullname'] }}<br/>
+            @lang('message.orderPageSenderPhone'): {{ $order['send_phone'] }}<br/>
+            @lang('message.orderPageSenderAddress'): {{ $order['send_province'] }}{{ $order['send_city'] }}{{ $order['send_district'] }}{{ $order['send_address'] }}
           </td>
           <td>
-            <b>收件信息：</b><br/><br/>
-            收件人姓名：{{ $order['receiver_fullname'] }}<br/>
-            收件人电话：{{ $order['receiver_phone'] }}<br/>
-            收件人地址：{{ $order['receiver_province'] }}{{ $order['receiver_city'] }}{{ $order['receiver_district'] }}{{ $order['receiver_address'] }}
+            <b>@lang('message.orderPageReceiverInfo')</b><br/><br/>
+            @lang('message.orderPageReceiverName'): {{ $order['receiver_fullname'] }}<br/>
+            @lang('message.orderPageReceiverPhone'): {{ $order['receiver_phone'] }}<br/>
+            @lang('message.orderPageReceiverAddress'): {{ $order['receiver_province'] }}{{ $order['receiver_city'] }}{{ $order['receiver_district'] }}{{ $order['receiver_address'] }}
           </td>
         </tr>
       </table>
@@ -94,10 +94,10 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>商品名称及规格</th>
-            <th>SKU编码</th>
-            <th>下单数量</th>
-            <th>出库数量</th>
+            <th>@lang('message.orderPageProduct')</th>
+            <th>@lang('message.orderPageSku')</th>
+            <th>@lang('message.orderPageOrderQty')</th>
+            <th>@lang('message.orderPageOutboundQty')</th>
           </tr>
         </thead>
         <tbody>
@@ -116,13 +116,13 @@
       </table>
       <div class="row">
         <div class="col-md-12">
-          备注：
+          @lang('message.orderPageRemark')：
           {{ $order['remark'] }} 
          </div>
       </div>
       <div class="row">
         <div class="col-md-12">
-          仓库：
+          @lang('message.orderPageWarehouse')：
           {{ $order['warehouse']['name_cn'] }}
          </div>
       </div>

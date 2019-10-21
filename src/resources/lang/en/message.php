@@ -66,6 +66,27 @@ return [
     'distributorDeleteFailed' => 'Failed',#
     'distributorCannotDelete'=>'The goods exist under the supplier and are not allowed to be deleted.',
 
+    'orderPage'=>'Outbound',
+    'orderPageDate'=>'Date',
+    'orderPageSenderInfo'=>'Sender',
+    'orderPageSenderName'=>'Fullname',
+    'orderPageSenderPhone'=>'Phone',
+    'orderPageSenderAddress'=>'Address',
+
+    'orderPageReceiverInfo'=>'Receiver',
+    'orderPageReceiverName'=>'Fullname',
+    'orderPageReceiverPhone'=>'Phone',
+    'orderPageReceiverAddress'=>'Address',
+    'orderPageProduct'=>'Product & spec',
+    'orderPageSku'=>'Sku',
+    'orderPageOrderQty'=>'Order Qty',
+    'orderPageOutboundQty'=>'Outbound Qty',
+    'orderPageRemark'=>'Remark',
+    'orderPageWarehouse'=>'Warehouse',
+
+    'orderPagePicking'=>'Picking List',
+    'orderPagePickqty'=>'Picking Qty',
+
     'orderAddFailed' =>'Failed',
     'orderAddSuccess' =>'Success',
     'orderUpdateFailed' => 'Failed',#
