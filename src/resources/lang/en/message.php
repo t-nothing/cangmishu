@@ -8,10 +8,10 @@ return [
     'activeAccount'=>'User is not activated, please activate your account by click at the link in your mail',
 
     'statusBatchIn'=>'Inbound',
-    'statusShelf'=>'OnShelf',
+    'statusShelf'=>'Putaway',
     'statusPick'=>'Picking',
     'statusOutbound'=>'Outbound',
-    'statusRecount'=>'Stock taking',
+    'statusRecount'=>'Inventory',
 
     'batchPage'=>'Inbound',
     'batchPageDate'=>'Date',
