@@ -181,7 +181,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //采购单
     Route::get('/purchase', 'PurchaseController@index');
-    Route::get('/purchase/{id}/logs', 'PurchaseController@showLogs');
+    Route::get('/purchase/item/{id}/logs', 'PurchaseController@showLogs');
     Route::get('/purchase/{id}', 'PurchaseController@show');
     Route::post('/purchase/{id}/done', 'PurchaseController@done');
     Route::post('/purchase', 'PurchaseController@store');
