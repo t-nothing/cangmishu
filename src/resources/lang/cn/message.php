@@ -45,6 +45,20 @@ return [
     'batchPurcharseInitiator'=>'采购人签名',
     'batchPurcharseDivisionHead'=>'负责人签名',
 
+    'batchPurchaseAddFailed' => '添加采购单失败', #
+    'batchPurchaseUpdateFailed' => '修改采购单失败',#
+    'batchPurchaseDeleteFailed' => '删除采购单失败',#
+    'batchPurchaseNotExist'=>'采购单不存在',
+    'batchPurchaseCannotEdit'=>'该采购单不可编辑',
+    'batchPurchaseOnshelfFailed'=>'入库上架失败',
+    'batchPurchaseCannotDelete' =>'只能删除状态为‘待入库’的采购单!',
+    'batchPurchaseStatus1'=>'采购中',
+    'batchPurchaseStatus2'=>'采购中',
+    'batchPurchaseStatus3'=>'采购完成',
+    'batchPurchaseItemStatus1'=>'未到货',
+    'batchPurchaseItemStatus2'=>'部分到货',
+    'batchPurchaseItemStatus3'=>'全部到货',
+
 
     'batchAddFailed' => '添加入库单失败', #
     'batchUpdateFailed' => '修改入库单失败',#

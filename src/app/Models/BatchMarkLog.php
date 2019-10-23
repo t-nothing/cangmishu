@@ -28,15 +28,15 @@ class BatchMarkLog extends Model
 
 	static function saveBatchCode($batch)
 	{
-	$batch_code =  $batch->batch_code;
-	$batch_mark =  base_convert(substr($batch_code,-4),16,10);
-	$data = [
-		'warehouse_code' => app('auth')->warehouse()->code,
-		'batch_mark'	 => $batch_mark,
-	];
-	$batchMark = new BatchMarkLog();
-	$batchMark::binds($batchMark,$data);
-	$batchMark->save();
+		$batch_code =  $batch->batch_code;
+		$batch_mark =  base_convert(substr($batch_code,-4),16,10);
+		$data = [
+			'warehouse_code' => app('auth')->warehouse()->code,
+			'batch_mark'	 => $batch_mark,
+		];
+		$batchMark = new BatchMarkLog();
+		$batchMark::binds($batchMark,$data);
+		$batchMark->save();
 	}
 }
 ?>

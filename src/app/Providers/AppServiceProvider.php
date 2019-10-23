@@ -8,6 +8,7 @@ use App\Services\GroupService;
 use App\Services\ModuleService;
 use App\Services\Service\CategoryService;
 use App\Services\EmployeeService;
+use App\Services\Service\PurchaseService;
 use App\Services\Service\OrderService;
 use App\Services\Service\ProductService;
 use App\Services\Service\ProductStockService;
@@ -98,6 +99,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton('batch',function(){
             return new BatchService();
+        });
+        $this->app->singleton('purchase',function(){
+            return new PurchaseService();
         });
         $this->app->singleton('category',function(){
             return new CategoryService();

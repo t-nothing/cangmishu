@@ -45,6 +45,19 @@ return [
     'batchPurcharseInitiator'=>'Initiator',
     'batchPurcharseDivisionHead'=>'Division Head',
 
+    'batchPurchaseAddFailed' => 'Failed', #
+    'batchPurchaseUpdateFailed' => 'Failed',#
+    'batchPurchaseDeleteFailed' => 'Failed',#
+    'batchPurchaseNotExist'=>'Information does not exist',
+    'batchPurchaseCannotEdit'=>'Info is Readonly Now',
+    'batchPurchaseCannotDelete' =>'Info is Readonly Now!',
+    'batchPurchaseStatus1'=>'Purcharsing',
+    'batchPurchaseStatus2'=>'Purcharsing',
+    'batchPurchaseStatus3'=>'Done',
+    'batchPurchaseItemStatus1'=>'Not Receive',
+    'batchPurchaseItemStatus2'=>'Received Part',
+    'batchPurchaseItemStatus3'=>'Received All',
+
     'batchAddFailed' => 'Failed', #
     'batchUpdateFailed' => 'Failed',#
     'batchDeleteFailed' => 'Failed',#
