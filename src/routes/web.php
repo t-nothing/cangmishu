@@ -179,8 +179,16 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/export/sku', 'ProductStockController@exportBySku');
     Route::get('/export/stock', 'ProductStockController@export');
 
-
-
+    //采购单
+    Route::get('/purchase', 'PurchaseController@index');
+    Route::get('/purchase/{id}/logs', 'PurchaseController@showLogs');
+    Route::get('/purchase/{id}', 'PurchaseController@show');
+    Route::post('/purchase/{id}/done', 'PurchaseController@done');
+    Route::post('/purchase', 'PurchaseController@store');
+    Route::put('/purchase/{id}', 'PurchaseController@update');
+    Route::put('/purchase/item/{id}', 'PurchaseController@itemUpdate');
+    Route::post('/purchase/item/{id}/done', 'PurchaseController@itemDone');
+    Route::delete('/purchase/{id}','PurchaseController@destroy');
 
 
     //员工分组管理

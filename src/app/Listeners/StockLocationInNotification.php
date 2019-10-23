@@ -29,9 +29,9 @@ class StockLocationInNotification
         $stockLocation = $event->stockLocation;
         $model = $event->stock->load("spec.product");
 
-        $model->increment('stockin_num', $event->qty); //总入库数量
-        $model->increment('stock_num', $event->qty); //库存数量
-        $model->increment('floor_num', $event->qty);
+        // $model->increment('stockin_num', $event->qty); //总入库数量
+        // $model->increment('stock_num', $event->qty); //库存数量
+        // $model->increment('floor_num', $event->qty);
 
         //库存可用数量
         $model->spec->increment('total_stock_num', $event->qty);
