@@ -238,6 +238,10 @@ class BatchProduct extends Model
         $stock->production_batch_number   = $this->getProductionBatchNumber();
         $stock->warehouse_location_id     = $this->getLocationId();
 
+        //
+        $stock->stock_num                 = $this->getStockQty();
+        $stock->stockin_num                 = $this->getStockQty();
+
         $stock->save();
         //推送上默认位置
 
