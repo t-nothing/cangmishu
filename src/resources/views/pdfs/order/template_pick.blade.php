@@ -2,9 +2,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
-  <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
   <title>@lang('message.orderPagePicking')</title>
   <style type="text/css">
+    <?php echo file_get_contents(public_path('bootstrap/css/bootstrap.min.css'));?>
     *{
       font-size: 13px;
     }
