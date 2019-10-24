@@ -219,6 +219,9 @@ return [
     'warehouseNotExist'=>'Information does not exist',
     'warehouseDeleteFailed' => 'Failed',#
 
+    'warehouseAreaFieldNameCn' =>'Name',
+    'warehouseAreaFieldNameCode' =>'Code',
+    'warehouseAreaFieldNameIsEnabled'=>'Enabled',
     'warehouseAreaAddFailed' =>'Failed',
     'warehouseAreaUpdateFailed' => 'Failed',#
     'warehouseAreaNotExist'=>'Information does not exist',

@@ -218,6 +218,9 @@ return [
     'warehouseNotExist'=>'仓库不存在',
     'warehouseDeleteFailed' => '删除仓库失败',#
 
+    'warehouseAreaFieldNameCn' =>'名称',
+    'warehouseAreaFieldNameCode' =>'代码',
+    'warehouseAreaFieldNameIsEnabled'=>'是否启用',
     'warehouseAreaAddFailed' =>'添加仓库货区失败',
     'warehouseAreaUpdateFailed' => '修改仓库货区失败',#
     'warehouseAreaNotExist'=>'仓库货区不存在',
