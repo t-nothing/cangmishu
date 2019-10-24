@@ -191,6 +191,15 @@ return [
     'productImportsuccess'  =>'Import success',
     'productImportStop'=>'End of import, data verification failed',
 
+    'productFieldName' =>'Product Name',
+    'productFieldCategory' =>'Category',
+    'productFieldWarehouse' =>'Warehouse',
+    'productFieldSpecName' =>'Spec Name',
+    'productFieldGrossWeight' =>'Gross Weight',
+    'productFieldSalePrice' =>'Sale Price',
+    'productFieldPurchasePrice' =>'Purchase Price',
+    'productFieldRelevanceCode' =>'Relevance Code',
+
     'productSkuExportCaption'=>'SkuStock',
     'productStockExportCaption'=>'ProductStock',
 
