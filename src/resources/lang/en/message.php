@@ -102,6 +102,7 @@ return [
     'orderPageOutboundQty'=>'Outbound Qty',
     'orderPageRemark'=>'Remark',
     'orderPageWarehouse'=>'Warehouse',
+    'orderPageWarehouseLocation'=>'Rack',
 
     'orderPagePicking'=>'Picking List',
     'orderPagePickqty'=>'Picking Qty',
