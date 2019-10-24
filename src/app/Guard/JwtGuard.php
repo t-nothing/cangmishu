@@ -183,21 +183,25 @@ class JwtGuard implements Guard
         if(empty($credentials['email']))
         {
             \Log::info('用户名、邮箱或密码不正确 A', $credentials);
-            eRet('用户名、邮箱或密码不正确');
+            // eRet('用户名、邮箱或密码不正确');
+            return false;
         }
 //        $user = $this->provider->retrieveByCredentials($credentials);
         $user= User::with(['defaultWarehouse:id,name_cn'])->where('phone',$credentials['email'])->orWhere('email',$credentials['email'])->first();
         if(!$user){
             \Log::info('用户名、邮箱或密码不正确 B', $credentials);
-            eRet('用户名、邮箱或密码不正确');
+            // eRet('用户名、邮箱或密码不正确');
+            return false;
         }
         if(!Hash::check($credentials['password'], $user->password)){
             \Log::info('用户名、邮箱或密码不正确 C', $credentials);
-            eRet('用户名、邮箱或密码不正确');
+            // eRet('用户名、邮箱或密码不正确');
+            return false;
         }
 
         if ($user->isLocked()) {
-            eRet('帐户被锁，禁止登入！');
+            // eRet('帐户被锁，禁止登入！');
+            return false;
         }
 
         // if (!$user->isActivated()) {
@@ -264,8 +268,7 @@ class JwtGuard implements Guard
      */
     public function sendFailedLoginResponse()
     {
-        return '邮箱或者密码不正确';
-        // return trans('auth.failed');
+        return trans('auth.failed');
     }
 
     /**
