@@ -58,6 +58,11 @@ return [
     'batchPurchaseItemStatus1'=>'未到货',
     'batchPurchaseItemStatus2'=>'部分到货',
     'batchPurchaseItemStatus3'=>'全部到货',
+    'batchPurchaseWarehouseNotExists'=>'仓库不存在',
+    'batchPurchaseCodeExists'=>'采购单号存在',
+    'batchPurchaseSupplierNotExists'=>'供货商不存在',
+    'batchPurchaseOuterCodeNotExists'=>'外部编码不存在',
+    'batchPurchasePriceRequired'=>'进货价格不能为空',
 
 
     'batchAddFailed' => '添加入库单失败', #

@@ -57,6 +57,11 @@ return [
     'batchPurchaseItemStatus1'=>'Not Receive',
     'batchPurchaseItemStatus2'=>'Received Part',
     'batchPurchaseItemStatus3'=>'Received All',
+    'batchPurchaseWarehouseNotExists'=>'Warehouse Not Exists',
+    'batchPurchaseCodeExists'=>'Code Exists, Please Change',
+    'batchPurchaseSupplierNotExists'=>'Supplier Not Exists',
+    'batchPurchaseOuterCodeNotExists'=>'Spec Not Exists',
+    'batchPurchasePriceRequired'=>'Price is Required',
 
     'batchAddFailed' => 'Failed', #
     'batchUpdateFailed' => 'Failed',#

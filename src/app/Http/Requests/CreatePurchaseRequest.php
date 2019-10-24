@@ -62,11 +62,11 @@ class CreatePurchaseRequest extends BaseRequests
     public function messages()
     {
         return [
-            'warehouse_id.exists' => '仓库不存在',
-            'purchase_code.unique' => '采购单号存在',
-            'distributor_id.exists' =>'供货商不存在',
-            'items.*.relevance_code.exists' =>  '外部编码不存在',
-            'items.*.purchase_price.required' =>  '进货价格不能为空',
+            'warehouse_id.exists' => trans("message.batchPurchaseWarehouseNotExists"),
+            'purchase_code.unique' => trans("message.batchPurchaseCodeExists"),
+            'distributor_id.exists' =>trans("message.batchPurchaseSupplierNotExists"),
+            'items.*.relevance_code.exists' =>  trans("message.batchPurchaseOuterCodeNotExists"),
+            'items.*.purchase_price.required' =>  trans("message.batchPurchasePriceRequired"),
         ];
     }
 }
