@@ -192,6 +192,22 @@ return [
     'receiverNotExist'=>'收件地址不存在',
     'receiverDeleteFailed' => '删除收件地址失败',#
 
+
+    'recountPage' =>'盘点单',
+    'recountPageWarehouse' =>'仓库名称',
+    'recountPageDate' =>'制单日期',
+    'recountPageRemark' => '制单备注',
+    'recountPageProductSpecName' => '商品名称及规格',
+    'recountPageProductSpecSku' => 'SKU编码',
+    'recountPageInboundBatch' => '入库批次',
+    'recountPageOrginStock' => '原库存',
+    'recountPageInventoryCount' => '盘点数量',
+    'recountPageInventoryLoss' => '盘亏',
+    'recountPageInventoryLossMoney' => '盘亏金额(元)',
+    'recountPageInventoryProfit' => '盘盈',
+    'recountPageInventoryProfitMoney' => '盘盈金额(元)',
+    
+
     'recountAddFailed' =>'添加盘点单信息失败',
     'recountUpdateFailed' => '修改盘点单地址失败',#
     'recountNotExist'=>'盘点单不存在',
