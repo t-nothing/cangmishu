@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <link href="{{ url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <title>盘点单</title>
+  <title>@lang("message.recountPage")</title>
   <style type="text/css">
     *{
       font-size: 13px;
@@ -68,19 +68,19 @@
         <img src="{{ $data['recount_no_barcode'] }}">
         <p>{{ $data['recount_no'] }}</p>
       </div>
-      <h3 class="text-center"> 盘点单</h3>
+      <h3 class="text-center"> @lang("message.recountPage") </h3>
 
       <table style="margin-top: 30px;" width="100%" class="header-table">
         <tr>
-          <th width="100px">仓库名称：</th>
+          <th width="100px">@lang("message.recountPageWarehouse") :  </th>
           <td>{{ $data['warehouse']['name_cn'] }}</td>
         </tr>
         <tr>
-          <th>制单日期：</th>
+          <th>@lang("message.recountPageDate"): </th>
           <td>{{ date("Y-m-d", strtotime($data['created_at'])) }}</td>
         </tr>
         <tr>
-          <th>制单人员：</th>
+          <th>@lang("message.recountPageCreatedor"): </th>
           <td>{{ $data['operator_user']['nickname'] }}</td>
         </tr>
 
@@ -91,15 +91,15 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>商品名称及规格</th>
-            <th>SKU编码</th>
-            <th>入库批次</th>
-            <th>原库存</th>
-            <th>盘点数量</th>
-            <th>盘亏</th>
-            <th>盘亏金额(元)</th>
-            <th>盘盈</th>
-            <th>盘盈金额(元)</th>
+            <th> @lang("message.recountPageProductSpecName") </th>
+            <th> @lang("message.recountPageProductSpecSku") </th>
+            <th> @lang("message.recountPageInboundBatch") </th>
+            <th> @lang("message.recountPageOrginStock") </th>
+            <th> @lang("message.recountPageInventoryCount") </th>
+            <th> @lang("message.recountPageInventoryLoss") </th>
+            <th> @lang("message.recountPageInventoryLossMoney") </th>
+            <th> @lang("message.recountPageInventoryProfit") </th>
+            <th> @lang("message.recountPageInventoryProfitMoney") </th>
           </tr>
         </thead>
         <tbody>
@@ -133,7 +133,7 @@
       </table>
       <div class="row">
         <div class="col-md-12">
-          盘点备注：
+          @lang("message.recountPageRemark") : 
           {{ $data['remark'] }} </div>
       </div>
     </div>

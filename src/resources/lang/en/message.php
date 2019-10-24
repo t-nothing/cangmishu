@@ -193,6 +193,21 @@ return [
     'receiverNotExist'=>'Information does not exist',
     'receiverDeleteFailed' => 'Failed',#
 
+    'recountPage' =>'Stock taking',
+    'recountPageWarehouse' =>'Warehouse',
+    'recountPageDate' =>'Date',
+    'recountPageCreatedor' => 'Prepared by',
+    'recountPageRemark' => 'Remark',
+    'recountPageProductSpecName' => 'Name',
+    'recountPageProductSpecSku' => 'Sku',
+    'recountPageInboundBatch' => 'Inbound Batch',
+    'recountPageOrginStock' => 'Original Stock',
+    'recountPageInventoryCount' => 'Inventory Qty',
+    'recountPageInventoryLoss' => 'Inventory loss',
+    'recountPageInventoryLossMoney' => 'Fee Loss',
+    'recountPageInventoryProfit' => 'Inventory profit',
+    'recountPageInventoryProfitMoney' => 'Fee Profit',
+
     'recountAddFailed' =>'Failed',
     'recountUpdateFailed' => 'Failed',#
     'recountNotExist'=>'Information does not exist',
