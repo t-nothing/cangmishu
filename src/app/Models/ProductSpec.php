@@ -65,9 +65,10 @@ class ProductSpec extends Model
 	{
 		$name = '';
         $lang = app('translator')->locale()?:'cn';
-        if($lang == 'zh-CN'){
-            $lang='cn';
-        }
+        // if($lang == 'zh-CN'){
+        //     $lang='cn';
+        // }
+        $lang='cn';
 		if (isset($this->product)) {
 			$name = $this->product['name_'.$lang]
 				. '('
@@ -87,6 +88,7 @@ class ProductSpec extends Model
         if($lang == 'zh-CN'){
             $lang='cn';
         }
+        $lang='cn';
 
         return $this->{'name_'.$lang};
     }

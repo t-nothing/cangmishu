@@ -99,8 +99,8 @@ class ProductStockController extends  Controller
 
                 $product_name_cn = sprintf("%s (%s)" , $v["origin_product_name_cn"],  $v["name_cn"]);
                 $product_name_en = sprintf("%s (%s)" , $v["origin_product_name_en"],  $v["name_en"]);
-                $results['data'][$k]['product_name'] = $lang == 'en'?$product_name_en:$product_name_cn;
-
+                // $results['data'][$k]['product_name'] = $lang == 'en'?$product_name_en:$product_name_cn;
+                $results['data'][$k]['product_name'] = $product_name_cn;
                 foreach ($v['stocks'] as $key => &$value) {
                     $value['warehouse_location_code'] = WarehouseLocation::getCode($value['warehouse_location_id']);
                 }
