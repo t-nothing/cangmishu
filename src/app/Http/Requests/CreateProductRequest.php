@@ -64,19 +64,19 @@ class CreateProductRequest extends BaseRequests
 
         return $arr;
     }
-
+ 
 
     public function attributes()
     {
         return [
-            'name_cn'               => '商品名称',
-            'category_id'           => '分类标识',
-            'warehouse_id'          => '仓库标识',
-            'specs.*.name_cn'       => '规格名称',
-            'specs.*.gross_weight'  => '规格毛重',
-            'specs.*.sale_price'    => '规格销售价格',
-            'specs.*.purchase_price'=> '规格进货价格',
-            'specs.*.relevance_code'=> '外部编码',
+            'name_cn'               => trans("message.productFieldName"),
+            'category_id'           => trans("message.productFieldCategory"),
+            'warehouse_id'          => trans("message.productFieldWarehouse"),
+            'specs.*.name_cn'       => trans("message.productFieldSpecName"),
+            'specs.*.gross_weight'  => trans("message.productFieldGrossWeight"),
+            'specs.*.sale_price'    => trans("message.productFieldSalePrice"),
+            'specs.*.purchase_price'=> trans("message.productFieldPurchasePrice"),
+            'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
         ];
     }
 

@@ -55,4 +55,19 @@ class UpdateProductRequest extends BaseRequests
         }
         return $arr;
     }
+
+
+    public function attributes()
+    {
+        return [
+            'name_cn'               => trans("message.productFieldName"),
+            'category_id'           => trans("message.productFieldCategory"),
+            'warehouse_id'          => trans("message.productFieldWarehouse"),
+            'specs.*.name_cn'       => trans("message.productFieldSpecName"),
+            'specs.*.gross_weight'  => trans("message.productFieldGrossWeight"),
+            'specs.*.sale_price'    => trans("message.productFieldSalePrice"),
+            'specs.*.purchase_price'=> trans("message.productFieldPurchasePrice"),
+            'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
+        ];
+    }
 }

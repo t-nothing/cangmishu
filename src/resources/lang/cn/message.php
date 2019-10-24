@@ -189,6 +189,15 @@ return [
     'productImportsuccess'  =>'商品导入成功',
     'productImportStop'=>'导入结束,数据验证未通过',
 
+    'productFieldName' =>'商品名称',
+    'productFieldCategory' =>'分类标识',
+    'productFieldWarehouse' =>'仓库标识',
+    'productFieldSpecName' =>'规格名称',
+    'productFieldGrossWeight' =>'规格毛重',
+    'productFieldSalePrice' =>'规格销售价格',
+    'productFieldPurchasePrice' =>'规格进货价格',
+    'productFieldRelevanceCode' =>'外部编码',
+
     'productSkuExportCaption'=>'仓秘书SKU库存',
     'productStockExportCaption'=>'仓秘书货品总库存',
 
