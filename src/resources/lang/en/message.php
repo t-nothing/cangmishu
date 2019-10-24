@@ -40,7 +40,7 @@ return [
     'batchPurcharse'=>'Purcharse Requisition',
     'batchPurcharseDepartment'=>'Depertment',
     'batchPurcharsePrice'=>'Amount',
-    'batchPurcharseTotal'=>'Totla',
+    'batchPurcharseTotal'=>'Total',
     'batchPurcharseRemark'=>'Remark',
     'batchPurcharseInitiator'=>'Initiator',
     'batchPurcharseDivisionHead'=>'Division Head',
