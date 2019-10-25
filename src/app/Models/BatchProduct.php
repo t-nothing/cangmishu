@@ -215,7 +215,6 @@ class BatchProduct extends Model
     {
         $stock = new ProductStock;
         //真正写入到库存表中
-         ####!!! 不需要在这里增加数量，事件会自动处理
 
         $stock->owner_id                  = $this->owner_id;
         $stock->spec_id                   = $this->spec_id;
@@ -240,7 +239,7 @@ class BatchProduct extends Model
 
         //
         $stock->stock_num                 = $this->getStockQty();
-        $stock->stockin_num                 = $this->getStockQty();
+        $stock->stockin_num               = $this->getStockQty();
 
         $stock->save();
         //推送上默认位置
