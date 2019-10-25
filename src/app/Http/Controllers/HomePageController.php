@@ -142,9 +142,10 @@ class HomePageController extends Controller
         $inputData = $this->getTotalOutputNum(strtotime($request->start_time), strtotime($request->end_time),
             $warehouse_id);
 
+
         $inputDataInfo = [];
         foreach ($inputData as $val) {
-            $inputDataInfo[$val['date_time']] = $val;
+            $inputDataInfo[$val->record_time][$val->type] = $val->count;
         }
 
         for ($k = $days; $k >= 0; $k--) {
@@ -165,17 +166,40 @@ class HomePageController extends Controller
 
     public function getTotalOutputNum($startTime, $endTime, $warehouseId)
     {
-        $data = HomePageAnalyze::getIns()
-            ->select(app("db")->raw('Date(from_unixtime(record_time)) as date_time,
-                                                sum(batch_count) as batch_count,
-                                                sum(order_count) as order_count,
-                                                sum(batch_product_num) as batch_product_num,
-                                                sum(order_product_num) as order_product_num
-                                                '))
-            ->whereBetween('record_time', [$startTime, $endTime])
-            ->where('warehouse_id', $warehouseId)
-            ->groupBy(app("db")->raw('from_unixtime(record_time)'))
-            ->get();
+
+
+
+        $sql = "
+select count(*) as count ,Date(from_unixtime(created_at))  as record_time, 'batch_count' as `type`  from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ? and `status` >1 group by record_time 
+union all 
+select sum(stock_num),Date(from_unixtime(created_at))  as record_time, 'batch_product_num' as `type`   from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time 
+union all 
+select count(*),Date(from_unixtime(created_at))  as record_time, 'order_count' as `type`   from `order` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time 
+union all 
+select sum(sub_order_qty),Date(from_unixtime(created_at)) as record_time, 'order_product_num' as `type`     from `order` where warehouse_id = ? and created_at >= ? and created_at <= ? group by record_time 
+
+";
+        $data = DB::select($sql, 
+            [
+                $warehouseId, 
+                $startTime, 
+                $endTime, 
+
+                $warehouseId, 
+                $startTime, 
+                $endTime, 
+
+                $warehouseId, 
+                $startTime, 
+                $endTime, 
+
+                $warehouseId, 
+                $startTime, 
+                $endTime]);
+
+
+
+
         return $data;
     }
 
