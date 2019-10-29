@@ -26,6 +26,7 @@ class CreatePurchaseTable extends Migration
             $table->tinyInteger('status')->comment('状态')->default(1);
             $table->unsignedInteger('need_num')->comment('需要的数量')->default(0);
             $table->unsignedInteger('confirm_num')->comment('实际的数量')->default(0);
+            $table->decimal('sub_total', 10, 2)->comment('采购总金额');
 
             $table->integer('created_at')->comment('创建时间');
             $table->integer('updated_at')->nullable()->comment('修改时间');

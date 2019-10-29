@@ -180,6 +180,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/export/stock', 'ProductStockController@export');
 
     //采购单
+    Route::get('/purchaseCode', 'PurchaseController@purchaseCode');
     Route::get('/purchase', 'PurchaseController@index');
     Route::get('/purchase/item/{id}/logs', 'PurchaseController@showLogs');
     Route::get('/purchase/{id}', 'PurchaseController@show');

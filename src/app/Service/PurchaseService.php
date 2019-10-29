@@ -19,6 +19,7 @@ class PurchaseService
     {
         $items = [];
         $total_num  = 0;
+        $sub_total = 0;
 
         foreach ($request['items'] as $k => $v) {
             // 检查采购商品外部编码
@@ -28,6 +29,7 @@ class PurchaseService
                 ->where('relevance_code', $v['relevance_code'])
                 ->firstOrFail();
             $total_num+=$v['need_num'];
+            $sub_total += $v['need_num']*floatval($v['purchase_price']);
             $items[] = [
                 'product_spec_name'=> $spec->product_name_cn,
                 'owner_id'         => Auth::ownerId(),
@@ -45,6 +47,7 @@ class PurchaseService
             "order_invoice_number"    => $request['order_invoice_number'],
             "distributor_id"      => $request['distributor_id']??0,
             "need_num"            => $total_num,
+            "sub_total"           => $sub_total,
             "status"              => Purchase::STATUS_PREPARE,
             "created_date"        => $request['created_date'],
             "owner_id"            => Auth::ownerId(),
@@ -64,6 +67,7 @@ class PurchaseService
 
         $stocks = [];
         $total_num  = 0;
+        $sub_total = 0;
 
         foreach ($request['items'] as $k => $v) {
             // 检查采购商品外部编码
@@ -73,6 +77,7 @@ class PurchaseService
                 ->where('relevance_code', $v['relevance_code'])
                 ->firstOrFail();
             $total_num+=$v['need_num'];
+            $sub_total += $v['need_num']*floatval($v['purchase_price']);
             $items[] = [
                 'product_spec_name'=> $spec->product_name_cn,
                 'owner_id'         => Auth::ownerId(),
@@ -89,6 +94,7 @@ class PurchaseService
             "order_invoice_number"    => $request['order_invoice_number'],
             "distributor_id"      => $request['distributor_id']??0,
             "need_num"            => $total_num,
+            "sub_total"           => $sub_total,
             "status"              => Purchase::STATUS_PREPARE,
             "created_date"        => $request['created_date'],
             "owner_id"            => Auth::ownerId(),
