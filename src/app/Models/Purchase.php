@@ -131,7 +131,7 @@ class Purchase extends Model
     public function scopeHasKeyword($query, $keywords)
     {
         return $query->where('purchase_code', 'like', '%' . $keywords . '%')
-                     ->orWhere('order_invoice_no', 'like', '%' . $keywords . '%');
+                     ->orWhere('order_invoice_number', 'like', '%' . $keywords . '%');
     }
 
 }
