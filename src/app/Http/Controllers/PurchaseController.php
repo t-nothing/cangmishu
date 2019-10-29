@@ -6,7 +6,7 @@ use App\Http\Requests\BaseRequests;
 use App\Http\Requests\CreatePurchaseRequest;
 use App\Http\Requests\UpdatePurchaseItemRequest;
 use App\Http\Requests\UpdatePurchaseRequest;
-
+use App\Models\BatchMarkLog;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\PurchaseItemLog;
