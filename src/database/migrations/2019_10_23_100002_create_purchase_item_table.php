@@ -20,8 +20,8 @@ class CreatePurchaseItemTable extends Migration
             $table->integer('warehouse_id')->comment('仓库ID');
             $table->integer('need_num')->comment('申请采购数量');
             $table->integer('confirm_num')->comment('实际数量');
-            $table->date('last_confirm_date')->comment('最后确认日期');
-            $table->string('product_spec_name', 100)->comment('商品规格名称');
+            $table->date('last_confirm_date')->nullable()->comment('最后确认日期');
+            $table->string('product_spec_name', 250)->comment('商品规格名称');
             $table->string('relevance_code', 100)->comment('货品外部编码');
             $table->integer('status')->comment('1代入库,2 入库成功');
             $table->integer('owner_id')->comment('所属用户');

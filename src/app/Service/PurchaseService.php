@@ -129,6 +129,10 @@ class PurchaseService
         $model->last_confirm_date = date("Y-m-d");
         $model->save();
 
+        $purchase = Purchase::find($model->purchase_id);
+        $purchase->confirm_num += $model->confirm_num;
+        $purchase->save();
+
         $log = new PurchaseItemLog;
         $log->purchase_id = $model->purchase_id;
         $log->purchase_item_id = $model->id;
@@ -149,15 +153,19 @@ class PurchaseService
 
         if(!$model) throw new Exception("Error Processing Request", 1);
         $model->last_confirm_date = $data["arrived_date"];
+        $model->confirm_num = $data["arrived_num"];
         $model->status = PurchaseItem::STATUS_PROCEED;
-        $model->save();
-
-        $model->increment('confirm_num', $data["arrived_num"]);
+        
         if($model->confirm_num >= $model->need_num)
         {
             $model->status = PurchaseItem::STATUS_ACCOMPLISH;
-            $model->save();
         }
+
+        $model->save();
+
+        $purchase = Purchase::find($model->purchase_id);
+        $purchase->confirm_num += $data["arrived_num"];
+        $purchase->save();
 
         $log = new PurchaseItemLog;
         $log->purchase_id = $model->purchase_id;

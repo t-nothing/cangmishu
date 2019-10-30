@@ -13,6 +13,10 @@ return [
     'statusOutbound'=>'出库',
     'statusRecount'=>'盘点',
 
+    'purchasePage'=>'采购单',
+    'purchasePageInvoiceNumber'=>'发票号',
+    'purchasePageArriveQty'=>'到货数量',
+
     'batchPage'=>'入库单',
     'batchPageDate'=>'制单日期',
     'batchPageWarehouse'=>'仓库',
