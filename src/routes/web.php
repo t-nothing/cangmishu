@@ -190,6 +190,8 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/purchase/item/{id}', 'PurchaseController@itemUpdate');
     Route::post('/purchase/item/{id}/done', 'PurchaseController@itemDone');
     Route::delete('/purchase/{id}','PurchaseController@destroy');
+    Route::get('/purchase/{id}/download/{tempate}', 'PurchaseController@download');
+    Route::get('/purchase/{id}/pdf/', 'PurchaseController@pdf');
 
 
     //员工分组管理

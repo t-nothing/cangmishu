@@ -13,6 +13,10 @@ return [
     'statusOutbound'=>'Outbound',
     'statusRecount'=>'Inventory',
 
+    'purchasePage'=>'Purchase',
+    'purchasePageInvoiceNumber'=>'Invoice Number',
+    'purchasePageArriveQty'=>'Confirm Quantity',
+
     'batchPage'=>'Inbound',
     'batchPageDate'=>'Date',
     'batchPageWarehouse'=>'Warehouse',

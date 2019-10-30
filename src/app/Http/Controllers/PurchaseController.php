@@ -250,36 +250,28 @@ class PurchaseController extends Controller
     /*
      * 查看PDF
      * */
-    public function pdf($batch_id, $template = '')
+    public function pdf($id, $template = '')
     {
-        if (! $batch = Batch::find($batch_id)) {
+        if (! $purchase = Purchase::find($id)) {
             return formatRet(404, trans('message.batchNotExist'), [], 404);
         }
 
-        if($batch->owner_id != Auth::ownerId()){
+        if($purchase->owner_id != Auth::ownerId()){
             return formatRet(500, trans('message.noPermission'));
         }
 
-        $batch->load(['batchProducts', 'distributor', 'warehouse', 'batchType', 'operatorUser']);
+        $purchase->load(['items', 'distributor', 'warehouse']);
 
-        $batch->append('batch_code_barcode');
+        $purchase->append('purchase_code_barcode');
 
-        if ($batch['batchProducts']) {
-            foreach ($batch['batchProducts'] as $k => $v) {
-                $v->append('recommended_location');
-                $v->append('sku_barcode');
-            }
-        }
-
-        
         app('log')->info('template', [strtolower($template)]);
-        $templateName = "pdfs.batch.template_".strtolower($template);
-        if(!in_array(strtolower($template), ['entry','purchase','batchno'])){
-            $templateName = "pdfs.batch";
+        $templateName = "pdfs.purchase.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['purchase'])){
+            $templateName = "pdfs.purchase.template_purchase";
         }
         app('log')->info('template', [strtolower($template)]);
         return view($templateName, [
-            'batch' => $batch->toArray(),
+            'purchase' => $purchase->toArray(),
             'showInStock'=>1
         ]);
     }
