@@ -277,44 +277,37 @@ class PurchaseController extends Controller
     }
 
     /**下载PDF**/
-    public function download(BaseRequests $request, $batch_id, $template = '')
+    public function download(BaseRequests $request, $id, $template = '')
     {
 
-        if (! $batch = Batch::where('owner_id',Auth::ownerId())->find($batch_id)) {
+        if (! $purchase = Purchase::find($id)) {
             return formatRet(404, trans('message.batchNotExist'), [], 404);
         }
 
-        if($batch->owner_id != Auth::ownerId()){
+        if($purchase->owner_id != Auth::ownerId()){
             return formatRet(500, trans('message.noPermission'));
         }
 
-        $batch->load(['batchProducts', 'distributor', 'warehouse', 'batchType', 'operatorUser']);
+        $purchase->load(['items', 'distributor', 'warehouse']);
 
-        $batch->append('batch_code_barcode');
+        $purchase->append('purchase_code_barcode');
 
-        if ($batch['batchProducts']) {
-            foreach ($batch['batchProducts'] as $k => $v) {
-                $v->append('recommended_location');
-                $v->append('sku_barcode');
-            }
-        }
-
-        $templateName = "pdfs.batch.template_".strtolower($template);
-        if(!in_array(strtolower($template), [ 'entry','purchase','batchno'])){
-            $templateName = "pdfs.batch";
+        app('log')->info('template', [strtolower($template)]);
+        $templateName = "pdfs.purchase.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['purchase'])){
+            $templateName = "pdfs.purchase.template_purchase";
         }
 
 
         $pdf = PDF::setPaper('a4');
 
-        if($templateName == "pdfs.batch.template_batchno" )
-        {
-            $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '5')->setOption('margin-bottom', '0');
-        }
 
-        $file = sprintf("%s_%s.pdf", $batch->batch_code, template_download_name($templateName));
+        $file = sprintf("%s_%s.pdf", $purchase->purchase_code, template_download_name($templateName));
 
-        return $pdf->loadView($templateName, ['batch' => $batch->toArray(), 'showInStock'=>0])->download($file);
+        return $pdf->loadView($templateName, [
+            'purchase' => $purchase->toArray(),
+            'showInStock'=>1
+        ])->download($file);
 
     }
 
