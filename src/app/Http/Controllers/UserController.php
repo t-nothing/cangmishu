@@ -163,7 +163,7 @@ class UserController extends  Controller
     public function updateInfo(BaseRequests $request,$user_id){
         $this->validate($request, [
             'nickname'=>'required|string|max:255',
-//            'avatar'=>'required|string|max:255',
+            'avatar'=>'url|max:255',
         ]);
 
         $user = User::find($user_id);
@@ -171,7 +171,7 @@ class UserController extends  Controller
             return formatRet(500, trans("message.noPermission"));
         }
         $user->nickname = $request->nickname;
-//        $user->avatar = $request->avatar;
+        if($request->filled('avatar'))$user->avatar = $request->avatar;
         if (! $user->save()) {
             return formatRet(500, trans("message.failed"));
         }
