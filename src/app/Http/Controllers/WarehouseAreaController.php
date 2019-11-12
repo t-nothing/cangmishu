@@ -47,6 +47,21 @@ class WarehouseAreaController extends Controller
         }
     }
 
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $area = WarehouseArea::find($id);
+        if(!$area){
+            return formatRet(500, trans("message.warehouseAreaNotExist"));
+        }
+        if ($area->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        return formatRet(0, '', $area->toArray());
+       
+    }
+
     /**
      * 修改货区
      */

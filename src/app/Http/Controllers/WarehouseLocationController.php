@@ -44,6 +44,21 @@ class WarehouseLocationController extends Controller
         }
     }
 
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $area = WarehouseLocation::find($id);
+        if(!$area){
+            return formatRet(500, trans("message.warehouseLocationNotExist"));
+        }
+        if ($area->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        return formatRet(0, '', $area->toArray());
+       
+    }
+
     public function update( UpdateWarehouseLocationRequest $request,$warehouse_location_id)
     {
         app('log')->info('编辑仓库货位', ['warehouse_location_id'=>$warehouse_location_id]);
