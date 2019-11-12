@@ -70,6 +70,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //仓库货位
     Route::get('/locations', 'WarehouseLocationController@index');
+    Route::get('/locations/{location_id}', 'WarehouseLocationController@show');
     Route::post('/locations', 'WarehouseLocationController@store');
     Route::put('/locations/{location_id}', 'WarehouseLocationController@update');
     Route::delete('/locations/{location_id}', 'WarehouseLocationController@destroy');
@@ -78,6 +79,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     //仓库货区
     Route::get('/areas', 'WarehouseAreaController@index');
     Route::post('/areas', 'WarehouseAreaController@store');
+    Route::get('/areas/{location_id}', 'WarehouseAreaController@show');
     Route::put('/areas/{areas_id}', 'WarehouseAreaController@update');
     Route::delete('/areas/{areas_id}', 'WarehouseAreaController@destroy');
 
