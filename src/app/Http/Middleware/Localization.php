@@ -34,17 +34,14 @@ class Localization
     public function getLocaleForRequest($request)
     {
         $locale = $request->header('Language');
-        if (!is_null($locale)) {
+        if (!is_null($locale) && trim($locale) != "") {
             $locale = $request->header('Language');
         }
         
-        if (! is_null($locale)) {
-            return $locale;
-        } 
 
         $locale = $request->query('lang');
 
-        if (! is_null($locale)) {
+        if (! is_null($locale) && trim($locale) != "") {
             return $locale;
         }
 
