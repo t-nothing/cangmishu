@@ -43,7 +43,7 @@ class AuthenticateController extends  Controller
             'code'              => 'required|string',
             // 'shopid'            => 'required|int',
             'nick_name'         => 'required|string',
-            'gender'            => 'required|string',
+            'gender'            => 'string',
             'country'           => 'required|string',
             'city'              => 'string',
             'avatar_url'        => 'required|url',
