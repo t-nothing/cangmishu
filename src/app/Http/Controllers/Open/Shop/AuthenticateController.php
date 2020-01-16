@@ -38,6 +38,7 @@ class AuthenticateController extends  Controller
      */
     public function autoLogin(BaseRequests $request)
     {
+        app('log')->info('处理小程序的自动登陆和注册',$request->all());
         $this->validate($request, [
             'code'              => 'required|string',
             // 'shopid'            => 'required|int',
