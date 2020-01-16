@@ -28,7 +28,6 @@ class WeChatController extends Controller
      */
     public function wechatLogin(BaseRequests $request)
     {
-        exit;
         $app = app('wechat.official_account');
         $config = config('wechat.mini_program.default');
         $buttons = [
