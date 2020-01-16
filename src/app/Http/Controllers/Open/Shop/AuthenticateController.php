@@ -50,6 +50,7 @@ class AuthenticateController extends  Controller
             'mobile'             => 'string',
         ]);
 
+        app('log')->info('处理小程序的自动登陆和注册',$request->all());
         // 根据 code 获取微信 openid 和 session_key
         $miniProgram = Factory::miniProgram(config('wechat.mini_program.default'));
         $data = $miniProgram->auth->session($request->code);
