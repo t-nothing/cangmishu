@@ -85,7 +85,7 @@ class ProductStockController extends  Controller
             ->when($option == 3, function ($query) use ($warehouse_id, $owner_id) {
                 $query->onlyToBeOnShelf($warehouse_id, $owner_id);
             })
-            ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
+            ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
             // sortBy
             ->orderBy('product_spec.created_at', 'desc')
             ->orderBy('product_spec.id', 'desc')
