@@ -110,7 +110,7 @@ class ProductStock extends Model
      */
     public function scopeOfWarehouse($query,$warehosue_id)
     {
-        return $query->where('product_spec.warehouse_id', $warehosue_id);
+        return $query->where('product_stock.warehouse_id', $warehosue_id);
     }
 
 
