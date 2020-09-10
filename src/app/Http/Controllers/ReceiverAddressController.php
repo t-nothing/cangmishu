@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ReceiverAddressController extends Controller
 {
+    /**
+     * 收件人列表
+     */
     public function index(BaseRequests $request)
     {
         $owner_id= Auth::ownerId();

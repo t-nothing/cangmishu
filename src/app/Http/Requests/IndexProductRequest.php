@@ -25,12 +25,6 @@ class IndexProductRequest extends BaseRequests
     public function rules()
     {
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',app('auth')->ownerId());
-                })
-            ],
             'page' => 'integer|min:1',
             'page_size' => new PageSize(),
             'category_id' =>[
