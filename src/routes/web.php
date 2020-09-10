@@ -97,6 +97,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/orderType', 'OrderTypeController@index');
     Route::post('/orderType', 'OrderTypeController@store');
     Route::put('/orderType/{type_id}', 'OrderTypeController@update');
+    Route::get('/orderType/{type_id}', 'OrderTypeController@show');
     Route::delete('/orderType/{type_id}', 'OrderTypeController@destroy');
 
     //发件人地址管理

@@ -79,15 +79,9 @@ class OrderController extends Controller
             'created_at_e' => 'date:Y-m-d',
             'status' => 'integer',
             'keywords' => 'string',
-            'delivery_date' => 'date_format:Y-m-d',
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ]
+            'delivery_date' => 'date_format:Y-m-d'
         ]);
-        $order = Order::ofWarehouse($request->warehouse_id)
+        $order = Order::ofWarehouse(app('auth')->warehouse()->id)
             ->with('orderType')
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
@@ -159,7 +153,7 @@ class OrderController extends Controller
 
 //    public function destroy(BaseRequests $request,$order_id)
 //    {
-//        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
+//        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
 //        $this->validate($request,[
 //            'warehouse_id' =>  [
 //                'required','integer','min:1',
@@ -169,7 +163,7 @@ class OrderController extends Controller
 //            ],
 //        ]);
 //
-//        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+//        $order = Order::where('warehouse_id',app('auth')->warehouse()->id)->find($order_id);
 //        if(!$order){
 //            return formatRet(500, trans("message.orderNotExist"));
 //        }
@@ -266,16 +260,16 @@ class OrderController extends Controller
     public function cancelOrder(BaseRequests $request,$order_id)
     {
         app('log')->info('request',$request->all());
-        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
-        $this->validate($request,[
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
-        ]);
-        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
+        // $this->validate($request,[
+        //     'warehouse_id' =>  [
+        //         'required','integer','min:1',
+        //         Rule::exists('warehouse','id')->where(function($q){
+        //             $q->where('owner_id',Auth::ownerId());
+        //         })
+        //     ],
+        // ]);
+        $order = Order::where('warehouse_id', app('auth')->warehouse()->id)->find($order_id);
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
         }
@@ -378,8 +372,8 @@ class OrderController extends Controller
 
     public function  UpdateData(UpdateOrderRequest $request,$order_id )
     {
-        app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
-        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+        app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
+        $order = Order::where('warehouse_id',app('auth')->warehouse()->id)->find($order_id);
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
         }

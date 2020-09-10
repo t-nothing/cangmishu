@@ -16,17 +16,39 @@ class OrderTypeController extends Controller
     public function index(BaseRequests $request)
     {
         $this->validate($request, [
-            'warehouse_id' => 'required|integer|min:1',
             'page'         => 'integer|min:1',
             'is_enabled'   => 'boolean',
         ]);
         $orderTypes = OrderType::ofWhose(Auth::ownerId())
-                              ->ofWarehouse($request->warehouse_id)  
+                              ->ofWarehouse(app('auth')->warehouse()->id)  
                               ->when($request->filled('is_enabled'),function($q)use($request) {
                                   $q->where('is_enabled', $request->is_enabled);
                               })
                               ->paginate($request->input('page_size',10));
         return formatRet(0, '', $orderTypes->toArray());
+    }
+
+    /**
+     * 获取列表
+     */
+    public function show(BaseRequests $request, $id)
+    {
+        $id = intval($id);
+        $orderType = OrderType::ofWhose(Auth::ownerId())
+                              ->ofWarehouse(app('auth')->warehouse()->id)  
+                              ->when($request->filled('is_enabled'),function($q)use($request) {
+                                  $q->where('is_enabled', $request->is_enabled);
+                              })
+                              ->find($id);
+
+        if(!$orderType){
+            return formatRet(500, trans("message.orderTypeNotExist"));
+        }
+        if ($orderType->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+        
+        return formatRet(0, '', $orderType->toArray());
     }
 
 
@@ -35,7 +57,7 @@ class OrderTypeController extends Controller
         app('log')->info('新增出库单分类', $request->all());
         try{
             $data = $request->all();
-            $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
+            $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>app('auth')->warehouse()->id]);
             OrderType::create($data);
             return formatRet(0);
         }catch (\Exception $e){
@@ -52,7 +74,7 @@ class OrderTypeController extends Controller
         app('log')->info('编辑出库单分类', $request->all());
         try{
             $data = $request->all();
-            OrderType::where('id',$order_type_id)->update($data);
+            OrderType::where('id', $order_type_id)->update($data);
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑出库单分类失败',['msg' =>$e->getMessage()]);
@@ -60,6 +82,9 @@ class OrderTypeController extends Controller
         }
     }
 
+    /**
+     * 删除单个分类
+     **/
     public function destroy($order_type_id)
     {
         app('log')->info('删除出库单分类',['id'=>$order_type_id]);

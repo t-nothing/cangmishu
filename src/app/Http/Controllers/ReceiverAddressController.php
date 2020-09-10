@@ -24,6 +24,10 @@ class ReceiverAddressController extends Controller
         return  formatRet(0,'',$address->toArray());
     }
 
+
+    /**
+     * 新增收件人
+     **/
     public  function store(CreateReceiverAddressRequest $request)
     {
         app('log')->info('添加收件人地址',$request->all());
@@ -39,6 +43,9 @@ class ReceiverAddressController extends Controller
         }
     }
 
+    /**
+     * 编辑收件人
+     **/
     public function update(UpdateReceiverAddressRequest $request, $address_id)
     {
         app('log')->info('编辑收件人地址',$request->all());
@@ -52,6 +59,9 @@ class ReceiverAddressController extends Controller
         }
     }
 
+    /**
+     * 删除
+     **/
     public function destroy($address_id)
     {
         app('log')->info('删除收件人地址',['id'=>$address_id]);
@@ -71,6 +81,9 @@ class ReceiverAddressController extends Controller
         }
     }
 
+    /**
+     * 显示单个收件人信息
+     **/
     public function  show(BaseRequests $request, $address_id)
     {
 
