@@ -33,7 +33,7 @@ class ProductController extends Controller
         app('log')->info('查询列表',$request->all());
         $product = Product::leftjoin('category', 'category.id','=', 'product.category_id')
         ->with(['specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price,total_stock_num'])
-            ->ofWarehouse($request->warehouse_id)
+            ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('product.owner_id',app('auth')->ownerId())
             ->select(['product.id','product.name_cn','product.name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'product.updated_at', 'product.warehouse_id','total_stock_num', 'category.name_cn as category_name_cn', 'category.name_en as category_name_en'])
             ->latest('updated_at');
@@ -93,7 +93,7 @@ class ProductController extends Controller
                 'sale_price'     => $spec['sale_price'],
                 'purchase_price' => $spec['purchase_price'],
                 'owner_id'       => Auth::ownerId(),
-                'warehouse_id'   => $request->warehouse_id,
+                'warehouse_id'   => app('auth')->warehouse()->id,
                 'is_warning'     => 1
             ];
             $exists = ProductSpec::whose(app('auth')->ownerId())->where('relevance_code', $spec['relevance_code'])->first();
@@ -181,7 +181,7 @@ class ProductController extends Controller
                     'sale_price'     => $spec['sale_price'],
                     'purchase_price' => $spec['purchase_price'],
                     'owner_id'       => Auth::ownerId(),
-                    'warehouse_id'   => $request->warehouse_id,
+                    'warehouse_id'   => app('auth')->warehouse()->id,
                     'is_warning'     => 1,
                     'product_id'     => $product->id,
                 ];

@@ -58,8 +58,10 @@ Route::middleware(['auth:jwt'])->group(function () {
     //商品分类
     Route::get('/categories', 'CategoryController@index');
     Route::post('/categories', 'CategoryController@store');
+    Route::get('/categories/{category_id}', 'CategoryController@show');
     Route::put('/categories/{category_id}', 'CategoryController@update');
     Route::delete('/categories/{category_id}', 'CategoryController@destroy');
+
 
     //仓库特性
     Route::get('/features', 'WarehouseFeatureController@index');
@@ -257,7 +259,6 @@ Route::middleware(['auth:jwt'])->group(function () {
 
 
 });
-
 
 $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) {
     // 认证、授权
