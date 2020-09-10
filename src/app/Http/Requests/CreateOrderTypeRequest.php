@@ -26,12 +26,6 @@ class CreateOrderTypeRequest extends BaseRequests
     public function rules()
     {
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'name'         => [
                 'required','string','max:50',
                 Rule::unique('order_type')->where(function ($query) {
