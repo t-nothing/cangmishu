@@ -187,7 +187,7 @@ class OrderService
                         'name_en' => $spec->product->name_en??'',
                         'spec_name_cn' => $spec->name_cn,
                         'spec_name_en' => $spec->name_en,
-                        'pic' => $v['pic']??'',
+                        'pic' => $v['pic']??$spec->product->photos,
                         'spec_id'=>$spec->id,
                     ];
 
