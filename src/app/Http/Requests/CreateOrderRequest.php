@@ -59,14 +59,8 @@ class CreateOrderRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
-            'sender_id'                   =>  [
-                'required','integer','min:1',
-                Rule::exists('sender_address','id')->where(function($q) use($warehouse_id){
-                    $q->where('owner_id',Auth::ownerId());
-
-                })
-            ],
-            'remark' => 'string|max:255',
+            'sender_id'                   => 'integer|min:0',
+            'remark'                      => 'string|max:255',
         ];
     }
 
