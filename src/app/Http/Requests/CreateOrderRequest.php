@@ -29,6 +29,7 @@ class CreateOrderRequest extends BaseRequests
             "warehouse_id"      =>  $warehouse_id,
             "owner_id"          =>  Auth::ownerId(),
         ]);
+        app('log')->info('新增出库单',$request->all());
 
         return [
             // 出库单数据
