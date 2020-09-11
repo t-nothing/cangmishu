@@ -25,11 +25,11 @@ class CreateOrderRequest extends BaseRequests
     public function rules()
     {
         $warehouse_id = intval(app('auth')->warehouse()->id);
-        app("log")->info("仓库和所属", [
-            "warehouse_id"      =>  $warehouse_id,
-            "owner_id"          =>  Auth::ownerId(),
-        ]);
-        app('log')->info('新增出库单',$this->all());
+        // app("log")->info("仓库和所属", [
+            // "warehouse_id"      =>  $warehouse_id,
+            // "owner_id"          =>  Auth::ownerId(),
+        // ]);
+        // app('log')->info('新增出库单',$this->all());
 
         return [
             // 出库单数据
