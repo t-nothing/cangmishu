@@ -232,7 +232,25 @@ class OrderService
                 // 发件人信息
                 if(!isset($data->sender))
                 {
-                    $sender = SenderAddress::find($data->sender_id);
+                    if($data->sender_id == 0 ) {
+
+                        $sender = new SenderAddress;
+                        $sender->country    = "";
+                        $sender->city       = "";
+                        $sender->province   = "";
+                        $sender->postcode   = "";
+                        $sender->district   = "";
+                        $sender->address    = "";
+                        $sender->fullname   = "";
+                        $sender->phone      = "";
+                    } else {
+                        $sender = SenderAddress::where("owner_id", Auth::ownerId())->find($data->sender_id);
+                        if(!$sender) {
+                            throw new \Exception("发件人信息不存在", 1);
+                            
+                        }
+                    }
+                    
                 } 
                 else 
                 {
@@ -242,15 +260,15 @@ class OrderService
                 $order->send_city     = $sender->city;
                 $order->send_province = $sender->province;
                 $order->send_postcode = $sender->postcode;
-                $order->send_district   = $sender->district;
+                $order->send_district = $sender->district;
                 $order->send_address  = $sender->address;
                 $order->send_fullname = $sender->fullname;
                 $order->send_phone    = $sender->phone;
-                $order->out_sn = $out_sn;
+                $order->out_sn        = $out_sn;
 
                 
-                $order->express_num = $data->express_num;
-                $order->shop_id    = $data->shop_id??0;
+                $order->express_num     = $data->express_num;
+                $order->shop_id         = $data->shop_id??0;
                 $order->shop_user_id    = $data->shop_user_id??0;
 
                 $order->sub_total    = $subTotal;
