@@ -136,6 +136,9 @@ class OrderController extends Controller
         app('log')->info('新增出库单',$request->all());
         app('db')->beginTransaction();
         try {
+
+            $request->warehouse_id = app('auth')->warehouse()->id;
+
             $order = app('order')->setSource("自建")->create($request);
             if(!isset($order->out_sn))
             {
