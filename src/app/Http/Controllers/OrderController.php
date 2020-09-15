@@ -399,6 +399,35 @@ class OrderController extends Controller
     }
 
     /**
+     * 更新为发货
+     */
+    public function setToSend(BaseRequests $request,$id)
+    {
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+        if ($order->status < Order::STATUS_PICKING){
+            return formatRet(500, trans("message.orderOpStopByUnPick"));
+        }
+
+        try {
+            app('order')->updateSend($id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新发货信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500,  trans("message.failed"));
+        }
+        return formatRet(0,trans("message.success"));
+
+    }
+
+    /**
      * 预览PDF
      **/
     public function pdf($id, $template = '')

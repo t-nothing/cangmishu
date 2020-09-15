@@ -65,6 +65,32 @@ class OrderService
 
     }
 
+    /**
+     * 更新为发货
+     **/
+    public function updateSend($id)
+    {
+        $order = Order::find($id);
+        if(!$order) {
+            throw new \Exception("订单未找到", 1);
+        }
+
+        
+        $arr = [
+                'status'        =>  Order::STATUS_SENDING //配送中
+            ];
+        
+       
+        $order->update($arr);
+
+        event(new OrderShipped($order));
+        OrderHistory::addHistory($order, Order::STATUS_SENDING);
+
+        return true;
+
+    }
+
+
 
     /**
      * 更新支付信息
