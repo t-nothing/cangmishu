@@ -29,7 +29,7 @@ class PickAndOutRequest extends BaseRequests
         return [
             'order_id'              => [
                 'required','integer','min:1',
-                Rule::exists('order','id')->where(function($q){
+                Rule::exists('order','id')->where(function($q) use($warehouse_id){
                     $q->where('owner_id',app('auth')->ownerId())
                         ->where('status',Order::STATUS_DEFAULT)
                         ->where('warehouse_id',$warehouse_id);
