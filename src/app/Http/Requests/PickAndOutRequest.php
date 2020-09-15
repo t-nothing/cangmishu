@@ -25,24 +25,19 @@ class PickAndOutRequest extends BaseRequests
      */
     public function rules()
     {
+        $warehouse_id = intval(app('auth')->warehouse()->id);
         return [
             'order_id'              => [
                 'required','integer','min:1',
                 Rule::exists('order','id')->where(function($q){
                     $q->where('owner_id',app('auth')->ownerId())
                         ->where('status',Order::STATUS_DEFAULT)
-                        ->where('warehouse_id',$this->warehouse_id);
+                        ->where('warehouse_id',$warehouse_id);
                 })
             ],
             'express_code'           => 'string|string|max:255',
             'express_num'            => 'string|max:255',
             'delivery_date'          => 'required|string|date_format:Y-m-d',
-            'warehouse_id'           => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',app('auth')->ownerId());
-                })
-            ],
             'items'                  => 'required|array',
             'items.*.order_item_id'  => [
                 'required','integer','min:1',
