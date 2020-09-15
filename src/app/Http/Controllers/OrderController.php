@@ -253,13 +253,13 @@ class OrderController extends Controller
             0,
             trans("message.success"),
             [
-                ['id'=>  Order::STATUS_CANCEL, 'name'=>  trans("message.orderStatusCancel")],
                 ['id'=>  Order::STATUS_DEFAULT, 'name'=>  trans("message.orderStatusUnConfirm")],
                 // ['id'=>  Order::STATUS_PICKING, 'name'=>  '拣货中'],
                 // ['id'=>  Order::STATUS_PICK_DONE, 'name'=>  '已出库'],
                 ['id'=>  Order::STATUS_WAITING, 'name'=>  trans("message.orderStatusUnSend")],
                 ['id'=>  Order::STATUS_SENDING, 'name'=>  trans("message.orderStatusSending")],
                 ['id'=>  Order::STATUS_SUCCESS, 'name'=>  trans("message.orderStatusSuccess")],
+                ['id'=>  Order::STATUS_CANCEL, 'name'=>  trans("message.orderStatusCancel")],
             ]
         );
     }
