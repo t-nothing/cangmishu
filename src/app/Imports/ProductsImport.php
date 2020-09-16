@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Product;
-use App\Services\Service\CategoryService;
+use App\Services\CategoryService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;

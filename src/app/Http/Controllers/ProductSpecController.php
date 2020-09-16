@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BaseRequests;
 use App\Http\Requests\IndexProductRequest;
 use App\Imports\ProductSpecImport;
-use App\Services\Service\ProductService;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductSpec;

@@ -12,7 +12,7 @@ use App\Models\ProductSpec;
 use App\Models\Category;
 use App\Models\ShopProduct;
 use App\Models\ShopProductSpec;
-use App\Services\Service\CategoryService;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

@@ -1,5 +1,5 @@
 <?php
-namespace  App\Services\Service;
+namespace  App\Services;
 
 use App\Models\Pick;
 use App\Models\ProductStock;
