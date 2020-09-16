@@ -414,32 +414,32 @@ if (! function_exists('template_download_name')) {
     /**
     * 下载文件名称
     */
-    function template_download_name($v){
+    function template_download_name($v,$lang = 'cn'){
         
         $name = "";
         switch ($v) {
             case 'pdfs.order.template_pick':
-                $name = "拣货单";
+                $name = $lang=="cn"?"拣货单":"pick";
                 break;
             case 'pdfs.order.template_out':
-                $name = "出库单";
+                $name = $lang=="cn"?"出库单":"order";
                 break;
 
             case 'pdfs.batch.template_batchno':
-                $name = "批次标签";
+                $name = $lang=="cn"?"批次标签":"batchno";
                 break;
 
             case 'pdfs.batch':
             case 'pdfs.batch.template_entry':
-                $name = "入库单";
+                $name = $lang=="cn"?"入库单":"entry";
                 break;
 
             case 'pdfs.batch.template_purchase':
-                $name = "采购单";
+                $name = $lang=="cn"?"采购单":"purchase";
                 break;
 
             case 'pdfs.recount':
-                $name = "盘点单";
+                $name = $lang=="cn"?"盘点单":"recount";
                 break;
             
             default:

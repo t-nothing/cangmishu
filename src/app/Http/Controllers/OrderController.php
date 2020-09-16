@@ -489,7 +489,7 @@ class OrderController extends Controller
         $pdf = PDF::setPaper('a4');
 
         // $file = $order->out_sn . "_{$templateName}.pdf";
-        $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName), md5($order->out_sn.$order->created_at));
+        $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName, "en"), md5($order->out_sn.$order->created_at));
         
         $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
         if(!file_exists($filePath)) {
