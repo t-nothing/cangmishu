@@ -19,6 +19,7 @@ use Illuminate\Validation\Rule;
 use PDF;
 use App\Exports\OrderExport;
 use App\Events\OrderCancel;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -488,9 +489,22 @@ class OrderController extends Controller
         $pdf = PDF::setPaper('a4');
 
         // $file = $order->out_sn . "_{$templateName}.pdf";
-        $file = sprintf("%s_%s.pdf", $order->out_sn, template_download_name($templateName));
+        $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName), md5($order->out_sn.$order->created_at));
         
-        return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
+        $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
+        if(!file_exists($filePath)) {
+
+            $pdf->loadView($templateName, ['order' => $order->toArray()])->save($filePath);
+        }
+
+        if($request->filled("require_url") && $request->require_url == 1) {
+
+            $url = asset('storage/pdfs/'.$fileName);
+            return formatRet(0,trans("message.success"), ["url"=>$url]);
+        }
+
+        return response()->download($filePath, $fileName);
+        // return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
 
     }
 }
