@@ -131,9 +131,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('employee',function(){
             return new EmployeeService();
         });
-        // $this->app->singleton('module',function(){
-        //     return new ModuleService();
-        // });
+        $this->app->singleton('module',function(){
+            return new ModuleService();
+        });
         $this->app->singleton('ship',function(){
             return new ShipService();
         });
