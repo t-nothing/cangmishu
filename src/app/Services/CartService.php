@@ -1,11 +1,11 @@
 <?php
-namespace  App\Services\Service;
+namespace  App\Services;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Contracts\Cache\LockTimeoutException;
-use App\Services\Service\Cart\Item;
+use App\Services\Cart\Item;
 use App\Events\CartAdding;
 use App\Events\CartAdded;
 use App\Events\CartUpdating;
