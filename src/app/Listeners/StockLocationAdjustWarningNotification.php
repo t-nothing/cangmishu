@@ -57,7 +57,13 @@ class StockLocationAdjustWarningNotification implements ShouldQueue
 
                 $user = User::find($model->spec->product->owner_id);
 
-                $warning_email = Warehouse::warningEmail(intval($model->spec->product->warehouse_id));
+                $warehouseInfo = Warehouse::find($model->spec->product->warehouse_id);
+                if(!$warehouseInfo) {
+                    app('log')->error('找不到仓库', ['id'=> $model->spec->product->warehouse_id]);
+                    return false;
+                }
+
+                $warning_email = $warehouseInfo->warningEmail;
                 if($user) {
                     if($warning_email) {
                         $product_name = $model->spec->product->name_cn.'规格'.$model->spec->name_cn;
