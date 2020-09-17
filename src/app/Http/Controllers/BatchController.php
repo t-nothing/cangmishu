@@ -23,12 +23,6 @@ class BatchController extends Controller
     {
         app('log')->info('查询入库单',$request->all());
         $this->validate($request,[
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'type_id'           => 'integer|min:1',
             'status'            => 'integer|min:1',
             'created_at_b'      => 'date_format:Y-m-d',
@@ -41,7 +35,7 @@ class BatchController extends Controller
             'batchType:id,name',
             'distributor:id,name_cn,name_en',
         ])
-            ->ofWarehouse($request->input('warehouse_id'))
+            ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id',Auth::ownerId())
             ->when($request->filled('created_at_b'),function ($q) use ($request){
                 return $q->where('created_at', '>', strtotime($request->input('created_at_b')));
@@ -156,7 +150,7 @@ class BatchController extends Controller
         app('db')->beginTransaction();
         try{
             $data = $request->stock;
-            $res = app('store')->InAndPutOn($request->warehouse_id,$data,$request->batch_id);
+            $res = app('store')->InAndPutOn(app('auth')->warehouse()->id,$data,$request->batch_id);
             app('db')->commit();
             return formatRet(0);
         }catch (\Exception $e){
@@ -247,13 +241,13 @@ class BatchController extends Controller
     public function show(BaseRequests $request, $id)
     {
         app('log')->info('查询入库单详情',$request->all());
-        $this->validate($request,[
-            'warehouse_id' => [
-                'required','integer','min:1'
-            ]
-        ]);
+        // $this->validate($request,[
+        //     'warehouse_id' => [
+        //         'required','integer','min:1'
+        //     ]
+        // ]);
 
-        $batch = Batch::where('warehouse_id',$request->warehouse_id)->where('owner_id',Auth::ownerId())
+        $batch = Batch::where('warehouse_id',app('auth')->warehouse()->id)->where('owner_id',Auth::ownerId())
             ->with([
                 'warehouse:id,name_cn',
                 'batchType:id,name',

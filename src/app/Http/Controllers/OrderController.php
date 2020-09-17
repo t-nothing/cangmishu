@@ -19,6 +19,7 @@ use Illuminate\Validation\Rule;
 use PDF;
 use App\Exports\OrderExport;
 use App\Events\OrderCancel;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -73,21 +74,16 @@ class OrderController extends Controller
     public function index(BaseRequests $request)
     {
         $this->validate($request, [
-            'page' => 'integer|min:1',
-            'page_size' => new PageSize(),
-            'created_at_b' => 'date:Y-m-d',
-            'created_at_e' => 'date:Y-m-d',
-            'status' => 'integer',
-            'keywords' => 'string',
-            'delivery_date' => 'date_format:Y-m-d',
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ]
+            'page'          => 'integer|min:1',
+            'page_size'     => new PageSize(),
+            'created_at_b'  => 'date:Y-m-d',
+            'created_at_e'  => 'date:Y-m-d',
+            'status'        => 'integer',
+            'keywords'      => 'string',
+            'with_items'    => 'boolean',
+            'delivery_date' => 'date_format:Y-m-d'
         ]);
-        $order = Order::ofWarehouse($request->warehouse_id)
+        $order = Order::ofWarehouse(app('auth')->warehouse()->id)
             ->with('orderType')
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
@@ -109,6 +105,12 @@ class OrderController extends Controller
             return $query->whereBetween ("delivery_date",
                 [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
         });
+        $order->when(
+            ($request->filled('with_items') && $request->with_items),
+            function($q)use($request) {
+                        $q->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic');
+                    }
+        );
 
         $orders = $order->latest()->paginate($request->input('page_size',10));
         $result = $orders->toArray();
@@ -142,6 +144,9 @@ class OrderController extends Controller
         app('log')->info('新增出库单',$request->all());
         app('db')->beginTransaction();
         try {
+
+            $request->warehouse_id = app('auth')->warehouse()->id;
+
             $order = app('order')->setSource("自建")->create($request);
             if(!isset($order->out_sn))
             {
@@ -159,7 +164,7 @@ class OrderController extends Controller
 
 //    public function destroy(BaseRequests $request,$order_id)
 //    {
-//        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
+//        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
 //        $this->validate($request,[
 //            'warehouse_id' =>  [
 //                'required','integer','min:1',
@@ -169,7 +174,7 @@ class OrderController extends Controller
 //            ],
 //        ]);
 //
-//        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+//        $order = Order::where('warehouse_id',app('auth')->warehouse()->id)->find($order_id);
 //        if(!$order){
 //            return formatRet(500, trans("message.orderNotExist"));
 //        }
@@ -249,13 +254,13 @@ class OrderController extends Controller
             0,
             trans("message.success"),
             [
-                ['id'=>  Order::STATUS_CANCEL, 'name'=>  trans("message.orderStatusCancel")],
                 ['id'=>  Order::STATUS_DEFAULT, 'name'=>  trans("message.orderStatusUnConfirm")],
                 // ['id'=>  Order::STATUS_PICKING, 'name'=>  '拣货中'],
                 // ['id'=>  Order::STATUS_PICK_DONE, 'name'=>  '已出库'],
                 ['id'=>  Order::STATUS_WAITING, 'name'=>  trans("message.orderStatusUnSend")],
                 ['id'=>  Order::STATUS_SENDING, 'name'=>  trans("message.orderStatusSending")],
                 ['id'=>  Order::STATUS_SUCCESS, 'name'=>  trans("message.orderStatusSuccess")],
+                ['id'=>  Order::STATUS_CANCEL, 'name'=>  trans("message.orderStatusCancel")],
             ]
         );
     }
@@ -266,16 +271,16 @@ class OrderController extends Controller
     public function cancelOrder(BaseRequests $request,$order_id)
     {
         app('log')->info('request',$request->all());
-        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
-        $this->validate($request,[
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
-        ]);
-        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
+        // $this->validate($request,[
+        //     'warehouse_id' =>  [
+        //         'required','integer','min:1',
+        //         Rule::exists('warehouse','id')->where(function($q){
+        //             $q->where('owner_id',Auth::ownerId());
+        //         })
+        //     ],
+        // ]);
+        $order = Order::where('warehouse_id', app('auth')->warehouse()->id)->find($order_id);
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
         }
@@ -378,8 +383,8 @@ class OrderController extends Controller
 
     public function  UpdateData(UpdateOrderRequest $request,$order_id )
     {
-        app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
-        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+        app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
+        $order = Order::where('warehouse_id',app('auth')->warehouse()->id)->find($order_id);
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
         }
@@ -392,6 +397,35 @@ class OrderController extends Controller
             app('log')->error('修改出库单数据失败',['msg'=>$e->getMessage()]);
             return formatRet(500, trans("message.failed"));
         }
+    }
+
+    /**
+     * 更新为发货
+     */
+    public function setToSend(BaseRequests $request,$id)
+    {
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+        if ($order->status < Order::STATUS_PICKING){
+            return formatRet(500, trans("message.orderOpStopByUnPick"));
+        }
+
+        try {
+            app('order')->updateSend($id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新发货信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500,  trans("message.failed"));
+        }
+        return formatRet(0,trans("message.success"));
+
     }
 
     /**
@@ -455,9 +489,22 @@ class OrderController extends Controller
         $pdf = PDF::setPaper('a4');
 
         // $file = $order->out_sn . "_{$templateName}.pdf";
-        $file = sprintf("%s_%s.pdf", $order->out_sn, template_download_name($templateName));
+        $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName, "en"), md5($order->out_sn.$order->created_at));
         
-        return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
+        $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
+        if(!file_exists($filePath)) {
+
+            $pdf->loadView($templateName, ['order' => $order->toArray()])->save($filePath);
+        }
+
+        if($request->filled("require_url") && $request->require_url == 1) {
+
+            $url = asset('storage/pdfs/'.$fileName);
+            return formatRet(0,trans("message.success"), ["url"=>$url]);
+        }
+
+        return response()->download($filePath, $fileName);
+        // return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
 
     }
 }

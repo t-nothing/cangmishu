@@ -29,12 +29,6 @@ class UpdateOrderRequest extends BaseRequests
         $warehouse_id = $this->warehouse_id;
 
         return [
-            'warehouse_id'                => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             // 出库单数据
             'order_type'                  => [
                 'required','integer','min:1',

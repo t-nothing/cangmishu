@@ -21,21 +21,26 @@ class CategoryController extends Controller
             'page_size'    => new PageSize(),
             'is_enabled'   => 'boolean',
             'no_pager'     => 'boolean',
-            'warehouse_id' => 'required|integer|min:1',
+            'no_feature'   => 'boolean',
         ]);
 
-        $categories = Category::with('feature:id,name_cn,name_en')
-                    ->ofWarehouse($request->warehouse_id)
+        $categories = Category::ofWarehouse(app('auth')->warehouse()->id);
+
+        $categories = $categories
                     ->where('owner_id',Auth::ownerId())
                     ->when($request->filled('is_enabled'),function($q)use($request) {
                         $q->where('is_enabled', $request->is_enabled);
                     })
+                    ->when(!$request->filled('no_feature', 0),function($q)use($request) {
+                        $q->with('feature:id,name_cn,name_en');
+                    })
                     ->orderBy('id','ASC');
         //如果需要分页
-        if(!$request->filled('no_pager', 0)) {
+        if(!$request->filled('no_pager')) {
             $categories = $categories->paginate($request->input('page_size',10));
         }
-        else {
+        else {        
+
             $categories = $categories->get();
         }
                     
@@ -43,6 +48,20 @@ class CategoryController extends Controller
         return formatRet(0, '', $categories->toArray());
     }
 
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $category = Category::ofWarehouse(app('auth')->warehouse()->id)->find($id);
+        if(!$category){
+            return formatRet(500, trans("message.productCategoryNotExist"));
+        }
+        if ($category->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        return formatRet(0, '', $category->toArray());
+       
+    }
 
     public function store(CreateCategoryRequest $request)
     {
@@ -51,7 +70,7 @@ class CategoryController extends Controller
         try{
             $data = $request->all();
             $data["name_en"] = $request->name_cn;
-            $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>$request->warehouse_id]);
+            $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>app('auth')->warehouse()->id]);
             $category = Category::create($data);
             DB::commit();
             return formatRet(0);

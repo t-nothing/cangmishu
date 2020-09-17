@@ -58,8 +58,10 @@ Route::middleware(['auth:jwt'])->group(function () {
     //商品分类
     Route::get('/categories', 'CategoryController@index');
     Route::post('/categories', 'CategoryController@store');
+    Route::get('/categories/{category_id}', 'CategoryController@show');
     Route::put('/categories/{category_id}', 'CategoryController@update');
     Route::delete('/categories/{category_id}', 'CategoryController@destroy');
+
 
     //仓库特性
     Route::get('/features', 'WarehouseFeatureController@index');
@@ -95,6 +97,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/orderType', 'OrderTypeController@index');
     Route::post('/orderType', 'OrderTypeController@store');
     Route::put('/orderType/{type_id}', 'OrderTypeController@update');
+    Route::get('/orderType/{type_id}', 'OrderTypeController@show');
     Route::delete('/orderType/{type_id}', 'OrderTypeController@destroy');
 
     //发件人地址管理
@@ -158,6 +161,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
     Route::get('/order/export', 'OrderController@export');
     Route::get('/order/{order_id}', 'OrderController@show');
+    Route::put('/order/send/{order_id}', 'OrderController@setToSend'); //更新快递单号
     Route::put('/order/express/{order_id}', 'OrderController@updateExpress'); //更新快递单号
     Route::put('/order/pay/{order_id}', 'OrderController@updatePayStatus'); //更新支付方式
     Route::put('/order/completed/{order_id}', 'OrderController@completed'); //设为签收
@@ -257,7 +261,6 @@ Route::middleware(['auth:jwt'])->group(function () {
 
 
 });
-
 
 $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) {
     // 认证、授权

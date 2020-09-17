@@ -365,7 +365,6 @@ class ProductStockController extends  Controller
             ->latest()
             ->pluck('id')
             ->toArray();
-
         $stocks = ProductStock::with(['locations'])
             ->ofWarehouse($warehouse_id)
             ->where('owner_id', app('auth')->ownerId())

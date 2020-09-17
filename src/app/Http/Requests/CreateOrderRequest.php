@@ -24,15 +24,14 @@ class CreateOrderRequest extends BaseRequests
      */
     public function rules()
     {
-        $warehouse_id = $this->warehouse_id;
+        $warehouse_id = intval(app('auth')->warehouse()->id);
+        // app("log")->info("仓库和所属", [
+            // "warehouse_id"      =>  $warehouse_id,
+            // "owner_id"          =>  Auth::ownerId(),
+        // ]);
+        // app('log')->info('新增出库单',$this->all());
 
         return [
-            'warehouse_id'                => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             // 出库单数据
             'order_type'                  => [
                 'required','integer','min:1',
@@ -59,14 +58,8 @@ class CreateOrderRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
-            'sender_id'                   =>  [
-                'required','integer','min:1',
-                Rule::exists('sender_address','id')->where(function($q) use($warehouse_id){
-                    $q->where('owner_id',Auth::ownerId());
-
-                })
-            ],
-            'remark' => 'string|max:255',
+            'sender_id'                   => 'integer|min:0',
+            'remark'                      => 'string|max:255',
         ];
     }
 
