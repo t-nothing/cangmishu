@@ -35,7 +35,7 @@ class StockLocationAdjustLogNotification
                         ->setStockLocation($model)
                         ->setRemark($option['remark']??'')
                         ->setItemId($option['item_id']??0)
-                        ->setNum($qty - ($option['origin_stock_location_shelf_num']??0) )
+                        ->setNum($qty ) // - ($option['origin_stock_location_shelf_num']??0)
                         ->setOrderSn($option['order_sn']??'')
                         ->log();
     }
