@@ -44,7 +44,7 @@ class StockLocationAdjustWarningNotification implements ShouldQueue
     public function handle(StockLocationAdjust $event)
     {
         $model = $event->stock->load("spec.product.category");
-        app('log')->info('StockLocationAdjustWarningNotification 库存调整开始检查库存预警条件');
+        app('log')->info('库存调整开始检查库存预警条件');
         app('log')->info('当前规格总库存和预警值为:', [
             $model->spec->total_stock_num,
             $model->spec->product->category->warning_stock,
@@ -63,8 +63,7 @@ class StockLocationAdjustWarningNotification implements ShouldQueue
                     return false;
                 }
 
-                $warning_email = $warehouseInfo->warningEmail;
-                app('log')->info('准备发送邮件给', ['email'=>$warning_email]);
+                $warning_email = $warehouseInfo->warning_email;
 
                 if($user) {
                     if($warning_email) {
