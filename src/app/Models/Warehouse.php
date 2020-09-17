@@ -183,7 +183,7 @@ class Warehouse extends Model
     /**
      * 预警邮件
      **/
-    public static function warningEmail(int $id)
+    public static function warningEmail($id)
     {
         try
         {
