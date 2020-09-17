@@ -63,8 +63,9 @@ class StockLocationAdjustWarningNotification implements ShouldQueue
                     return false;
                 }
 
-                app('log')->info('准备发送邮件给', ['email'=>$warning_email]);
                 $warning_email = $warehouseInfo->warningEmail;
+                app('log')->info('准备发送邮件给', ['email'=>$warning_email]);
+
                 if($user) {
                     if($warning_email) {
                         $product_name = $model->spec->product->name_cn.'规格'.$model->spec->name_cn;
