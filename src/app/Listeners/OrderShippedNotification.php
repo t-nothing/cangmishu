@@ -64,7 +64,7 @@ class OrderShippedNotification
                 {
                     $result = $app->template_message->send([
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'eRoqrc6HHi8PR8eZxFfvAjEv4T1Jo5xTih4nviuAUUI',
+                        'template_id' => 'UyDuO51RlyHTDdec4CFrPqUBBw8GlGt4H7g_lqeCUFM',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => $formId,
                         'data' => [
@@ -80,7 +80,7 @@ class OrderShippedNotification
                 {
                     app('log')->info('发送结内容', [
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'eRoqrc6HHi8PR8eZxFfvAjEv4T1Jo5xTih4nviuAUUI',
+                        'template_id' => 'UyDuO51RlyHTDdec4CFrPqUBBw8GlGt4H7g_lqeCUFM',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => $formId,
                         'data' => [
