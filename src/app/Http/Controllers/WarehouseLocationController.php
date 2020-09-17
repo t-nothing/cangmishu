@@ -26,7 +26,7 @@ class WarehouseLocationController extends Controller
                 $query->where('is_enabled', $request->is_enabled);
             })
             ->when($request->filled('keywords'),function($query) use($request){
-                $query->where('code','like',$keywords.'%');
+                $query->where('code','like',$request->keywords.'%');
             })
             ->with(['warehouseArea:id,name_cn,name_en'])
             ->paginate($request->input('page_size',10));
