@@ -64,6 +64,7 @@ class StockLocationOutWarningNotification implements ShouldQueue
                     app('log')->error('找不到仓库', ['id'=> $model->spec->product->warehouse_id]);
                     return false;
                 }
+                app('log')->info('准备发送邮件给', ['email'=>$warning_email]);
 
                 $warning_email = $warehouseInfo->warningEmail;
                 if($user) {
