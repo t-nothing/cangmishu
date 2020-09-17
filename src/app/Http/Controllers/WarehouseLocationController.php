@@ -19,9 +19,6 @@ class WarehouseLocationController extends Controller
             'is_enabled'    => 'boolean',
         ]);
 
-        if ($request->filled('keywords')) {
-            $order->hasKeywords($request->keywords);
-        }
 
         $features = WarehouseLocation::ofWarehouse($request->input('warehouse_id'))
             ->where('owner_id',Auth::ownerId())
