@@ -79,7 +79,7 @@
         <tr>
           <td colspan="3">@lang('message.batchPurcharseTotal')：</td>
           <td class="text-center"> {{ $purchase['need_num'] }}</td>
-          <td></td>
+          <td class="text-center">{{ number_format($purchase['sub_total'],2) }}</td>
           <td class="text-center">{{ $purchase['confirm_num'] }}</td>
         </tr>
       </tfoot>
