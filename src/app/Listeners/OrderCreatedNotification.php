@@ -76,7 +76,7 @@ class OrderCreatedNotification  implements ShouldQueue
 
                     $data = [
                         'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o', // 所需下发的订阅模板id
-                        'touser' => 'oSyZp5OBNPBRhG-7BVgWxbiNZm',     // 接收者（用户）的 openid
+                        'touser' => $user->weapp_openid,     // 接收者（用户）的 openid
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'data' => [ 
                             'first' => [
