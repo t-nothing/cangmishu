@@ -62,7 +62,7 @@ class OrderCreatedNotification  implements ShouldQueue
                 {
                     $result = $app->template_message->send([
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'X6mPMpA5Se7DLUPhLjBsbFMB8Ma1uTodl5PZs3VgcsA',
+                        'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => ShopWeappFormId::getOne($user->id),
                         'data' => [
@@ -77,7 +77,7 @@ class OrderCreatedNotification  implements ShouldQueue
                 {
                     app('log')->info('发送结内容', [
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'X6mPMpA5Se7DLUPhLjBsbFMB8Ma1uTodl5PZs3VgcsA',
+                        'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => ShopWeappFormId::getOne($user->id),
                         'data' => [

@@ -64,7 +64,7 @@ class OrderCompletedNotification
                 {
                     $result = $app->template_message->send([
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'bGobe_xX_A2_MhQOK-t0HY4B6bTnUrOhtGDtBHKH1FI',
+                        'template_id' => 'zz1dcq7ybDrsj2hZgGY6YSuXLzJh4Q51d5eczxN3078',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => $formId,
                         'data' => [
@@ -82,7 +82,7 @@ class OrderCompletedNotification
                 {
                     app('log')->info('发送结内容', [
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'bGobe_xX_A2_MhQOK-t0HY4B6bTnUrOhtGDtBHKH1FI',
+                        'template_id' => 'zz1dcq7ybDrsj2hZgGY6YSuXLzJh4Q51d5eczxN3078',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => $formId,
                         'data' => [
