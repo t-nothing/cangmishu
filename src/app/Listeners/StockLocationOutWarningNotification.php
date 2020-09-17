@@ -65,7 +65,7 @@ class StockLocationOutWarningNotification implements ShouldQueue
                     return false;
                 }
 
-                $warning_email = $warehouseInfo->warningEmail;
+                $warning_email = $warehouseInfo->warning_email;
 
                 app('log')->info('准备发送邮件给', ['email'=>$warning_email]);
                 if($user) {
