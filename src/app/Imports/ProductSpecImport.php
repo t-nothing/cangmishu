@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use App\Models\ProductSpec;
 use App\Repositories\ProductRepository;
-use App\Services\Service\ProductService;
+use App\Services\ProductService;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;

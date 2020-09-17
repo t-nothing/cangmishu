@@ -57,7 +57,7 @@ class BaseRequests extends  FormRequest
     public function isRequiredLang(int $warehouseId = 0)
     {
         if($warehouseId == 0) {
-            $warehouseId = intval($this->route('warehouse_id'));
+            $warehouseId = intval(app('auth')->warehouse()->id);
         }
         return   Warehouse::isEnabledLang($warehouseId);
     }

@@ -4,7 +4,7 @@
  *
  * (c) 2016 overtrue <i@overtrue.me>
  */
-namespace App\Services\Service\Cart;
+namespace App\Services\Cart;
 use Illuminate\Support\Collection;
 /**
  * Shopping cart item.
