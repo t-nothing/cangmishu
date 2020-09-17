@@ -68,7 +68,7 @@ class OrderCancelNotification  implements ShouldQueue
                 {
                     $result = $app->template_message->send([
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'TMupKMzx9wIVvxtS0j6tVzk3p6Bxniu6uvse0YhSl9U',
+                        'template_id' => 'JKD0vi2qHq0t8pdaMROQCkcGPoUcSg8tzWkr0wONADk',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => $formId,
                         'data' => [
@@ -86,7 +86,7 @@ class OrderCancelNotification  implements ShouldQueue
                 {
                     app('log')->info('发送结内容', [
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'TMupKMzx9wIVvxtS0j6tVzk3p6Bxniu6uvse0YhSl9U',
+                        'template_id' => 'JKD0vi2qHq0t8pdaMROQCkcGPoUcSg8tzWkr0wONADk',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'form_id' => $formId,
                         'data' => [
