@@ -47,7 +47,8 @@ class StockLocationAdjustWarningNotification implements ShouldQueue
         app('log')->info('库存调整开始检查库存预警条件');
         app('log')->info('当前规格总库存和预警值为:', [
             $model->spec->total_stock_num,
-            $model->spec->product->category->warning_stock
+            $model->spec->product->category->warning_stock,
+            $model->spec->product->warehouse_id,
         ]);
         if($model->spec->product->category->warning_stock > 0) {
 
@@ -56,7 +57,7 @@ class StockLocationAdjustWarningNotification implements ShouldQueue
 
                 $user = User::find($model->spec->product->owner_id);
 
-                $warning_email = Warehouse::warningEmail($model->spec->warehouse_id);
+                $warning_email = Warehouse::warningEmail($model->spec->product->warehouse_id);
                 if($user) {
                     if($warning_email) {
                         $product_name = $model->spec->product->name_cn.'规格'.$model->spec->name_cn;
