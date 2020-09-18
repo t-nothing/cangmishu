@@ -8,7 +8,8 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-class PrivateMessageEvent implements ShouldBroadcast
+
+class PrivateMessageEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     /**
