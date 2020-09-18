@@ -77,6 +77,7 @@ class BatchController extends Controller
         app('db')->beginTransaction();
         try{
             $data = $request->all();
+            $data["warehouse_id"] = app('auth')->warehouse()->id;;
             app('batch')->create($data);
             app('db')->commit();
             return formatRet(0);
