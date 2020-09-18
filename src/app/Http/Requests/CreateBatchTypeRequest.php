@@ -27,12 +27,7 @@ class CreateBatchTypeRequest extends BaseRequests
     {
         $warehouse_id = app('auth')->warehouse()->id;
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q) use($warehouse_id){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
+            
             'name'         => [
                 'required','string','max:50',
                 Rule::unique('batch_type')->where(function ($query) use($warehouse_id) {
