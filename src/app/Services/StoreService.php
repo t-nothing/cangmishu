@@ -11,6 +11,8 @@ use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use App\Models\OrderItemStockLocation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use App\Events\StockLocationIn;
 use App\Events\StockLocationPutOn;
 use App\Events\StockLocationPick;
