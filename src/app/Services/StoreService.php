@@ -149,22 +149,36 @@ class StoreService
     public function pickAndOut($data)
     {
    
-        $order = Order::find($data["order_id"]);
-        if(!$order) 
-        {
-            throw new \Exception("订单不存在", 1);
-        }
+        try {
+            $lock = Cache::lock(sprintf("orderpickAndOutLockV1:%s", $data["order_id"]), 5);
+            //加一个锁防止并发
+            if ($lock->get()) {
 
-        //先拣货
-        $pick = $this->pick($data["items"], $order);
-        app('log')->info('拣货流程完成');
-        $pick_num = collect($pick)->sum('pick_num');
-        if($pick_num <=0) {
-            throw new \Exception("拣货失败,不需要出库", 1);
-        }
+                $order = Order::find($data["order_id"]);
+                if(!$order) 
+                {
+                    throw new \Exception("订单不存在", 1);
+                }
 
-        //再出库
-        $this->out($pick, $data["delivery_date"], $order);
+                //先拣货
+                $pick = $this->pick($data["items"], $order);
+                app('log')->info('拣货流程完成');
+                $pick_num = collect($pick)->sum('pick_num');
+                if($pick_num <=0) {
+                    throw new \Exception("拣货失败,不需要出库", 1);
+                }
+
+                //再出库
+                $this->out($pick, $data["delivery_date"], $order);
+                $lock->release();
+            } else {
+                throw new \Exception("请稍候再试", 1);
+            }
+        } 
+        catch(\Exception $ex) {
+            $lock->release();
+            throw new \Exception($ex->getMessage(), 1);
+        }
     }
 
     /**
