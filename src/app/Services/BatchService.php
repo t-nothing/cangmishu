@@ -63,6 +63,9 @@ class BatchService
         }
         $warehouse = Warehouse::find($request['warehouse_id']);
         $data['batch_code'] = $this->batchCode($warehouse);
+        if(trim($data["confirmation_number"]) == "") {
+            $data['confirmation_number'] = $data["batch_code"];
+        }
 
         $batch = Batch::create($data);
         $batch->batchProducts()->createMany($stocks);
