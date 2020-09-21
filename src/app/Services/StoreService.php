@@ -224,9 +224,9 @@ class StoreService
             }
 
             $pickStockResult[] = [
-                'item'      =>  $item,
-                'pick_locations'     =>  $stockInLocations,
-                'pick_num'  =>  $i['pick_num']
+                'item'                  =>  $item,
+                'pick_locations'        =>  $stockInLocations,
+                'pick_num'              =>  $i['pick_num']
             ];
 
         }
@@ -242,11 +242,11 @@ class StoreService
 
             // app('log')->info('开始从库位拣货AAA');
             // $v['item']->product_stock_id = $v['stock']->id;
-            $v['item']->pick_num = $v['pick_num'];
-            $v['item']->verify_num = $v['pick_num'];
+            $v['item']->pick_num    = $v['pick_num'];
+            $v['item']->verify_num  = $v['pick_num'];
             $v['item']->save();
 
-            $subPickNum += $i['pick_num'];
+            $subPickNum += $v['pick_num'];
             // app('log')->info('开始从库位拣货AAA');
 
             foreach ($v['pick_locations'] as $locationStock) {
@@ -260,17 +260,17 @@ class StoreService
                 ]);
 
                 //这里是要拼出来存到出库清单对应的位置中去的
-                $tmp['stock_id'] = $locationStock["stock_id"];
-                $tmp['warehouse_location_id'] = $locationStock["warehouse_location_id"];
+                $tmp['stock_id']                = $locationStock["stock_id"];
+                $tmp['warehouse_location_id']   = $locationStock["warehouse_location_id"];
                 $tmp['warehouse_location_code'] = $locationStock["warehouse_location_code"];
-                $tmp['warehouse_id'] = $locationStock["warehouse_id"];
+                $tmp['warehouse_id']            = $locationStock["warehouse_id"];
                 $tmp['product_stock_location_id'] = $locationStock["id"];
-                $tmp['item_id'] = $v['item']["id"];
-                $tmp['pick_num'] = $locationStock['pick_num'];
-                $tmp['shipment_num'] = $locationStock["shipment_num"]??"";
-                $tmp['stock_sku'] = $locationStock["sku"];
-                $tmp['relevance_code'] = $v['item']->relevance_code;
-                $tmp['verify_num'] = $locationStock['pick_num'];//自动验货
+                $tmp['item_id']                 = $v['item']["id"];
+                $tmp['pick_num']                = $locationStock['pick_num'];
+                $tmp['shipment_num']            = $locationStock["shipment_num"]??"";
+                $tmp['stock_sku']               = $locationStock["sku"];
+                $tmp['relevance_code']          = $v['item']->relevance_code;
+                $tmp['verify_num']              = $locationStock['pick_num'];//自动验货
 
                 OrderItemStockLocation::create($tmp);
 
