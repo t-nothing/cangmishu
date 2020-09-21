@@ -14,13 +14,12 @@ class WarehouseLocationController extends Controller
     public function index(BaseRequests $request)
     {
         $this->validate($request, [
-            'warehouse_id'  => 'required|integer|min:1',
             'keywords'      => 'string',
             'is_enabled'    => 'boolean',
         ]);
 
-
-        $features = WarehouseLocation::ofWarehouse($request->input('warehouse_id'))
+        $warehouse_id = app('auth')->warehouse()->id;
+        $features = WarehouseLocation::ofWarehouse($warehouse_id)
             ->where('owner_id',Auth::ownerId())
             ->when($request->filled('is_enabled'),function($query) use($request){
                 $query->where('is_enabled', $request->is_enabled);
