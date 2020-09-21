@@ -32,12 +32,6 @@ class CreateShelfRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'stock'                           => 'required|array',
             'stock.*'                         => 'required|array',
             'stock.*.stock_id' 				  => [
