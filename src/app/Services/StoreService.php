@@ -108,7 +108,7 @@ class StoreService
         $batchProduct->expiration_date         = isset($data['expiration_date']) && !empty($data['expiration_date']) ?strtotime($data['expiration_date']." 00:00:00"): null;
         $batchProduct->best_before_date        = isset($data['best_before_date']) && !empty($data['best_before_date'])?strtotime($data['best_before_date']." 00:00:00"): null;
         $batchProduct->production_batch_number = $data['production_batch_number']??'';
-        $batchProduct->remark                  = $data['remark'];
+        $batchProduct->remark                  = $data['remark']??"";
 
         app('log')->info('here');
         // 添加入库单记录
