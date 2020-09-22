@@ -27,8 +27,8 @@
       border: 1px solid #000000;
     }
     .table-bordered td div{
-      width:380px;
-      height: 25px;
+      width:350px;
+      height: 22px;
       word-break:keep-all;/* 不换行 */
       white-space:nowrap;/* 不换行 */
       overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
