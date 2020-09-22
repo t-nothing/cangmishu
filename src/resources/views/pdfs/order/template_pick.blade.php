@@ -26,6 +26,14 @@
     .table-bordered td {
       border: 1px solid #000000;
     }
+    .table-bordered td span{
+      width:400px;
+      height: 25px;
+      word-break:keep-all;/* 不换行 */
+      white-space:nowrap;/* 不换行 */
+      overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+      text-overflow:ellipsis;
+    }
     .qrcode{
       float: right;
       font-size: 15px;
@@ -77,7 +85,26 @@
 
       </div>
       <div style="margin-top: 30px;"></div>
-      
+<?php
+
+    $firstArr = $restArr = [];
+    $line_no = 0;
+    foreach ($order['order_items'] as $k => $item) {
+        
+        foreach ($item['stocks'] as $kk => $itemLocation) {
+            if($line_no < 30) {
+                $firstArr[] = $itemLocation;
+            }  else {
+                $restArr[] = $itemLocation;
+            }
+
+            $line_no++;
+        }
+    }
+
+
+    if($firstArr) {
+?>
     <table class="table  table-bordered text-center" >
         <thead>
           <tr>
@@ -86,17 +113,16 @@
             <th>@lang('message.batchPageBatchNo')</th>
             <th>@lang('message.orderPageSku')</th>
             <th>@lang('message.orderPageWarehouseLocation')</th>
-            <th>@lang('message.orderPagePickqty')</th>
+            <th width="100">@lang('message.orderPagePickqty')</th>
           </tr>
         </thead>
         <tbody>
           <?php $total = 0;$index = 0;?>
-          @forelse ($order['order_items'] as $k => $item)
-            @forelse ($item['stocks'] as $kk => $itemLocation)
+            @forelse ($firstArr as $kk => $itemLocation)
             <?php $index++;?>
             <tr>
               <td>{{ ($index) }}</td>
-              <td>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</td>
+              <td><span>{{ $item['name_cn'] }} </span> -  {{ $item['spec_name_cn'] }}</td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
@@ -104,10 +130,42 @@
             </tr>
             @empty
             @endforelse
-          @empty
-          @endforelse
         </tbody>
       </table>
+<?php
+    }
+    if($restArr) {
+?>   
+    <table class="table  table-bordered text-center" >
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>@lang('message.orderPageProduct')</th>
+            <th>@lang('message.batchPageBatchNo')</th>
+            <th>@lang('message.orderPageSku')</th>
+            <th>@lang('message.orderPageWarehouseLocation')</th>
+            <th width="100">@lang('message.orderPagePickqty')</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php $total = 0;$index = 0;?>
+            @forelse ($restArr as $kk => $itemLocation)
+            <?php $index++;?>
+            <tr>
+              <td>{{ ($index) }}</td>
+              <td><span>{{ $item['name_cn'] }}</span> - {{ $item['spec_name_cn'] }} </td>
+              <td> {{ $itemLocation['stock_sku'] }}</td>
+              <td>{{ $itemLocation['relevance_code'] }}</td>
+              <td>{{ $itemLocation['warehouse_location_code'] }}</td>
+              <td>{{ $itemLocation['pick_num'] }}</td>
+            </tr>
+            @empty
+            @endforelse
+        </tbody>
+      </table>
+<?php
+    }
+?>  
       <div class="row">
         <div class="col-md-12">
           @lang('message.orderPageRemark'): 
