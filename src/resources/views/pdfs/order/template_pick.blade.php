@@ -26,7 +26,7 @@
     .table-bordered td {
       border: 1px solid #000000;
     }
-    .table-bordered td span{
+    .table-bordered td div{
       width:400px;
       height: 25px;
       word-break:keep-all;/* 不换行 */
@@ -92,6 +92,8 @@
     foreach ($order['order_items'] as $k => $item) {
         
         foreach ($item['stocks'] as $kk => $itemLocation) {
+            $itemLocation["name_cn"] = $item['name_cn'];
+            $itemLocation["spec_name_cn"] = $item['spec_name_cn'];
             if($line_no < 30) {
                 $firstArr[] = $itemLocation;
             }  else {
@@ -122,7 +124,7 @@
             <?php $index++;?>
             <tr>
               <td>{{ ($index) }}</td>
-              <td><span>{{ $item['name_cn'] }} </span> -  {{ $item['spec_name_cn'] }}</td>
+              <td><div>{{ $itemLocation['name_cn'] }}  -  {{ $itemLocation['spec_name_cn'] }}</div></td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
@@ -160,7 +162,7 @@
             <?php $index++;?>
             <tr>
               <td>{{ ($index) }}</td>
-              <td><span>{{ $item['name_cn'] }}</span> - {{ $item['spec_name_cn'] }} </td>
+              <td><div>{{ $itemLocation['name_cn'] }} - {{ $itemLocation['spec_name_cn'] }}</div> </td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
