@@ -27,7 +27,7 @@
       border: 1px solid #000000;
     }
     .table-bordered td div{
-      width:400px;
+      width:380px;
       height: 25px;
       word-break:keep-all;/* 不换行 */
       white-space:nowrap;/* 不换行 */
