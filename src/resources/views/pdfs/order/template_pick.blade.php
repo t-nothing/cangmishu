@@ -132,7 +132,7 @@
             @endforelse
         </tbody>
       </table>
-      
+
       <div class="row">
         <div class="col-md-12">
           @lang('message.orderPageRemark'): 
@@ -142,7 +142,8 @@
     }
     if($restArr) {
 ?>   
-    <table class="table  table-bordered text-center" style="page-break-after: always;" >
+    <div  style="page-break-after:always;">
+    <table class="table  table-bordered text-center" >
         <thead>
           <tr>
             <th>#</th>
@@ -169,6 +170,7 @@
             @endforelse
         </tbody>
       </table>
+      </div>
 <?php
     }
 ?>  
