@@ -152,7 +152,7 @@ class StoreService
     {
    
         try {
-            $lock = Cache::lock(sprintf("orderpickAndOutLockV1:%s", $data["order_id"]), 5);
+            $lock = Cache::lock(sprintf("orderpickAndOutLockV1:%s", $data["order_id"]), 10);
             //加一个锁防止并发
             if ($lock->get()) {
 
