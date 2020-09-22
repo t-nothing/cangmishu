@@ -228,14 +228,27 @@ class BatchController extends Controller
 
         $pdf = PDF::setPaper('a4');
 
-        if($templateName == "pdfs.batch.template_batchno" )
-        {
-            $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '5')->setOption('margin-bottom', '0');
+        $fileName = sprintf("%s_%s_%s.pdf", $batch->id, template_download_name($templateName, "en"), md5($batch->id.$batch->created_at));
+        
+        $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
+        if(!file_exists($filePath)) {
+
+            if($templateName == "pdfs.batch.template_batchno" )
+            {
+                $pdf->setOption('page-width', '70')->setOption('page-height', '50')->setOption('margin-left', '0')->setOption('margin-right', '0')->setOption('margin-top', '5')->setOption('margin-bottom', '0');
+            }
+
+
+            $pdf->loadView($templateName, ['batch' => $batch->toArray(), 'showInStock'=>0])->save($filePath);
         }
 
-        $file = sprintf("%s_%s.pdf", $batch->batch_code, template_download_name($templateName));
+        if($request->filled("require_url") && $request->require_url == 1) {
 
-        return $pdf->loadView($templateName, ['batch' => $batch->toArray(), 'showInStock'=>0])->download($file);
+            $url = asset('storage/pdfs/'.$fileName);
+            return formatRet(0,trans("message.success"), ["url"=>$url]);
+        }
+
+        return response()->download($filePath, $fileName);
 
     }
 
