@@ -146,7 +146,7 @@
     if($restArrs) {
       foreach ($restArrs as $key => $restArr) {
 ?>   
-    <div  style="page-break-after:always;">
+    <div <?php if($key<count($restArrs)){ ?> style="page-break-after:always;"<?php }?>>
     <table class="table  table-bordered text-center" >
         <thead>
           <tr>
