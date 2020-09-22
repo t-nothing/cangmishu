@@ -132,11 +132,17 @@
             @endforelse
         </tbody>
       </table>
+      
+      <div class="row">
+        <div class="col-md-12">
+          @lang('message.orderPageRemark'): 
+          {{ $order['remark'] }} </div>
+      </div>
 <?php
     }
     if($restArr) {
 ?>   
-    <table class="table  table-bordered text-center" >
+    <table class="table  table-bordered text-center" style="page-break-after: always;" >
         <thead>
           <tr>
             <th>#</th>
@@ -166,11 +172,6 @@
 <?php
     }
 ?>  
-      <div class="row">
-        <div class="col-md-12">
-          @lang('message.orderPageRemark'): 
-          {{ $order['remark'] }} </div>
-      </div>
     </div>
   </div>
 </body>
