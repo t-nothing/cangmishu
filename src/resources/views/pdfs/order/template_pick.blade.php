@@ -94,7 +94,7 @@
         foreach ($item['stocks'] as $kk => $itemLocation) {
             $itemLocation["name_cn"] = $item['name_cn'];
             $itemLocation["spec_name_cn"] = $item['spec_name_cn'];
-            if($line_no < 30) {
+            if($line_no < 25) {
                 $firstArr[] = $itemLocation;
             }  else {
                 $restArr[] = $itemLocation;
@@ -142,7 +142,9 @@
       </div>
 <?php
     }
-    if($restArr) {
+    $restArrs = array_chunk($restArr, 30, true);
+    if($restArrs) {
+      foreach ($restArrs as $key => $restArr) {
 ?>   
     <div  style="page-break-after:always;">
     <table class="table  table-bordered text-center" >
@@ -174,6 +176,7 @@
       </table>
       </div>
 <?php
+      }
     }
 ?>  
     </div>
