@@ -109,8 +109,8 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>@lang('message.orderPageProduct')</th>
-            <th>@lang('message.batchPageBatchNo')</th>
+            <th width="400">@lang('message.orderPageProduct')</th>
+            <th >@lang('message.batchPageBatchNo')</th>
             <th>@lang('message.orderPageSku')</th>
             <th>@lang('message.orderPageWarehouseLocation')</th>
             <th width="100">@lang('message.orderPagePickqty')</th>
@@ -147,7 +147,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>@lang('message.orderPageProduct')</th>
+            <th  width="400">@lang('message.orderPageProduct')</th>
             <th>@lang('message.batchPageBatchNo')</th>
             <th>@lang('message.orderPageSku')</th>
             <th>@lang('message.orderPageWarehouseLocation')</th>
