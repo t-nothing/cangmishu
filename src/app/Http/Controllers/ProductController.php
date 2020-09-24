@@ -397,7 +397,7 @@ class ProductController extends Controller
     {
         app('log')->error('查看详情', ["product_id" => $product_id]);
         
-        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price'])
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price,total_stock_num'])
             ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())
             ->where('id', $product_id)
