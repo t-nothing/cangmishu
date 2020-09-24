@@ -119,7 +119,7 @@ class ShopProductController extends Controller
      **/
     function store(CreateShopProductRequest $request, int $shopId)
     {
-        $dbProducts = Product::ofWarehouse($request->warehouse_id)
+        $dbProducts = Product::ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id',app('auth')->ownerId())
             ->whereIn('id', $request->products)
             ->get()->keyBy('id');

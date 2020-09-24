@@ -314,13 +314,13 @@ class PurchaseController extends Controller
     public function show(BaseRequests $request, $id)
     {
         app('log')->info('查询采购单详情',$request->all());
-        $this->validate($request,[
-            'warehouse_id' => [
-                'required','integer','min:1'
-            ]
-        ]);
+        // $this->validate($request,[
+        //     'warehouse_id' => [
+        //         'required','integer','min:1'
+        //     ]
+        // ]);
 
-        $purchase = Purchase::where('warehouse_id',$request->warehouse_id)->where('owner_id',Auth::ownerId())
+        $purchase = Purchase::where('warehouse_id',app('auth')->warehouse()->id)->where('owner_id',Auth::ownerId())
             ->with([
                 'warehouse:id,name_cn',
                 'distributor:id,name_cn,name_en',
@@ -340,13 +340,13 @@ class PurchaseController extends Controller
     public function showLogs(BaseRequests $request, $id)
     {
         app('log')->info('查询采购单日志详情',$request->all());
-        $this->validate($request,[
-            'warehouse_id' => [
-                'required','integer','min:1'
-            ]
-        ]);
+        // $this->validate($request,[
+        //     'warehouse_id' => [
+        //         'required','integer','min:1'
+        //     ]
+        // ]);
 
-        $purchase = PurchaseItem::where('warehouse_id',$request->warehouse_id)->where('owner_id',Auth::ownerId())
+        $purchase = PurchaseItem::where('warehouse_id',app('auth')->warehouse()->id)->where('owner_id',Auth::ownerId())
             ->with([
                 'logs'
             ])

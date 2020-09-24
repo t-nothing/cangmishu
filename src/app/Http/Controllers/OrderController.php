@@ -32,15 +32,9 @@ class OrderController extends Controller
             'created_at_e' => 'date:Y-m-d',
             'status' => 'integer',
             'keywords' => 'string',
-            'delivery_date' => 'date_format:Y-m-d',
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ]
+            'delivery_date' => 'date_format:Y-m-d'
         ]);
-        $order = Order::ofWarehouse($request->warehouse_id)
+        $order = Order::ofWarehouse(app('auth')->warehouse()->id)
             ->with(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {

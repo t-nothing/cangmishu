@@ -28,7 +28,7 @@ class CreateShopProductRequest extends BaseRequests
     public function rules()
     {
         $arr = [
-            'warehouse_id'              => 'required|int|min:1',
+            // 'warehouse_id'              => 'required|int|min:1',
             'products'                  => 'required|array|max:100',
             'products.*'                => 'required|int|min:1',
         ];

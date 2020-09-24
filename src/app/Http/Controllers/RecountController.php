@@ -21,16 +21,16 @@ class RecountController extends Controller
             'created_at_b' => 'date:Y-m-d',
             'created_at_e' => 'date:Y-m-d',
             'keywords' => 'string',
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ]
+            // 'warehouse_id' =>  [
+            //     'required','integer','min:1',
+            //     Rule::exists('warehouse','id')->where(function($q){
+            //         $q->where('owner_id',Auth::ownerId());
+            //     })
+            // ]
         ]);
 
         $batchType = Recount::with('stocks')
-                            ->ofWarehouse($request->warehouse_id)
+                            ->ofWarehouse(app('auth')->warehouse()->id)
                             ->whose(Auth::ownerId())
                             ->when($request->filled('created_at_b'),function ($q) use ($request){
                                 return $q->where('created_at', '>', strtotime($request->input('created_at_b')));
