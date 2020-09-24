@@ -396,14 +396,9 @@ class ProductController extends Controller
     public  function  show(BaseRequests $request,$product_id)
     {
         app('log')->error('查看详情', ["product_id" => $product_id]);
-        $this->validate($request,[
-            'warehouse_id' => [
-                'required','min:1',
-                Rule::exists('warehouse','id')->where('owner_id',app('auth')->ownerId())
-            ]
-        ]);
+        
         $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price'])
-            ->ofWarehouse($request->warehouse_id)
+            ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())
             ->where('id', $product_id)
             ->first();
