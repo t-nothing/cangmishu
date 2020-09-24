@@ -26,12 +26,6 @@ class CreateProductRequest extends BaseRequests
     {
         $self = $this;
         $arr =  [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'category_id'               => [
                 'required','integer','min:1',
                 Rule::exists('category','id')->where(function($q){

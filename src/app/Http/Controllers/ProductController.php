@@ -114,7 +114,7 @@ class ProductController extends Controller
         $product->remark              = $request->input('remark', '');
         $product->photos              = $request->input('photos');
         $product->owner_id            = Auth::ownerId();
-        $product->warehouse_id	      = $request->warehouse_id;
+        $product->warehouse_id	      = app('auth')->warehouse()->id;
         $product->sale_price          = $specs[0]['sale_price'];
         $product->purchase_price      = $specs[0]['purchase_price'];
         $product->barcode             = $request->barcode??"";
