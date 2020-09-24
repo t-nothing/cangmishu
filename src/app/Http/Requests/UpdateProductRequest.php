@@ -39,6 +39,7 @@ class UpdateProductRequest extends BaseRequests
             'name_cn'                   => 'required|string|max:255',
             'remark'                    => 'string|max:255',
             'photos'                    => 'string|max:255',
+            'barcode'                   => 'sometimes|string|max:50',
             'specs'                     => 'required|array',
             'specs.*.id'                => 'required|int|min:0',
             'specs.*.relevance_code'    => ['required','string'],
