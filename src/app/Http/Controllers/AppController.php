@@ -55,9 +55,9 @@ class AppController extends  Controller
         try{
             $model = new AppAccount;
             $model->remark = $request->remark;
-            $model->app_key = Warehouse::find($request->warehouse_id)->code;
-            $model->app_secret = AppAccount::generateAppSecret($request->warehouse_id, $model->app_key);
-            $model->warehouse_id = $request->warehouse_id;
+            $model->app_key = Warehouse::find(app('auth')->warehouse()->id)->code;
+            $model->app_secret = AppAccount::generateAppSecret(app('auth')->warehouse()->id, $model->app_key);
+            $model->warehouse_id = app('auth')->warehouse()->id;
             $model->owner_id = $request->owner_id;
             $model->is_enabled_push = 1;
             $model->save();

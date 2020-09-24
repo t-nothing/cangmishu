@@ -33,7 +33,7 @@ class ProductSpecController extends Controller
         $recount = intval($request->recount);
         // return formatRet(0, '', $product->specs->toArray());
         $product = ProductSpec::leftjoin('product', 'product.id','=', 'product_spec.product_id')
-            ->where('product_spec.warehouse_id',$request->warehouse_id)
+            ->where('product_spec.warehouse_id',app('auth')->warehouse()->id)
             ->where('product_spec.owner_id',app('auth')->ownerId())
             ->when($recount, function($q) {
                 return $q->where('product_spec.total_stockin_times','>',0);

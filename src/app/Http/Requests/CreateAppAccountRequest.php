@@ -24,14 +24,8 @@ class CreateAppAccountRequest extends BaseRequests
      */
     public function rules()
     {
-        $warehouse_id = $this->warehouse_id;
+        // $warehouse_id = $this->warehouse_id;
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'remark'      => 'required|string|max:255',
         ];
     }
