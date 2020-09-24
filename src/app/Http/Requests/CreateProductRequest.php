@@ -42,6 +42,7 @@ class CreateProductRequest extends BaseRequests
             'name_cn'                   => 'required|string|max:255',
             'remark'                    => 'string|max:255',
             'photos'                    => 'string|max:255',
+            'barcode'                   => 'sometimes|string|max:50',
             'specs'                     => 'required|array',
             'specs.*.name_cn'           => 'required|string|max:50',
             // 'specs.*.net_weight'        => 'present|numeric',

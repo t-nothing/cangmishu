@@ -117,6 +117,7 @@ class ProductController extends Controller
         $product->warehouse_id	      = $request->warehouse_id;
         $product->sale_price          = $specs[0]['sale_price'];
         $product->purchase_price      = $specs[0]['purchase_price'];
+        $product->barcode             = $request->barcode??"";
         DB::beginTransaction();
   
         try{
@@ -153,6 +154,7 @@ class ProductController extends Controller
         $product->photos              = $request->photos;
         $product->sale_price          = $request->specs[0]['sale_price'];
         $product->purchase_price      = $request->specs[0]['purchase_price'];
+        $product->barcode             = $request->barcode??"";
         DB::beginTransaction();
         try{
             $product->save();

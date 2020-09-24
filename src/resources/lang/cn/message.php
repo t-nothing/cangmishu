@@ -183,7 +183,7 @@ return [
 
 
     'productRelevanceCodeIsUsed'  =>'SKU编码 :relevance_code 已被使用, 请更换',
-    'productAddFailed' =>'添加商品成功',
+    'productAddFailed' =>'添加商品失败',
     'productNotExist'=>'商品不存在',
     'productCannotDelete'=>'不允许删除此商品',
     'productUpdateFailed' => '修改商品失败',#
