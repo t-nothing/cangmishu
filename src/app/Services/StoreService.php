@@ -153,11 +153,11 @@ class StoreService
     {
    
         try {
+            //外面有事务了
             $lock = Cache::lock(sprintf("orderpickAndOutLockV1:%s", $data["order_id"]), 10);
             //加一个锁防止并发
             if ($lock->get()) {
 
-                app('db')->beginTransaction();
                 try {
                     $order = Order::lockForUpdate()->find($data["order_id"]);
                     if(!$order) 
@@ -175,16 +175,10 @@ class StoreService
 
                     //再出库
                     $this->out($pick, $data["delivery_date"], $order);
-                    app('db')->commit();
                 }catch(QueryException $ex) {
 
-                    app('db')->rollback();
                     throw new \Exception("请稍候再试", 1);
-                }catch(\Exception $ex) {
-                    app('db')->rollback();
-                    throw $ex;
                 }
-
                 
                 $lock->release();
             } else {
