@@ -102,7 +102,13 @@ class ProductController extends Controller
             }
         }
 
-
+        $barcode =  $request->barcode??"";
+        if($barcode != "") {
+            $existsCount = Product::where("barcode", $barcode)->where("warehouse_id", app('auth')->warehouse()->id)->count();
+            if($existsCount > 0) {
+                return formatRet(500, "条码已存在,请重新更换");
+            }
+        }
 
         $product = new Product;
         $product->category_id         = $request->category_id;
@@ -117,7 +123,7 @@ class ProductController extends Controller
         $product->warehouse_id	      = app('auth')->warehouse()->id;
         $product->sale_price          = $specs[0]['sale_price'];
         $product->purchase_price      = $specs[0]['purchase_price'];
-        $product->barcode             = $request->barcode??"";
+        $product->barcode             = $barcode;
         DB::beginTransaction();
   
         try{
@@ -146,6 +152,7 @@ class ProductController extends Controller
     {
         app('log')->info('编辑商品',$request->all());
         $product = Product::find($product_id);
+        $barcode =  $request->barcode??"";
         $product->load("specs");
         $product->category_id         = $request->category_id;
         $product->name_cn             = $request->name_cn;
@@ -154,6 +161,12 @@ class ProductController extends Controller
         $product->photos              = $request->photos;
         $product->sale_price          = $request->specs[0]['sale_price'];
         $product->purchase_price      = $request->specs[0]['purchase_price'];
+        if($product->barcode != $barcode) {
+            $existsCount = Product::where("barcode", $barcode)->where("warehouse_id", app('auth')->warehouse()->id)->count();
+            if($existsCount > 0) {
+                return formatRet(500, "条码已存在,请重新更换");
+            }
+        }
         $product->barcode             = $request->barcode??"";
         DB::beginTransaction();
         try{
