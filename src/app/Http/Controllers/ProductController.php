@@ -393,6 +393,9 @@ class ProductController extends Controller
 
     }
 
+    /**
+     * 商品详细
+     **/
     public  function  show(BaseRequests $request,$product_id)
     {
         app('log')->error('查看详情', ["product_id" => $product_id]);
@@ -411,4 +414,44 @@ class ProductController extends Controller
 
     }
 
+    /**
+     * 商品详细扫码
+     **/
+    public  function  scan(BaseRequests $request)
+    {
+        $this->validate($request, [
+            'barcode' => 'required|string|max:255'
+        ]);
+
+        $productId = 0;
+        //先查一下商品条码
+        $productInfo = Product::where("barcode", $request->barcode)
+            ->ofWarehouse(app('auth')->warehouse()->id)
+            ->where('owner_id', app('auth')->ownerId())->first();
+        if(!$productInfo) {
+            $specInfo = ProductSpec::where("barcode", $request->barcode)
+            ->ofWarehouse(app('auth')->warehouse()->id)
+            ->where('owner_id', app('auth')->ownerId())->first();
+            if(!$specInfo) {
+                return formatRet(500, trans("message.productNotExist"));
+            }
+
+            $productId = $specInfo->product_id;
+        } else {
+            $productId = $productInfo->id;
+        }
+
+        $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price,total_stock_num'])
+            ->ofWarehouse(app('auth')->warehouse()->id)
+            ->where('owner_id', app('auth')->ownerId())
+            ->where('id', $productId)
+            ->first();
+        if(!$product){
+            $product= [];
+        }else{
+            $product= $product->toArray();
+        }
+        return formatRet(0, "成功", $product);
+
+    }
 }
