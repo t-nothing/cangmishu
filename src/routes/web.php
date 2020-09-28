@@ -123,8 +123,9 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //商品
     Route::get('/products', 'ProductController@index');//货品库
-    Route::get('/products/{product_id}', 'ProductController@show');
     Route::get('/products/scan', 'ProductController@scan');//扫码
+    Route::get('/products/total', 'ProductController@total');//扫码
+    Route::get('/products/{product_id}', 'ProductController@show');
     Route::post('/products', 'ProductController@store');
     Route::put('/products/{product_id}', 'ProductController@update');
     Route::delete('/products/{product_id}', 'ProductController@destroy');

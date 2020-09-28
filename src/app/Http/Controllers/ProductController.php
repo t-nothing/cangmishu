@@ -428,6 +428,24 @@ class ProductController extends Controller
     }
 
     /**
+     * 汇总统计
+     */
+    public function total() {
+        $totalCount = Product::ofWarehouse(app('auth')->warehouse()->id)
+            ->where('owner_id', app('auth')->ownerId())
+            ->count();
+
+        $totalStockNum = Product::ofWarehouse(app('auth')->warehouse()->id)
+            ->where('owner_id', app('auth')->ownerId())
+            ->sum("total_stock_num");
+        
+        return formatRet(0, "成功", [
+            "count_product" =>  intval($totalCount),
+            "count_stock"   =>  intval($totalStockNum),
+        ]);
+    }
+
+    /**
      * 商品详细扫码
      **/
     public  function  scan(BaseRequests $request)
