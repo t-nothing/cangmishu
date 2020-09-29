@@ -125,4 +125,22 @@ class DistributorController extends Controller
         }
         return formatRet(500, trans("message.distributorDeleteFailed"));
     }
+
+    /**
+     * 供应商 - 查看
+     *
+     * @author liusen
+     */
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $distributor = Distributor::whose(Auth::id())->find($id);
+        if(!$distributor){
+            return formatRet(404, trans("message.distributorNotExist"), [], 404);
+        }
+        
+
+        return formatRet(0, '', $distributor->toArray());
+       
+    }
 }

@@ -116,6 +116,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     //供应商管理
     Route::get('/distributor', 'DistributorController@index');
+    Route::get('/distributor/{id}', 'DistributorController@show');
     Route::post('/distributor', 'DistributorController@store');
     Route::put('/distributor/{id}', 'DistributorController@update');
     Route::delete('/distributor/{id}', 'DistributorController@destroy');
