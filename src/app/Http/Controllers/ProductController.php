@@ -460,7 +460,7 @@ class ProductController extends Controller
             ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())->first();
         if(!$productInfo) {
-            $specInfo = ProductSpec::where("barcode", $request->barcode)
+            $specInfo = ProductSpec::where("relevance_code", $request->barcode)
             ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())->first();
             if(!$specInfo) {
