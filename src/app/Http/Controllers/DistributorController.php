@@ -66,7 +66,7 @@ class DistributorController extends Controller
         $distributor->name_en = $request->name_en??$request->name_cn;
 
         if ($distributor->save()) {
-            return formatRet(0);
+            return formatRet(0,'', $distributor->toArray());
         }
 
         return formatRet(500, trans("message.distributorAddFailed"));
