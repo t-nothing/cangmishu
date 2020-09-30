@@ -111,7 +111,10 @@ class ProductController extends Controller
         }
 
         $product = new Product;
-        $product->category_id         = $request->category_id;
+        if($request->category_id > 0){
+            $product->category_id         = $request->category_id;
+        }
+        
         $product->name_cn             = $request->name_cn;
         $product->name_en             = $request->input('name_en', $request->name_cn);
         $product->hs_code             = $request->hs_code;
