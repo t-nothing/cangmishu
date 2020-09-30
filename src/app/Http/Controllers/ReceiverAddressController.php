@@ -36,7 +36,7 @@ class ReceiverAddressController extends Controller
             $data = $request->all();
             $data = array_merge($data,['owner_id' =>$user_id]);
             $data = ReceiverAddress::create($data);
-            return formatRet(0, '', $data);
+            return formatRet(0, '', $data->toArray());
         }catch (\Exception $e){
             app('log')->info('仓秘书添加收件人地址失败',['msg' =>$e->getMessage()]);
             return formatRet(500, trans("message.receiverAddFailed"));
