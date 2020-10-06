@@ -612,7 +612,7 @@ class ProductStockController extends  Controller
             $stock->where('sku', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code);
         }
 
-        $stocks= $stock->paginate();
+        $stocks= $stock->paginate($request->input('page_size',100));
 
         $arr= [];
         foreach ($stocks as $stockLoation) {
