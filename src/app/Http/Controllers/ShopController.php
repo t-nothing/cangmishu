@@ -132,7 +132,7 @@ class ShopController extends Controller
         {
 
             $shop = new Shop;
-            $shop->warehouse_id         = $data['warehouse_id'];
+            $shop->warehouse_id         = app('auth')->warehouse()->id;
             $shop->name_cn              = $data['name_cn'];
             $shop->name_en              = $data['name_en']??$data['name_cn'];
             $shop->logo                 = $data['logo']??'';
@@ -237,6 +237,7 @@ class ShopController extends Controller
      */
     public function show(BaseRequests $request,$id)
     {
+        app('log')->info('查看店铺详细',$request->all());
         $shop = Shop::find($id);
 
         if (! $shop || $shop->owner_id != Auth::id()){

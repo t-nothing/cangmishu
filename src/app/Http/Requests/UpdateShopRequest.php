@@ -27,13 +27,8 @@ class UpdateShopRequest extends BaseRequests
     public function rules()
     {
 
+        
         $arr = [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'name_cn'                   => [
                'required','string','max:100',
                 Rule::unique('shop', 'name_cn')->where(function($q){
