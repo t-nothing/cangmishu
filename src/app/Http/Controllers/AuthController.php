@@ -219,7 +219,7 @@ class AuthController extends  Controller
         $miniProgram = Factory::miniProgram(config('wechat.mini_program_cms.default'));
         $data = $miniProgram->auth->session($request->code);
         if (isset($data['errcode'])) {
-            return formatRet(500, 'code已过期或不正确', [], 401);
+            return formatRet(500, 'code已过期或不正确', [], 200);
         }
 
         $openid = $data['openid'];
@@ -245,9 +245,9 @@ class AuthController extends  Controller
             if(!$user)
             {
                 //交给前端去判断要不要创新新用户还是绑定新用户
-                return formatRet(200, trans("message.userNotExist") , [
+                return formatRet(500, trans("message.userNotExist") , [
                     "user"  =>  null
-                ]);
+                ],200);
             } 
 
             $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
@@ -293,7 +293,7 @@ class AuthController extends  Controller
         $miniProgram = Factory::miniProgram(config('wechat.mini_program_cms.default'));
         $data = $miniProgram->auth->session($request->code);
         if (isset($data['errcode'])) {
-            return formatRet(500, 'code已过期或不正确', [], 401);
+            return formatRet(500, 'code已过期或不正确', [], 200);
         }
 
         $user = NULL;
