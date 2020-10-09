@@ -136,6 +136,13 @@ class ProductController extends Controller
             }
             ProductSpec::insert($specs);
             DB::commit();
+
+            $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price,total_stock_num'])
+            ->ofWarehouse(app('auth')->warehouse()->id)
+            ->where('owner_id', app('auth')->ownerId())
+            ->where('id', $$product->id)
+            ->first();
+
             return formatRet(0, '', $product->toArray());
         }catch (\Exception $e){
             DB::rollBack();
