@@ -78,9 +78,9 @@ class BatchController extends Controller
         try{
             $data = $request->all();
             $data["warehouse_id"] = app('auth')->warehouse()->id;;
-            app('batch')->create($data);
+            $batch = app('batch')->create($data);
             app('db')->commit();
-            return formatRet(0);
+            return formatRet(0, '', $batch->toArray());
         }catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('新增入库单失败',['msg' =>$e->getMessage()]);

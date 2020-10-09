@@ -53,6 +53,7 @@ class UserService{
             $user->nickname             = $request->nickname??$nickname[0];
             $user->avatar               = $request->avatar??env("APP_URL")."/images/default_avatar.png";
             $user->wechat_openid        = $request->wechat_openid??'';
+            $user->wechat_mini_program_open_id        = $request->wechat_mini_program_open_id??'';
             $user->save();
 
             $user->setActivated();
