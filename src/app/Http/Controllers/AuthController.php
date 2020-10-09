@@ -54,6 +54,28 @@ class AuthController extends  Controller
     }
 
     /**
+     *  创建TOKEN登录
+     * 生成一个新的 token，token 哈希来保证唯一性。
+     *
+     * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+     * @return \App\Models\Token|null
+     */
+    private function createToken($user, $type) {
+        $token = new Token;
+        $token->token_type = $type;
+        $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
+        $token->expired_at = Carbon::now()->addWeek();
+        $token->owner_user_id = $user->getAuthIdentifier();
+        $token->is_valid = Token::VALID;
+
+        if ($token->save()) {
+            return $token;
+        }
+
+        return;
+    }
+
+    /**
      * 手机短信验证码登录
      **/
     public function smsLogin(BaseRequests $request)
@@ -62,29 +84,6 @@ class AuthController extends  Controller
             'mobile'     => 'required|mobile|string',
             'code'      => 'required|string',
         ]);
-
-
-        /**
-         * 生成一个新的 token，token 哈希来保证唯一性。
-         *
-         * @param  \Illuminate\Contracts\Auth\Authenticatable $user
-         * @return \App\Models\Token|null
-         */
-        $createToken = function($user, $type)
-        {
-            $token = new Token;
-            $token->token_type = $type;
-            $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-            $token->expired_at = Carbon::now()->addWeek();
-            $token->owner_user_id = $user->getAuthIdentifier();
-            $token->is_valid = Token::VALID;
-
-            if ($token->save()) {
-                return $token;
-            }
-
-            return;
-        };
 
         $verify_code = VerifyCode::where('code',$request->code)->where('email',$request->mobile)->where('expired_at','>',time())->first();
         if(!$verify_code){
@@ -100,7 +99,7 @@ class AuthController extends  Controller
 
    
         \Log::info('找到用户', $user->toArray());
-        $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+        $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
         $userId = $user->id;
 
         $data['token'] = $token;
@@ -195,5 +194,146 @@ class AuthController extends  Controller
         }
 
         return formatRet(0, '', $data);
+    }
+
+    /**
+     * 处理小程序的自动登陆和注册
+     * @param $oauth
+     */
+    public function checkMiniProgramLogin(BaseRequests $request)
+    {
+        app('log')->info('检查小程序的自动登陆和注册',$request->all());
+        $this->validate($request, [
+            'code'              => 'required|string',
+            'nick_name'         => 'required|string',
+            'gender'            => 'string',
+            'country'           => 'string',
+            'city'              => 'string',
+            'avatar_url'        => 'url',
+            'language'          => 'required|string',
+            'mobile'            => 'string',
+        ]);
+
+        app('log')->info('处理小程序的自动登陆和注册',$request->all());
+        // 根据 code 获取微信 openid 和 session_key
+        $miniProgram = Factory::miniProgram(config('wechat.mini_program_cms.default'));
+        $data = $miniProgram->auth->session($request->code);
+        if (isset($data['errcode'])) {
+            return formatRet(401, 'code已过期或不正确', [], 401);
+        }
+
+        $openid = $data['openid'];
+        $weixinSessionKey = $data['session_key'];
+
+        $avatar_url = str_replace('/132', '/0', $request->avatar_url);//拿到分辨率高点的头像
+
+
+        $request->merge([
+            'email'                         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
+            'province'                      =>  $request->province??'',
+            'country'                       =>  $request->country??'',
+            'city'                          =>  $request->city??'',
+            'avatar'                        =>  $avatar_url,
+            'nickname'                      =>  $request->mobile??'',
+            'wechat_mini_program_open_id'   =>  $data['wechat_mini_program_open_id']??'',
+        ]);//合并参数
+
+        try {
+            $user = User::where('wechat_mini_program_open_id', $request->wechat_mini_program_open_id)->first();
+
+            //如果用户不存在
+            if(!$user)
+            {
+                //交给前端去判断要不要创新新用户还是绑定新用户
+                return formatRet(200, trans("message.userNotExist") , [
+                    "user"  =>  null
+                ]);
+            } 
+
+            $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+            $userId = $user->id;
+
+            $data['token'] = $token;
+            $data['modules'] = [];
+            $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+
+            return formatRet(0, '', $data);
+
+        } catch (\Exception $e) {
+            app('log')->error($e->getMessage());
+
+            return formatRet(500, trans("message.userNotExist"));
+        }
+        
+    }
+
+    /**
+     * 处理小程序的自动登陆和注册
+     * @param $oauth
+     */
+    public function autoMiniProgramLogin(BaseRequests $request)
+    {
+        app('log')->info('处理小程序的自动登陆和注册',$request->all());
+        $this->validate($request, [
+            'code'              => 'required|string',
+            'nick_name'         => 'required|string',
+            'gender'            => 'string',
+            'country'           => 'string',
+            'city'              => 'string',
+            'avatar_url'        => 'url',
+            'language'          => 'required|string',
+            'mobile'            => 'string',
+            'bind_username'     => 'string',
+            'bind_password'     => 'string',
+        ]);
+
+        app('log')->info('处理小程序的自动登陆和注册',$request->all());
+        // 根据 code 获取微信 openid 和 session_key
+        $miniProgram = Factory::miniProgram(config('wechat.mini_program_cms.default'));
+        $data = $miniProgram->auth->session($request->code);
+        if (isset($data['errcode'])) {
+            return formatRet(401, 'code已过期或不正确', [], 401);
+        }
+
+        $openid = $data['openid'];
+        $weixinSessionKey = $data['session_key'];
+
+        $avatar_url = str_replace('/132', '/0', $request->avatar_url);//拿到分辨率高点的头像
+
+
+        $request->merge([
+            'email'                         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
+            'province'                      =>  $request->province??'',
+            'country'                       =>  $request->country??'',
+            'city'                          =>  $request->city??'',
+            'avatar'                        =>  $avatar_url,
+            'nickname'                      =>  $request->mobile??'',
+            'wechat_mini_program_open_id'   =>  $data['wechat_mini_program_open_id']??'',
+        ]);//合并参数
+
+        try {
+            $user = User::where('wechat_mini_program_open_id', $request->wechat_mini_program_open_id)->first();
+
+            //如果用户不存在
+            if(!$user)
+            {
+                $user = app('user')->quickRegister($request);
+            } 
+
+            $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+            $userId = $user->id;
+
+            $data['token'] = $token;
+            $data['modules'] = [];
+            $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+
+            return formatRet(0, '', $data);
+
+        } catch (\Exception $e) {
+            app('log')->error($e->getMessage());
+
+            return formatRet(500, trans("message.userNotExist"));
+        }
+        
     }
 }

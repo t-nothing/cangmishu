@@ -71,7 +71,7 @@ class BatchService
         $batch->batchProducts()->createMany($stocks);
         BatchMarkLog::saveBatchCode($batch);
 
-        return true;
+        return $batch;
     }
 
     public function update($request,$batch)

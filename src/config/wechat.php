@@ -102,6 +102,18 @@ return [
     ],
 
     /*
+     * 仓秘书小程序
+     */
+    'mini_program_cms' => [
+        'default' => [
+            'app_id'  => env('WECHAT_MINI_PROGRAM_APPID', ''),
+            'secret'  => env('WECHAT_MINI_PROGRAM_SECRET', ''),
+            'token'   => env('WECHAT_MINI_PROGRAM_TOKEN', ''),
+            'aes_key' => env('WECHAT_MINI_PROGRAM_AES_KEY', ''),
+        ],
+    ],
+
+    /*
      * 微信支付
      */
     // 'payment' => [
