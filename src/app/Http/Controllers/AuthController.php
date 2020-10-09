@@ -219,7 +219,7 @@ class AuthController extends  Controller
         $miniProgram = Factory::miniProgram(config('wechat.mini_program_cms.default'));
         $data = $miniProgram->auth->session($request->code);
         if (isset($data['errcode'])) {
-            return formatRet(401, 'code已过期或不正确', [], 401);
+            return formatRet(500, 'code已过期或不正确', [], 401);
         }
 
         $openid = $data['openid'];
@@ -282,9 +282,10 @@ class AuthController extends  Controller
             'city'              => 'string',
             'avatar_url'        => 'url',
             'language'          => 'required|string',
+            'type'              => 'required|string|in:bind,register',
             'mobile'            => 'string',
-            'bind_username'     => 'string',
-            'bind_password'     => 'string',
+            'bind_username'     => 'required_if:type,bind|string',
+            'bind_password'     => 'required_if:type,bind|string',
         ]);
 
         app('log')->info('处理小程序的自动登陆和注册',$request->all());
@@ -292,8 +293,24 @@ class AuthController extends  Controller
         $miniProgram = Factory::miniProgram(config('wechat.mini_program_cms.default'));
         $data = $miniProgram->auth->session($request->code);
         if (isset($data['errcode'])) {
-            return formatRet(401, 'code已过期或不正确', [], 401);
+            return formatRet(500, 'code已过期或不正确', [], 401);
         }
+
+        $user = NULL;
+        if($request->type == "bind") {
+
+            $guard = app('auth')->guard();
+
+            if (! $data = $guard->login($request->only('bind_username', 'bind_password'))) {
+                \Log::info('登录失败', $request->all());
+                return formatRet(500, $guard->sendFailedLoginResponse());
+            }
+
+            $user = $guard->user();
+
+        }
+
+       
 
         $openid = $data['openid'];
         $weixinSessionKey = $data['session_key'];
@@ -312,13 +329,22 @@ class AuthController extends  Controller
         ]);//合并参数
 
         try {
-            $user = User::where('wechat_mini_program_open_id', $request->wechat_mini_program_open_id)->first();
 
-            //如果用户不存在
-            if(!$user)
-            {
-                $user = app('user')->quickRegister($request);
-            } 
+            if(!$user) {
+                $user = User::where('wechat_mini_program_open_id', $request->wechat_mini_program_open_id)->first();
+
+                //如果用户不存在
+                if(!$user)
+                {
+                    $user = app('user')->quickRegister($request);
+                } 
+            } else {
+                User::find($bindUser->id)->update(
+                    "wechat_mini_program_open_id", 
+                    $request->wechat_mini_program_open_id
+                );
+            }
+            
 
             $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
             $userId = $user->id;

@@ -106,10 +106,10 @@ return [
      */
     'mini_program_cms' => [
         'default' => [
-            'app_id'  => env('WECHAT_MINI_PROGRAM_APPID', ''),
-            'secret'  => env('WECHAT_MINI_PROGRAM_SECRET', ''),
-            'token'   => env('WECHAT_MINI_PROGRAM_TOKEN', ''),
-            'aes_key' => env('WECHAT_MINI_PROGRAM_AES_KEY', ''),
+            'app_id'  => env('WECHAT_MINI_CMS_PROGRAM_APPID', ''),
+            'secret'  => env('WECHAT_MINI_CMS_PROGRAM_SECRET', ''),
+            'token'   => env('WECHAT_MINI_CMS_PROGRAM_TOKEN', ''),
+            'aes_key' => env('WECHAT_MINI_CMS_PROGRAM_AES_KEY', ''),
         ],
     ],
 
