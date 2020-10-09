@@ -136,7 +136,7 @@ class ProductController extends Controller
             }
             ProductSpec::insert($specs);
             DB::commit();
-            return formatRet(0);
+            return formatRet(0, '', $product->toArray());
         }catch (\Exception $e){
             DB::rollBack();
             app('log')->error('新增货品失败',['msg'=>$e->getMessage()]);
