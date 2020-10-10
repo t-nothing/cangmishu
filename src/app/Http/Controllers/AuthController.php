@@ -353,8 +353,9 @@ class AuthController extends  Controller
                 } 
             } else {
                 User::find($user->id)->update(
-                    "wechat_mini_program_open_id", 
-                    $request->wechat_mini_program_open_id
+                    [
+                        "wechat_mini_program_open_id" => $request->wechat_mini_program_open_id
+                    ]
                 );
             }
             
