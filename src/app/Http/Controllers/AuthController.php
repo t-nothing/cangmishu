@@ -304,7 +304,11 @@ class AuthController extends  Controller
 
             $guard = app('auth')->guard();
 
-            if (! $data = $guard->login($request->only('bind_username', 'bind_password'))) {
+            $request->merge([
+                'email'=>$request->bind_username ,
+                'password'=>$request->bind_password
+            ]);
+            if (! $data = $guard->login($request->only('email', 'password'))) {
                 \Log::info('登录失败', $request->all());
                 return formatRet(500, $guard->sendFailedLoginResponse());
             }
@@ -336,7 +340,7 @@ class AuthController extends  Controller
             if(empty($request->wechat_mini_program_open_id)) {
                 throw new \Exception("OPEN ID 无法获取", 1);
             }
-            
+
             if(!$user) {
                 $user = User::where('wechat_mini_program_open_id', $request->wechat_mini_program_open_id)->first();
 
