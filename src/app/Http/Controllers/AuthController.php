@@ -304,11 +304,11 @@ class AuthController extends  Controller
 
             $guard = app('auth')->guard();
 
-            $request->merge([
-                'email'=>$request->bind_username ,
-                'password'=>$request->bind_password
-            ]);
-            if (! $data = $guard->login($request->only('email', 'password'))) {
+            $loginData = [
+                'email'     =>  $request->bind_username ,
+                'password'  =>  $request->bind_password
+            ];
+            if (! $data = $guard->login($loginData)) {
                 \Log::info('登录失败', $request->all());
                 return formatRet(500, $guard->sendFailedLoginResponse());
             }
