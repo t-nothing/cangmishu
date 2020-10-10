@@ -352,7 +352,7 @@ class AuthController extends  Controller
                     $user = app('user')->quickRegister($request);
                 } 
             } else {
-                User::find($bindUser->id)->update(
+                User::find($user->id)->update(
                     "wechat_mini_program_open_id", 
                     $request->wechat_mini_program_open_id
                 );
