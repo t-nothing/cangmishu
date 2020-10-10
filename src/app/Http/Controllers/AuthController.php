@@ -235,12 +235,15 @@ class AuthController extends  Controller
             'city'                          =>  $request->city??'',
             'avatar'                        =>  $avatar_url,
             'nickname'                      =>  $request->mobile??'',
-            'wechat_mini_program_open_id'   =>  $data['wechat_mini_program_open_id']??'',
+            'wechat_mini_program_open_id'   =>  $data['openid']??'',
         ]);//合并参数
 
         try {
             $user = User::where('wechat_mini_program_open_id', $request->wechat_mini_program_open_id)->first();
 
+            if(empty($request->wechat_mini_program_open_id)) {
+                throw new \Exception("OPEN ID 无法获取", 1);
+            }
             //如果用户不存在
             if(!$user)
             {
@@ -325,11 +328,15 @@ class AuthController extends  Controller
             'city'                          =>  $request->city??'',
             'avatar'                        =>  $avatar_url,
             'nickname'                      =>  $request->mobile??'',
-            'wechat_mini_program_open_id'   =>  $data['wechat_mini_program_open_id']??'',
+            'wechat_mini_program_open_id'   =>  $data['openid']??'',
         ]);//合并参数
 
         try {
 
+            if(empty($request->wechat_mini_program_open_id)) {
+                throw new \Exception("OPEN ID 无法获取", 1);
+            }
+            
             if(!$user) {
                 $user = User::where('wechat_mini_program_open_id', $request->wechat_mini_program_open_id)->first();
 
