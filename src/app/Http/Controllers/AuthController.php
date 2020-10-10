@@ -136,7 +136,10 @@ class AuthController extends  Controller
             if (Cache::tags(['wechat'])->has($request->qr_key)) {
                 $data = Cache::tags(['wechat'])->get($request->qr_key);
                 if($data['is_valid']) {
-                    User::find($guard->user()->id)->update("wechat_openid", $data['open_id']);
+                    User::find($guard->user()->id)->update(
+                        [
+                            "wechat_openid" => $data['open_id']
+                        ]);
                 }
             }
         }
