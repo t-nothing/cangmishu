@@ -210,7 +210,7 @@ class AuthController extends  Controller
             'country'           => 'string',
             'city'              => 'string',
             'avatar_url'        => 'url',
-            'language'          => 'required|string',
+            'language'          => 'string',
             'mobile'            => 'string',
         ]);
 
@@ -281,7 +281,7 @@ class AuthController extends  Controller
             'country'           => 'string',
             'city'              => 'string',
             'avatar_url'        => 'url',
-            'language'          => 'required|string',
+            'language'          => 'string',
             'type'              => 'required|string|in:bind,register',
             'mobile'            => 'string',
             'bind_username'     => 'required_if:type,bind|string',
