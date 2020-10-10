@@ -317,6 +317,8 @@ class AuthController extends  Controller
 
         }
 
+        app("log")->info("mp", $data);
+
        
 
         $openid = $data['openid'];
