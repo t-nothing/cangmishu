@@ -294,8 +294,8 @@ class AuthController extends  Controller
         app('log')->info('处理小程序的自动登陆和注册',$request->all());
         // 根据 code 获取微信 openid 和 session_key
         $miniProgram = Factory::miniProgram(config('wechat.mini_program_cms.default'));
-        $data = $miniProgram->auth->session($request->code);
-        if (isset($data['errcode'])) {
+        $miniData = $miniProgram->auth->session($request->code);
+        if (isset($miniData['errcode'])) {
             return formatRet(500, 'code已过期或不正确', [], 200);
         }
 
@@ -317,12 +317,12 @@ class AuthController extends  Controller
 
         }
 
-        app("log")->info("mp", $data);
+        app("log")->info("mp", $miniData);
 
        
 
-        $openid = $data['openid'];
-        $weixinSessionKey = $data['session_key'];
+        $openid = $miniData['openid'];
+        $weixinSessionKey = $miniData['session_key'];
 
         $avatar_url = str_replace('/132', '/0', $request->avatar_url);//拿到分辨率高点的头像
 
