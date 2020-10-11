@@ -27,6 +27,7 @@ class ShopProductController extends Controller
             'created_at_b'      => 'date_format:Y-m-d',
             'created_at_e'      => 'date_format:Y-m-d|after_or_equal:created_at_b',
             'keywords'          => 'string|max:255',
+            'shelf_status'      =>  'string|in:on,off'
         ]);
         $batchs =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
             ->with("specs")
@@ -40,6 +41,15 @@ class ShopProductController extends Controller
             })
             ->when($request->filled('keywords'),function ($q) use ($request){
                 return $q->hasKeyword($request->input('keywords'));
+            })
+            ->when($request->filled('shelf_status'),function ($q) use ($request){
+                if($request->shelf_status == 'on') {
+                    return $q->where('is_shelf', 1);
+                } elseif($request->shelf_status == 'off') {
+                    return $q->where('is_shelf', 0);
+                } 
+                return $q;
+                
             })
             ->latest()->paginate($request->input('page_size',10), [
                 'shop_product.id',
