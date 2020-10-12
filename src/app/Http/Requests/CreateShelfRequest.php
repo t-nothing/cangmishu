@@ -56,4 +56,19 @@ class CreateShelfRequest extends BaseRequests
             ],
         ];
     }
+
+    public function attributes()
+    {
+        return [
+            'batch_id'              => 'ID',
+            'stock'                 => '上架清单',
+            'stock.*.stock_id'      =>  '上架清单明细',
+            'stock.*.stockin_num'   =>  '上架清单数量',
+            'stock.*.ean'           =>  '上架EAN码',
+            'stock.*.expiration_date'                   =>  '上架过期时间',
+            'stock.*.best_before_date'                  =>  '上架最佳食用期',
+            'stock.*.production_batch_number'           =>  '上架生产批次号',
+            'stock.*.code'                              =>  '上架货位',
+        ];
+    }
 }
