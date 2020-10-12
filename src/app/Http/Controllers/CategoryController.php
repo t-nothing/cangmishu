@@ -23,6 +23,7 @@ class CategoryController extends Controller
             'no_pager'     => 'boolean',
             'no_feature'   => 'boolean',
         ]);
+        app('log')->info('拉取商品分类', $request->all());
 
         $categories = Category::ofWarehouse(app('auth')->warehouse()->id);
 
