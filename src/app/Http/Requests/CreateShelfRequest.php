@@ -25,7 +25,7 @@ class CreateShelfRequest extends BaseRequests
      */
     public function rules()
     {
-        app('log')->info('入库上架', $this->all());
+        // app('log')->info('入库上架', $this->all());
         return [
             'batch_id'                        => [
                 'required','integer','min:1',
@@ -45,8 +45,8 @@ class CreateShelfRequest extends BaseRequests
             'stock.*.box_code' 		          => 'sometimes|string',
             'stock.*.distributor_code' 		  => 'sometimes|string|max:255',
             'stock.*.ean' 				      => 'required|string|max:255',
-            'stock.*.expiration_date' 		  => 'date_format:Y-m-d',
-            'stock.*.best_before_date'        => 'date_format:Y-m-d',
+            // 'stock.*.expiration_date' 		  => 'date_format:Y-m-d',
+            // 'stock.*.best_before_date'        => 'date_format:Y-m-d',
             'stock.*.production_batch_number' => 'string|max:255',
             'stock.*.remark'                  => 'sometimes|string|max:255',
             'stock.*.code'                    => [
