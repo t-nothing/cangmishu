@@ -25,6 +25,7 @@ class CreateShelfRequest extends BaseRequests
      */
     public function rules()
     {
+        app('log')->info('入库上架', $this->all());
         return [
             'batch_id'                        => [
                 'required','integer','min:1',
