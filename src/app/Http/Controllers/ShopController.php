@@ -71,6 +71,7 @@ class ShopController extends Controller
             $shop->email                = $data['email']??'';
             $shop->owner_id             = Auth::ownerId();
             $shop->remark_cn            = $data['remark']??'';
+            $shop->remark_en            = $data['remark']??'';
             $shop->is_closed            = 0;
             $shop->is_stock_show        = 1;
             $shop->is_price_show        = 1;
