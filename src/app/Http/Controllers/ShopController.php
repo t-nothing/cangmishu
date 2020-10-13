@@ -26,7 +26,7 @@ class ShopController extends Controller
             'created_at_e'      => 'date_format:Y-m-d|after_or_equal:created_at_b',
             'keywords'          => 'string|max:255',
         ]);
-        $batchs =   Shop::ofWarehouse(app('auth')->warehouse()->id)
+        $shops =   Shop::ofWarehouse(app('auth')->warehouse()->id)
             ->with('senderAddress')
             ->where('owner_id',Auth::ownerId())
             ->when($request->filled('created_at_b'),function ($q) use ($request){
@@ -40,14 +40,8 @@ class ShopController extends Controller
             })
             ->latest()->paginate($request->input('page_size',10));
 
-            $re = $batchs->toArray();
+            $re = $shops->toArray();
 
-//
-            $data = collect($re['data'])->map(function($v){
-                unset($v['batch_products']);
-                return $v;
-            })->toArray();
-            $re['data'] = $data;
         return formatRet(0,'',$re);
     }
 
