@@ -37,7 +37,11 @@
     }
   </style>
 </head>
-
+<?php
+  
+    $data_count = count($batch['batch_products']);
+    $page_count = ceil($data_count/10+ (($data_count-10)/15));
+?>
 <body>
   <div class="container-fluid" style="position: relative;">
     <div class="qrcode" style="position: absolute; right: 0px; ">
@@ -47,7 +51,7 @@
 
       </div>
      </div>
-    <h2 align="center">@lang('message.batchPage') </h2>
+    <h2 align="center">@lang('message.batchPage') <?php  if($page_count>1){?>1/<?php echo $page_count?> <?php }?></h2>
     <table width="100%" border="0" align="center" style="margin-top: 30px;">
       <tr>
         <td width="33%">@lang('message.batchPageDate') 
@@ -66,8 +70,6 @@
 
     $firstArr = $restArr = [];
     $line_no = 0;
-    $data_count = count($batch['batch_products']);
-    $page_count = ceil($data_count/10+ (($data_count-10)/15));
     foreach ($batch['batch_products'] as $k => $product) {
         
         if($line_no < 10) {
@@ -146,7 +148,7 @@
 
       </div>
      </div>
-    <h2 align="center">@lang('message.batchPage') </h2>
+    <h2 align="center">@lang('message.batchPage') <?php echo $key+2?>/<?php echo $page_count?> </h2>
     <table width="100%" border="0" align="center" style="margin-top: 30px;">
       <tr>
         <td width="33%">@lang('message.batchPageDate') 
