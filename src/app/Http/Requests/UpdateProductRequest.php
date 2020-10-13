@@ -28,6 +28,8 @@ class UpdateProductRequest extends BaseRequests
      */
     public function rules()
     {
+        app('log')->info('保存商品',$this->all());
+
         $arr = [
             'category_id'               => [
                 'required','integer','min:1',
