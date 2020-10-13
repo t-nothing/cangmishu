@@ -38,7 +38,10 @@ class BatchTypeController extends Controller
        app('log')->info('新增入库单分类', $request->all());
         try{
             $data = $request->all();
-            $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
+            $data = array_merge($data, [
+              'owner_id' =>Auth::ownerId(), 
+              'warehouse_id'=>app('auth')->warehouse()->id
+            ]);
             BatchType::create($data);
             return formatRet(0);
         }catch (\Exception $e){
