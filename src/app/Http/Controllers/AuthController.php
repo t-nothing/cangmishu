@@ -303,6 +303,9 @@ class AuthController extends  Controller
         }
 
         $user = NULL;
+        if(trim($request->bind_username??"") != "") {
+            $request->type = "bind";
+        }
         if($request->type == "bind") {
 
             $guard = app('auth')->guard();
