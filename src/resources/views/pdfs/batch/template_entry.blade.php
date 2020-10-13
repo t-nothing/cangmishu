@@ -59,10 +59,27 @@
     <table width="100%" border="0"  align="center">
       <tr>
         <td width="33%">@lang('message.batchPageDistributor')：{{ $batch['distributor']['name_cn'] }}</td>
-        <td>@lang('message.batchPageRemark')：{{ $batch['remark'] }}</td>
+        <td></td>
       </tr>
     </table>
-    
+<?php
+
+    $firstArr = $restArr = [];
+    $line_no = 0;
+    $data_count = count($batch['batch_products']);
+    $page_count = ceil($data_count/10+ (($data_count-10)/15));
+    foreach ($batch['batch_products'] as $k => $product) {
+        
+        if($line_no < 10) {
+            $firstArr[] = $product;
+        }  else {
+            $restArr[] = $product;
+        }
+
+        $line_no++;
+    }
+    if($firstArr) {
+?>
     <table class="table  table-bordered text-center" style="margin-top: 30px;">
       <thead>
         <tr>
@@ -80,7 +97,7 @@
       </thead>
       <tbody>
           <?php $total = 0; $remarks = [];?>
-        @forelse ($batch['batch_products'] as $k => $product)
+        @forelse ($firstArr as $k => $product)
           <?php $total += $product['purchase_price'];?>
           <?php if(!empty($product['remark'])) $remarks[] = sprintf("%s : %s; ",$product['spec']['product']['name_cn'],$product['remark'] );?>
         <tr>
@@ -104,7 +121,7 @@
     <table width="100%" border="0"  align="center" class="table table-bordered ">
       <tr>
         <td width="240px">@lang('message.batchPageInRemark')：</td>
-        <td height="100px"><?php echo  implode("<br/>", $remarks)?></td>
+        <td height="100px">{{ $batch['remark'] }} <br/><?php echo  implode("<br/>", $remarks)?></td>
       </tr>
     </table>
 
@@ -115,6 +132,77 @@
         <td >@lang('message.batchPageKeeper')：</td>
       </tr>
     </table>
+<?php
+    }
+    $restArrs = array_chunk($restArr, 15, true);
+    if($restArrs) {
+      foreach ($restArrs as $key => $restArr) {
+?>
+    <div <?php if($key<count($restArrs)){ ?> style="page-break-before: always;"<?php }?>>
+    <div class="qrcode" style="position: absolute; right: 0px; ">
+        <img src="{{ $batch['batch_code_barcode'] }}">
+     
+        <div style="font-size: 18px; color: red; border-bottom: 2px solid #000000"><b style="color: black">NO.</b> {{ $batch['confirmation_number'] }}
+
+      </div>
+     </div>
+    <h2 align="center">@lang('message.batchPage') </h2>
+    <table width="100%" border="0" align="center" style="margin-top: 30px;">
+      <tr>
+        <td width="33%">@lang('message.batchPageDate') 
+：{{ date("Y-m-d", strtotime($batch['created_at'])) }}</td>
+        <td width="33%">@lang('message.batchPageWarehouse')：{{ $batch['warehouse']['name_cn'] }}</td>
+        <td>@lang('message.batchPageType')：{{ $batch['batch_type']['name'] }}</td>
+      </tr>
+    </table>
+    <table width="100%" border="0"  align="center">
+      <tr>
+        <td width="33%">@lang('message.batchPageDistributor')：{{ $batch['distributor']['name_cn'] }}</td>
+        <td></td>
+      </tr>
+    </table>
+    <table class="table  table-bordered text-center" style="margin-top: 30px;">
+      <thead>
+        <tr>
+          <th width="60px">@lang('message.batchPageNo')</th>
+          <th width="180px">@lang('message.batchPageSku')</th>
+          <th >@lang('message.batchPageProductName')</th>
+          <th width="120px">@lang('message.batchPageSpecName')</th>
+          <th width="80px">@lang('message.batchPagePurcharseQty')</th>
+          <?php if($showInStock??0){?>
+            <th class="no-print" width="80px">@lang('message.batchPageActualQty')</th>
+            <th class="no-print">@lang('message.batchPageBatchNo')</th>
+          <?php }?>
+          <th width="100px">@lang('message.batchPagePurcharsePrice')</th>
+        </tr>
+      </thead>
+      <tbody>
+          <?php $total = 0; $remarks = [];?>
+        @forelse ($restArr as $k => $product)
+          <?php $total += $product['purchase_price'];?>
+          <?php if(!empty($product['remark'])) $remarks[] = sprintf("%s : %s; ",$product['spec']['product']['name_cn'],$product['remark'] );?>
+        <tr>
+          <td>{{ $k+1 }}</td>
+          <td><img src="{{ $product['relevance_code_barcode'] }}">
+              <p>{{ $product['relevance_code'] }}</p></td>
+          <td>{{ $product['spec']['product']['name_cn'] }}</td>
+          <td>{{$product['spec']['name_cn']}}</td>
+          <td>{{ $product['need_num'] }}</td>
+            <?php if($showInStock??0){?>
+            <td class="no-print">{{ $product['stockin_num'] }}</td>
+            <td class="no-print">{{ $product['sku'] }}</td>
+            <?php }?>
+          <td>{{ $product['purchase_price'] }}</td>
+        </tr>
+        @empty
+        @endforelse
+      </tbody>
+    </table>
+    </div>
+<?php
+      }
+    }
+?>  
   </div>
 </body>
 </html>
