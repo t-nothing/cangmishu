@@ -24,6 +24,23 @@
     .table-bordered td {
       border: 1px solid #000000;
     }
+    .table-bordered td div{
+      width:350px;
+      height: 22px;
+      word-break:keep-all;/* 不换行 */
+      white-space:nowrap;/* 不换行 */
+      overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+      text-overflow:ellipsis;
+    }
+    .table-bordered td span{
+      width:100px;
+      height: 22px;
+      display: block;
+      word-break:keep-all;/* 不换行 */
+      white-space:nowrap;/* 不换行 */
+      overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+      text-overflow:ellipsis;
+    }
     @page {
       size: A4;
       margin: 2mm 2mm;
@@ -106,8 +123,8 @@
           <td>{{ $k+1 }}</td>
           <td><img src="{{ $product['relevance_code_barcode'] }}">
               <p>{{ $product['relevance_code'] }}</p></td>
-          <td>{{ $product['spec']['product']['name_cn'] }}</td>
-          <td>{{$product['spec']['name_cn']}}</td>
+              <td><div>{{ $product['spec']['product']['name_cn'] }}</div></td>
+              <td><span>{{$product['spec']['name_cn']}}</span></td>
           <td>{{ $product['need_num'] }}</td>
             <?php if($showInStock??0){?>
             <td class="no-print">{{ $product['stockin_num'] }}</td>
@@ -187,8 +204,8 @@
           <td>{{ $k+1 }}</td>
           <td><img src="{{ $product['relevance_code_barcode'] }}">
               <p>{{ $product['relevance_code'] }}</p></td>
-          <td>{{ $product['spec']['product']['name_cn'] }}</td>
-          <td>{{$product['spec']['name_cn']}}</td>
+              <td><div>{{ $product['spec']['product']['name_cn'] }}</div></td>
+              <td><span>{{$product['spec']['name_cn']}}</span></td>
           <td>{{ $product['need_num'] }}</td>
             <?php if($showInStock??0){?>
             <td class="no-print">{{ $product['stockin_num'] }}</td>
