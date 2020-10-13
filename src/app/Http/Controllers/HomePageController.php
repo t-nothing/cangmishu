@@ -55,10 +55,10 @@ class HomePageController extends Controller
         ];
 
         $sql = "select 
-(select sum(total_stock_num)  from `product` where warehouse_id = ?) as all_count,
-(select sum(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
-(select sum(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
-(select sum(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y' ) = date_format( curdate( ) , '%y' ) ) as year_count";
+(select count(total_stock_num)  from `product` where warehouse_id = ?) as all_count,
+(select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
+(select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
+(select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y' ) = date_format( curdate( ) , '%y' ) ) as year_count";
         $product = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
 
         $product = [
