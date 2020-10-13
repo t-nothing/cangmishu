@@ -30,6 +30,9 @@ class UpdateProductRequest extends BaseRequests
     {
         app('log')->info('保存商品',$this->all());
 
+        app('log')->info('owner_id', [
+            'owner_id'=>Auth::ownerId()
+        ]);
         $arr = [
             'category_id'               => [
                 'required','integer','min:1',
