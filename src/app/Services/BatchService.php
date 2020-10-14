@@ -16,6 +16,7 @@ class BatchService
     {
         $stocks = [];
         $batch_num  = 0;
+        $total_purchase_price = 0;
 
         foreach ($request['product_stock'] as $k => $v) {
             // 检查入库单商品外部编码
@@ -40,6 +41,8 @@ class BatchService
                 'status'           => Product::PRODUCT_STATUS_PREPARE,
                 'sku'	           => ProductSpec::newSku($spec),
             ];
+
+            $total_purchase_price += $v['purchase_price'];
         }
         $data = [
             "warehouse_id"        => $request['warehouse_id'],
@@ -47,6 +50,7 @@ class BatchService
             "confirmation_number" => isset($request['confirmation_number'])?$request['confirmation_number']:"",
             "distributor_id"      => isset($request['distributor_id'])?$request['distributor_id']:0,
             "need_num"            => $batch_num,
+            "total_purchase_price"=> $total_purchase_price,
             "status"              => Batch::STATUS_PREPARE,
             "owner_id"            => Auth::ownerId(),
         ];
