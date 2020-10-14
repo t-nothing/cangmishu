@@ -26,6 +26,14 @@
     .table-bordered td {
       border: 1px solid #000000;
     }
+    .table-bordered td div{
+      width:550px;
+      height: 22px;
+      word-break:keep-all;/* 不换行 */
+      white-space:nowrap;/* 不换行 */
+      overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+      text-overflow:ellipsis;
+    }
     .qrcode{
       float: right;
       font-size: 15px;
@@ -56,7 +64,11 @@
 
 
 </head>
-
+<?php
+    $pre_count = 25;
+    $data_count = count($order['order_items']);
+    $page_count = ceil($data_count/$pre_count+ (($data_count-$pre_count)/$pre_count));
+?>
 <body>
   <div class="container-fluid">
     <div class="A4"> 
@@ -65,7 +77,7 @@
         <img src="{{ $order['out_sn_barcode'] }}">
         <p>{{ $order['out_sn'] }}</p>
       </div>
-      <h3 class="text-center">@lang('message.orderPage')</h3>
+      <h2 class="text-center">@lang('message.orderPage') </h2>
 
       <div class="row" style="margin-top: 30px;">
         <div class="col-md-12" style="font-size:16px;">{{ $order['order_type']['name'] }}</div>
@@ -87,7 +99,24 @@
           </td>
         </tr>
       </table>
+<?php
 
+    $firstArr = $restArr = [];
+    $line_no = 0;
+    foreach ($order['order_items'] as $k => $item) {
+        
+        if($line_no < $pre_count) {
+            $firstArr[] = $item;
+        }  else {
+            $restArr[] = $item;
+        }
+
+        $line_no++;
+    }
+
+    $line_no = 0;
+    if($firstArr) {
+?>
 
       
     <table class="table  table-bordered text-center" >
@@ -101,11 +130,11 @@
           </tr>
         </thead>
         <tbody>
-          <?php $total = 0;?>
-          @forelse ($order['order_items'] as $k => $item)
+          @forelse ($firstArr as $k => $item)
+          <?php $line_no++;?>
             <tr>
-              <td>{{ $k+1 }}</td>
-              <td>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</td>
+              <td>{{ $line_no+1 }}</td>
+              <td><div>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</div></td>
               <td> {{ $item['relevance_code'] }}</td>
               <td>{{ $item['amount'] }}</td>
               <td>{{ $item['pick_num'] }}</td>
@@ -114,6 +143,10 @@
           @endforelse
         </tbody>
       </table>
+<?php
+    }
+
+?>
       <div class="row">
         <div class="col-md-12">
           @lang('message.orderPageRemark')：
@@ -126,6 +159,42 @@
           {{ $order['warehouse']['name_cn'] }}
          </div>
       </div>
+<?php
+      $restArrs = array_chunk($restArr, $pre_count, true);
+      if($restArrs) {
+        foreach ($restArrs as $key => $restArr) {
+?>
+        <div <?php if($key<count($restArrs)){ ?> style="page-break-before: always;"<?php }?>>
+    <table class="table  table-bordered text-center" >
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>@lang('message.orderPageProduct')</th>
+            <th>@lang('message.orderPageSku')</th>
+            <th>@lang('message.orderPageOrderQty')</th>
+            <th>@lang('message.orderPageOutboundQty')</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php $total = 0;?>
+          @forelse ($restArr as $k => $item)
+              <?php $line_no++;?>
+            <tr>
+              <td>{{ $line_no+1 }}</td>
+              <td><div>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</div></td>
+              <td> {{ $item['relevance_code'] }}</td>
+              <td>{{ $item['amount'] }}</td>
+              <td>{{ $item['pick_num'] }}</td>
+            </tr>
+          @empty
+          @endforelse
+        </tbody>
+      </table>
+        </div>
+<?php
+        }
+      }
+?>
     </div>
   </div>
 </body>
