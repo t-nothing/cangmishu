@@ -303,7 +303,7 @@ class AuthController extends  Controller
         }
 
         $user = NULL;
-        if(trim($request->bind_username??"") != "") {
+        if(trim($request->bind_username??"") != "" && trim($request->bind_password??"") != "") {
             $request->type = "bind";
         }
         if($request->type == "bind") {
