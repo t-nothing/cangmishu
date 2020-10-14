@@ -65,8 +65,7 @@ class ProductController extends Controller
      **/
     public function show(BaseRequests $request, int $id)
     {
-        $shopProduct = ShopProduct::with("shop")
-            ->where('is_shelf', 1)->findOrFail($id);
+        $shopProduct = ShopProduct::with("shop")->findOrFail($id);
 
         if ( !$shopProduct || !$shopProduct->shop ){
             return formatRet(404,'商品不存在', 404);
