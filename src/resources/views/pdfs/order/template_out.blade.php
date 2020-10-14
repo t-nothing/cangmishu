@@ -105,7 +105,7 @@
     $line_no = 0;
     foreach ($order['order_items'] as $k => $item) {
         
-        if($line_no < $pre_count) {
+        if($line_no < 20) {
             $firstArr[] = $item;
         }  else {
             $restArr[] = $item;
@@ -133,7 +133,7 @@
           @forelse ($firstArr as $k => $item)
           <?php $line_no++;?>
             <tr>
-              <td>{{ $line_no+1 }}</td>
+              <td>{{ $line_no }}</td>
               <td><div>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</div></td>
               <td> {{ $item['relevance_code'] }}</td>
               <td>{{ $item['amount'] }}</td>
@@ -180,7 +180,7 @@
           @forelse ($restArr as $k => $item)
               <?php $line_no++;?>
             <tr>
-              <td>{{ $line_no+1 }}</td>
+              <td>{{ $line_no }}</td>
               <td><div>{{ $item['name_cn'] }}{{ $item['spec_name_cn'] }}</div></td>
               <td> {{ $item['relevance_code'] }}</td>
               <td>{{ $item['amount'] }}</td>
