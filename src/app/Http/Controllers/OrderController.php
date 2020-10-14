@@ -148,12 +148,13 @@ class OrderController extends Controller
                 
             }
             app('db')->commit();
+            return formatRet(0,trans("message.orderAddSuccess"), $order->toArray());
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('新增出库单失败',['msg'=>$e->getMessage()]);
             return formatRet(500, trans("message.orderAddFailed"));
         }
-        return formatRet(0,trans("message.orderAddSuccess"));
+        
     }
 
 //    public function destroy(BaseRequests $request,$order_id)
