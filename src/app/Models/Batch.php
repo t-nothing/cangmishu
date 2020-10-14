@@ -17,7 +17,7 @@ class Batch extends Model
     
     protected $table = 'batch';
 
-    protected  $fillable = ['type_id','warehouse_id','batch_code','plan_time','over_time','distributor_id','remark','confirmation_number','owner_id','status','need_num'];
+    protected  $fillable = ['type_id','warehouse_id','batch_code','plan_time','over_time','distributor_id','remark','confirmation_number','owner_id','status','need_num','total_purchase_price'];
 
     protected $guarded  =[];
     /**
