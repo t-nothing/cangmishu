@@ -37,6 +37,7 @@ class PickAndOutRequest extends BaseRequests
             ],
             'express_code'           => 'string|string|max:255',
             'express_num'            => 'string|max:255',
+            'pick_remark'            => 'string|max:255',
             'delivery_date'          => 'required|string|date_format:Y-m-d',
             'items'                  => 'required|array',
             'items.*.order_item_id'  => [
