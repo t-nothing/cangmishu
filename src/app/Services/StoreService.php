@@ -164,9 +164,9 @@ class StoreService
                     {
                         throw new \Exception("订单不存在", 1);
                     }
-
+                    $pick_remark = $data["pick_remark"]??"";
                     //先拣货
-                    $pick = $this->pick($data["items"], $order);
+                    $pick = $this->pick($data["items"], $order, $pick_remark);
                     app('log')->info('拣货流程完成');
                     $pick_num = collect($pick)->sum('pick_num');
                     if($pick_num <=0) {
@@ -194,7 +194,7 @@ class StoreService
     /**
      * 拣货单， 订单
      **/
-    public function pick($pickItems, $order)
+    public function pick($pickItems, $order, $pick_remark = '')
     {
         app('log')->info('开始拣货', [
             'out_sn'=> $order->out_sn
@@ -317,6 +317,7 @@ class StoreService
         $order->update([
             'status' => Order::STATUS_PICK_DONE,
             'sub_pick_num'  => $subPickNum,
+            'pick_remark'   => $pick_remark,
             'verify_status'=>2,
             'delivery_data'=>time()
         ]);
