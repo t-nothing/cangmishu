@@ -127,6 +127,10 @@ class ShopController extends Controller
     {
 
         $data = $request->all();
+        if(Shop::count("owner_id", Auth::ownerId()) > 2) {
+            app('log')->error('新增店铺一个仓库最多只能创建两个店铺');
+            return formatRet(500, trans("message.shopAddFailed"));
+        }
         app('db')->beginTransaction();
         try
         {
