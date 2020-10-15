@@ -58,8 +58,8 @@ class OrderTypeController extends Controller
         try{
             $data = $request->all();
             $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>app('auth')->warehouse()->id]);
-            OrderType::create($data);
-            return formatRet(0);
+            $data = OrderType::create($data);
+            return formatRet(0, '', $data->toArray());
         }catch (\Exception $e){
             app('log')->error('新增出库单分类失败',['msg' =>$e->getMessage()]);
             return formatRet(500, trans("message.orderTypeAddFailed"));
