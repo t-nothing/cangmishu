@@ -240,6 +240,7 @@ return [
     'shopUpdateFailed' => '修改店铺失败',#
     'shopNotExist'=>'店铺不存在',
     'shopDeleteFailed' => '删除店铺失败',#
+    'shopMaxCountFailed' =>'添加店铺信息失败,一个仓库最多只能创建两个店铺',
 
     'shopProductAddFailed' =>'添加店铺商品信息失败',
     'shopProductUpdateFailed' => '修改店铺商品失败',#

@@ -241,6 +241,8 @@ return [
     'shopUpdateFailed' => 'Failed',#
     'shopNotExist'=>'Information does not exist',
     'shopDeleteFailed' => 'Failed',#
+    'shopMaxCountFailed' =>'Failed, Up to two stores in a warehouse',
+
 
     'shopProductAddFailed' =>'Failed',
     'shopProductUpdateFailed' => 'Failed',#
