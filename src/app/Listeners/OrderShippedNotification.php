@@ -65,7 +65,7 @@ class OrderShippedNotification
                         'template_id' => '-93hSJ-C5U7bh10LLD9Gl885G4n9nNYC3O_5UluRwsM',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
                         'data' => [
-                            'first' => [
+                            'thing1' => [
                                 'value' =>$order['order_items'][0]['name_cn']??$shop->name_cn
                             ],
                             'character_string2' => [
