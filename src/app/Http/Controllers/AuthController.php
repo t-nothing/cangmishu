@@ -379,4 +379,45 @@ class AuthController extends  Controller
         }
         
     }
+
+    /**
+     * 测试体验帐号登录
+     * @param $oauth
+     */
+    public function testMiniProgramLogin(BaseRequests $request)
+    {
+        app('log')->info('测试体验帐号登录',$request->all());
+        $this->validate($request, [
+            'code'              => 'required|string',
+            'nick_name'         => 'required|string',
+            'gender'            => 'string',
+            'country'           => 'string',
+            'city'              => 'string',
+            'avatar_url'        => 'url',
+            'language'          => 'string',
+            'mobile'            => 'string',
+        ]);
+
+        app('log')->info('测试体验帐号登录',$request->all());
+        
+        try {
+            //绑定的一个固定帐号
+            $user = User::find(483);
+
+            $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+            $userId = $user->id;
+
+            $data['token'] = $token;
+            $data['modules'] = [];
+            $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+
+            return formatRet(0, '', $data);
+
+        } catch (\Exception $e) {
+            app('log')->error($e->getMessage());
+
+            return formatRet(500, trans("message.userNotExist"));
+        }
+        
+    }
 }
