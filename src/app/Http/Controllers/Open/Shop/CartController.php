@@ -141,8 +141,6 @@ class CartController extends Controller
         
         try
         {
-
-            // $this->processFormId($request);
             app('cart')->name($this->getWhoesCart())->remove($id);
 
             return formatRet(200,"移除商品成功");
@@ -163,8 +161,6 @@ class CartController extends Controller
     {
         try
         {
-
-            // $this->processFormId($request);
             app('cart')->name($this->getWhoesCart())->destroy();
 
             return formatRet(200,"清空购物车成功");
@@ -189,6 +185,12 @@ class CartController extends Controller
             'shop' => app('request')->header('Shop', ''),
         ]);
         $items = app('cart')->name($this->getWhoesCart())->all();
+        foreach ($items as $key => $value) {
+            if(!isset($value->__raw_id)) {
+                app('cart')->name($this->getWhoesCart())->remove($key);
+                unset($items[$key]);
+            }
+        }
 
         return formatRet(0, '', $items->toArray());
     }
