@@ -81,17 +81,17 @@ class OrderCancelNotification  implements ShouldQueue
                 }
                 catch(InvalidArgumentException $ex)
                 {
-                    app('log')->info('发送结内容', [
-                        'touser' => $user->weapp_openid,
-                        'template_id' => 'Dx0qg4KbZyJTRMB7vRySptulHhPTGtByxqF8yjx6sgw',
-                        'page' => '/pages/center/center?shop='.$order['shop_id'],
-                        'form_id' => $formId,
-                        'data' => [
-                            'character_string1' => $order['out_sn'],
-                            'thing2' => $order['receiver_fullname'],
-                            'thing4' => "后台取消订单"
-                        ],
-                    ]);
+                    // app('log')->info('发送结内容', [
+                    //     'touser' => $user->weapp_openid,
+                    //     'template_id' => 'Dx0qg4KbZyJTRMB7vRySptulHhPTGtByxqF8yjx6sgw',
+                    //     'page' => '/pages/center/center?shop='.$order['shop_id'],
+                    //     'form_id' => $formId,
+                    //     'data' => [
+                    //         'character_string1' => $order['out_sn'],
+                    //         'thing2' => $order['receiver_fullname'],
+                    //         'thing4' => "后台取消订单"
+                    //     ],
+                    // ]);
                     app('log')->info('发送结果失败', [$ex->getMessage()]);
                 }
                 

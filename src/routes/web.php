@@ -25,6 +25,7 @@ Route::post('/logout', 'AuthController@logout');
 // 小程序登录
 Route::post('/mpLogin', 'AuthController@checkMiniProgramLogin');
 Route::post('/mpBind', 'AuthController@autoMiniProgramLogin');
+Route::post('/mpTestLogin', 'AuthController@testMiniProgramLogin');
 
 Route::post('/register', 'UserController@register');
 Route::post('/emailCode', 'UserController@getEmailVerifyCode');
