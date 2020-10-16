@@ -55,42 +55,35 @@ class OrderShippedNotification
                 app('log')->info('开始给用户推送发货订单消息', [$order["out_sn"], $order["shop_user_id"]]);
                 $app = app('wechat.mini_program');
 
-                $formId = ShopWeappFormId::getOne($user->id);
-                if(empty($formId)) return ;
                 
                 $result = [];
 
                 try
                 {
-                    $result = $app->template_message->send([
+                    $result = $app->subscribe_message->send([
                         'touser' => $user->weapp_openid,
-                        'template_id' => 'UyDuO51RlyHTDdec4CFrPqUBBw8GlGt4H7g_lqeCUFM',
+                        'template_id' => '-93hSJ-C5U7bh10LLD9Gl885G4n9nNYC3O_5UluRwsM',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
-                        'form_id' => $formId,
                         'data' => [
-                            'keyword1' => app('ship')->getExpressName($order['express_code']),
-                            'keyword2' => date("Y年m月d日"),
-                            'keyword3' => date("Y年m月d日", $order['create_at']),
-                            'keyword4' => $order['order_items'][0]['name_cn']??$shop->name_cn,
+                            'first' => [
+                                'value' =>$order['order_items'][0]['name_cn']??$shop->name_cn
+                            ],
+                            'character_string2' => [
+                                'value' => $order['out_sn']
+                            ],
+                            'date3' => [
+                                'value' => date("Y年m月d日")
+                            ],
+                            'thing4' => [
+                                'value' => app('ship')->getExpressName($order['express_code'])
+                            ],
                         ],
                     ]);
 
                 }
                 catch(InvalidArgumentException $ex)
                 {
-                    app('log')->info('发送结内容', [
-                        'touser' => $user->weapp_openid,
-                        'template_id' => 'UyDuO51RlyHTDdec4CFrPqUBBw8GlGt4H7g_lqeCUFM',
-                        'page' => '/pages/center/center?shop='.$order['shop_id'],
-                        'form_id' => $formId,
-                        'data' => [
-                            'keyword1' => app('ship')->getExpressName($order['express_code']),
-                            'keyword2' => date("Y年m月d日"),
-                            'keyword3' => date("Y年m月d日", strtotime($order['create_at'])),
-                            'keyword4' => $order['order_items'][0]['name_cn']??$shop->name_cn,
-                        ],
-                    ]);
-                    app('log')->info('发送结果失败', [$ex->getMessage()]);
+                   
                 }
 
                 // $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
