@@ -45,7 +45,7 @@ class OrderOutReadyNotification implements ShouldQueue
     public function handle(OrderOutReady $event)
     {
         $order = $event->order;
-
+        return false;//先不用处理
         if($order["shop_user_id"] > 0) {
 
             $user = ShopUser::find($order["shop_user_id"]);
