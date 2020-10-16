@@ -186,10 +186,10 @@ class CartController extends Controller
         ]);
         $items = app('cart')->name($this->getWhoesCart())->all();
         foreach ($items as $key => $value) {
-            if(!isset($value->__raw_id)) {
-                app('cart')->name($this->getWhoesCart())->remove($key);
-                unset($items[$key]);
-            }
+            // if(!isset($value->__raw_id)) {
+            //     app('cart')->name($this->getWhoesCart())->remove($key);
+            //     unset($items[$key]);
+            // }
         }
 
         return formatRet(0, '', $items->toArray());
