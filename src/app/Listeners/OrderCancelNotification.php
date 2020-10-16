@@ -57,11 +57,7 @@ class OrderCancelNotification  implements ShouldQueue
                 $app = app('wechat.mini_program');
 
                 $service = $app->customer_service;
-                $formId = ShopWeappFormId::getOne($user->id);
-                if(empty($formId)) {
-                    app('log')->info('form Id不足');
-                    return;
-                }
+          
                 
                 $result = [];
                 try
@@ -70,7 +66,6 @@ class OrderCancelNotification  implements ShouldQueue
                         'touser' => $user->weapp_openid,
                         'template_id' => 'Dx0qg4KbZyJTRMB7vRySptulHhPTGtByxqF8yjx6sgw',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
-                        'form_id' => $formId,
                         'data' => [
                             'character_string1' => $order['out_sn'],
                             'thing2' => $order['receiver_fullname'],
