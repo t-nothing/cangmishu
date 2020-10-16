@@ -62,7 +62,7 @@ class OrderCancelNotification  implements ShouldQueue
                 $result = [];
                 try
                 {
-                    $result = $app->template_message->send([
+                    $result = $service->send([
                         'touser' => $user->weapp_openid,
                         'template_id' => 'Dx0qg4KbZyJTRMB7vRySptulHhPTGtByxqF8yjx6sgw',
                         'page' => '/pages/center/center?shop='.$order['shop_id'],
