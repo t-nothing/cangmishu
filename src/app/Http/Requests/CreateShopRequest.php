@@ -29,7 +29,7 @@ class CreateShopRequest extends BaseRequests
             'name_cn'                   => [
                'required','string','max:100',
                 Rule::unique('shop', 'name_cn')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
+                    $q->where('owner_id',Auth::ownerId())->where('deleted_at', null);
                 })
             ],
             'logo'                      => 'url|max:100',
