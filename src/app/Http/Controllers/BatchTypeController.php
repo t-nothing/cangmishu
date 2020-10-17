@@ -92,4 +92,22 @@ class BatchTypeController extends Controller
             return formatRet(500, trans("message.batchTypeDeleteFailed"));
         }
     }
+
+    /**
+     * 供应商 - 查看
+     *
+     * @author liusen
+     */
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $batchType = BatchType::whose(Auth::id())->find($id);
+        if(!$batchType){
+            return formatRet(404, trans("message.batchTypeNotExist"), [], 404);
+        }
+        
+
+        return formatRet(0, '', $batchType->toArray());
+       
+    }
 }
