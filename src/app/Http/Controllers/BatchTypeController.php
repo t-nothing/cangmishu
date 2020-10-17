@@ -101,9 +101,13 @@ class BatchTypeController extends Controller
     public function show( BaseRequests $request,$id)
     {
         $id = intval($id);
-        $batchType = BatchType::whose(Auth::id())->find($id);
+        $batchType = BatchType::find($id);
         if(!$batchType){
             return formatRet(404, trans("message.batchTypeNotExist"), [], 404);
+        }
+
+        if ($batchType->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
         }
         
 
