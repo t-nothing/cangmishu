@@ -7,6 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ShopUser;
 use App\Models\Shop;
+use App\Models\User;
 use EasyWeChat\Kernel\Messages\Text;
 use App\Models\ShopWeappFormId;
 use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
@@ -52,40 +53,33 @@ class OrderCreatedNotification  implements ShouldQueue
 
         if($order["shop_user_id"] > 0) {
 
-            $user = ShopUser::find($order["shop_user_id"]);
+            $user = User::where("weapp_openid","!=", "")->find($order["owner_id"]);
             if($user) {
 
                 $shop = Shop::find($order["shop_id"]);
 
-                app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"], $shop->name_cn, $user->toArray()]);
-                $app = app('wechat.mini_program');
+                $mpApp = config('wechat.mini_program_cms.default');
+                // app('log')->info('开始给用户推送创建订单消息', [$order["out_sn"], $order["shop_user_id"], $shop->name_cn, $user->toArray()]);
+                //这里是公众号的
+                $app = app('wechat.official_account');
                 $result = [];
-                app('log')->info('开始给用户推送创建订单消息'.ShopWeappFormId::getOne($user->id));
                 try
                 {
-                    // $result = $app->template_message->send([
-                    //     'touser' => $user->weapp_openid,
-                    //     'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o',
-                    //     'page' => '/pages/center/center?shop='.$order['shop_id'],
-                    //     'form_id' => ShopWeappFormId::getOne($user->id),
-                    //     'data' => [
-                    //         'keyword1' => $order['sub_total'],
-                    //         'keyword2' => $order['out_sn'],
-                    //         'keyword3' => $order['order_items'][0]['name_cn']??$shop->name_cn,
-                    //         'keyword4' => $order['status_name']??'已支付',
-                    //     ],
-                    // ]);
-
+                    
                     $data = [
                         'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o', // 所需下发的订阅模板id
                         'touser' => $user->weapp_openid,     // 接收者（用户）的 openid
-                        'page' => '/pages/center/center?shop='.$order['shop_id'],
+                        'url' => 'https://www.cangmishu.com',
+                        'miniprogram' => [
+                                'appid' => $mpApp["app_id"],
+                                'pagepath' => 'pages/xxx',
+                        ],
                         'data' => [ 
                             'first' => [
-                                'value' => '您的订单下单成功',
+                                'value' => '您有新的订单，请尽快处理！',
                             ],
                             'keyword1' => [
-                                'value' => $order['sub_total'],
+                                'value' => $order['out_sn'],
                             ],
                             'keyword2' => [
                                 'value' => $shop->name_cn,
@@ -105,33 +99,15 @@ class OrderCreatedNotification  implements ShouldQueue
                         ],
                     ];
 
-                    $result = $app->subscribe_message->send($data);
+                    //这里是发给服务号的
+                    $result = $app->template_message->send($data);
                 }
                 catch(InvalidArgumentException $ex)
                 {
-                    app('log')->info('发送结内容', [
-                        'touser' => $user->weapp_openid,
-                        'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o',
-                        'page' => '/pages/center/center?shop='.$order['shop_id'],
-                        'form_id' => ShopWeappFormId::getOne($user->id),
-                        'data' => [
-                            'keyword1' => $order['sub_total'],
-                            'keyword2' => $order['out_sn'],
-                            'keyword3' => $order['order_items'][0]['name_cn']??$shop->name_cn,
-                            'keyword4' => $order['status_name']??'已支付',
-                        ],
-                    ]);
                     app('log')->info('发送结果失败', [$ex->getMessage()]);
                 }
 
                 
-
-                // $text = new Text(sprintf("%s 您好, 您的订单下单成功, 订单号为:%s", $order["receiver_fullname"], $order["out_sn"]));
-
-                // $result = $app->customer_service->message($text)->to($user->weapp_openid)->send();
-
-                
-                app('log')->info('发送结果', $result);
 
 
             }
