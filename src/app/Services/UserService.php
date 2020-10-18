@@ -235,6 +235,7 @@ class UserService{
             $product->name_cn             = "我的第一个商品";
             $product->name_en             = "我的第一个商品";
             $product->hs_code             = "";
+            $product->barcode             = "123456";
             $product->origin              = "中国";
             $product->display_link        = "";
             $product->remark              = $request->input('remark', '');
