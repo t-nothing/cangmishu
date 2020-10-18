@@ -39,6 +39,10 @@ Route::get('/user/resetPassword/{token_value}', [
 ]);// 忘记密码-重置密码链接
 Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-重置密码接口
 
+//开放下载
+Route::get('/open/shareOrder/detail', 'CaptchaController@shareView');
+Route::get('/open/shareOrder/downloadPdf', 'CaptchaController@shareDownload');
+
 Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
@@ -165,6 +169,8 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::post('/order', 'OrderController@store');
     Route::put('/order/cancel/{order_id}', 'OrderController@cancelOrder');
     Route::put('/order/data/{order_id}', 'OrderController@updateData');
+    Route::put('/order/share/{order_id}', 'OrderController@shareOrder');//分享
+
     Route::get('/order/status', 'OrderController@statusList'); //订单状态列表
     Route::delete('/order/{order_id}', 'OrderController@destroy');
     Route::post('/order/out', 'OrderController@pickAndOut');//拣货和出库
@@ -181,7 +187,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/order/{id}/download/{tempate}', 'OrderController@download');
     Route::get('/order/{id}/pdf/', 'OrderController@pdf');
     Route::get('/order/{id}/pdf/{tempate}', 'OrderController@pdf');
-
+    
     //库存
     // Route::get('/stock/code', 'ProductStockController@getSkus');
     Route::get('/stock/code', 'ProductStockController@getLocations');
@@ -310,8 +316,8 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 
 
     Route::get('swiper/{platform}', 'SwiperController@list');
-
 });
+
 
 $router->get('open/shop/list', 'Open\\Shop\\ShopController@index');// 店铺列表
 //店铺开放型接口
