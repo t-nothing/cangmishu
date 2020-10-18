@@ -91,15 +91,13 @@ class OrderCreatedNotification  implements ShouldQueue
                             'keyword5' => [
                                 'value' => $order['order_items'][0]['name_cn']??$shop->name_cn,
                             ],
-                            'first' => [
-                                'value' => '点击查看详情',
-                            ],
                         ],
                     ];
 
                     //这里是发给服务号的
                     $result = $app->template_message->send($data);
-                    app('log')->info('发送结果成功', $data);
+                    app('log')->info('发送结果参数', $data);
+                    app('log')->info('发送结果', $result);
                 }
                 catch(InvalidArgumentException $ex)
                 {
