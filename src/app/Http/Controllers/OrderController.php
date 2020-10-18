@@ -510,13 +510,12 @@ class OrderController extends Controller
         }
 
         try {
-            app('order')->updateToPublic($id);
-            app('db')->commit();
+            $shareCode = app('order')->updateToShare($id);
+            return formatRet(0,trans("message.success"), $shareCode);
         } catch (\Exception $e) {
-            app('db')->rollback();
             return formatRet(500,  trans("message.failed"));
         }
-        return formatRet(0,trans("message.success"));
+        
     }
 
     /**
