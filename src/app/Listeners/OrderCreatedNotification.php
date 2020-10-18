@@ -51,7 +51,7 @@ class OrderCreatedNotification  implements ShouldQueue
 
         if($order["shop_user_id"] > 0) {
 
-            $user = User::where("weapp_openid","!=", "")->find($order["owner_id"]);
+            $user = User::where("wechat_openid","!=", "")->find($order["owner_id"]);
             if($user) {
 
                 $shop = Shop::find($order["shop_id"]);
@@ -66,7 +66,7 @@ class OrderCreatedNotification  implements ShouldQueue
                     
                     $data = [
                         'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o', // 所需下发的订阅模板id
-                        'touser' => $user->weapp_openid,     // 接收者（用户）的 openid
+                        'touser' => $user->wechat_openid,     // 接收者（用户）的 openid
                         'url' => 'https://www.cangmishu.com',
                         'miniprogram' => [
                                 'appid' => $mpApp["app_id"],
