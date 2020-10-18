@@ -89,7 +89,7 @@ class OrderCreatedNotification  implements ShouldQueue
                                 'value' => $order['created_at'],
                             ],
                             'keyword5' => [
-                                'value' => $order['order_items'][0]['name_cn']??$shop->name_cn,
+                                'value' => $order['remark']??$shop->name_cn,
                             ],
                         ],
                     ];
