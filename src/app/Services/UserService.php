@@ -130,7 +130,7 @@ class UserService{
 
             $location->warehouse_id      = $warehouse->id;
             $location->warehouse_area_id = $warehouseArea->id;
-            $location->code              = "LOCATION";
+            $location->code              = "默认货位";
             $location->capacity          = 100;
             $location->is_enabled        = 1;
             $location->passage           = 2;
