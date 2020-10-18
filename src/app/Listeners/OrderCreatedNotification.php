@@ -49,8 +49,6 @@ class OrderCreatedNotification  implements ShouldQueue
     {
         $order = $event->order;
 
-        return;//先不用发送消息，看后面的场景
-
         if($order["shop_user_id"] > 0) {
 
             $user = User::where("weapp_openid","!=", "")->find($order["owner_id"]);
