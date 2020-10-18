@@ -456,6 +456,127 @@ class OrderController extends Controller
     }
 
     /**
+     * 设置为公开信息
+     **/
+    public function shareView(BaseRequests $request)
+    {
+
+        $this->validate($request,[
+            'id'            => 'required|integer|min:0',
+            'share_code'    => 'required|string|max:100|min:1',
+            'type'          => 'required|string|in:part,detail',
+            'mobile'        => 'required_if:type,detail|string',
+        ]);
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->share_code != $request->share_code && trim($request->share_code)!=""){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        if($request->type == "part") {
+            $result["out_sn"]               = $order->out_sn;
+            $result["source"]               = $order->source;
+            $result["receiver_fullname"]    = $order->receiver_fullname;
+
+            return formatRet(0, trans("message.success"),$result);
+        }
+        if($order->receiver_phone != $request->mobile) {
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+
+        $order = $order->load(['orderItems.spec:id,total_shelf_num']);
+
+        $order = $order->toArray();
+
+        return formatRet(0,trans("message.success"), $order->toArray());
+    }
+
+    /**
+     * 设置为公开信息
+     **/
+    public function shareOrder(BaseRequests $request,$id)
+    {
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        try {
+            app('order')->updateToPublic($id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            return formatRet(500,  trans("message.failed"));
+        }
+        return formatRet(0,trans("message.success"));
+    }
+
+    /**
+     * 设置为公开信息
+     **/
+    public function shareDownload(BaseRequests $request)
+    {
+
+        $this->validate($request,[
+            'id'            => 'required|integer|min:0',
+            'share_code'    => 'required|string|max:100|min:1',
+            'mobile'        => 'required|string',
+        ]);
+
+        $id =  $request->id;
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        
+
+        if ($order->share_code != $code && trim($code)!=""){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        if($order->receiver_phone != $request->mobile) {
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->append(['out_sn_barcode']);
+
+        $template = "out";
+        $templateName = "pdfs.order.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['out','pick'])){
+            $templateName = "pdfs.order.template_pick";
+        }
+
+        $pdf = PDF::setPaper('a4');
+
+        // $file = $order->out_sn . "_{$templateName}.pdf";
+        $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName, "en"), md5($order->out_sn.$order->created_at));
+        
+        $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
+        if(!file_exists($filePath)) {
+
+            $pdf->loadView($templateName, ['order' => $order->toArray()])->save($filePath);
+        }
+
+        if($request->filled("require_url") && $request->require_url == 1) {
+
+            $url = asset('storage/pdfs/'.$fileName);
+            return formatRet(0,trans("message.success"), ["url"=>$url]);
+        }
+
+        return response()->download($filePath, $fileName);
+    }
+
+    /**
      * 下载PDF
      *
     */

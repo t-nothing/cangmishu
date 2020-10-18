@@ -90,6 +90,27 @@ class OrderService
 
     }
 
+    /**
+     * 设置为公开信息
+     **/
+    public function updateToPublic($id)
+    {
+        $order = Order::find($id);
+        if(!$order) {
+            throw new \Exception("订单未找到", 1);
+        }
+
+        
+        $arr = [
+            'share_code'    =>  md5($id.time().$order->out_sn)
+            ];
+        
+        $order->update($arr);
+
+        return true;
+
+    }
+
 
 
     /**
