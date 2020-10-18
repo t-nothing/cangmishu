@@ -99,15 +99,14 @@ class OrderCreatedNotification  implements ShouldQueue
 
                     //这里是发给服务号的
                     $result = $app->template_message->send($data);
+                    app('log')->info('发送结果成功');
                 }
                 catch(InvalidArgumentException $ex)
                 {
                     app('log')->info('发送结果失败', [$ex->getMessage()]);
                 }
-
-                
-
-
+            } else {
+                    app('log')->info('未发送微信推送消息,未绑定公众号');
             }
         }
     }
