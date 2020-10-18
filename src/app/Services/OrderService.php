@@ -93,13 +93,13 @@ class OrderService
     /**
      * 设置为公开信息
      **/
-    public function updateToPublic($id)
+    public function updateToShare($id)
     {
         $order = Order::find($id);
         if(!$order) {
             throw new \Exception("订单未找到", 1);
         }
-
+        if($order->share_code !="") return $order->share_code;
         
         $arr = [
             'share_code'    =>  md5($id.time().$order->out_sn)
@@ -107,7 +107,7 @@ class OrderService
         
         $order->update($arr);
 
-        return true;
+        return $arr['share_code'];
 
     }
 

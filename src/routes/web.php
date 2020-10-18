@@ -40,8 +40,8 @@ Route::get('/user/resetPassword/{token_value}', [
 Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-重置密码接口
 
 //开放下载
-Route::get('/open/shareOrder/detail', 'CaptchaController@shareView');
-Route::get('/open/shareOrder/downloadPdf', 'CaptchaController@shareDownload');
+Route::get('/open/shareOrder/detail', 'OrderController@shareView');
+Route::get('/open/shareOrder/downloadPdf', 'OrderController@shareDownload');
 
 Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
