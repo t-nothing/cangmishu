@@ -511,7 +511,7 @@ class OrderController extends Controller
 
         try {
             $shareCode = app('order')->updateToShare($id);
-            return formatRet(0,trans("message.success"), $shareCode);
+            return formatRet(0,trans("message.success"), [$shareCode]);
         } catch (\Exception $e) {
             return formatRet(500,  trans("message.failed"));
         }
