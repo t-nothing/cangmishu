@@ -468,7 +468,7 @@ class OrderController extends Controller
             'mobile'        => 'required_if:type,detail|string',
         ]);
 
-        $order = Order::find($id);
+        $order = Order::find($request->id);
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
         }
