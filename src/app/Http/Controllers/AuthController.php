@@ -339,7 +339,7 @@ class AuthController extends  Controller
             'country'                       =>  $request->country??'',
             'city'                          =>  $request->city??'',
             'avatar'                        =>  $avatar_url,
-            // 'nickname'                      =>  $request->mobile??'',
+            'nickname'                      =>  $request->nick_name??'',
             'wechat_mini_program_open_id'   =>  $miniData['openid']??'',
         ]);//合并参数
 
