@@ -29,8 +29,7 @@ class CreateProductRequest extends BaseRequests
             'category_id'               => [
                 'required','integer','min:1',
                 Rule::exists('category','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId())
-                      ->where('is_enabled',1);
+                    $q->where('owner_id',Auth::ownerId());
                 })
             ],
             'name_cn'                   => 'required|string|max:255',
