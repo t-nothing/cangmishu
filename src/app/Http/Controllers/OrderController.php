@@ -456,7 +456,7 @@ class OrderController extends Controller
     }
 
     /**
-     * 设置为公开信息
+     * 查看公开信息
      **/
     public function shareView(BaseRequests $request)
     {
@@ -467,6 +467,8 @@ class OrderController extends Controller
             'type'          => 'required|string|in:part,detail',
             'mobile'        => 'required_if:type,detail|string',
         ]);
+        app('log')->info('查看公开信息',$request->all());
+
 
         $order = Order::find($request->id);
         if(!$order){
@@ -501,7 +503,7 @@ class OrderController extends Controller
     public function shareOrder(BaseRequests $request,$id)
     {
 
-        $order = Order::find($id);
+        $order = Order::find($request->id);
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
         }
@@ -519,7 +521,7 @@ class OrderController extends Controller
     }
 
     /**
-     * 设置为公开信息
+     * 公开信息下载PDF
      **/
     public function shareDownload(BaseRequests $request)
     {
@@ -529,6 +531,7 @@ class OrderController extends Controller
             'share_code'    => 'required|string|max:100|min:1',
             'mobile'        => 'required|string',
         ]);
+        app('log')->info('公开信息下载PDF',$request->all());
 
         $id =  $request->id;
 
