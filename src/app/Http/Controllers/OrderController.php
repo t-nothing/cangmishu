@@ -483,7 +483,7 @@ class OrderController extends Controller
             $result["source"]               = $order->source;
             $result["receiver_fullname"]    = $order->receiver_fullname;
             $result["status"]               = $order->status;
-            $result["status_id"]            = $order->status_id;
+            $result["status_name"]          = $order->status_name;
 
             return formatRet(0, trans("message.success"),$result);
         }
