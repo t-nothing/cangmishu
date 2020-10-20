@@ -50,7 +50,13 @@ class ProductController extends Controller
         }
 
         if ($request->filled('keywords')) {
-            $product = $product->hasKeyword($request->keywords);
+
+            if($request->keywords == "库存不足") {
+                $request->show_low_stock = 1;
+            } else {
+                $product = $product->hasKeyword($request->keywords);
+            }
+            
         }
 
         if ($request->filled('show_low_stock') && $request->show_low_stock == 1) {
