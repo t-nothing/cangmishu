@@ -494,7 +494,7 @@ class OrderController extends Controller
 
         $order = $order->load(['orderItems.spec:id,total_shelf_num']);
 
-        $order = $order->toArray();
+        // $order = $order->toArray();
 
         return formatRet(0,trans("message.success"), $order->toArray());
     }
