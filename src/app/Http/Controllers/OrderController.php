@@ -543,7 +543,7 @@ class OrderController extends Controller
         }
         
 
-        if ($order->share_code != $code && trim($code)!=""){
+        if ($order->share_code != $request->share_code && trim($request->share_code)!=""){
             return formatRet(500, trans("message.noPermission"));
         }
 
