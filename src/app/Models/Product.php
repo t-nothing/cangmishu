@@ -90,7 +90,7 @@ class Product extends Model
                         $qq->where('relevance_code', 'like','%' .$keywords . '%');
                     })
                     ->orwhere('product.name_cn', 'like', '%' . $keywords . '%')
-                    ->orWhere('product.name_en', 'like', '%' . $keywords . '%');
+                    ->orWhere('product.barcode', 'like', '%' . $keywords . '%');
         });
         return $query;
     }
