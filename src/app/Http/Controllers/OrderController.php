@@ -484,7 +484,7 @@ class OrderController extends Controller
             $result["receiver_fullname"]    = $order->receiver_fullname;
             $result["status"]               = $order->status;
             $result["status_name"]          = $order->status_name;
-            $result["created_at"]           = $order->created_at;
+            $result["created_at"]           = date("Y-m-d H:i:s", $order->created_at);
 
             return formatRet(0, trans("message.success"),$result);
         }
