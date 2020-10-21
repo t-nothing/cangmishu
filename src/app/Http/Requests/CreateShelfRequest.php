@@ -49,12 +49,7 @@ class CreateShelfRequest extends BaseRequests
             'stock.*.best_before_date'        => 'date_format:Y-m-d|nullable',
             'stock.*.production_batch_number' => 'string|max:255|nullable',
             'stock.*.remark'                  => 'sometimes|string|max:255',
-            'stock.*.code'                    => [
-            'required','string','max:255',
-                Rule::exists('warehouse_location','code')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
+            'stock.*.code'                    => 'required|string|max:255',
         ];
     }
 
