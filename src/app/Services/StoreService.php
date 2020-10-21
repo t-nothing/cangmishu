@@ -118,7 +118,7 @@ class StoreService
                 $location->owner_id         =  $batchProduct->batch->owner_id;
                 $location->save();
 
-                app("log")->info("创建完成");
+                app("log")->info("创建完成", $location->toArray());
             } else {
                 throw new LocationException($code);
             }
