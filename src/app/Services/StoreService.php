@@ -20,6 +20,7 @@ use App\Events\StockLocationOut;
 use App\Events\OrderCompleted;
 use App\Events\OrderOutReady;
 use Illuminate\Database\QueryException;
+use App\Exceptions\LocationException;
 
 class StoreService
 {
@@ -90,7 +91,9 @@ class StoreService
         }
 
         if (! $location = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $code)->where('is_enabled',1)->first()) {
-            return eRet('货位不存在或未启用('.$code.')');
+            throw new LocationException($code);
+            
+            // return eRet('货位不存在或未启用('.$code.')');
         }
         // app('log')->info('here1111');
         $category = $batchProduct->spec->product->category;
