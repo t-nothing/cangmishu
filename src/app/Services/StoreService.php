@@ -96,10 +96,12 @@ class StoreService
             //如果是自动创建货位
             if($auto_create_location) {
 
+                app("log")->info("开始创建一个货位");
                 $warehouseArea = WarehouseArea::where("warehouse_id", $warehouse_id)->first();
 
                 $warehouse_area_id = 0;
                 if($warehouseArea) {
+                    app("log")->info("找到默认货区");
                     $warehouse_area_id = $warehouseArea->id;
                 }
                 $location = new WarehouseLocation;
@@ -115,6 +117,8 @@ class StoreService
                 $location->remark            = "自动创建货位";
                 $location->owner_id         =  $batchProduct->batch->owner_id;
                 $location->save();
+
+                app("log")->info("创建完成");
             } else {
                 throw new LocationException($code);
             }
