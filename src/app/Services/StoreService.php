@@ -127,7 +127,7 @@ class StoreService
             // return eRet('货位不存在或未启用('.$code.')');
         }
         // app('log')->info('here1111');
-        app("log")->info("开始验证必需项");
+        app("log")->info("开始验证必需项",  $batchProduct->toArray());
 
         $category = $batchProduct->spec->product->category;
         if ($category) {
