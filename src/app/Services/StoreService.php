@@ -113,6 +113,7 @@ class StoreService
                 $location->floor             = 2;
                 $location->remark            = "自动创建货位";
                 $location->owner_id         =  $batchProduct->batch->owner_id;
+                $location->save();
             } else {
                 throw new LocationException($code);
             }
