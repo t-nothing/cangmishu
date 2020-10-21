@@ -26,7 +26,7 @@ class StoreService
 {
 
     //入库
-    public  function  InAndPutOn($warehouse_id,$data,$batch_id)
+    public  function  InAndPutOn($warehouse_id,$data,$batch_id, $auto_create_location = false)
     {
  
         $stocks =[];
@@ -44,10 +44,10 @@ class StoreService
         }
 
         // app('log')->info('hereAAAAAA');
-        $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num){
+        $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num, $auto_create_location){
             // app('log')->info('herebbbbbbb');
             //入库到虚拟货位
-            $locationStock = $this->inAndMoveTo($warehouse_id,$v, $v['code']);
+            $locationStock = $this->inAndMoveTo($warehouse_id,$v, $v['code'],$auto_create_location);
             // app('log')->info('herecccccc');
             $stock_num += $v['stockin_num'];
             //上架
@@ -81,7 +81,7 @@ class StoreService
 
 
     //入库
-    public function inAndMoveTo($warehouse_id,$data, $code)
+    public function inAndMoveTo($warehouse_id,$data, $code, $auto_create_location = false)
     {
         $batchProduct = BatchProduct::ofWarehouse($warehouse_id)->findOrFail($data['stock_id']);
         $batchProduct->load(['batch', 'spec.product.category']);
@@ -91,7 +91,32 @@ class StoreService
         }
 
         if (! $location = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $code)->where('is_enabled',1)->first()) {
-            throw new LocationException($code);
+
+            //如果是自动创建货位
+            if($auto_create_location) {
+
+                $warehouseArea = WarehouseArea::where("warehouse_id", $warehouse_id)->first();
+
+                $warehouse_area_id = 0;
+                if($warehouseArea) {
+                    $warehouse_area_id = $warehouseArea->id;
+                }
+                $location = new WarehouseLocation;
+                $location->warehouse_id      = $warehouse_id;
+                $location->warehouse_area_id = $warehouse_area_id;
+                $location->code              = $code;
+                $location->capacity          = 100;
+                $location->is_enabled        = 1;
+                $location->passage           = 2;
+                $location->row               = 2;
+                $location->col               = 2;
+                $location->floor             = 2;
+                $location->remark            = "自动创建货位";
+                $location->owner_id         =  $batchProduct->batch->owner_id;
+            } else {
+                throw new LocationException($code);
+            }
+            
             
             // return eRet('货位不存在或未启用('.$code.')');
         }
