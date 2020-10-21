@@ -12,6 +12,7 @@ use App\Models\BatchMarkLog;
 use App\Models\ProductSpec;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Exceptions\LocationException;
 use PDF;
 
 class BatchController extends Controller
@@ -154,7 +155,14 @@ class BatchController extends Controller
             $res = app('store')->InAndPutOn(app('auth')->warehouse()->id,$data,$request->batch_id);
             app('db')->commit();
             return formatRet(0);
-        }catch (\Exception $e){
+        }catch(LocationException $e) {
+            app('db')->rollback();
+            app('log')->error('货位不存在',['msg' =>$e->getMessage()]);
+            return formatRet(404, trans("message.warehouseLocationNotExistExt", $e->getMessage()), [
+                'location' => $e->getMessage()
+            ]);
+        } 
+        catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
             //"入库上架失败:".$e->getMessage()
