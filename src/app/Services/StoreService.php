@@ -115,7 +115,7 @@ class StoreService
                 $location->col               = 2;
                 $location->floor             = 2;
                 $location->remark            = "自动创建货位";
-                $location->owner_id         =  $batchProduct->batch->owner_id;
+                $location->owner_id         =  $batchProduct->owner_id;
                 $location->save();
 
                 app("log")->info("创建完成", $location->toArray());
