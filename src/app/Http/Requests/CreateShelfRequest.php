@@ -33,6 +33,7 @@ class CreateShelfRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
+            'auto_create_location'            => 'sometimes|integer',
             'stock'                           => 'required|array',
             'stock.*'                         => 'required|array',
             'stock.*.stock_id' 				  => [

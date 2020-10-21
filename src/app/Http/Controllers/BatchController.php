@@ -148,11 +148,12 @@ class BatchController extends Controller
      */
     public function shelf(CreateShelfRequest $request)
     {
+        $autoCreateLocation = $request->auto_create_location??0;
         app('log')->info('入库上架', $request->all());
         app('db')->beginTransaction();
         try{
             $data = $request->stock;
-            $res = app('store')->InAndPutOn(app('auth')->warehouse()->id,$data,$request->batch_id);
+            $res = app('store')->InAndPutOn(app('auth')->warehouse()->id,$data,$request->batch_id, $autoCreateLocation);
             app('db')->commit();
             return formatRet(0);
         }catch(LocationException $e) {
