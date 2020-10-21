@@ -158,7 +158,9 @@ class BatchController extends Controller
         }catch(LocationException $e) {
             app('db')->rollback();
             app('log')->error('货位不存在',['msg' =>$e->getMessage()]);
-            return formatRet(404, trans("message.warehouseLocationNotExistExt", $e->getMessage()), [
+            return formatRet(404, trans("message.warehouseLocationNotExistExt", [
+                'code'=>$e->getMessage()
+            ]), [
                 'location' => $e->getMessage()
             ]);
         } 
