@@ -45,7 +45,7 @@ class CreateShelfRequest extends BaseRequests
             'stock.*.stockin_num' 		      => 'required|integer|min:',
             'stock.*.box_code' 		          => 'sometimes|string',
             'stock.*.distributor_code' 		  => 'sometimes|string|max:255',
-            'stock.*.ean' 				      => 'required|string|max:255',
+            'stock.*.ean' 				      => 'sometimes|string|max:255',
             'stock.*.expiration_date' 		  => 'date_format:Y-m-d|nullable',
             'stock.*.best_before_date'        => 'date_format:Y-m-d|nullable',
             'stock.*.production_batch_number' => 'string|max:255|nullable',

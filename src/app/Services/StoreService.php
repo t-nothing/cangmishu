@@ -154,7 +154,7 @@ class StoreService
         $productStock = $batchProduct->setStockQty($data["stockin_num"])
                         ->setBoxCode($data["box_code"]??'')
                         ->setDistributorCode($batchProduct->distributor_code)
-                        ->setEan($batchProduct->ean)
+                        ->setEan($batchProduct->ean??'')
                         ->setProductionBatchNumber($batchProduct->production_batch_number)
                         ->setExpirationDate($batchProduct->expiration_date)
                         ->setBestBeforeDate($batchProduct->best_before_date)
