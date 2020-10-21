@@ -127,6 +127,8 @@ class StoreService
             // return eRet('货位不存在或未启用('.$code.')');
         }
         // app('log')->info('here1111');
+        app("log")->info("开始验证必需项");
+
         $category = $batchProduct->spec->product->category;
         if ($category) {
             $rules = [];
@@ -139,7 +141,7 @@ class StoreService
             $rules &&
             validator($data,$rules);
         }
-
+        app("log")->info("开始填充值");
         $batchProduct->distributor_code        = isset($data['distributor_code'])?$data['distributor_code']:"";
         $batchProduct->ean                     = $data['ean'];
         $batchProduct->expiration_date         = isset($data['expiration_date']) && !empty($data['expiration_date']) ?strtotime($data['expiration_date']." 00:00:00"): null;
