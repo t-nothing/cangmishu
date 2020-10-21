@@ -21,6 +21,7 @@ use App\Events\OrderCompleted;
 use App\Events\OrderOutReady;
 use Illuminate\Database\QueryException;
 use App\Exceptions\LocationException;
+use App\Models\WarehouseArea;
 
 class StoreService
 {
