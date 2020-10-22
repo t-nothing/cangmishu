@@ -51,7 +51,7 @@ class StoreService
 
                 $count = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $item['code'])->where('is_enabled',1)->count();
 
-                if($count ==0) $notExistsLocations[] = $v['code'];
+                if($count ==0) $notExistsLocations[] = $item['code'];
             }
 
             if(count($notExistsLocations) >0) {
