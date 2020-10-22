@@ -68,10 +68,10 @@ class OrderCreatedNotification  implements ShouldQueue
                         'template_id' => '9c0AODtEy_PzrusA53EcQpE2B3utlQHO9TJQjsNTT_o', // 所需下发的订阅模板id
                         'touser' => $user->wechat_openid,     // 接收者（用户）的 openid
                         'url' => 'https://my.cangmishu.com',
-                        // 'miniprogram' => [
-                        //         'appid' => $mpApp["app_id"],
-                        //         'pagepath' => '/pages/order/index',
-                        // ],
+                        'miniprogram' => [
+                                'appid' => $mpApp["app_id"],
+                                'pagepath' => '/pages/order/index',
+                        ],
                         'data' => [ 
                             'first' => [
                                 'value' => '您有新的订单，请尽快处理！',

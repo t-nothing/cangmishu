@@ -147,8 +147,7 @@ class WeChatController extends Controller
         $app->server->push(function($message) use($config, $app, $request) {
             \Log::info('扫码登录外面', $message);
 
-            $str = "你好，欢迎登录仓秘书！\n仓秘书——专为中小型企业、个体经营者提供的免费WMS系统 \n无需付费，人人都用得起的专业仓储+订货管理系统 \n如果你正在寻找一款仓储软件，或许你可以点击下方直达通道体验一下我们的仓储系统
-直达通道→https://www.cangmishu.com \n不定期进行功能迭代更新，如果您有意见或建议可以直接打包好发送给我们的产品团队哦！\n回复关键词：“产品”，添加工作人员的微信吧！）";
+            $str = "你好，欢迎登录仓秘书！\n您可以在微信小程序中搜索:仓秘书，可以同步使用哦！）";
 
             if(($message['Content']??'') == "产品") {
                 return new Image('Y2UZBJIujBqIsLIduCiNC7TFRrXq40xlonzxaJWEah8');
