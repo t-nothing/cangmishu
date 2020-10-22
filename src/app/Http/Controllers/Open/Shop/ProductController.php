@@ -63,8 +63,9 @@ class ProductController extends Controller
     /**
      * 分类详细
      **/
-    public function show(BaseRequests $request, int $id)
+    public function show(BaseRequests $request, $id)
     {
+        $id = intval($id);
         $shopProduct = ShopProduct::with("shop")->findOrFail($id);
 
         if ( !$shopProduct || !$shopProduct->shop ){
