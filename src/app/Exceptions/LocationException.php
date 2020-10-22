@@ -15,6 +15,6 @@ class LocationException extends \Exception
 
 
     public function getLocations() {
-        return $this->locatiosn;
+        return $this->locations;
     }
 }
