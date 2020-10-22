@@ -29,24 +29,22 @@ class WeChatController extends Controller
     public function wechatLogin(BaseRequests $request)
     {
         $app = app('wechat.official_account');
-        $config = config('wechat.mini_program.default');
+        $dhlsjconfig = config('wechat.mini_program.default');
+        $cmsConfig = config('wechat.mini_program_cms.default');
         $buttons = [
             [
                 "type" => "miniprogram",
-                "name" => "订货老司机",
-                "appid"  => $config['app_id'],
+                "name" => "运营端",
+                "appid"  => $cmsConfig['app_id'],
                 "url"=>"http://mp.weixin.qq.com",
                 "pagepath"  => "pages/index/index",
             ],
             [
-                "type" => "view",
-                "name" => "官方网站",
-                "url"  => "https://www.cangmishu.com/",
-            ],
-            [
-                "type" => "media_id",
-                "name" => "联系产品经理",
-                "media_id"  => "Y2UZBJIujBqIsLIduCiNC7TFRrXq40xlonzxaJWEah8",
+                "type" => "miniprogram",
+                "name" => "订货端",
+                "appid"  => $dhlsjconfig['app_id'],
+                "url"=>"http://mp.weixin.qq.com",
+                "pagepath"  => "pages/index/index?shop=2",
             ],
         ];
         $app->menu->create($buttons);
