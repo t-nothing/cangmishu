@@ -44,6 +44,24 @@ class StoreService
             throw new \Exception("该入库单不可编辑", 1);
         }
 
+        //如果不是自动创建货位，就判断一下
+        if(!$auto_create_location) {
+            $notExistsLocations  = [];
+            foreach ($stocks as $key => $item) {
+
+                $count = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $item['code'])->where('is_enabled',1)->count();
+
+                if($count ==0) $notExistsLocations[] = $v['code'];
+            }
+
+            if(count($notExistsLocations) >0) {
+                throw new LocationException($notExistsLocations);
+                
+            }
+            
+        }
+
+
         // app('log')->info('hereAAAAAA');
         $stocks = collect($stocks)->map(function ($v) use ($warehouse_id, &$stock_num, $auto_create_location){
             // app('log')->info('herebbbbbbb');
@@ -120,7 +138,7 @@ class StoreService
 
                 app("log")->info("创建完成", $location->toArray());
             } else {
-                throw new LocationException($code);
+                throw new LocationException([$code]);
             }
             
             
