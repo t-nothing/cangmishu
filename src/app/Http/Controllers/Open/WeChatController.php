@@ -34,14 +34,14 @@ class WeChatController extends Controller
         $buttons = [
             [
                 "type" => "miniprogram",
-                "name" => "运营端",
+                "name" => "免费运营端",
                 "appid"  => $cmsConfig['app_id'],
                 "url"=>"http://mp.weixin.qq.com",
                 "pagepath"  => "pages/index/index",
             ],
             [
                 "type" => "miniprogram",
-                "name" => "订货端",
+                "name" => "免费订货端",
                 "appid"  => $dhlsjconfig['app_id'],
                 "url"=>"http://mp.weixin.qq.com",
                 "pagepath"  => "pages/index/index?shop=2",
