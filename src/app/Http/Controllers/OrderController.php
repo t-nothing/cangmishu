@@ -445,7 +445,7 @@ class OrderController extends Controller
 
       
         $templateName = "pdfs.order.template_".strtolower($template);
-        if(!in_array(strtolower($template), ['out','pick'])){
+        if(!in_array(strtolower($template), ['out','pick','sale'])){
             $templateName = "pdfs.order.template_pick";
         }
 
@@ -555,9 +555,9 @@ class OrderController extends Controller
         $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
         $order->append(['out_sn_barcode']);
 
-        $template = "out";
+        $template = "sale";
         $templateName = "pdfs.order.template_".strtolower($template);
-        if(!in_array(strtolower($template), ['out','pick'])){
+        if(!in_array(strtolower($template), ['out','pick','sale'])){
             $templateName = "pdfs.order.template_pick";
         }
 
