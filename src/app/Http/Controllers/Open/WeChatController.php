@@ -41,7 +41,7 @@ class WeChatController extends Controller
             ],
             [
                 "type" => "miniprogram",
-                "name" => "免费订货端",
+                "name" => "订货端演示",
                 "appid"  => $dhlsjconfig['app_id'],
                 "url"=>"http://mp.weixin.qq.com",
                 "pagepath"  => "pages/index/index?shop=2",
