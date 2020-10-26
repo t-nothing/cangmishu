@@ -34,7 +34,9 @@ class UpdateReceiverAddressRequest extends BaseRequests
             'city'     => 'required|string',
             'district' => 'required|string',
             'address'  => 'required|string',
-            'postcode' => 'string'
+            'postcode' => 'string',
+            'street'    => 'string',
+            'door_no'   => 'string',
         ];
     }
 }
