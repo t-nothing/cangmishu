@@ -299,29 +299,29 @@ class ProductController extends Controller
             $productImport = new ProductsImport(new CategoryService);
             $resultAll = app('excel')->toArray($productImport, $request->file('file'), 'UTF-8');
 
-            $result = $resultAll[0];
+            $result = collect($resultAll[0])->filter->name_cn->all();
             // app('log')->info('result', $result);
 
-            validator(
-                $result,
-                [
-                    'name_cn' => 'required',
-                    'category_name' => 'required',
-                ],
-                [],
-                [
-                    'name_cn' => '商品名称',
-                    'category_name' => '商品分类',
-                ]
-            )->validate();
-
             foreach ($result as $key => $row) {
-                // print_r($row);
+                validator(
+                    $row,
+                    [
+                        'name_cn' => 'required',
+                        'category_name' => 'required',
+                    ],
+                    [],
+                    [
+                        'name_cn' => '商品名称',
+                        'category_name' => '商品分类',
+                    ]
+                )->validate();
 
-                $category  = Category::where('name_cn', $row['category_name'])
-                ->where('warehouse_id',app('auth')->warehouse()->id)
-                ->where('owner_id',app('auth')->ownerId())->first();
-                if(!$category) {
+                $category = Category::where('name_cn', $row['category_name'])
+                    ->where('warehouse_id', app('auth')->warehouse()->id)
+                    ->where('owner_id', app('auth')->ownerId())
+                    ->first();
+
+                if(! $category) {
                     return formatRet(0, "{$row['category_name']}分类不存在");
                 }
 
