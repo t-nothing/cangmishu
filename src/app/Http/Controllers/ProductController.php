@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Maatwebsite\Excel\Validators\ValidationException;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -395,7 +395,7 @@ class ProductController extends Controller
             // app('log')->info('商品信息xxxxx', $result);
 
         } catch (ValidationException $e) {
-            $failures = $e->failures();
+            /*$failures = $e->failures();
             $error = [];
             foreach ($failures as $failure) {
                 $error[] = [
@@ -403,8 +403,8 @@ class ProductController extends Controller
                     'attribute' => $failure->attribute(),
                     'error' => $failure->errors()
                 ];
-            }
-            return formatRet(0, '导入结束,数据验证未通过', $error);
+            }*/
+            return formatRet(0, '导入结束,数据验证未通过', $e->errors());
         } catch(\Exception $exception) {
 
             app('log')->error('货品导入失败', ["msg" => $exception->getMessage()]);
