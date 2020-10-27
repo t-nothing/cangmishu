@@ -404,7 +404,8 @@ class ProductController extends Controller
                     'error' => $failure->errors()
                 ];
             }*/
-            return formatRet(422, '导入结束,数据验证未通过'. $e->errors()[0]);
+            $errorMessage = array_values($e->errors())[0];
+            return formatRet(422, '导入结束,数据验证未通过：'. $errorMessage);
         } catch(\Exception $exception) {
 
             app('log')->error('货品导入失败', ["msg" => $exception->getMessage()]);
