@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Validators\ValidationException;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 
 class ProductController extends Controller
@@ -56,7 +56,7 @@ class ProductController extends Controller
             } else {
                 $product = $product->hasKeyword($request->keywords);
             }
-            
+
         }
 
         if ($request->filled('show_low_stock') && $request->show_low_stock == 1) {
@@ -74,7 +74,7 @@ class ProductController extends Controller
             unset($value['category_name_cn']);
             unset($value['category_name_en']);
         }
-        
+
         return formatRet(0, '', $result);
     }
 
@@ -120,7 +120,7 @@ class ProductController extends Controller
         if($request->category_id > 0){
             $product->category_id         = $request->category_id;
         }
-        
+
         $product->name_cn             = $request->name_cn;
         $product->name_en             = $request->input('name_en', $request->name_cn);
         $product->hs_code             = $request->hs_code;
@@ -134,7 +134,7 @@ class ProductController extends Controller
         $product->purchase_price      = $specs[0]['purchase_price'];
         $product->barcode             = $barcode;
         DB::beginTransaction();
-  
+
         try{
             $product->save();
             foreach ($specs as $k => $v) {
@@ -216,10 +216,10 @@ class ProductController extends Controller
                     'is_warning'     => 1,
                     'product_id'     => $product->id,
                 ];
-                
+
                 ProductSpec::updateOrCreate(
                     [
-                        'relevance_code'=>$spec['relevance_code'], 
+                        'relevance_code'=>$spec['relevance_code'],
                         'owner_id'      =>Auth::ownerId()
                     ],
                     $data
@@ -270,7 +270,7 @@ class ProductController extends Controller
             ShopProduct::where('product_id', $product_id)->delete();
             ShopProductSpec::where('product_id', $product_id)->delete();
             // $product->specs()->stocks()->delete();
-            
+
             $product->specs()->forceDelete();
             $product->forceDelete();
             DB::commit();
@@ -298,10 +298,23 @@ class ProductController extends Controller
         try {
             $productImport = new ProductsImport(new CategoryService);
             $resultAll = app('excel')->toArray($productImport, $request->file('file'), 'UTF-8');
-           
+
             $result = $resultAll[0];
             // app('log')->info('result', $result);
-            
+
+            validator(
+                $result,
+                [
+                    'name_cn' => 'required',
+                    'category_name' => 'required',
+                ],
+                [],
+                [
+                    'name_cn' => '商品名称',
+                    'category_name' => '商品分类',
+                ]
+            )->validate();
+
             foreach ($result as $key => $row) {
                 // print_r($row);
 
@@ -336,12 +349,9 @@ class ProductController extends Controller
                 $product_purchase_price = 0;
                 $product_sale_price = 0;
                 foreach ($specs as $kk=> $spec) {
-
                     if(empty($spec[0]) && empty($spec[1])) {
                         continue;
                     }
-
-
 
                     $specRow = [
                         'name_cn'           =>  trim($spec[0]),
@@ -356,6 +366,18 @@ class ProductController extends Controller
                         'warehouse_id'      =>  app('auth')->warehouse()->id,
                     ];
 
+                    validator(
+                        $specRow,
+                        [
+                            'name_cn' => 'required',
+                            'relevance_code' => 'required',
+                        ],
+                        [],
+                        [
+                            'name_cn' => '规格名称',
+                            'relevance_code' => '规格SKU',
+                        ]
+                    )->validate();
 
                     $product_purchase_price = trim($spec[2]);
                     $product_sale_price = trim($spec[3]);
@@ -366,7 +388,7 @@ class ProductController extends Controller
                 $product['purchase_price']  = $product_purchase_price;
                 $product['sale_price']      = $product_sale_price;
 
-                
+
                 $newResult[] =  $product;
             }
 
@@ -384,7 +406,7 @@ class ProductController extends Controller
             }
             return formatRet(0, '导入结束,数据验证未通过', $error);
         } catch(\Exception $exception) {
-            
+
             app('log')->error('货品导入失败', ["msg" => $exception->getMessage()]);
             return formatRet(500, '导入失败');
         }
@@ -395,12 +417,12 @@ class ProductController extends Controller
 
         DB::beginTransaction();
         try{
-           
+
             $products = [];
             foreach ($newResult as $key => $product) {
-                
-                $validator = Validator::make($product, $productRequest->rules(), [], $productRequest->attributes());   
-                if ($validator->fails()) 
+
+                $validator = Validator::make($product, $productRequest->rules(), [], $productRequest->attributes());
+                if ($validator->fails())
                 {
                     throw new \Exception("第".($key+1)."行" . $validator->errors()->first(), 1);
                 }
@@ -428,7 +450,7 @@ class ProductController extends Controller
     public  function  show(BaseRequests $request,$product_id)
     {
         app('log')->error('查看详情', ["product_id" => $product_id]);
-        
+
         $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price,total_stock_num'])
             ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())
@@ -454,7 +476,7 @@ class ProductController extends Controller
         $totalStockNum = Product::ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())
             ->sum("total_stock_num");
-        
+
         return formatRet(0, "成功", [
             "count_product" =>  intval($totalCount),
             "count_stock"   =>  intval($totalStockNum),
