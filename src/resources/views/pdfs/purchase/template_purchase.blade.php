@@ -49,7 +49,7 @@
         <td>@lang('message.batchPurcharseDepartment')：{{ $purchase['warehouse']['name_cn'] }}</td>
       </tr>
     </table>
-    
+
     <table class="table  table-bordered text-center" style="margin-top: 30px;">
       <thead>
         <tr>
@@ -88,7 +88,7 @@
     <table width="100%" border="0"  align="center" class="table table-bordered ">
       <tr>
         <td width="180px">@lang('message.batchPurcharseRemark')：</td>
-        <td height="100px"><?php echo $purchase['remark']?></td>
+        <td height="100px">{{ $purchase['remark'] }}</td>
       </tr>
     </table>
 
