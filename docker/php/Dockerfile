@@ -29,7 +29,7 @@ RUN apt-get update  && apt-get install -y \
     && docker-php-ext-install -j$(nproc) gd 
 
 RUN pecl install -o -f mcrypt && \
-docker-php-ext-enable mcryp
+docker-php-ext-enable mcrypt
 
 RUN pecl install -o -f redis \
 &&  rm -rf /tmp/pear \
