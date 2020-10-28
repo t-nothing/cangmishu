@@ -24,9 +24,12 @@ RUN apt-get update  && apt-get install -y \
 	    curl \
 	    wget \
         cron \ 
-    && docker-php-ext-install -j$(nproc) iconv mcrypt mysqli pdo_mysql pcntl zip pcntl bcmath \
+    && docker-php-ext-install -j$(nproc) iconv mysqli pdo_mysql pcntl zip pcntl bcmath \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install -j$(nproc) gd
+
+RUN pecl install -o -f mcrypt && \
+docker-php-ext-enable mcrypt
 
 RUN pecl install -o -f redis \
 &&  rm -rf /tmp/pear \
