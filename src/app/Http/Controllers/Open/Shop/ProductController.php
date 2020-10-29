@@ -5,12 +5,14 @@
 
 namespace App\Http\Controllers\Open\Shop;
 use App\Http\Requests\BaseRequests;
+use App\Models\ShopUser;
 use App\Rules\PageSize;
 use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use App\Models\Product;
 use App\Models\ShopProduct;
 use App\Models\ShopProductSpec;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -50,7 +52,7 @@ class ProductController extends Controller
 
             $re = $dataList->toArray();
 
-//      
+//
             $currency = $request->shop->currency;
             $data = collect($re['data'])->map(function($v) use($currency){
                 $v['currency'] = $currency;
@@ -75,5 +77,83 @@ class ProductController extends Controller
         $shopProduct->currency = $request->shop->currency;
 
         return formatRet(0,"成功",$shopProduct->toArray());
+    }
+
+    /**
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function collect(int $id)
+    {
+        $shopProduct = ShopProduct::query()->findOrFail($id);
+
+        /** @var ShopUser $user */
+        $user = auth('shop')->user();
+
+        $user->collectShopProduct()->attach($shopProduct->getKey());
+
+        return formatRet(0,'成功');
+    }
+
+    /**
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unCollect(int $id)
+    {
+        $shopProduct = ShopProduct::query()->findOrFail($id);
+
+        /** @var ShopUser $user */
+        $user = auth('shop')->user();
+
+        $user->collectShopProduct()->detach($shopProduct->getKey());
+
+        return formatRet(0,'成功');
+    }
+
+    /**
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function collectionList(BaseRequests $request)
+    {
+        /** @var ShopUser $user */
+        $user = auth('shop')->user();
+
+        $collectIds = $user->collectShopProduct->modelKeys();
+
+        $dataList =   ShopProduct::query()
+            ->leftJoin('product', 'shop_product.product_id', '=', 'product.id')
+            ->with("specs")
+            ->where('shop_id', $request->shop->id)
+            ->where('shop_product.is_shelf', 1)
+            ->whereIn('shop_product.id', $collectIds)
+            ->when($request->filled('keywords'),function ($q) use ($request){
+                return $q->hasKeyword($request->input('keywords'));
+            })
+            ->latest()->paginate($request->input('page_size',10), [
+                'shop_product.id',
+                'product.name_cn',
+                'product.name_en',
+                'shop_product.sale_price',
+                'shop_product.is_shelf',
+                'shop_product.pics',
+                'shop_product.remark',
+                'shop_product.created_at',
+                'shop_product.updated_at',
+            ]);
+
+        $re = $dataList->toArray();
+
+        $currency = $request->shop->currency;
+
+        $data = collect($re['data'])->map(function($v) use($currency){
+            $v['currency'] = $currency;
+            return $v;
+        })->toArray();
+
+        $re['data'] = $data;
+
+        return formatRet(0,'', $re);
     }
 }
