@@ -18,7 +18,7 @@ use App\Models\User;
 use App\Models\Token;
 use App\Models\VerifyCode;
 use Carbon\Carbon;
-use Log;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 
@@ -43,7 +43,7 @@ class AuthController extends  Controller
         $user = User::where('phone', $request->mobile)->first();
 
         if(!$user) {
-            \Log::info('找到不用户', $request->all());
+            Log::info('找到不用户', $request->all());
             return formatRet(500, trans("message.userNotExist"));
         }
 
@@ -93,12 +93,12 @@ class AuthController extends  Controller
         $user = User::where('phone', $request->mobile)->first();
 
         if(!$user) {
-            \Log::info('找到不用户', $request->all());
+            Log::info('找到不用户', $request->all());
             return formatRet(500, trans("message.userNotExist"));
         }
 
-   
-        \Log::info('找到用户', $user->toArray());
+
+        Log::info('找到用户', $user->toArray());
         $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
         $userId = $user->id;
 
@@ -108,6 +108,7 @@ class AuthController extends  Controller
 
         return formatRet(0, '', $data);
     }
+
     /**
      * 登入
      */
@@ -122,14 +123,15 @@ class AuthController extends  Controller
         $guard = app('auth')->guard();
 
         if (! $data = $guard->login($guard->credentials())) {
-            \Log::info('登录失败', $request->all());
+            Log::info('登录失败', $request->all());
             return formatRet(500, $guard->sendFailedLoginResponse());
         }
 
         $data['user'] = $guard->user();
 
-        
-        $filtered = collect($data['user'])->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
+
+        $filtered = collect($data['user'])
+            ->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
         $data['user'] = $filtered->all();
         //如果有填写qrkey
         if($request->filled('qr_key')) {
@@ -143,13 +145,44 @@ class AuthController extends  Controller
                 }
             }
         }
-        
+
         //获取用户权限
         $modules =app('module')->getModulesByUser($guard->user(),$guard->user()->default_warehouse_id);
         $modules = collect($modules)->pluck('id')->toArray();
         $modules =array_unique($modules);
         sort($modules);
         $data['modules'] = $modules;
+        return formatRet(0, '', $data);
+    }
+
+    /**
+     * 登入
+     */
+    public function expLogin()
+    {
+        $guard = auth()->guard();
+
+        if (! $data = $guard->userLogin(13)) {
+            return formatRet(500, $guard->sendFailedLoginResponse());
+        }
+
+        $data['user'] = $guard->user();
+
+        $filtered = collect($data['user'])
+            ->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
+        $data['user'] = $filtered->all();
+
+        //获取用户权限
+        $modules = app('module')->getModulesByUser(
+            $guard->user(),
+            $guard->user()->default_warehouse_id
+        );
+
+        $modules = collect($modules)->pluck('id')->toArray();
+        $modules = array_unique($modules);
+        sort($modules);
+        $data['modules'] = $modules;
+
         return formatRet(0, '', $data);
     }
 
@@ -254,7 +287,7 @@ class AuthController extends  Controller
                 return formatRet(500, trans("message.userNotExist") , [
                     "user"  =>  null
                 ],200);
-            } 
+            }
 
             $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
             $userId = $user->id;
@@ -270,7 +303,7 @@ class AuthController extends  Controller
 
             return formatRet(500, trans("message.userNotExist"));
         }
-        
+
     }
 
     /**
@@ -315,7 +348,7 @@ class AuthController extends  Controller
                 'password'  =>  $request->bind_password
             ];
             if (! $data = $guard->login($loginData)) {
-                \Log::info('登录失败', $request->all());
+                Log::info('登录失败', $request->all());
                 return formatRet(500, $guard->sendFailedLoginResponse());
             }
 
@@ -323,9 +356,9 @@ class AuthController extends  Controller
 
         }
 
-        app("log")->info("mp", $miniData);
+        info("mp", $miniData);
 
-       
+
 
         $openid = $miniData['openid'];
         $weixinSessionKey = $miniData['session_key'];
@@ -356,12 +389,12 @@ class AuthController extends  Controller
                 if(!$user)
                 {
                     $user = app('user')->quickRegister($request);
-                } 
+                }
             } else {
                 $user->wechat_mini_program_open_id =  $request->wechat_mini_program_open_id;
                 $user->save();
             }
-            
+
 
             $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
             $userId = $user->id;
@@ -377,7 +410,7 @@ class AuthController extends  Controller
 
             return formatRet(500, trans("message.userNotExist"));
         }
-        
+
     }
 
     /**
@@ -399,7 +432,7 @@ class AuthController extends  Controller
         ]);
 
         app('log')->info('测试体验帐号登录',$request->all());
-        
+
         try {
             //绑定的一个固定帐号
             $user = User::find(483);
@@ -418,6 +451,6 @@ class AuthController extends  Controller
 
             return formatRet(500, trans("message.userNotExist"));
         }
-        
+
     }
 }
