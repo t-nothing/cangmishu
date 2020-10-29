@@ -182,12 +182,12 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/order/completed/{order_id}', 'OrderController@completed'); //设为签收
     Route::get('/order/pay/status', 'OrderController@payStatusList'); //支付状态列表
     Route::get('/order/pay/type', 'OrderController@payTypeList'); //支付方式列表
-    
+
     Route::get('/order/{id}/download/', 'OrderController@download');
     Route::get('/order/{id}/download/{tempate}', 'OrderController@download');
     Route::get('/order/{id}/pdf/', 'OrderController@pdf');
     Route::get('/order/{id}/pdf/{tempate}', 'OrderController@pdf');
-    
+
     //库存
     // Route::get('/stock/code', 'ProductStockController@getSkus');
     Route::get('/stock/code', 'ProductStockController@getLocations');
@@ -328,9 +328,11 @@ $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middlewar
     $router->get('/categories', 'CategoryController@list');// 列表
     $router->get('/categories/{id}/products', 'ProductController@list');// 商品列表
     $router->get('/products/{id}', 'ProductController@show');// 商品详细
+    $router->put('/products/{id}/collect', 'ProductController@collect');// 收藏
+    $router->put('/products/{id}/unCollect', 'ProductController@unCollect');// 取消收藏
+    $router->get('/products/collections', 'ProductController@collectionList');// 商品收藏列表
 
     $router->group(['middleware' => [ 'auth:shop']], function($router) {
-        
         $router->get('/cart', 'CartController@list');// 购物车列表
         $router->get('/cart/count', 'CartController@count');// 购物车数量
         $router->post('/cart', 'CartController@store');// 加入购物车

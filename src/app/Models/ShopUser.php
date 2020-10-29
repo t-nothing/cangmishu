@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Laravel\Passport\HasApiTokens;
 
 class ShopUser extends User
@@ -32,13 +34,28 @@ class ShopUser extends User
         'password', 'remember_token','openid','deleted_at',
     ];
 
+    /**
+     * 用戶收藏的商品
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function collectShopProduct()
+    {
+        return $this->belongsToMany(
+            ShopProduct::class,
+        'shop_product_collection',
+        'user_id',
+        'shop_product_id'
+        );
+    }
+
 
     //修改电话信息
     public function userInfo()
     {
-        $q = \Auth::user()->openid;
-        return Self::where('openid', $q)->get();
+        $q = Auth::user()->openid;
 
+        return self::where('openid', $q)->get();
     }
 
     public function findForPassport($username) {

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use GuzzleHttp\Client;
 
-class TestThirdPartRequest extends TestCase
+class ThirdPartRequestTest extends TestCase
 {
     /**
      * A basic test example.
@@ -56,7 +56,7 @@ class TestThirdPartRequest extends TestCase
             $bodyData = $response->getBody();
             print_r((string)$bodyData);
             $responseData = json_decode((string) $bodyData, true);
-            
+
             print_r($responseData);
         }catch (\Exception $e){
             print_r($e->getMessage());
