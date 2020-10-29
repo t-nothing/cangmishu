@@ -8,15 +8,12 @@ use App\Http\Requests\BaseRequests;
 use App\Models\ShopUser;
 use App\Rules\PageSize;
 use App\Http\Controllers\Controller;
-use App\Models\Shop;
-use App\Models\Product;
 use App\Models\ShopProduct;
-use App\Models\ShopProductSpec;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
-
     /**
      * 商品首页
      **/
@@ -51,23 +48,7 @@ class ProductController extends Controller
                 'shop_product.updated_at',
             ]);
 
-            $re = $dataList->toArray();
-
-//
-            $currency = $request->shop->currency;
-            $data = collect($re['data'])->map(function($v) use($currency){
-                $v['currency'] = $currency;
-
-                $v['specs'] = collect($v['specs'])->map(function ($spec) {
-                    $spec['total_stock_num'] = $spec['product_spec']['total_stock_num'];
-                    unset($spec['product_spec']);
-                    return $spec;
-                })->all();
-
-                return $v;
-            })->toArray();
-            $re['data'] = $data;
-        return formatRet(0,'',$re);
+        return $this->convertProductList($dataList, $request);
     }
 
     /**
@@ -94,7 +75,7 @@ class ProductController extends Controller
 
     /**
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function collect(int $id)
     {
@@ -110,7 +91,7 @@ class ProductController extends Controller
 
     /**
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function unCollect(int $id)
     {
@@ -126,7 +107,7 @@ class ProductController extends Controller
 
     /**
      * @param  BaseRequests  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function collectionList(BaseRequests $request)
     {
@@ -137,7 +118,7 @@ class ProductController extends Controller
 
         $dataList =   ShopProduct::query()
             ->leftJoin('product', 'shop_product.product_id', '=', 'product.id')
-            ->with("specs")
+            ->with(['specs', 'specs.productSpec'])
             ->where('shop_id', $request->shop->id)
             ->where('shop_product.is_shelf', 1)
             ->whereIn('shop_product.id', $collectIds)
@@ -148,6 +129,7 @@ class ProductController extends Controller
                 'shop_product.id',
                 'product.name_cn',
                 'product.name_en',
+                'product.total_stock_num',
                 'shop_product.sale_price',
                 'shop_product.is_shelf',
                 'shop_product.pics',
@@ -156,17 +138,35 @@ class ProductController extends Controller
                 'shop_product.updated_at',
             ]);
 
+        return $this->convertProductList($dataList, $request);
+    }
+
+    /**
+     * @param  LengthAwarePaginator  $dataList
+     * @param  BaseRequests  $request
+     * @return JsonResponse
+     */
+    protected function convertProductList(LengthAwarePaginator $dataList, BaseRequests $request): JsonResponse
+    {
         $re = $dataList->toArray();
 
         $currency = $request->shop->currency;
 
-        $data = collect($re['data'])->map(function($v) use($currency){
+        $data = collect($re['data'])->map(function ($v) use ($currency) {
             $v['currency'] = $currency;
+
+            $v['specs'] = collect($v['specs'])->map(function ($spec) {
+                $spec['total_stock_num'] = $spec['product_spec']['total_stock_num'];
+                unset($spec['product_spec']);
+
+                return $spec;
+            })->all();
+
             return $v;
         })->toArray();
 
         $re['data'] = $data;
 
-        return formatRet(0,'', $re);
+        return formatRet(0, '', $re);
     }
 }
