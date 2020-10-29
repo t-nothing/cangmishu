@@ -8,13 +8,13 @@ if (! function_exists('formatRet')) {
      *
      * @param  int  $code
      * @param  string  $message
-     * @param  array  $data
+     * @param  mixed  $data
      * @param  int  $status
      * @param  array  $headers
      * @param  int  $options
      * @return \Illuminate\Http\JsonResponse
      */
-    function formatRet(int $code, $message = '', array $data = [], $status = 200, array $headers = [], $options = 0)
+    function formatRet(int $code, $message = '', $data = [], $status = 200, array $headers = [], $options = 0)
     {
         if($code == 0 && !$message){
             $message = trans("message.success");
