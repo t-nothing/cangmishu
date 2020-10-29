@@ -49,6 +49,15 @@ class ShopUser extends User
         );
     }
 
+    /**
+     * 地址
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function addresses()
+    {
+        return $this->hasMany(ShopUserAddress::class, 'shop_user_id', 'id');
+    }
 
     //修改电话信息
     public function userInfo()

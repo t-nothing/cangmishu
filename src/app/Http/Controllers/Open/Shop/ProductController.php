@@ -29,7 +29,7 @@ class ProductController extends Controller
 
         $catId = intval($catId);
         $dataList =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
-            ->with("specs")
+            ->with(['specs', 'specs.productSpec'])
             ->when($catId, function($q) use($catId) {
                 return $q->where('product.category_id', $catId);
             })
@@ -42,6 +42,7 @@ class ProductController extends Controller
                 'shop_product.id',
                 'product.name_cn',
                 'product.name_en',
+                'product.total_stock_num',
                 'shop_product.sale_price',
                 'shop_product.is_shelf',
                 'shop_product.pics',
@@ -56,6 +57,13 @@ class ProductController extends Controller
             $currency = $request->shop->currency;
             $data = collect($re['data'])->map(function($v) use($currency){
                 $v['currency'] = $currency;
+
+                $v['specs'] = collect($v['specs'])->map(function ($spec) {
+                    $spec['total_stock_num'] = $spec['product_spec']['total_stock_num'];
+                    unset($spec['product_spec']);
+                    return $spec;
+                })->all();
+
                 return $v;
             })->toArray();
             $re['data'] = $data;

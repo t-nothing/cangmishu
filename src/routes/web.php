@@ -279,7 +279,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
 });
 
-$router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function(\Illuminate\Routing\Router $router) {
     // 认证、授权
     $router->post('/auth', 'AuthController@login');// 登入
 
@@ -305,8 +305,7 @@ $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) 
     });
 });
 
-$router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
-
+Route::group(['prefix' => 'open', 'namespace' => 'Open'], function () {
     Route::any('wechat', 'WeChatController@serve');
     Route::any('wechat/login', 'WeChatController@wechatLogin');
     Route::get('wechat/qr', 'WeChatController@wechatQr');
@@ -321,18 +320,15 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 });
 
 
-$router->get('open/shop/list', 'Open\\Shop\\ShopController@index');// 店铺列表
+Route::get('open/shop/list', 'Open\\Shop\\ShopController@index');// 店铺列表
 //店铺开放型接口
-$router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware' => ['shop']], function($router) {
+Route::group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware' => ['shop']], function($router) {
 
     Route::post('/login', 'AuthenticateController@autoLogin')->name('openShopLogin');
     $router->get('/', 'ShopController@show');// 店铺详细
     $router->get('/categories', 'CategoryController@list');// 列表
     $router->get('/categories/{id}/products', 'ProductController@list');// 商品列表
     $router->get('/products/{id}', 'ProductController@show');// 商品详细
-    $router->put('/products/{id}/collect', 'ProductController@collect');// 收藏
-    $router->put('/products/{id}/unCollect', 'ProductController@unCollect');// 取消收藏
-    $router->get('/products/collections', 'ProductController@collectionList');// 商品收藏列表
 
     $router->group(['middleware' => [ 'auth:shop']], function($router) {
         $router->get('/cart', 'CartController@list');// 购物车列表
@@ -345,6 +341,12 @@ $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middlewar
 
         $router->get('/order', 'OrderController@list');// 店铺订单ID
         $router->get('/order/{id}', 'OrderController@show');// 店铺订单ID
+
+        $router->put('/products/{id}/collect', 'ProductController@collect');// 收藏
+        $router->put('/products/{id}/unCollect', 'ProductController@unCollect');// 取消收藏
+        $router->get('/products/collections', 'ProductController@collectionList');// 商品收藏列表
+
+        Route::resource('userAddress', 'UserAddressController'); //用户地址 REST
     });
 });
 
