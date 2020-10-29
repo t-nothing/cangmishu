@@ -12,7 +12,7 @@ class ShopProduct extends Model
     protected $casts = [
         'pics' => 'array',
         'descs'=> 'array',
-    ]; 
+    ];
 
     protected $appends = ['name'];
 
@@ -20,7 +20,7 @@ class ShopProduct extends Model
     {
         return $this->belongsTo('App\Models\Shop', 'shop_id', 'id');
     }
-    
+
     public function specs()
     {
         return $this->hasMany('App\Models\ShopProductSpec', 'shop_product_id', 'id');
@@ -49,5 +49,28 @@ class ShopProduct extends Model
     public function scopeHasKeyword($query, $keywords)
     {
         $query->where('shop_product.name_cn', 'like', '%' . $keywords . '%')->orWhere('shop_product.name_en', 'like', '%' . $keywords . '%');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function collectUsers()
+    {
+        return $this->belongsToMany(
+            ShopUser::class,
+            'shop_product_collection',
+            'shop_product_id',
+            'user_id'
+        );
+    }
+
+    /**
+     * 是否收藏
+     *
+     * @return bool
+     */
+    public function isCollect()
+    {
+        return in_array(auth('shop')->user()->getKey(), $this->collectUsers->modelKeys());
     }
 }
