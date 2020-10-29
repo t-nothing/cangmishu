@@ -9,6 +9,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model as Models;
+use Illuminate\Support\Arr;
+
 class Model extends  Models
 {
     protected static $_instance = [];
@@ -38,7 +40,7 @@ class Model extends  Models
 
         $attributes = $this->attributes;
 
-        if (! is_null($value = array_get($this->getCasts(), $key))) {
+        if (! is_null($value = Arr::get($this->getCasts(), $key))) {
             if (! array_key_exists($key, $attributes)) {
                 return;
             }
