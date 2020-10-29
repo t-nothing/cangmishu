@@ -58,7 +58,7 @@ class CreateProductRequest extends BaseRequests
 
         return $arr;
     }
- 
+
 
     public function attributes()
     {
@@ -70,7 +70,8 @@ class CreateProductRequest extends BaseRequests
             'specs.*.gross_weight'  => trans("message.productFieldGrossWeight"),
             'specs.*.sale_price'    => trans("message.productFieldSalePrice"),
             'specs.*.purchase_price'=> trans("message.productFieldPurchasePrice"),
-            'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
+            //'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
+            'specs.*.relevance_code'=> __('message.recountPageProductSpecSku'),
         ];
     }
 

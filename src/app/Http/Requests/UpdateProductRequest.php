@@ -73,7 +73,8 @@ class UpdateProductRequest extends BaseRequests
             'specs.*.gross_weight'  => trans("message.productFieldGrossWeight"),
             'specs.*.sale_price'    => trans("message.productFieldSalePrice"),
             'specs.*.purchase_price'=> trans("message.productFieldPurchasePrice"),
-            'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
+            //'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
+            'specs.*.relevance_code'=> trans("message.recountPageProductSpecSku"),
         ];
     }
 }
