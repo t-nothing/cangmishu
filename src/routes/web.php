@@ -347,6 +347,7 @@ Route::group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware'
         $router->get('/products/collections', 'ProductController@collectionList');// 商品收藏列表
 
         Route::resource('userAddress', 'UserAddressController'); //用户地址 REST
+        Route::get('searchKeywords', 'UserAddressController'); //用户地址 REST
     });
 });
 
