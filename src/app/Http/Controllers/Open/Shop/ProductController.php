@@ -11,6 +11,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ShopProduct;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -32,7 +34,7 @@ class ProductController extends Controller
             })
             ->where('shop_id', $request->shop->id)
             ->where('shop_product.is_shelf', 1)
-            ->when($request->filled('keywords'),function ($q) use ($request){
+            ->when($request->filled('keywords'),function ($q) use ($request) {
                 return $q->hasKeyword($request->input('keywords'));
             })
             ->latest()->paginate($request->input('page_size',10), [
@@ -168,5 +170,37 @@ class ProductController extends Controller
         $re['data'] = $data;
 
         return formatRet(0, '', $re);
+    }
+
+    /**
+     * @param  string  $keyword
+     * @return bool
+     */
+    protected function pushKeyword(string $keyword)
+    {
+        /** @var Collection $keywords */
+        $keywords = Cache::get($this->keywordKeyName(), collect([]));
+
+        $keywords = $keywords->merge([$keyword]);
+
+        return Cache::forever($this->keywordKeyName(), $keywords);
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getKeywords()
+    {
+        $data = Cache::get($this->keywordKeyName(), collect([]));
+
+        return formatRet(0, '操作成功', $data);
+    }
+
+    /**
+     * @return string
+     */
+    protected function keywordKeyName()
+    {
+        return 'UserKeywords_'.auth('shop')->id();
     }
 }
