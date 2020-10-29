@@ -248,6 +248,32 @@ class JwtGuard implements Guard
     }
 
     /**
+     * @param  int  $id
+     * @return array|false
+     */
+    public function userLogin(int $id)
+    {
+        $user = User::with(['defaultWarehouse:id,name_cn'])
+            ->whereKey($id)
+            ->first();
+
+        if(! $user || $user->isLocked()){
+            return false;
+        }
+
+        $user->last_login_at = time();
+        $user->save();
+
+        $this->setUser($user);
+
+        $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+
+        return [
+            'token' => $token->toArray(),
+        ];
+    }
+
+    /**
      * Determine if the user matches the credentials.
      *
      * @param  mixed $user

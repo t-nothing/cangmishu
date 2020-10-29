@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,6 +17,7 @@ Route::get('/', function () {
 });
 
 // 用户认证
+Route::post('/expLogin', 'AuthController@expLogin');
 Route::post('/login', 'AuthController@login');
 Route::post('/smsLogin', 'AuthController@smsLogin');
 Route::post('/smsLoginCode', 'AuthController@getSMSVerifyCode');
