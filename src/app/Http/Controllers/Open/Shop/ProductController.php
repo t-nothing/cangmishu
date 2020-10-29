@@ -68,13 +68,18 @@ class ProductController extends Controller
     public function show(BaseRequests $request, $id)
     {
         $id = intval($id);
-        $shopProduct = ShopProduct::with("shop")->findOrFail($id);
+        /** @var ShopProduct $shopProduct */
+        $shopProduct = ShopProduct::with(["shop", 'collectUsers'])->findOrFail($id);
 
         if ( !$shopProduct || !$shopProduct->shop ){
             return formatRet(404,'商品不存在', 404);
         }
         $shopProduct->load("specs");
+
         $shopProduct->currency = $request->shop->currency;
+        $shopProduct->is_collect = $shopProduct->isCollect();
+
+        unset($shopProduct['collectUsers']);
 
         return formatRet(0,"成功",$shopProduct->toArray());
     }
