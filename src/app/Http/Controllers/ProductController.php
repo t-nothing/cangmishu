@@ -299,9 +299,10 @@ class ProductController extends Controller
             $productImport = new ProductsImport(new CategoryService);
             $resultAll = app('excel')->toArray($productImport, $request->file('file'), 'UTF-8');
 
-            $result = collect($resultAll[0])->filter->name_cn->all();
-            // app('log')->info('result', $result);
-
+            $result = collect($resultAll[0])->filter(function ($value) {
+                return $value->name_cn && $value->categoty_name;
+            })->all();
+            
             foreach ($result as $key => $row) {
                 validator(
                     $row,
@@ -322,7 +323,7 @@ class ProductController extends Controller
                     ->first();
 
                 if(! $category) {
-                    return formatRet(0, "{$row['category_name']}分类不存在");
+                    return formatRet(422, "{$row['category_name']}分类不存在");
                 }
 
                 $product = [
