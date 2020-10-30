@@ -302,7 +302,7 @@ class ProductController extends Controller
             $result = collect($resultAll[0])->filter(function ($value) {
                 return $value['name_cn'] && $value['category_name'];
             })->all();
-            
+
             foreach ($result as $key => $row) {
                 validator(
                     $row,
