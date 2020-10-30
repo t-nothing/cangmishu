@@ -52,7 +52,7 @@ class UserController extends  Controller
                     'nickname'      =>  $data['wechat_user']['nickname']??'',
                     'wechat_openid' =>  $data['open_id']??'',
                 ]);//合并参数
-                
+
             }
         } else {
             $verify_code = VerifyCode::where('code',$code)->where('email',$codeFieldValue)->where('expired_at','>',time())->first();
@@ -70,28 +70,27 @@ class UserController extends  Controller
         return formatRet(0, trans("message.userRegisterSuccess"), $user->toArray());
     }
 
-    public  function getEmailVerifyCode(BaseRequests $request)
+    public function getEmailVerifyCode(BaseRequests $request)
     {
-        $this->validate($request,[
-            'email'         =>['required','email',Rule::unique('user','email')],
+        $this->validate($request, [
+            'email' => ['required', 'email', Rule::unique('user', 'email')],
         ]);
 
-
-
         $code = app('user')->getRandCode();
-        app('user')->createUserEmailVerifyCode($code,$request->email);
+        app('user')->createUserEmailVerifyCode($code, $request->email);
+
         return formatRet(0, "");
     }
 
     public  function getSmsVerifyCode(BaseRequests $request)
     {
-        $this->validate($request,[
-            'mobile'        =>  ['required','mobile',Rule::unique('user','phone')],
-            'captcha_key'   =>  'required|string|min:1',
-            'captcha'       =>  'required|string'
+        $this->validate($request, [
+            'mobile' => ['required', 'mobile', Rule::unique('user', 'phone')],
+            'captcha_key' => 'required|string|min:1',
+            'captcha' => 'required|string',
         ]);
 
-        if($request->captcha_key != "app") {
+        if ($request->captcha_key != "app") {
             if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
                 return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
             }
@@ -99,60 +98,82 @@ class UserController extends  Controller
         }
 
         $code = app('user')->getRandCode();
-        app('user')->createUserSMSVerifyCode($code,$request->mobile);
+        app('user')->createUserSMSVerifyCode($code, $request->mobile);
+
         return formatRet(0, trans("message.userRegisterSendSuccess"));
 
     }
 
     public function privilege(BaseRequests $request,$user_id)
     {
-        app('log')->info('拉取用户模块',$request->all());
-        $this->validate($request,[
-            'warehouse_id' =>[
-                'required','min:0',
-                Rule::exists('warehouse','id')->where('owner_id',Auth::ownerId())
-            ]
+        app('log')->info('拉取用户模块', $request->all());
+
+        $this->validate($request, [
+            'warehouse_id' => [
+                'required', 'min:0',
+                Rule::exists('warehouse', 'id')->where('owner_id', Auth::ownerId()),
+            ],
         ]);
 
         $user = User::find($user_id);
-        if($user_id != Auth::id()){
+
+        if ($user_id != Auth::id()) {
             return formatRet(500, trans("message.noPermission"));
         }
-        if(!$user){
+
+        if ( ! $user) {
 
             return formatRet(500, trans("message.userNotExist"));
         }
-        $warehouse_id =$request->input('warehouse_id');
-        $res= app('module')->getModulesByUser($user ,$warehouse_id);
+
+        $warehouse_id = $request->input('warehouse_id');
+        $res = app('module')->getModulesByUser($user, $warehouse_id);
         $res = collect($res)->pluck('id')->toArray();
+
         return formatRet(0, trans("message.success"), $res);
     }
 
     /**
-     * 重设密码
+     * 修改密码
+     *
+     * @param  BaseRequests  $request
+     * @param $user_id
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function resetPassword(BaseRequests $request,$user_id){
         $this->validate($request, [
+            'old_password' => 'required|string',
             'password'=>'required|max:255|confirmed',
             'password_confirmation' => 'required|max:255',
         ]);
-        app('log')->info('user',['request'=>$request->all(),'user_id'=>$user_id]);
+
+        info('user', ['request' => $request->all(),'user_id' => $user_id]);
+
         $user = User::find($user_id);
+
         if(!$user){
             return formatRet(500, trans("message.userNotExist"));
         }
+
         $auth = Auth::user();
-        if($user->boss_id !=0){
-            if($user->boss_id !=$auth->id){
+
+        if ($user->boss_id != 0) {
+            if ($user->boss_id != $auth->id) {
                 return formatRet(500, trans("message.noPermission"));
             }
-        }else{
-            if($user->id != $auth->id){
+        } else {
+            if ($user->id != $auth->id) {
                 return formatRet(500, trans("message.noPermission"));
             }
         }
 
+        if (! password_verify($request->password, $user->password)) {
+            return formatRet(500, trans("message.invalidOldPassword"));
+        }
+
         $user->password = Hash::make($request->password);
+
         if (! $user->save()) {
             return formatRet(500, trans("message.failed"));
         }
@@ -160,62 +181,85 @@ class UserController extends  Controller
         return formatRet(0);
     }
 
+    /**
+     * @param  BaseRequests  $request
+     * @param $user_id
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function updateInfo(BaseRequests $request,$user_id){
         $this->validate($request, [
-            'nickname'=>'required|string|max:255',
-            'photos'=>'url|max:255',
+            'nickname' => 'required|string|max:255',
+            'photos' => 'url|max:255',
         ]);
 
         $user = User::find($user_id);
-        if($user_id != Auth::id()){
+
+        if ($user_id != Auth::id()) {
             return formatRet(500, trans("message.noPermission"));
         }
+
         $user->nickname = $request->nickname;
-        if($request->filled('photos'))$user->avatar = $request->photos;
-        if (! $user->save()) {
+
+        if ($request->filled('photos')) {
+            $user->avatar = $request->photos;
+        }
+
+        if ( ! $user->save()) {
             return formatRet(500, trans("message.failed"));
         }
+
         return formatRet(0);
     }
 
     public function avatar(BaseRequests $request,$user_id){
         $this->validate($request, [
-            'avatar'=>'required|string|max:255',
+            'avatar' => 'required|string|max:255',
         ]);
 
         $user = User::find($user_id);
-        if($user_id != Auth::id()){
+
+        if ($user_id != Auth::id()) {
             return formatRet(500, trans("message.noPermission"));
         }
+
         $user->avatar = $request->avatar;
-        if (! $user->save()) {
+
+        if ( ! $user->save()) {
             return formatRet(500, trans("message.failed"));
         }
+
         return formatRet(0);
     }
 
     public function show(BaseRequests $requests,$user_id)
     {
         $user = User::find($user_id);
-        if($user_id != Auth::id()){
+
+        if ($user_id != Auth::id()) {
             return formatRet(500, trans("message.noPermission"));
         }
-        return formatRet(0,trans("message.success"),$user->toArray());
+
+        return formatRet(0, trans("message.success"), $user->toArray());
     }
 
 
     public function callUser()
     {
-        $users  = User::all();
-        $logo=env("APP_URL")."/images/logo.png";
-        $qrCode =env("APP_URL")."/images/qrCode.png";
-        $url =env('RESET_PASSWORD_URL');
-        foreach ($users as $user){
-            $name = explode("@",$user->email)[0];
-            $message = new UserCallBackEmail($logo,$qrCode,$url,$name);
+        $users = User::all();
+
+        $logo = env("APP_URL")."/images/logo.png";
+        $qrCode = env("APP_URL")."/images/qrCode.png";
+        $url = env('RESET_PASSWORD_URL');
+
+        foreach ($users as $user) {
+            $name = explode("@", $user->email)[0];
+            $message = new UserCallBackEmail($logo, $qrCode, $url, $name);
             $message->onQueue('cangmishu_emails');
+
             Mail::to($user->email)->send($message);
         }
+
         return formatRet(0);
     }
 }

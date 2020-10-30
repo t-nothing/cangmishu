@@ -1,11 +1,12 @@
 <?php
 return [
-    '404NotFound' => 'Cannot find anything', 
+    '404NotFound' => 'Cannot find anything',
     'success' =>'Succeed',
-    'failed' => 'Failed', 
-    'tokenInvalid' =>'Bad Request', 
+    'failed' => 'Failed',
+    'tokenInvalid' =>'Bad Request',
     'noPermission' =>'Bad Request',
     'activeAccount'=>'User is not activated, please activate your account by click at the link in your mail',
+    'invalidOldPassword' => 'Origin password verify failed',
 
     'statusBatchIn'=>'Inbound',
     'statusShelf'=>'Putaway',
@@ -81,7 +82,7 @@ return [
     'batchTypeNotExist'=>'Information does not exist',
     'batchTypeDeleteFailed' => 'Failed',#
     'batchTypeCannotDelete'=>'There is an inbound order under this inbound order, and deletion is not allowed.',
-    
+
     'productCategoryAddFailed' =>'Failed',
     'productCategoryUpdateFailed' => 'Failed',#
     'productCategoryNotExist'=>'Information does not exist',
