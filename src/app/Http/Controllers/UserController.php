@@ -144,7 +144,7 @@ class UserController extends  Controller
     public function resetPassword(BaseRequests $request,$user_id){
         $this->validate($request, [
             'old_password' => 'required|string',
-            'password'=>'required|max:255|confirmed',
+            'password' => 'required|max:255|confirmed',
             'password_confirmation' => 'required|max:255',
         ]);
 
