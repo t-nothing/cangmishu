@@ -276,7 +276,10 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/recount/{id}/download/', 'RecountController@download');
     Route::get('/recount/{id}/pdf/', 'RecountController@pdf');
 
-
+    Route::prefix('subscribeMessages')->group(function () {
+        Route::get('/{type}', 'SubscribeMessageController@info');
+        Route::put('/{type}', 'SubscribeMessageController@update');
+    });
 });
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function(\Illuminate\Routing\Router $router) {
