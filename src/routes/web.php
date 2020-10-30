@@ -338,21 +338,23 @@ Route::group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware'
         $router->delete('/cart/{id}', 'CartController@remove');// 删除单个购物车商品
         $router->delete('/cart', 'CartController@destroy');// 删除整个购物车商品
         $router->post('/cart/checkout', 'CartController@checkout');// 下单
-
-        $router->get('/order', 'OrderController@list');// 店铺订单ID
-        $router->get('/order/{id}', 'OrderController@show');// 店铺订单ID
+        //订单
+        Route::prefix('order')->group(function () {
+            Route::get('/', 'OrderController@list');// 店铺订单ID
+            Route::get('{id}', 'OrderController@show');// 店铺订单ID
+           Route::get('statusCount', 'OrderController@orderCount'); //订单数量统计
+        });
 
         $router->put('/products/{id}/collect', 'ProductController@collect');// 收藏
         $router->put('/products/{id}/unCollect', 'ProductController@unCollect');// 取消收藏
         $router->get('/products/collections', 'ProductController@collectionList');// 商品收藏列表
 
         Route::resource('userAddress', 'UserAddressController'); //用户地址 REST
-        Route::get('searchKeywords', 'UserAddressController'); //用户地址 REST
     });
 });
 
 //API 第三方开放接口
-$router->group(['prefix' => 'open/api', 'namespace' => 'Open\\Api', 'middleware' => ['auth:third-party']], function($router) {
+Route::group(['prefix' => 'open/api', 'namespace' => 'Open\\Api', 'middleware' => ['auth:third-party']], function($router) {
 
     $router->get('/stock/spec', 'StockController@spec');// 根据SKU查询库存
     $router->get('/stock/location', 'StockController@location');// 根据货位查询库存
