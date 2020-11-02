@@ -27,7 +27,7 @@ class OrderController extends Controller
 
         $dataList = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)
                     ->orderBy('id','DESC')
-                    ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic')
+                    ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic,relevance_code')
                     ->paginate(
                         $request->input('page_size',50),
                         ['id', 'out_sn', 'status', 'remark', 'express_code', 'delivery_date', 'express_code',
