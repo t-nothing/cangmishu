@@ -16,6 +16,8 @@ Route::get('/', function () {
     return  "upgrade success!".env('APP_ENV');
 });
 
+Route::get('websiteConfig', 'WebsiteAppController@info');
+
 // 用户认证
 Route::post('/expLogin', 'AuthController@expLogin');
 Route::post('/login', 'AuthController@login');
@@ -50,6 +52,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
     Route::get('/home/analyzeTable', 'HomePageController@batchOrOrderCount');// 首页仓库
 
+    Route::post('bindEmail', 'UserController@bindEmail'); //绑定邮箱
 
     Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
