@@ -67,8 +67,8 @@ class WebsiteAppController extends Controller
                 'city'      => $userInfo['original']['city'] ?? '',
                 'avatar'    => $userInfo['original']['headimgurl'] ?? '',
                 'nickname'  => $userInfo['original']['nickname'] ?? '',
-                'wechat_openid' => $userInfo['original']['openid'] ?? '',
-                'union_id'  =>  $userInfo['origin']['unionid'] ?? '',
+                'wechat_openid' =>  $userInfo['original']['openid'] ?? '',
+                'union_id'  =>      $userInfo['original']['unionid'] ?? null,
             ]);
 
             info('创建用户的参数为:', $request->toArray());
