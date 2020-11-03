@@ -63,6 +63,7 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     Route::get('me', 'AuthController@me');
     Route::post('bindEmail', 'UserController@bindEmail'); //绑定邮箱
+    Route::post('bindPhone', 'UserController@bindEmail'); //绑定邮箱
 
     Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
