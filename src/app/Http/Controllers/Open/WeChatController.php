@@ -65,7 +65,7 @@ class WeChatController extends Controller
 
 
         // exit;
-        // $url = sprintf("https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=STATE#wechat_redirect", 
+        // $url = sprintf("https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=STATE#wechat_redirect",
         //     $info['app_id'],
         //     urlencode('https://api.changmishu.com/open/wechat/scan/login_callback'),
         //     'snsapi_login'
@@ -89,16 +89,17 @@ class WeChatController extends Controller
                 unset($data['wechat_user']);
                 return formatRet(0, '扫描成功', $data);
             }
-            
+
         }
 
         return formatRet(0, '等待中...');
-        
+
     }
 
 
     public function wechatQr()
     {
+
         $wechat = app('wechat.official_account');
 
         $key = Cache::increment('CMS-WECHAT-KEY');
@@ -134,13 +135,13 @@ class WeChatController extends Controller
             case 'wechat.open_platform':
                 # code...
                 break;
-            
+
             default:
                 \Log::info('配置无效');
                 return "配置无效";
         }
 
-        
+
         $app = app($config);
         $app->server->push(function($message) use($config, $app, $request) {
             \Log::info('扫码登录外面', $message);
@@ -190,12 +191,12 @@ class WeChatController extends Controller
 
                         return;
                     };
-                    
+
                     if ($user) {
                         // TODO: 这里根据情况加入其它鉴权逻辑
                         \Log::info('找到用户', $user->toArray());
                         // 使用 laravel-passport 的个人访问令牌
-                        
+
 
                         $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
 
@@ -219,14 +220,14 @@ class WeChatController extends Controller
                             'wechat_openid' =>  $openid,
                         ]);//合并参数
                         \Log::info('合并注册信息');
-                        try 
+                        try
                         {
                             \Log::info('开始注册');
                             $user = app('user')->quickRegister($request);
                             $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
                             $userId = $user->id;
-                        } 
-                        catch (\Exception $e) 
+                        }
+                        catch (\Exception $e)
                         {
                             \Log::info($e->getMessage());
                             // app('log')->error($e->getMessage());
@@ -252,7 +253,7 @@ class WeChatController extends Controller
                 }
 
                 return $str;
-            } 
+            }
 
             return $str;
         });

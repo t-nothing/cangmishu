@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -49,29 +50,28 @@ class Sms implements ShouldQueue
     public function handle()
     {
         $url = 'http://v.juhe.cn/sms/send';  // 模板列表
-        $params = array(
+        $params = [
             'key'      => config('juhe.china.sms_key'), //您申请的APPKEY
             'mobile'   => $this->mobile, //接受短信的用户手机号码
             'tpl_id'    => config('juhe.china.register_template_id'), //您申请的短信模板ID，根据实际情况修改
             'tpl_value' =>'#code#='.(string)($this->code) //您设置的模板变量，根据实际情况修改
-        );
+        ];
 
         try
         {
-            app('log')->info('开始向'.$this->mobile.'发送短信验证码', $params);
+            info('开始向'.$this->mobile.'发送短信验证码', $params);
+
             $client = new Client(['verify' => false]);
-            $res = $client->request('get', $url, 
-                [ 
-                    "query" => $params
+
+            $res = $client->request('get', $url,
+                [
+                        'query' => $params,
                 ]
             );
 
-            app('log')->info('短信回调成功结果'.$res->getBody());
+            info('短信回调成功结果'.$res->getBody());
+        } catch(GuzzleException $ex) {
+            info('短信回调失败结果'.$ex->getMessage());
         }
-        catch(GuzzleHttp\Exception\ClientException $ex) 
-        {
-            app('log')->info('短信回调失败结果'.$ex->getMessage());
-        }
-
     }
 }

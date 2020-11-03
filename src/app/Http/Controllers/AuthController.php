@@ -12,6 +12,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BaseRequests;
 use App\Models\GroupModuleRel;
 use App\Models\Modules;
+use App\Services\UserService;
+use App\Services\WechatOAuthService;
 use Illuminate\Http\Request;
 use EasyWeChat\Factory;
 use App\Models\User;
@@ -47,10 +49,13 @@ class AuthController extends  Controller
             return formatRet(500, trans("message.userNotExist"));
         }
 
-        $code = app('user')->getRandCode();
-        app('user')->createUserSMSVerifyCode($code,$request->mobile);
-        return formatRet(0, trans("message.userRegisterSendSuccess"));
+        $userService = new UserService;
 
+        $code = $userService->getRandCode();
+
+        $userService->createUserSMSVerifyCode($code, $request->mobile);
+
+        return formatRet(0, trans("message.userRegisterSendSuccess"));
     }
 
     /**
@@ -85,7 +90,11 @@ class AuthController extends  Controller
             'code'      => 'required|string',
         ]);
 
-        $verify_code = VerifyCode::where('code',$request->code)->where('email',$request->mobile)->where('expired_at','>',time())->first();
+        $verify_code = VerifyCode::where('code',$request->code)
+            ->where('email',$request->mobile)
+            ->where('expired_at','>',time())
+            ->first();
+
         if(!$verify_code){
             return formatRet(500, trans("message.userSMSExpired"));
         }
@@ -234,7 +243,10 @@ class AuthController extends  Controller
 
     /**
      * 处理小程序的自动登陆和注册
-     * @param $oauth
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function checkMiniProgramLogin(BaseRequests $request)
     {

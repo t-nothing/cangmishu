@@ -1,0 +1,366 @@
+<?php
+/**
+ * @Author: h9471
+ * @Created: 2020/11/2 16:25
+ */
+
+namespace App\Services;
+
+
+use App\Exceptions\BusinessException;
+use App\Exceptions\LocationException;
+use App\Models\Batch;
+use App\Models\Category;
+use App\Models\Order;
+use App\Models\Package;
+use App\Models\Product;
+use App\Models\ProductStock;
+use App\Models\Warehouse;
+use App\Services\Admin\IndexDataService;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use phpDocumentor\Reflection\Types\Self_;
+
+class StatisticsService
+{
+    public static int $warehouseId;
+
+    /**
+     * 解析时间格式参数
+     *
+     * @param $params
+     * @param  bool  $unix
+     * @return array
+     * @throws BusinessException
+     */
+    protected static function parseDateParams($params, bool $unix = false)
+    {
+        //默认选择一个仓库
+        if (! request()->filled('warehouse_id')) {
+            self::$warehouseId = app('auth')->warehouseId();
+        } else {
+            self::$warehouseId = intval(request()->input('warehouse_id'));
+        }
+
+        $warehouse = Warehouse::where('owner_id', app('auth')->ownerId())
+            ->find(self::$warehouseId);
+
+        if (! $warehouse) {
+            throw new BusinessException(__('message.warehouseNotExist'));
+        }
+
+        if ($unix) {
+            if (is_int($params) || is_string($params)) {
+                return [
+                    now()->subDays($params - 1)->startOfDay()->unix(),
+                    now()->endOfDay()->unix()
+                ];
+            }
+
+            if (is_array($params)) {
+                return [
+                    Carbon::parse($params[0])->startOfDay()->unix(),
+                    Carbon::parse($params[1])->startOfDay()->unix()
+                ];
+            }
+
+            return [now()->startOfDay()->unix(), now()->endOfDay()->unix()];
+        }
+
+        if (is_int($params) || is_string($params)) {
+            return [now()->subDays($params - 1)->startOfDay(), now()->endOfDay()];
+        }
+
+        if (is_array($params)) {
+            return [
+                Carbon::parse($params[0])->startOfDay(),
+                Carbon::parse($params[1])->startOfDay()
+            ];
+        }
+
+        return [now()->startOfDay(), now()->endOfDay()];
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function makeIndexCountData($params)
+    {
+        $date = self::parseDateParams($params);
+
+        $total_stock = ProductStock::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->sum('stock_num');
+
+        $total_product = Product::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->count('id');
+
+        $stock_warning = Product::query()
+            ->selectRaw('count(product.id) as count')
+            ->where('warehouse_id', self::$warehouseId)
+            ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
+            ->where('total_stock_num', '<=', 'c.warning_stock')
+            ->whereRaw('c.warning_stock > 0')
+            ->get()->sum->count;
+
+        $wait_shelf = Batch::query()->where('warehouse_id', self::$warehouseId)
+            ->where('status', '=', Batch::STATUS_PREPARE)
+            ->count();
+
+        $wait_confirm = Order::query()->where('warehouse_id', self::$warehouseId)
+            ->where('status', '<=', Order::STATUS_PICK_DONE)
+            ->count();
+
+        return compact('total_product', 'total_stock', 'stock_warning', 'wait_shelf', 'wait_confirm');
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getSaleTotalData($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        $data =  Order::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->whereBetween('created_at', $date)
+            ->selectRaw("sum(sub_total) as total, sum(sub_pay) as total_pay, count(id) as order_count")
+            ->first();
+
+        return [
+            'total' => $data['total'],
+            'total_pay' => $data['total_pay'],
+            'total_wait_pay' => bcsub($data['total'], $data['total_pay'], 2),
+            'order_count' => $data['order_count'],
+        ];
+    }
+
+    /**
+     * @param $params
+     * @return \Illuminate\Database\Eloquent\Collection
+     * @throws BusinessException
+     */
+    public static function getSalesDataByShop($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        return Order::query()
+            ->where('order.warehouse_id', self::$warehouseId)
+            ->leftJoin('shop as s', 's.id', '=', 'order.shop_id')
+            ->whereBetween('order.created_at', $date)
+            ->selectRaw('source, sum(sub_pay) as sales')
+            ->groupBy('shop_id', 'source')
+            ->get()
+            ->each(function ($order) {
+                return $order->setAppends([]);
+            });
+    }
+
+    /**
+     * @param $params
+     * @return Collection
+     * @throws BusinessException
+     */
+    public static function getSalesDataByDay($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        $data = Order::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->whereBetween('created_at', $date)
+            ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, sum(sub_pay) as sales")
+            ->groupBy('days')
+            ->get()
+            ->each(function ($order) {
+                return $order->setAppends([]);
+            });
+
+        $data = self::generateSalesDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
+
+        return $data;
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getStockTotalData($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        $data = ProductStock::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->whereBetween('created_at', $date)
+            ->selectRaw("sum(stockin_num) as stock_in_num, sum(stockout_num) as stock_out_num")
+            ->first();
+
+        $stock_bad = Product::query()
+            ->where('warehouse_id', self::$warehouseId)
+           ->where('total_stock_num', 0)
+            ->count();
+
+        return [
+            'stock_in_num' => $data['stock_in_num'] ?? 0,
+            'stock_out_num' => $data['stock_out_num'] ?? 0,
+            'stock_shortage' => $stock_bad,
+        ];
+    }
+
+    /**
+     * @param $params
+     * @return Collection
+     * @throws BusinessException
+     */
+    public static function getStockDataByDate($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        $data = ProductStock::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->whereBetween('created_at', $date)
+            ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, sum(stockin_num) as stock_in_num, sum(stockout_num) as stock_out_num")
+            ->groupBy('days')
+            ->get()
+            ->each(function ($order) {
+                return $order->setAppends([]);
+            });
+
+        $data = self::generateStockDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
+
+        return $data;
+    }
+
+    /**
+     * 数据为空的日期生成零数据
+     * @param Collection $data
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return Collection
+     */
+    public static function generateSalesDataOfZeroDay(Collection $data, Carbon $start, Carbon $end): Collection
+    {
+        $dates = self::generateDateRange($start, $end);
+
+        $realDates = [];
+
+        $data->flatMap(function ($value) use (&$realDates) {
+            $realDates[] = $value->days->each(function ($order) {
+                return $order->setAppends([]);
+            });
+        });
+
+        $dates = array_diff($dates, $realDates);
+
+        foreach ($dates as $date) {
+            $data->prepend(['days' => $date, 'sales' => 0]);
+        }
+
+        return $data->sortBy('days')->values();
+    }
+
+    /**
+     * 数据为空的日期生成零数据
+     * @param Collection $data
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return Collection
+     */
+    public static function generateStockDataOfZeroDay(Collection $data, Carbon $start, Carbon $end): Collection
+    {
+        $dates = self::generateDateRange($start, $end);
+
+        $realDates = [];
+
+        $data->flatMap(function ($value) use (&$realDates) {
+            $realDates[] = $value->days;
+        });
+
+        $dates = array_diff($dates, $realDates);
+
+        foreach ($dates as $date) {
+            $data->prepend(['days' => $date, 'stock_in_num' => 0, 'stock_out_num' => 0]);
+        }
+
+        return $data->sortBy('days')->values();
+    }
+
+    /**
+     * 数据为空的月份生成零数据
+     * @param Collection $data
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return Collection
+     */
+    private static function generateDataOfZeroMonth(Collection $data, Carbon $start, Carbon $end): Collection
+    {
+        $months = self::generateMonthRange($start, $end);
+
+        $realDates = [];
+
+        $data->flatMap(function ($value) use (&$realDates) {
+            $realDates[] = $value->months;
+        });
+
+        $months = array_diff($months, $realDates);
+
+        foreach ($months as $month) {
+            $data->prepend(['months' => $month, 'count' => 0]);
+        }
+
+        return $data->sortBy('months')->values();
+    }
+
+    /**
+     * 生成月份范围的数组
+     * @param Carbon $start_date
+     * @param Carbon $end_date
+     * @return array
+     */
+    private static function generateMonthRange(Carbon $start_date, Carbon $end_date): array
+    {
+        $months = [];
+        for ($month = $start_date; $month->lte($end_date); $month->addMonth()) {
+            $months[] = $month->format('Y-m');
+        }
+
+        return $months;
+    }
+
+    /**
+     * 生成日期范围的数组
+     * @param Carbon $start_date
+     * @param Carbon $end_date
+     * @return array
+     */
+    public static function generateDateRange(Carbon $start_date, Carbon $end_date): array
+    {
+        $dates = [];
+        for ($date = $start_date; $date->lte($end_date); $date->addDay()) {
+            $dates[] = $date->format('Y-m-d');
+        }
+
+        return $dates;
+    }
+
+    /**
+     * @param  string  $date
+     * @return float|int
+     */
+    protected static function getCacheTTLByDate(string $date)
+    {
+        //如果是今天或者未来
+        if (Carbon::parse($date)->isToday() || Carbon::parse($date)->isFuture()) {
+            return 60;
+        }
+
+        return 60 * 60 * 24;
+    }
+}

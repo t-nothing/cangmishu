@@ -17,6 +17,15 @@ Route::get('/', function () {
 });
 
 Route::get('websiteConfig', 'WebsiteAppController@info');
+Route::any('/wechatOAuth/callback', 'WebsiteAppController@callback');
+
+Route::any('test', function () {
+    return (new \App\Services\StatisticsService())::getStockDataByDate(30);
+});
+
+Route::any('oauth', function () {
+    return (new \App\Services\WechatOAuthService())->oauth();
+});
 
 // 用户认证
 Route::post('/expLogin', 'AuthController@expLogin');
