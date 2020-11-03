@@ -5,6 +5,7 @@ use App\Http\Requests\CreateUserRequest;
 use App\Mail\UserCallBackEmail;
 use App\Models\User;
 use App\Models\VerifyCode;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -70,18 +71,64 @@ class UserController extends  Controller
         return formatRet(0, trans("message.userRegisterSuccess"), $user->toArray());
     }
 
+    /**
+     * 获取邮箱验证码
+     *
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function getEmailVerifyCode(BaseRequests $request)
     {
         $this->validate($request, [
             'email' => ['required', 'email', Rule::unique('user', 'email')],
         ]);
 
-        $code = app('user')->getRandCode();
-        app('user')->createUserEmailVerifyCode($code, $request->email);
+        $userService = new UserService();
+
+        $code = $userService->getRandCode();
+        $userService->createUserEmailVerifyCode($code, $request->email);
 
         return formatRet(0, "");
     }
 
+    /**
+     * 用户邮箱绑定
+     *
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bindEmail(BaseRequests $request)
+    {
+        $request->validate([
+            'code' => 'required',
+            'email' => ['required', 'email', Rule::unique('user', 'email')],
+        ]);
+
+        $verifyCode = VerifyCode::where('code', $request['code'])
+            ->where('email',$request['email'])
+            ->where('expired_at','>', time())
+            ->first();
+
+        if(! $verifyCode){
+            return formatRet(500, trans("message.userSMSExpired"));
+        }
+
+        /** @var User $user */
+        $user = \auth()->user();
+
+        $user->update([
+            'email' => $request['email'],
+        ]);
+
+        return formatRet(0, trans("message.success"));
+    }
+
+    /**
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public  function getSmsVerifyCode(BaseRequests $request)
     {
         $this->validate($request, [

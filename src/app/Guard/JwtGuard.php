@@ -248,6 +248,26 @@ class JwtGuard implements Guard
     }
 
     /**
+     * @param  User  $user
+     * @return false|mixed
+     */
+    public function token(User $user)
+    {
+        if($user->isLocked()){
+            return false;
+        }
+
+        $user->last_login_at = time();
+        $user->save();
+
+        $this->setUser($user);
+
+        $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+
+        return $token['token_value'];
+    }
+
+    /**
      * @param  int  $id
      * @return array|false
      */
