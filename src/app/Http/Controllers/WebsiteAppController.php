@@ -31,6 +31,7 @@ class WebsiteAppController extends Controller
         info('网页授权回调的参数为:', $request->input());
 
         $code = $request->input('code');
+        $state = $request->input('state');
 
         $config = config('wechat.website_app.default');
 
@@ -77,7 +78,6 @@ class WebsiteAppController extends Controller
 
         $token = auth('jwt')->token($user);
 
-        return redirect('https://dev.cangmishu.com/#/initPage/home', 302, [''])
-            ->withHeaders(['Authorization' => 'Bearer ' . $token]);
+        return redirect(base64_decode($state) . '?api_token=' . $token, 302);
     }
 }

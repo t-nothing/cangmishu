@@ -36,6 +36,7 @@ class WechatOAuthService
         return $this->app->oauth
             ->setRedirectUrl('https://dev-api.cangmishu.com/wechatOAuth/callback')
             ->scopes(['snsapi_login'])
+            ->with(['state' => base64_encode('https://dev.cangmishu.com/#/initPage/home')])
             ->redirect();
     }
 }
