@@ -216,7 +216,7 @@ class AuthController extends  Controller
             return formatRet(401, '');
         }
 
-        $data['user'] = $user;
+        $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->find($user->id);
 
         $filtered = collect($data['user'])
             ->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
