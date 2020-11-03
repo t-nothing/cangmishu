@@ -125,6 +125,38 @@ class UserController extends  Controller
     }
 
     /**
+     * 用户邮箱绑定
+     *
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bindPhone(BaseRequests $request)
+    {
+        $request->validate([
+            'code' => 'required',
+            'phone' => ['required', 'string', Rule::unique('user', 'phone')],
+        ]);
+
+        $verifyCode = VerifyCode::where('code', $request['code'])
+            ->where('phone',$request['phone'])
+            ->where('expired_at','>', time())
+            ->first();
+
+        if(! $verifyCode){
+            return formatRet(500, trans("message.userSMSExpired"));
+        }
+
+        /** @var User $user */
+        $user = \auth()->user();
+
+        $user->update([
+            'phone' => $request['phone'],
+        ]);
+
+        return formatRet(0, trans("message.success"));
+    }
+
+    /**
      * @param  BaseRequests  $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
