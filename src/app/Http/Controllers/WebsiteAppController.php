@@ -68,7 +68,7 @@ class WebsiteAppController extends Controller
                 'avatar'    => $userInfo['original']['headimgurl'] ?? '',
                 'nickname'  => $userInfo['original']['nickname'] ?? '',
                 'app_openid' =>  $userInfo['original']['openid'] ?? '',
-                'union_id'  =>      $userInfo['original']['unionid'] ?? null,
+                'union_id'  =>   $userInfo['original']['unionid'] ?? null,
             ]);
 
             info('创建用户的参数为:', $request->toArray());
