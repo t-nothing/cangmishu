@@ -61,6 +61,7 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
     Route::get('/home/analyzeTable', 'HomePageController@batchOrOrderCount');// 首页仓库
 
+    Route::get('me', 'AuthController@me');
     Route::post('bindEmail', 'UserController@bindEmail'); //绑定邮箱
 
     Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码

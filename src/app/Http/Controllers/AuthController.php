@@ -23,6 +23,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthController extends  Controller
 {
@@ -207,10 +208,38 @@ class AuthController extends  Controller
         return formatRet(0, '');
     }
 
+    public function me()
+    {
+        $user = auth('jwt')->user();
+
+        if (! $user) {
+            return formatRet(401, '');
+        }
+
+        $data['user'] = $user;
+
+        $filtered = collect($data['user'])
+            ->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
+        $data['user'] = $filtered->all();
+
+        //获取用户权限
+        $modules = app('module')->getModulesByUser(
+            $user,
+            $user->default_warehouse_id
+        );
+
+        $modules = collect($modules)->pluck('id')->toArray();
+        $modules = array_unique($modules);
+        sort($modules);
+        $data['modules'] = $modules;
+
+        return formatRet(0, '', $data);
+    }
+
     /**
      * 当前用户信息
      */
-    public function me()
+    /*public function me()
     {
         $user = app('auth')->user();
         $data = $user->toArray();
@@ -239,7 +268,7 @@ class AuthController extends  Controller
         }
 
         return formatRet(0, '', $data);
-    }
+    }*/
 
     /**
      * 处理小程序的自动登陆和注册
