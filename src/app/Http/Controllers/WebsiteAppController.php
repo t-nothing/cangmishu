@@ -78,6 +78,6 @@ class WebsiteAppController extends Controller
 
         $token = auth('jwt')->token($user);
 
-        return redirect(base64_decode($state) . '?api_token=' . $token, 302);
+        return redirect(base64_decode($state) . '?token=' . $token, 302);
     }
 }
