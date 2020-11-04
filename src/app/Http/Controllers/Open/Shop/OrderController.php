@@ -93,7 +93,7 @@ class OrderController extends Controller
         if(!$order){
             return formatRet(404,"订单不存在", []);
         }
-        $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic");
+        $order->load("orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic,relevance_code");
 
         $result = $order->toArray();
         $result["ship"] = $result['status']>3 && !empty($result["express_num"]) ? [
