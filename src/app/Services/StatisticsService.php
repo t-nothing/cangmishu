@@ -8,9 +8,16 @@ namespace App\Services;
 
 use App\Exceptions\BusinessException;
 use App\Models\Batch;
+use App\Models\Distributor;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\ReceiverAddress;
+use App\Models\SenderAddress;
+use App\Models\Shop;
+use App\Models\ShopProduct;
+use App\Models\ShopUser;
 use App\Models\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -255,6 +262,195 @@ class StatisticsService
     }
 
     /**
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getOrderTotalData($params)
+    {
+        self::parseDateParams($params, true);
+
+        $created = Order::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->whereBetween('created_at', [now()->startOfDay()->unix(), now()->endOfDay()->unix()])
+            ->count();
+
+        $wait = Order::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->where('status', Order::STATUS_DEFAULT)
+            ->count();
+
+        $wait_ship = Order::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->where('status', Order::STATUS_WAITING)
+            ->count();
+
+        return compact('created', 'wait', 'wait_ship');
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getSalesDetailByDay($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        $data = Order::query()
+            ->where('order.warehouse_id', self::$warehouseId)
+            ->whereBetween('order.created_at', $date)
+            ->join('order_item as i', 'i.order_id', '=', 'order.id')
+            ->addSelect([
+                'product_amount' => OrderItem::query()
+                    ->selectRaw('sum(amount) as product_amount')
+                    ->whereColumn('order_id', '=', 'order.id'),
+                'pickup_amount' => OrderItem::query()
+                    ->selectRaw('sum(pick_num) as pickup_amount')
+                    ->whereColumn('order_id', '=', 'order.id'),
+            ])
+            ->selectRaw("FROM_UNIXTIME(order.created_at,'%Y-%m-%d') as days,
+            count(distinct order.id) as order_count,
+            sum(sub_total) as total,
+            sum(sub_pay) as total_pay")
+            ->groupBy('days')
+            ->get()->map(function ($order) {
+                return [
+                    'days' => $order['days'],
+                    'order_count' => $order['order_count'],
+                    'total' => $order->total,
+                    'total_pay' => $order->total_pay,
+                    'product_amount' => (int) $order->product_amount,
+                    'pickup_amount' => (int) $order->pickup_amount,
+                ];
+            });
+
+        return $data;
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getShopTotalData($params)
+    {
+        self::parseDateParams($params, true);
+
+        $shopIds = Shop::query()->where('warehouse_id', self::$warehouseId)->select('id')->get();
+        $orderIds = Order::query()->whereIn('shop_id', $shopIds->modelKeys())->select('id')->get();
+
+        return [
+            'count' => $shopIds->count(),
+            'sales_count' => (int) OrderItem::query()
+                ->whereIn('order_id', $orderIds->modelKeys())
+                ->sum('amount'),
+            'up_shelf_count' => ShopProduct::query()->whereIn('shop_id', $shopIds->modelKeys())
+                ->where('is_shelf', 1)
+                ->count(),
+        ];
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getUserTotalData($params)
+    {
+        self::parseDateParams($params, true);
+
+        return [
+            'receiver_count' => ReceiverAddress::query()
+                ->where('warehouse_id', self::$warehouseId)
+                ->count(),
+            'sender_count' => SenderAddress::query()
+                ->where('warehouse_id', self::$warehouseId)
+                ->count(),
+            'supplier_count' => Distributor::query()
+                ->where('user_id', auth()->id())
+            ->count(),
+            'member_count' => ShopUser::query()->count(),
+        ];
+    }
+
+    /**
+     * @param $params
+     * @return Collection
+     * @throws BusinessException
+     */
+    public static function getUserDataByDay($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        $data = ShopUser::query()
+            ->whereBetween('created_at', $date)
+            ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, count(id) as counts")
+            ->groupBy('days')
+            ->get();
+
+        $data = self::generateCountsDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
+
+        return $data;
+    }
+
+    /**
+     * @param $params
+     * @return Collection
+     * @throws BusinessException
+     */
+    public static function getUserOrderRank($params)
+    {
+        self::parseDateParams($params, true);
+
+        $data = ShopUser::query()
+            ->join('order as o', 'o.shop_user_id', '=', 'shop_user.id')
+            ->selectRaw('shop_user.id as user_id, shop_user.nick_name as name, count(o.id) as order_count,
+            sum(case when o.created_at >='
+                . now()->startOfMonth()->unix()
+                . ' and o.created_at <= '
+                . now()->endOfMonth()->unix()
+                . ' then 1 else 0 end) as current_month_order_count')
+            ->groupBy(['user_id', 'name'])
+            ->orderBy('order_count')
+            ->limit(10)
+            ->get()->map(function ($value) {
+                $value['current_month_order_count'] = (int) $value['current_month_order_count'];
+                return $value;
+            });
+
+        return $data;
+    }
+
+    /**
+     * @param $params
+     * @return Collection
+     * @throws BusinessException
+     */
+    public static function getSupplierOrderTrade($params)
+    {
+        self::parseDateParams($params, true);
+
+        $data = Distributor::query()
+            ->join('order as o', 'o.shop_user_id', '=', 'shop_user.id')
+            ->selectRaw('shop_user.id as user_id, shop_user.nick_name as name, count(o.id) as order_count,
+            sum(case when o.created_at >='
+                . now()->startOfMonth()->unix()
+                . ' and o.created_at <= '
+                . now()->endOfMonth()->unix()
+                . ' then 1 else 0 end) as current_month_order_count')
+            ->groupBy(['user_id', 'name'])
+            ->orderBy('order_count')
+            ->limit(10)
+            ->get()->map(function ($value) {
+                $value['current_month_order_count'] = (int) $value['current_month_order_count'];
+                return $value;
+            });
+
+        return $data;
+    }
+
+    /**
      * 数据为空的日期生成零数据
      * @param Collection $data
      * @param Carbon $start
@@ -301,6 +497,32 @@ class StatisticsService
 
         foreach ($dates as $date) {
             $data->prepend(['days' => $date, 'stock_in_num' => 0, 'stock_out_num' => 0]);
+        }
+
+        return $data->sortBy('days')->values();
+    }
+
+    /**
+     * 数据为空的日期生成零数据
+     * @param Collection $data
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return Collection
+     */
+    public static function generateCountsDataOfZeroDay(Collection $data, Carbon $start, Carbon $end): Collection
+    {
+        $dates = self::generateDateRange($start, $end);
+
+        $realDates = [];
+
+        $data->flatMap(function ($value) use (&$realDates) {
+            $realDates[] = $value->days;
+        });
+
+        $dates = array_diff($dates, $realDates);
+
+        foreach ($dates as $date) {
+            $data->prepend(['days' => $date, 'counts' => 0]);
         }
 
         return $data->sortBy('days')->values();
