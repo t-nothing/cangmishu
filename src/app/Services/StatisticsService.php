@@ -6,22 +6,14 @@
 
 namespace App\Services;
 
-
 use App\Exceptions\BusinessException;
-use App\Exceptions\LocationException;
 use App\Models\Batch;
-use App\Models\Category;
 use App\Models\Order;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\Warehouse;
-use App\Services\Admin\IndexDataService;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
-use phpDocumentor\Reflection\Types\Self_;
 
 class StatisticsService
 {
@@ -53,6 +45,13 @@ class StatisticsService
 
         if ($unix) {
             if (is_int($params) || is_string($params)) {
+                if ($params == -1) {
+                    return [
+                        Carbon::yesterday()->startOfDay()->unix(),
+                        Carbon::yesterday()->endOfDay()->unix()
+                    ];
+                }
+
                 return [
                     now()->subDays($params - 1)->startOfDay()->unix(),
                     now()->endOfDay()->unix()
@@ -70,7 +69,17 @@ class StatisticsService
         }
 
         if (is_int($params) || is_string($params)) {
-            return [now()->subDays($params - 1)->startOfDay(), now()->endOfDay()];
+            if ($params == -1) {
+                return [
+                    Carbon::yesterday()->startOfDay()->unix(),
+                    Carbon::yesterday()->endOfDay()->unix()
+                ];
+            }
+
+            return [
+                now()->subDays($params - 1)->startOfDay(),
+                now()->endOfDay()
+            ];
         }
 
         if (is_array($params)) {
@@ -88,11 +97,11 @@ class StatisticsService
      * @return array
      * @throws BusinessException
      */
-    public static function makeIndexCountData($params)
+    public static function getIndexCountData($params)
     {
-        $date = self::parseDateParams($params);
+        self::parseDateParams($params);
 
-        $total_stock = ProductStock::query()
+        $total_stock = (int) ProductStock::query()
             ->where('warehouse_id', self::$warehouseId)
             ->sum('stock_num');
 
@@ -102,7 +111,7 @@ class StatisticsService
 
         $stock_warning = Product::query()
             ->selectRaw('count(product.id) as count')
-            ->where('warehouse_id', self::$warehouseId)
+            ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
             ->where('total_stock_num', '<=', 'c.warning_stock')
             ->whereRaw('c.warning_stock > 0')
@@ -112,11 +121,11 @@ class StatisticsService
             ->where('status', '=', Batch::STATUS_PREPARE)
             ->count();
 
-        $wait_confirm = Order::query()->where('warehouse_id', self::$warehouseId)
-            ->where('status', '<=', Order::STATUS_PICK_DONE)
+        $wait_shipment = Order::query()->where('warehouse_id', self::$warehouseId)
+            ->where('status', '=', Order::STATUS_WAITING)
             ->count();
 
-        return compact('total_product', 'total_stock', 'stock_warning', 'wait_shelf', 'wait_confirm');
+        return compact('total_product', 'total_stock', 'stock_warning', 'wait_shelf', 'wait_shipment');
     }
 
     /**
@@ -124,7 +133,7 @@ class StatisticsService
      * @return array
      * @throws BusinessException
      */
-    public static function getSaleTotalData($params)
+    public static function getSalesTotalData($params)
     {
         $date = self::parseDateParams($params, true);
 
@@ -135,8 +144,8 @@ class StatisticsService
             ->first();
 
         return [
-            'total' => $data['total'],
-            'total_pay' => $data['total_pay'],
+            'total' => $data['total'] ?? '0.00',
+            'total_pay' => $data['total_pay'] ?? '0.00',
             'total_wait_pay' => bcsub($data['total'], $data['total_pay'], 2),
             'order_count' => $data['order_count'],
         ];
@@ -178,8 +187,11 @@ class StatisticsService
             ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, sum(sub_pay) as sales")
             ->groupBy('days')
             ->get()
-            ->each(function ($order) {
-                return $order->setAppends([]);
+            ->map(function ($order) {
+                $order->setAppends([]);
+                $order['sales'] = number_format($order->sales, 2, '.', '');
+
+                return $order;
             });
 
         $data = self::generateSalesDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
@@ -204,12 +216,12 @@ class StatisticsService
 
         $stock_bad = Product::query()
             ->where('warehouse_id', self::$warehouseId)
-           ->where('total_stock_num', 0)
+            ->where('total_stock_num', 0)
             ->count();
 
         return [
-            'stock_in_num' => $data['stock_in_num'] ?? 0,
-            'stock_out_num' => $data['stock_out_num'] ?? 0,
+            'stock_in_num' =>  (int) $data['stock_in_num'] ?? 0,
+            'stock_out_num' => (int) $data['stock_out_num'] ?? 0,
             'stock_shortage' => $stock_bad,
         ];
     }
@@ -229,8 +241,12 @@ class StatisticsService
             ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, sum(stockin_num) as stock_in_num, sum(stockout_num) as stock_out_num")
             ->groupBy('days')
             ->get()
-            ->each(function ($order) {
-                return $order->setAppends([]);
+            ->map(function ($order) {
+                $order->setAppends([]);
+                $order['stock_in_num'] = (int) $order['stock_in_num'];
+                $order['stock_out_num'] = (int) $order['stock_out_num'];
+
+                return $order;
             });
 
         $data = self::generateStockDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
@@ -252,15 +268,13 @@ class StatisticsService
         $realDates = [];
 
         $data->flatMap(function ($value) use (&$realDates) {
-            $realDates[] = $value->days->each(function ($order) {
-                return $order->setAppends([]);
-            });
+            $realDates[] = $value->days;
         });
 
         $dates = array_diff($dates, $realDates);
 
         foreach ($dates as $date) {
-            $data->prepend(['days' => $date, 'sales' => 0]);
+            $data->prepend(['days' => $date, 'sales' => '0.00']);
         }
 
         return $data->sortBy('days')->values();

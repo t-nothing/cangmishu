@@ -12,6 +12,7 @@ use EasyWeChat\OfficialAccount\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Ramsey\Uuid\Uuid;
 
 class WechatOfficialAccountService
@@ -47,9 +48,8 @@ class WechatOfficialAccountService
             $result = $qrCode->temporary($weChatFlag, 3600 * 24);
             $url    = $qrCode->url($result['ticket']);
 
-            Cache::put($weChatFlag, $url, now()->addDay());
+            Cache::put($weChatFlag, ['user_id' => auth()->id()], now()->addDay());
         }
-
         // 自定义参数返回给前端，前端轮询
         return formatRet(0, __('message.success'), compact('url', 'weChatFlag'))
             ->cookie('WECHAT_FLAG', $weChatFlag, 24 * 60);
@@ -113,19 +113,28 @@ class WechatOfficialAccountService
      */
     protected function eventUnsubscribe($event)
     {
+        if ($wxUser = User::where('wechat_openid', $this->openid)->first()) {
+            // 标记前端可登陆
+            $wxUser->is_subscribed = 0;
+            $wxUser->subscribed_at = null;
 
+            $wxUser->save();
+            return;
+        }
     }
 
     /**
+     * 用户已关注
      * 扫描带参二维码事件
      *
      * @param $event
      */
     public function eventSCAN($event)
     {
-        if ($wxUser = User::whereOpenid($this->openid)->first()) {
-            // 标记前端可登陆
-            $this->markTheLogin($event, $wxUser->uid);
+        //用户未找到但是已关注
+        //更新用户openid
+        if (! $wxUser = User::where('wechat_openid', $this->openid)->first()) {
+
 
             return;
         }
@@ -142,56 +151,25 @@ class WechatOfficialAccountService
     {
         $openId = $this->openid;
 
-        if ($wxUser = User::whereOpenid($openId)->first()) {
+        if ($wxUser = User::where('wechat_openid', $openId)->first()) {
             // 标记前端可登陆
-            $this->markTheLogin($event, $wxUser->uid);
+            $wxUser->is_subscribed = 1;
+            $wxUser->subscribed_at = now();
 
-            return;
+            $wxUser->save();
+
+        } else {
+            $key = Cache::get(Str::after($event['EventKey'], 'qrscene_'));
+            /** @var User $wxUser */
+            $wxUser = User::query()->whereKey($key['user_id'])->get();
+
+            $wxUser->is_subscribed = 1;
+            $wxUser->subscribed_at = now();
+
+            $wxUser->save();
         }
 
-        // 微信用户信息
-        $wxUser = $this->app->user->get($openId);
-        // 注册
-        $nickname = $this->filterEmoji($wxUser['nickname']);
-
-        $result = DB::transaction(function () use ($openId, $event, $nickname, $wxUser) {
-            $uid  = Uuid::uuid4()->getHex();
-            $time = time();
-
-            // 用户
-            $user = User::create([
-                'uid'        => $uid,
-                'created_at' => $time,
-            ]);
-            // 用户信息
-            $user->user_info()->create([
-                'email'      => $user->email,
-                'nickname'   => $nickname,
-                'sex'        => $wxUser['sex'],
-                'address'    => $wxUser['country'] . ' ' . $wxUser['province'] . ' ' . $wxUser['city'],
-                'avatar'     => $wxUser['headimgurl'],
-                'code'       => app(UserRegisterController::class)->inviteCode(10),
-                'created_at' => $time,
-            ]);
-            // 用户账户
-            $user->user_account()->create([
-                'gold'       => 200,
-                'created_at' => $time,
-            ]);
-
-            $wxUserModel = $user->wx_user()->create([
-                'subscribe'      => $wxUser['subscribe'],
-                'subscribe_time' => $wxUser['subscribe_time'],
-                'openid'         => $wxUser['openid'],
-                'created_at'     => $time,
-            ]);
-
-            Log::info('用户注册成功 openid：' . $openId);
-
-            $this->markTheLogin($event, $wxUserModel->uid);
-        });
-
-        Log::debug('SQL 错误: ', [$result]);
+        return;
     }
 
     /**
@@ -200,23 +178,8 @@ class WechatOfficialAccountService
      * @param $event
      * @param $uid
      */
-    public function markTheLogin($event, $uid)
+    public function updateWechatOpenID($event, $uid)
     {
-        if (empty($event['EventKey'])) {
-            return;
-        }
 
-        $eventKey = $event['EventKey'];
-
-        // 关注事件的场景值会带一个前缀需要去掉
-        if ($event['Event'] == 'subscribe') {
-            $eventKey = str_after($event['EventKey'], 'qrscene_');
-        }
-
-        Log::info('EventKey:' . $eventKey, [$event['EventKey']]);
-
-        // 标记前端可登陆
-        Cache::put(WxUser::LOGIN_WECHAT . $eventKey, $uid, now()->addMinute(30));
     }
-
 }

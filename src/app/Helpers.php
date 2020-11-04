@@ -501,4 +501,16 @@ if ( ! function_exists('redirect_url'))
         }
         exit;
     }
+
+
+    if (! function_exists('success')) {
+        /**
+         * @param mixed $data
+         * @return \Illuminate\Http\JsonResponse
+         */
+        function success($data)
+        {
+            return formatRet(0, __('message.success'), $data);
+        }
+    }
 }
