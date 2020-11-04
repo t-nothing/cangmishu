@@ -24,7 +24,6 @@ class OrderController extends Controller
             'is_enabled'   => 'boolean',
         ]);
 
-
         $dataList = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)
                     ->orderBy('id','DESC')
                     ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic,relevance_code')

@@ -27,6 +27,10 @@ Route::any('oauth', function () {
     return (new \App\Services\WechatOAuthService())->oauth();
 });
 
+Route::any('wxPic', function () {
+    return (new \App\Services\WechatOfficialAccountService())->getWxPic(request());
+});
+
 // 用户认证
 Route::post('/expLogin', 'AuthController@expLogin');
 Route::post('/login', 'AuthController@login');
@@ -60,6 +64,12 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
     Route::get('/home/analyzeTable', 'HomePageController@batchOrOrderCount');// 首页仓库
+
+    Route::prefix('index')->group(function () {
+        Route::get('totalData', 'HomePageController@getTotalData');
+        Route::get('salesData', 'HomePageController@getSalesData');
+        Route::get('stockData', 'HomePageController@getStockData');
+    });
 
     Route::get('me', 'AuthController@me');
     Route::post('bindEmail', 'UserController@bindEmail'); //绑定邮箱

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\StatisticsService;
 use Illuminate\Http\Request;
 use App\Models\HomePageNotice;
 use App\Models\HomePageAnalyze;
@@ -12,6 +13,13 @@ use DB;
 
 class HomePageController extends Controller
 {
+    protected $service;
+
+    public function __construct(StatisticsService $service)
+    {
+        $this->service = $service;
+    }
+
     //首页通知
     public function notice()
     {
@@ -28,7 +36,7 @@ class HomePageController extends Controller
 
         //默认选择一个仓库
         if (!$request->filled('warehouse_id')) {
-            
+
             $warehouse_id = app('auth')->warehouseId();
         } else {
             $warehouse_id = intval($request->input('warehouse_id'));
@@ -39,7 +47,7 @@ class HomePageController extends Controller
             return formatRet(0, trans("message.404NotFound"));
         }
 
-        $sql = "select 
+        $sql = "select
 (select sum(stock_num)  from `product_stock` where warehouse_id = ?) as all_count,
 (select sum(stock_num) from `product_stock` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
 (select sum(stock_num) from `product_stock` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
@@ -54,7 +62,7 @@ class HomePageController extends Controller
             'year_count'    =>$stock[0]->year_count??0,
         ];
 
-        $sql = "select 
+        $sql = "select
 (select count(total_stock_num)  from `product` where warehouse_id = ?) as all_count,
 (select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
 (select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
@@ -68,7 +76,7 @@ class HomePageController extends Controller
             'year_count'    =>$product[0]->year_count??0,
         ];
 
-        $sql = "select 
+        $sql = "select
 (select count(id)  from `order` where warehouse_id = ?) as all_count,
 (select count(id) from `order` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
 (select count(id) from `order` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
@@ -82,7 +90,7 @@ class HomePageController extends Controller
             'year_count'    =>$order[0]->year_count??0,
         ];
 
-        $sql = "select 
+        $sql = "select
 (select count(product.id) as count from product,category where product.category_id = category.id and  product.total_stock_num <= category.warning_stock and category.warning_stock >0 and product.warehouse_id = ?) as stock_warning,
 (select count(id) from `batch` where warehouse_id = ? and `status` = ".Batch::STATUS_PREPARE.") as unshelf,
 (select count(id) from `order` where warehouse_id = ? and `status` <= ".Order::STATUS_PICK_DONE.") as unconfirm";
@@ -96,11 +104,11 @@ class HomePageController extends Controller
         ];
 
 
-       
+
         $homePageAnalyze = [
-            "stock" => $stock, 
+            "stock" => $stock,
             "product" => $product,
-            "order" => $order, 
+            "order" => $order,
             "todo" => $todo,
             'warehouse_id' => $warehouse_id,
         ];
@@ -122,7 +130,7 @@ class HomePageController extends Controller
 
         //默认选择一个仓库
         if (!$request->filled('warehouse_id')) {
-            
+
             $warehouse_id = app('auth')->warehouseId();
         } else {
             $warehouse_id = intval($request->input('warehouse_id'));
@@ -170,31 +178,31 @@ class HomePageController extends Controller
 
 
         $sql = "
-select count(*) as count ,Date(from_unixtime(created_at))  as record_time, 'batch_count' as `type`  from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ? and `status` >1 group by record_time 
-union all 
-select sum(stock_num),Date(from_unixtime(created_at))  as record_time, 'batch_product_num' as `type`   from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time 
-union all 
-select count(*),Date(from_unixtime(created_at))  as record_time, 'order_count' as `type`   from `order` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time 
-union all 
-select sum(sub_order_qty),Date(from_unixtime(created_at)) as record_time, 'order_product_num' as `type`     from `order` where warehouse_id = ? and created_at >= ? and created_at <= ? group by record_time 
+select count(*) as count ,Date(from_unixtime(created_at))  as record_time, 'batch_count' as `type`  from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ? and `status` >1 group by record_time
+union all
+select sum(stock_num),Date(from_unixtime(created_at))  as record_time, 'batch_product_num' as `type`   from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time
+union all
+select count(*),Date(from_unixtime(created_at))  as record_time, 'order_count' as `type`   from `order` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time
+union all
+select sum(sub_order_qty),Date(from_unixtime(created_at)) as record_time, 'order_product_num' as `type`     from `order` where warehouse_id = ? and created_at >= ? and created_at <= ? group by record_time
 
 ";
-        $data = DB::select($sql, 
+        $data = DB::select($sql,
             [
-                $warehouseId, 
-                $startTime, 
-                $endTime, 
+                $warehouseId,
+                $startTime,
+                $endTime,
 
-                $warehouseId, 
-                $startTime, 
-                $endTime, 
+                $warehouseId,
+                $startTime,
+                $endTime,
 
-                $warehouseId, 
-                $startTime, 
-                $endTime, 
+                $warehouseId,
+                $startTime,
+                $endTime,
 
-                $warehouseId, 
-                $startTime, 
+                $warehouseId,
+                $startTime,
                 $endTime]);
 
 
@@ -203,4 +211,69 @@ select sum(sub_order_qty),Date(from_unixtime(created_at)) as record_time, 'order
         return $data;
     }
 
+    public function getRequestParams()
+    {
+        $days = \request()->input('days', 1);
+
+        $begin = \request()->input('begin', '');
+        $end = \request()->input('end', '');
+
+        if ($begin && $end) {
+            return [$begin, $end];
+        }
+
+        return $days;
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getTotalData()
+    {
+        return success($this->service::getIndexCountData($this->getRequestParams()));
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getSalesData()
+    {
+        $data = [
+            'total' => $this->service::getSalesTotalData($this->getRequestParams()),
+            'pie' => $this->service::getSalesDataByShop($this->getRequestParams()),
+            'daily' => $this->service::getSalesDataByDay($this->getRequestParams()),
+        ];
+
+        return success($data);
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getStockData()
+    {
+        $total = $this->service::getStockTotalData($this->getRequestParams());
+
+        $pie = [
+            [
+                'type' => '总入库',
+                'count' => $total['stock_in_num'],
+            ],
+            [
+                'type' => '总出库',
+                'count' => $total['stock_out_num'],
+            ],
+        ];
+
+        $data = [
+            'total' => $total,
+            'pie' => $pie,
+            'daily' => $this->service::getStockDataByDate($this->getRequestParams()),
+        ];
+
+        return success($data);
+    }
 }
