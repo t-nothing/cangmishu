@@ -21,8 +21,8 @@ class ShopUser extends User
      * @var array
      */
     protected $fillable = [
-
-        'id', 'email', 'password','weapp_openid','nick_name','avatar_url','last_login_ip','last_login_time','mobile','gender','country','province','city','language','weapp_session_key'
+        'id', 'email', 'password', 'weapp_openid', 'nick_name', 'avatar_url', 'last_login_ip', 'last_login_time',
+        'mobile', 'gender', 'country', 'province', 'city', 'language', 'weapp_session_key'
     ];
 
     /**

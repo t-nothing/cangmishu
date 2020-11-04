@@ -20,7 +20,7 @@ Route::get('websiteConfig', 'WebsiteAppController@info');
 Route::any('/wechatOAuth/callback', 'WebsiteAppController@callback');
 
 Route::any('test', function () {
-    return (new \App\Services\StatisticsService())::getStockDataByDate(30);
+    return (new \App\Services\StatisticsService())::getUserOrderTrade(30);
 });
 
 Route::any('oauth', function () {
@@ -69,6 +69,20 @@ Route::middleware(['auth:jwt'])->group(function () {
         Route::get('totalData', 'HomePageController@getTotalData');
         Route::get('salesData', 'HomePageController@getSalesData');
         Route::get('stockData', 'HomePageController@getStockData');
+    });
+
+    //销售
+    Route::prefix('sales')->group(function () {
+        Route::get('totalData', 'SalesDataController@getTotalData');
+        Route::get('graphData', 'HomePageController@getSalesData');
+        Route::get('detailData', 'SalesDataController@getDailyDetailData');
+    });
+
+    //客户
+    Route::prefix('customers')->group(function () {
+        Route::get('totalData', 'CustomersController@getTotalData');
+        Route::get('dailyData', 'CustomersController@getDailyData');
+        Route::get('orderRank', 'CustomersController@getOrderRank');
     });
 
     Route::get('me', 'AuthController@me');
@@ -268,6 +282,9 @@ Route::middleware(['auth:jwt'])->group(function () {
 
 
     //店铺
+    Route::prefix('shop')->group(function () {
+        Route::get('/statistics', 'ShopController@statistics');
+    });
     Route::get('/shop', 'ShopController@index');
     Route::post('/shop', 'ShopController@store');
     Route::get('/shop/{id}', 'ShopController@show');

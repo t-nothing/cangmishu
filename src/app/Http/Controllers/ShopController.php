@@ -8,6 +8,7 @@ use App\Models\Shop;
 use App\Models\ShopPaymentMethod;
 use App\Models\ShopSenderAddress;
 use App\Models\ShopProduct;
+use App\Services\StatisticsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
@@ -70,13 +71,13 @@ class ShopController extends Controller
             if(isset($data['remark'])) {
                 $shop->remark_en            = $data['remark'];
             }
-            
+
             $shop->is_closed            = 0;
             $shop->is_stock_show        = 1;
             $shop->is_price_show        = 1;
             $shop->is_allow_over_order  = 1;
             $shop->domain               = md5($data['name_cn']);
-            
+
             $shop->save();
 
             // $items = [];
@@ -159,7 +160,7 @@ class ShopController extends Controller
             $shop->domain               = md5($shop->id);
             $shop->weapp_qrcode         = sprintf("%s.png", $shop->domain);
             $shop->sort_num             = 0;
-            
+
             $app = app('wechat.mini_program');
             $response = $app->app_code->get('/pages/index/index?shop='.$shop->id);
 
@@ -170,7 +171,7 @@ class ShopController extends Controller
 
                 $url = Storage::url('weapp/'.$filename);
                 $shop->weapp_qrcode         = app('url')->to($url) ;
-                
+
             }
 
             $shop->save();
@@ -256,5 +257,14 @@ class ShopController extends Controller
         $shop->load("senderAddress");
 
         return formatRet(0,"",$shop->toArray());
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function statistics()
+    {
+        return success(StatisticsService::getShopTotalData(1));
     }
 }
