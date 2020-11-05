@@ -54,9 +54,10 @@ class UserService
             $nickname                   = explode("@",$email);
             $user->nickname             = $request->nickname??$nickname[0];
             $user->avatar               = $request->avatar??env("APP_URL")."/images/default_avatar.png";
-            $user->wechat_openid        = $request->wechat_openid??'';
-            $user->wechat_mini_program_open_id   = $request->wechat_mini_program_open_id ?? '';
-            $user->union_id = $request->union_id;
+            $user->wechat_openid        = $request->wechat_openid ?? null;
+            $user->wechat_mini_program_open_id   = $request->wechat_mini_program_open_id ?? null;
+            $user->union_id = $request->union_id ?? null;
+            $user->app_openid = $request->app_openid ?? null;
             $user->save();
 
             $user->setActivated();

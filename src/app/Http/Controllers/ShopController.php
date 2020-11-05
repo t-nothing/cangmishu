@@ -58,12 +58,12 @@ class ShopController extends Controller
 
             $shop = Shop::find($id);
             $shop->name_cn              = $data['name_cn'];
-            $shop->name_en              = $data['name_en']??$data['name_cn'];
-            $shop->logo                 = $data['logo']??'';
-            $shop->banner_background    = $data['banner_background']??'';
-            $shop->default_lang         = $data['default_lang']??'zh-cn';
-            $shop->default_currency     = $data['default_currency']??'CNY';
-            $shop->email                = $data['email']??'';
+            $shop->name_en              = $data['name_en'] ?? $data['name_cn'];
+            $shop->logo                 = $data['logo'] ?? '';
+            $shop->banner_background    = $data['banner_background'] ?? '';
+            $shop->default_lang         = $data['default_lang'] ?? 'zh-cn';
+            $shop->default_currency     = $data['default_currency'] ?? 'CNY';
+            $shop->email                = $data['email'] ?? '';
             $shop->owner_id             = Auth::ownerId();
             if(isset($data['remark'])) {
                 $shop->remark_cn            = $data['remark'];

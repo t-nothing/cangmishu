@@ -453,6 +453,68 @@ class StatisticsService
     }
 
     /**
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getStockTopData()
+    {
+        self::parseDateParams(1, true);
+
+        $stock_count = (int) ProductStock::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->sum('stock_num');
+
+        $stock_lack_count = Product::query()
+            ->where('product.warehouse_id', self::$warehouseId)
+            ->where('total_stock_num', '<=', 0)
+            ->count();
+
+        $product_count = Product::query()
+            ->where('product.warehouse_id', self::$warehouseId)
+            ->count();
+
+        return compact('stock_count', 'stock_lack_count', 'product_count');
+    }
+
+    /**
+     * @param $params
+     * @return mixed
+     * @throws BusinessException
+     */
+    public static function getSalesRank($params)
+    {
+        $date = self::parseDateParams($params, true);
+
+        $data = OrderItem::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->selectRaw("name_cn as name, sum(amount) as sales, pic as picture")
+            ->groupBy('name_cn')
+            ->orderByDesc('sales')
+            ->get()->each->setAppends([]);
+
+        return $data;
+    }
+
+    /**
+     * @param $params
+     * @return \Illuminate\Database\Eloquent\Collection
+     * @throws BusinessException
+     */
+    public static function getStockWarningRank($params)
+    {
+        self::parseDateParams($params, true);
+
+        return Product::query()
+            ->selectRaw('total_stock_num as stock,product.name_cn as name, photos as pictures')
+            ->where('product.warehouse_id', self::$warehouseId)
+            ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
+            ->where('total_stock_num', '<=', 'c.warning_stock')
+            ->whereRaw('c.warning_stock > 0')
+            ->orderBy('stock')
+            ->get();
+    }
+
+    /**
      * 数据为空的日期生成零数据
      * @param Collection $data
      * @param Carbon $start

@@ -20,7 +20,7 @@ Route::get('websiteConfig', 'WebsiteAppController@info');
 Route::any('/wechatOAuth/callback', 'WebsiteAppController@callback');
 
 Route::any('test', function () {
-    return (new \App\Services\StatisticsService())::getUserOrderTrade(30);
+    return (new \App\Services\StatisticsService())::getStockWarningRank(30);
 });
 
 Route::any('oauth', function () {
@@ -85,9 +85,18 @@ Route::middleware(['auth:jwt'])->group(function () {
         Route::get('orderRank', 'CustomersController@getOrderRank');
     });
 
+    //庫存
+    Route::prefix('stocks')->group(function () {
+        Route::get('totalData', 'StockDataController@getTotalData');
+        Route::get('graphData', 'HomePageController@getStockData');
+        Route::get('salesRank', 'StockDataController@getSalesRank');
+        Route::get('warningRank', 'StockDataController@getStockWarningRank');
+    });
+
     Route::get('me', 'AuthController@me');
-    Route::post('bindEmail', 'UserController@bindEmail'); //绑定邮箱
-    Route::post('bindPhone', 'UserController@bindEmail'); //绑定邮箱
+    Route::put('profile/email', 'UserController@bindEmail'); //绑定邮箱
+    Route::put('profile/phone', 'UserController@bindPhone'); //绑定邮箱
+    Route::get('phoneCode', 'UserController@getPhoneVerifyCode'); //手机验证码
 
     Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限

@@ -138,7 +138,7 @@ class UserController extends  Controller
         ]);
 
         $verifyCode = VerifyCode::where('code', $request['code'])
-            ->where('phone',$request['phone'])
+            ->where('email', $request['phone'])
             ->where('expired_at','>', time())
             ->first();
 
@@ -181,6 +181,24 @@ class UserController extends  Controller
 
         return formatRet(0, trans("message.userRegisterSendSuccess"));
 
+    }
+
+    /**
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public  function getPhoneVerifyCode(BaseRequests $request)
+    {
+        $this->validate($request, [
+            'phone' => ['required', 'mobile', Rule::unique('user', 'phone')],
+        ]);
+
+        $code = app('user')->getRandCode();
+
+        app('user')->createUserSMSVerifyCode($code, $request->phone);
+
+        return formatRet(0, trans("message.userRegisterSendSuccess"));
     }
 
     public function privilege(BaseRequests $request,$user_id)
