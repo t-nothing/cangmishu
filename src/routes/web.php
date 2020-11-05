@@ -20,7 +20,7 @@ Route::get('websiteConfig', 'WebsiteAppController@info');
 Route::any('/wechatOAuth/callback', 'WebsiteAppController@callback');
 
 Route::any('test', function () {
-    return (new \App\Services\StatisticsService())::getStockWarningRank(30);
+    return (new \App\Services\StatisticsService())::getSupplierRank();
 });
 
 Route::any('oauth', function () {
@@ -83,6 +83,7 @@ Route::middleware(['auth:jwt'])->group(function () {
         Route::get('totalData', 'CustomersController@getTotalData');
         Route::get('dailyData', 'CustomersController@getDailyData');
         Route::get('orderRank', 'CustomersController@getOrderRank');
+        Route::get('supplierRank', 'CustomersController@getSupplierRank');
     });
 
     //庫存

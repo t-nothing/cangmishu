@@ -425,29 +425,30 @@ class StatisticsService
     }
 
     /**
-     * @param $params
      * @return Collection
      * @throws BusinessException
      */
-    public static function getSupplierOrderTrade($params)
+    public static function getSupplierRank($params)
     {
         self::parseDateParams($params, true);
 
         $data = Distributor::query()
-            ->join('order as o', 'o.shop_user_id', '=', 'shop_user.id')
-            ->selectRaw('shop_user.id as user_id, shop_user.nick_name as name, count(o.id) as order_count,
-            sum(case when o.created_at >='
+            ->where('warehouse_id', self::$warehouseId)
+            ->join('purchase as p', 'distributor.id', '=', 'p.distributor_id')
+            ->selectRaw('name_cn as distributor_name, distributor.id as distributor_id, sum(p.confirm_num) as count,
+            sum(case when p.created_at >='
                 . now()->startOfMonth()->unix()
-                . ' and o.created_at <= '
+                . ' and p.created_at <= '
                 . now()->endOfMonth()->unix()
-                . ' then 1 else 0 end) as current_month_order_count')
-            ->groupBy(['user_id', 'name'])
-            ->orderBy('order_count')
+                . ' then 1 else 0 end) as current_month_count')
+            ->groupBy(['distributor_id', 'distributor_name'])
+            ->orderByDesc('count')
             ->limit(10)
             ->get()->map(function ($value) {
-                $value['current_month_order_count'] = (int) $value['current_month_order_count'];
+                $value['count'] = (int) $value['count'];
+                $value['current_month_count'] = (int) $value['current_month_count'];
                 return $value;
-            });
+            })->each->setAppends([]);
 
         return $data;
     }
