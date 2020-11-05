@@ -67,7 +67,7 @@ class WebsiteAppController extends Controller
                 'city'      => $userInfo['original']['city'] ?? '',
                 'avatar'    => $userInfo['original']['headimgurl'] ?? '',
                 'nickname'  => $userInfo['original']['nickname'] ?? '',
-                'app_openid' =>  $userInfo['original']['openid'] ?? '',
+                'app_openid' =>  $userInfo['original']['openid'] ?? null,
                 'union_id'  =>   $userInfo['original']['unionid'] ?? null,
             ]);
 
