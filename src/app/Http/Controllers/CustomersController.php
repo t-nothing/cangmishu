@@ -41,4 +41,13 @@ class CustomersController extends Controller
     {
         return success($this->service::getUserOrderRank($this->getRequestParams()));
     }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getSupplierRank()
+    {
+        return success($this->service::getSupplierRank($this->getRequestParams()));
+    }
 }
