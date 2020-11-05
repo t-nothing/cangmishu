@@ -141,7 +141,7 @@ class AuthController extends  Controller
 
 
         $filtered = collect($data['user'])
-            ->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
+            ->only(['avatar', 'email', 'phone', 'boss_id','id', 'nickname', 'default_warehouse']);
         $data['user'] = $filtered->all();
         //如果有填写qrkey
         if($request->filled('qr_key')) {
@@ -179,7 +179,7 @@ class AuthController extends  Controller
         $data['user'] = $guard->user();
 
         $filtered = collect($data['user'])
-            ->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
+            ->only(['avatar', 'email', 'phone', 'boss_id','id', 'nickname', 'default_warehouse']);
         $data['user'] = $filtered->all();
 
         //获取用户权限
@@ -219,7 +219,7 @@ class AuthController extends  Controller
         $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->find($user->id);
 
         $filtered = collect($data['user'])
-            ->only(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse']);
+            ->only(['avatar', 'email', 'phone', 'boss_id', 'id', 'nickname', 'default_warehouse']);
         $data['user'] = $filtered->all();
 
         //获取用户权限
