@@ -105,8 +105,9 @@ Route::middleware(['auth:jwt'])->group(function () {
 
     Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
-    Route::post('/user/{user_id}/info', 'UserController@updateInfo');//修改员工个人资料
-    Route::post('/user/{user_id}/avatar', 'UserController@avatar');//修改员工头像
+    Route::post('/user/info', 'UserController@updateInfo'); //修改个人资料
+    Route::post('/user/profile', 'UserController@updateProfile');   //修改个人资料
+    Route::post('/user/avatar', 'UserController@avatar');//修改员工头像
     Route::get('/user/{user_id}', 'UserController@show');//获取员工权限
 
     //上传图片
