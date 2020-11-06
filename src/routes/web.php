@@ -94,6 +94,10 @@ Route::middleware(['auth:jwt'])->group(function () {
         Route::get('warningRank', 'StockDataController@getStockWarningRank');
     });
 
+    Route::prefix('officialAccount')->group(function () {
+        Route::get('qrCode', 'WechatOfficialAccountController@getQrCode');
+    });
+
     Route::get('me', 'AuthController@me');
     Route::put('profile/email', 'UserController@bindEmail'); //绑定邮箱
     Route::put('profile/phone', 'UserController@bindPhone'); //绑定邮箱
