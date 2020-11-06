@@ -280,49 +280,77 @@ class UserController extends  Controller
 
     /**
      * @param  BaseRequests  $request
-     * @param $user_id
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function updateInfo(BaseRequests $request,$user_id){
-        $this->validate($request, [
-            'nickname' => 'required|string|max:255',
-            'photos' => 'url|max:255',
+    public function updateProfile(BaseRequests $request){
+        $data = $this->validate($request, [
+            'name' => 'required|string|max:80',
+            'contact_address' => 'sometimes|nullable|string|max:150',
+            'contact' => 'sometimes|nullable|string|max:150',
+            'industry' => 'sometimes|nullable|string|max:150',
         ]);
 
-        $user = User::find($user_id);
+        /** @var User $user */
+        $user = \auth()->user();
 
-        if ($user_id != Auth::id()) {
-            return formatRet(500, trans("message.noPermission"));
-        }
+        $res = $user->update([
+            'name' => $data['name'],
+            'contact_address' => $data['contact_address'] ?? '',
+            'contact' => $data['contact'] ?? '',
+            'industry' => $data['industry'] ?? '',
+        ]);
 
-        $user->nickname = $request->nickname;
-
-        if ($request->filled('photos')) {
-            $user->avatar = $request->photos;
-        }
-
-        if ( ! $user->save()) {
+        if (! $res) {
             return formatRet(500, trans("message.failed"));
         }
 
         return formatRet(0);
     }
 
-    public function avatar(BaseRequests $request,$user_id){
+    /**
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function updateInfo(BaseRequests $request){
+        $data = $this->validate($request, [
+            'nickname' => 'required|string|max:80',
+            'avatar' => 'sometimes|nullable|url|max:150',
+        ]);
+
+        /** @var User $user */
+        $user = \auth()->user();
+
+        $res = $user->update([
+            'nickname' => $data['nickname'],
+            'avatar' => $data['avatar'] ?? '',
+        ]);
+
+        if (! $res) {
+            return formatRet(500, trans("message.failed"));
+        }
+
+        return formatRet(0);
+    }
+
+    /**
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function updateAvatar(BaseRequests $request)
+    {
         $this->validate($request, [
             'avatar' => 'required|string|max:255',
         ]);
 
-        $user = User::find($user_id);
-
-        if ($user_id != Auth::id()) {
-            return formatRet(500, trans("message.noPermission"));
-        }
+        /** @var User $user */
+        $user = \auth()->user();
 
         $user->avatar = $request->avatar;
 
-        if ( ! $user->save()) {
+        if (! $user->save()) {
             return formatRet(500, trans("message.failed"));
         }
 

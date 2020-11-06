@@ -41,7 +41,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
             ) {
                 return true;
             }
-            
+
             session(['horizon-user' => $user->email]);
 
             $api_token = app('request')->get('api_token');
