@@ -177,10 +177,15 @@ class ShopGuard implements Guard
     public function login(array $credentials = [], $onlyAdmin = false)
     {
 //        $user = $this->provider->retrieveByCredentials($credentials);
-        $user= User::with(['defaultWarehouse:id,name_cn'])->where('nickname',$credentials['email'])->orWhere('email',$credentials['email'])->first();
+        $user= User::with(['defaultWarehouse:id,name_cn'])
+            ->where('nickname',$credentials['email'])
+            ->orWhere('email',$credentials['email'])
+            ->first();
+
         if(!$user){
             eRet('用户名、邮箱或密码不正确');
         }
+
         if(!Hash::check($credentials['password'], $user->password)){
             eRet('用户名、邮箱或密码不正确');
         }
@@ -192,7 +197,6 @@ class ShopGuard implements Guard
         if (!$user->isActivated()) {
             eRet('帐户尚未激活，禁止登入！');
         }
-
 
         if ($this->hasValidCredentials($user, $credentials)) {
             // If we have an event dispatcher instance set we will fire an event so that
@@ -377,7 +381,4 @@ class ShopGuard implements Guard
 
         Mail::send($message);
     }
-
-
-
 }
