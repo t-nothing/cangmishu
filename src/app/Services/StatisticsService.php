@@ -210,7 +210,11 @@ class StatisticsService
                 return $order;
             });
 
-        $data = self::generateSalesDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
+        $data = self::generateSalesDataOfZeroDay(
+            $data,
+            Carbon::createFromTimestamp($date[0]),
+            Carbon::createFromTimestamp($date[1])
+        );
 
         return $data;
     }
@@ -265,7 +269,11 @@ class StatisticsService
                 return $order;
             });
 
-        $data = self::generateStockDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
+        $data = self::generateStockDataOfZeroDay(
+            $data,
+            Carbon::createFromTimestamp($date[0]),
+            Carbon::createFromTimestamp($date[1])
+        );
 
         return $data;
     }
@@ -398,7 +406,11 @@ class StatisticsService
             ->groupBy('days')
             ->get();
 
-        $data = self::generateCountsDataOfZeroDay($data, Carbon::parse($date[0]), Carbon::parse($date[1]));
+        $data = self::generateCountsDataOfZeroDay(
+            $data,
+            Carbon::createFromTimestamp($date[0]),
+            Carbon::createFromTimestamp($date[1])
+        );
 
         return $data;
     }
