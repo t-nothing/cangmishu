@@ -50,7 +50,7 @@ class Token extends Model
     }
 
     /**
-     *  获取有效 token。
+     * 获取有效 token。
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
