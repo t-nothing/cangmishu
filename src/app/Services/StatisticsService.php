@@ -116,6 +116,10 @@ class StatisticsService
             ->where('warehouse_id', self::$warehouseId)
             ->count('id');
 
+        $total_order = Order::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->count('id');
+
         $stock_warning = Product::query()
             ->selectRaw('count(product.id) as count')
             ->where('product.warehouse_id', self::$warehouseId)
@@ -132,7 +136,12 @@ class StatisticsService
             ->where('status', '=', Order::STATUS_WAITING)
             ->count();
 
-        return compact('total_product', 'total_stock', 'stock_warning', 'wait_shelf', 'wait_shipment');
+        return compact('total_product',
+            'total_stock',
+            'total_order',
+            'stock_warning',
+            'wait_shelf',
+            'wait_shipment');
     }
 
     /**
