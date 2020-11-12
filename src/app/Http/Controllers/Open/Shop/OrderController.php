@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BaseRequests;
 use App\Rules\PageSize;
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
@@ -24,29 +25,34 @@ class OrderController extends Controller
             'is_enabled'   => 'boolean',
         ]);
 
-        $dataList = Order::getIns()->ofShopUser($request->shop->id, Auth::user()->id)
-                    ->orderBy('id','DESC')
-                    ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic,relevance_code')
-                    ->paginate(
-                        $request->input('page_size',50),
-                        ['id', 'out_sn', 'status', 'remark', 'express_code', 'delivery_date', 'express_code',
-                            'express_num',
-                            'receiver_country',
-                            'receiver_city',
-                            'receiver_postcode',
-                            'receiver_district',
-                            'receiver_address',
-                            'receiver_fullname',
-                            'receiver_phone',
-                            'receiver_province',
-                            'sub_order_qty',
-                            'created_at',
-                            'updated_at',
-                            'sub_pay',
-                            'sub_total',
-                            'sale_currency'
-                        ]
-                    );
+        $dataList = Order::getIns()
+            ->ofShopUser($request->shop->id, Auth::user()->id)
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $this->parseStatus($request->input('status'), $query);
+            })
+            ->orderBy('id', 'DESC')
+            ->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic,relevance_code')
+            ->paginate(
+                $request->input('page_size', 50),
+                [
+                    'id', 'out_sn', 'status', 'remark', 'express_code', 'delivery_date', 'express_code',
+                    'express_num',
+                    'receiver_country',
+                    'receiver_city',
+                    'receiver_postcode',
+                    'receiver_district',
+                    'receiver_address',
+                    'receiver_fullname',
+                    'receiver_phone',
+                    'receiver_province',
+                    'sub_order_qty',
+                    'created_at',
+                    'updated_at',
+                    'sub_pay',
+                    'sub_total',
+                    'sale_currency',
+                ]
+            );
         $dataList = $dataList->toArray();
         foreach ($dataList['data'] as $key => &$result) {
             $result["ship"] = $result['status']>3 && !empty($result["express_num"]) ? [
@@ -139,5 +145,25 @@ class OrderController extends Controller
         ];
 
         return formatRet(0, '', $counts);
+    }
+
+    protected function parseStatus($status, Builder $query)
+    {
+        switch ($status) {
+            case 1:
+            case 5:
+            case 7:
+                $query->where('status', $status);
+                break;
+            case 2:
+                $query->whereIn('status', [
+                    Order::STATUS_PICKING,
+                    Order::STATUS_PICK_DONE,
+                    Order::STATUS_WAITING,
+                ]);
+                break;
+            default:
+                $query->where('status', $status);
+        }
     }
 }

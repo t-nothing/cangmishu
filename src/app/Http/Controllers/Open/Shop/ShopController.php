@@ -12,7 +12,6 @@ use App\Models\ShopWeappFormId;
 
 class ShopController extends Controller
 {
-
     /**
      * 店铺详细
      **/
