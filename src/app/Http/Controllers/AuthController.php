@@ -210,7 +210,7 @@ class AuthController extends  Controller
 
     public function me()
     {
-        $user = auth('jwt')->user();
+        $user = auth('admin')->user();
 
         if (! $user) {
             return formatRet(401, '');

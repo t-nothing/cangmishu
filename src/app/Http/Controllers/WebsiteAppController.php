@@ -76,7 +76,7 @@ class WebsiteAppController extends Controller
             $user = $userService->quickRegister($request);
         }
 
-        $token = auth('jwt')->token($user);
+        $token = auth('admin')->token($user);
 
         return redirect(base64_decode($state) . '?token=' . $token, 302);
     }

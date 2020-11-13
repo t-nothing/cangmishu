@@ -60,7 +60,7 @@ Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-�
 Route::get('/open/shareOrder/detail', 'OrderController@shareView');
 Route::get('/open/shareOrder/downloadPdf', 'OrderController@shareDownload');
 
-Route::middleware(['auth:jwt'])->group(function () {
+Route::middleware(['auth:admin'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
     Route::get('/home/analyzeTable', 'HomePageController@batchOrOrderCount');// 首页仓库
