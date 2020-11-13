@@ -508,9 +508,21 @@ if ( ! function_exists('redirect_url'))
          * @param mixed $data
          * @return \Illuminate\Http\JsonResponse
          */
-        function success($data)
+        function success($data = [])
         {
             return formatRet(0, __('message.success'), $data);
+        }
+    }
+
+    if (! function_exists('failed')) {
+        /**
+         * @param  string  $message
+         * @param  int  $code
+         * @return \Illuminate\Http\JsonResponse
+         */
+        function failed($message = '', int $code = 500)
+        {
+            return formatRet($code, $message, []);
         }
     }
 }
