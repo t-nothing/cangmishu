@@ -105,43 +105,43 @@ class CartController extends Controller
             // print_r($ex->getMessage());
         }
 
-        
         return formatRet(500,"添加购物车失败");
-        
     }
 
     /**
      * 更新数量
-     **/
-    public function updateQty(BaseRequests $request, $id, $qty)
+     *
+     * @param  BaseRequests  $request
+     * @param $code
+     * @param $qty
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateQty(BaseRequests $request, $code, $qty)
     {
-        
-        try
-        {
-
+        try {
             // $this->processFormId($request);
-            app('cart')->name($this->getWhoesCart())->update($id, $qty);
+            app('cart')->name($this->getWhoesCart())->update($code, $qty);
 
-            return formatRet(200,"更新商品成功");
-        }
-        catch(\Exception $ex)
-        {
+            return formatRet(200, "更新商品成功");
+        } catch (\Exception $ex) {
 
         }
 
-        
         return formatRet(500,"更新商品失败");
     }
 
     /**
      * 移除单个商品
-     **/
-    public function remove(BaseRequests $request, $id)
+     *
+     * @param  BaseRequests  $request
+     * @param $code
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function remove(BaseRequests $request, $code)
     {
-        
         try
         {
-            app('cart')->name($this->getWhoesCart())->remove($id);
+            app('cart')->name($this->getWhoesCart())->remove($code);
 
             return formatRet(200,"移除商品成功");
         }
@@ -150,7 +150,6 @@ class CartController extends Controller
 
         }
 
-        
         return formatRet(500,"移除商品失败");
     }
 
@@ -170,7 +169,7 @@ class CartController extends Controller
 
         }
 
-        
+
         return formatRet(500,"清空购物车失败");
     }
 
@@ -236,7 +235,7 @@ class CartController extends Controller
                 throw new \Exception("购物车不能为空", 1);
             }
 
-            $data = new BaseRequests;            
+            $data = new BaseRequests;
 
             $data->express_code  = "";
             $data->remark           = $request->input('remark', '');
@@ -285,9 +284,9 @@ class CartController extends Controller
                 ];
             }
 
-           
+
             $data->goods_data = collect($orderItem);
-            
+
             $orderResult = app('order')->setSource($request->shop->name_cn)->create($data, $request->shop->owner_id);
             app('db')->commit();
 
