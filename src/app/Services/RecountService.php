@@ -103,6 +103,7 @@ class RecountService
                     $lock->release();
                 }
             } catch (BusinessException $exception) {
+                $lock->release();
                 throw $exception;
             } catch(\Exception $ex) {
                 $lock->release();
