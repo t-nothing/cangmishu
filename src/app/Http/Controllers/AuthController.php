@@ -476,7 +476,11 @@ class AuthController extends  Controller
 
         try {
             //绑定的一个固定帐号
-            $user = User::find(483);
+            if (app()->environment() === 'production') {
+                $user = User::find(483);
+            } else {
+                $user = User::find(13);
+            }
 
             $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
             $userId = $user->id;
