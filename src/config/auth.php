@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'jwt'),
+        'guard' => env('AUTH_GUARD', 'admin'),
         'passwords' => 'users',
     ],
 

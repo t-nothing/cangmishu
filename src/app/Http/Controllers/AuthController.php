@@ -170,7 +170,7 @@ class AuthController extends  Controller
      */
     public function expLogin()
     {
-        $guard = auth()->guard();
+        $guard = auth()->guard('admin');
 
         if (! $data = $guard->userLogin(13)) {
             return formatRet(500, $guard->sendFailedLoginResponse());
