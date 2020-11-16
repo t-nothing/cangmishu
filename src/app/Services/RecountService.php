@@ -1,6 +1,7 @@
 <?php
 namespace  App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Models\Recount;
 use App\Models\RecountStock;
 use App\Models\ProductStockLocation;
@@ -39,11 +40,15 @@ class RecountService
                     $totalQty = 0;
                     $totalOrginQty = 0;
                     foreach ($data['stock'] as $key => $v) {
-                        
+
                         $stockLoation = ProductStockLocation::where("warehouse_id", $data["warehouse_id"])->where("id", $v["id"])->first();
-                        if(!$stockLoation){
+                        if(! $stockLoation){
+                            if ($stockLocation = ProductStockLocation::where("id", $v["id"])->first()) {
+                                throw new BusinessException("SKU：{$stockLocation->stock->sku} 不属于当前仓库，请删除后提交");
+                            }
+
                             throw new \Exception("未找到库存ID:".$v["id"], 1);
-                            
+
                         }
 
                         $stockLoation->load("stock");
@@ -120,7 +125,7 @@ class RecountService
 
         $arr = [];
         foreach ($stockLocations as $key => $stockLoation) {
-            
+
             $arr[] = [
                     'id'                    =>  $stockLoation->id,
                     'name_cn'               =>  $stockLoation->stock->product_name_cn,
