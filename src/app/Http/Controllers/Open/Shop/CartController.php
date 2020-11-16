@@ -4,8 +4,10 @@
  */
 
 namespace App\Http\Controllers\Open\Shop;
+use App\Exceptions\BusinessException;
 use App\Http\Requests\BaseRequests;
 use App\Http\Controllers\Controller;
+use App\Models\ProductSpec;
 use App\Rules\PageSize;
 use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
@@ -121,8 +123,19 @@ class CartController extends Controller
      */
     public function updateQty(BaseRequests $request, $code, $qty)
     {
+        $cart = new CartService();
+
         try
         {
+            $spec = $cart->name($this->getWhoesCart())->get($code);
+
+            $spec = ShopProductSpec::query()
+                ->with(['productSpec'])
+                ->findOrFail($spec['id']);
+
+            if ($qty > $spec['productSpec']['total_stock_num']) {
+                throw new BusinessException('库存数量不足');
+            }
 
             // $this->processFormId($request);
             app('cart')->name($this->getWhoesCart())->update($code, $qty);
@@ -189,9 +202,18 @@ class CartController extends Controller
             'shop' => app('request')->header('Shop', ''),
         ]);
         $items = app('cart')->name($this->getWhoesCart())->all();
-        foreach ($items as $key => $value) {
+
+        $specs = ShopProductSpec::query()
+            ->with('productSpec')
+            ->whereKey(data_get($items, '*.id'))
+            ->get();
+
+        foreach ($items as $key => &$value) {
             try {
                 $tmp = $value->__raw_id;
+                $value['total_stock_num'] = data_get($specs->first(function ($v) use ($value) {
+                    return $v['id'] === $value['id'];
+                }), 'productSpec.total_stock_num');
             } catch( \ErrorException $ex) {
                 app('cart')->name($this->getWhoesCart())->remove($key);
                 unset($items[$key]);

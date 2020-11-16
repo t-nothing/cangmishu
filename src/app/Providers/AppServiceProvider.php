@@ -118,7 +118,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('stockLog',function(){
             return new ProductStockLogService();
         });
-        
+
         $this->app->singleton('product',function(){
             return new ProductService();
         });
@@ -140,6 +140,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('recount',function(){
             return new RecountService();
         });
+
         $this->app->singleton('cart',function(){
             return new CartService();
         });

@@ -65,14 +65,19 @@ class ProductController extends Controller
         if ( !$shopProduct || !$shopProduct->shop ){
             return formatRet(404,'商品不存在', 404);
         }
-        $shopProduct->load("specs");
+        $shopProduct->load(['specs', 'specs.productSpec']);
 
         $shopProduct->currency = $request->shop->currency;
         $shopProduct->is_collect = $shopProduct->isCollect();
 
         unset($shopProduct['collectUsers']);
 
-        return formatRet(0,"成功",$shopProduct->toArray());
+        foreach ($shopProduct['specs'] as &$spec) {
+            $spec['total_stock_num'] = $spec['productSpec']['total_stock_num'];
+            unset($spec['productSpec']);
+        }
+
+        return formatRet(0,"成功", $shopProduct->toArray());
     }
 
     /**
