@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\BusinessException;
 use App\Http\Requests\BaseRequests;
 use App\Http\Requests\CreateRecountRequest;
 use App\Models\Recount;
@@ -49,7 +50,9 @@ class RecountController extends Controller
     /**
      * 创建分类
      *
-     * @param Request $request
+     * @param  CreateRecountRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws BusinessException
      */
     public function store(CreateRecountRequest $request)
     {
@@ -59,7 +62,9 @@ class RecountController extends Controller
             $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
             app('recount')->create($data);
             return formatRet(0);
-        }catch (\Exception $e){
+        } catch (BusinessException $e) {
+            throw $e;
+        } catch (\Exception $e){
             app('log')->error('新增盘点单失败',['msg' =>$e->getMessage()]);
             return formatRet(500, trans("message.recountAddFailed"));
         }
