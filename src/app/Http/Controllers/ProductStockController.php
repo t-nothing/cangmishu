@@ -503,7 +503,7 @@ class ProductStockController extends  Controller
 
 
         $category = $stock->spec->product->category;
-        if ($category) 
+        if ($category)
         {
             $rules = [];
             $category->need_expiration_date == 1 AND
@@ -545,7 +545,7 @@ class ProductStockController extends  Controller
 
 
             app('db')->commit();
-            
+
 
         } catch (\Exception $e) {
             app('db')->rollback();
@@ -558,7 +558,7 @@ class ProductStockController extends  Controller
     }
 
     /**
-     * 
+     *
      */
     public  function  getInfoBySku(BaseRequests $request, $sku)
     {
@@ -609,7 +609,12 @@ class ProductStockController extends  Controller
         if ($location) {
             $stock->where('warehouse_location_id', $location->id);
         } else {
-            $stock->where('sku', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code);
+            $stock->where(function ($query) use ($request) {
+                $query->orWhere('sku', $request->code)
+                    ->orWhere('ean', $request->code)
+                    ->orWhere('relevance_code', $request->code);
+            });
+            //$stock->where('sku', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code);
         }
 
         $stocks= $stock->paginate($request->input('page_size',100));
