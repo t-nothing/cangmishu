@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Open\Shop;
 use App\Http\Requests\BaseRequests;
 use App\Http\Controllers\Controller;
 use App\Rules\PageSize;
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ShopProductSpec;
 use App\Models\ReceiverAddress;
@@ -89,12 +90,14 @@ class CartController extends Controller
         {
             $spec->load('productSpec');
             $pics = json_decode($spec->product->pics, true);
-            app('cart')->name($this->getWhoesCart())->add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, [
-                'spec'              =>  $spec->name,
-                'source'            =>  'wechat.mini_program',
-                'relevance_code'    =>  $spec->productSpec->relevance_code,
-                'pic'               =>  $pics[0]??'',
-                'currency'          =>  $request->shop->currency
+            (new CartService())->name($this->getWhoesCart())
+                ->add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, [
+                    'product_id' => $spec->shop_product_id,
+                    'spec'              => $spec->name,
+                    'source'            => 'wechat.mini_program',
+                    'relevance_code'    => $spec->productSpec->relevance_code,
+                    'pic'               => $pics[0] ?? '',
+                    'currency'          => $request->shop->currency
             ]);
 
             return formatRet(200,"添加购物车成功");
@@ -118,7 +121,9 @@ class CartController extends Controller
      */
     public function updateQty(BaseRequests $request, $code, $qty)
     {
-        try {
+        try
+        {
+
             // $this->processFormId($request);
             app('cart')->name($this->getWhoesCart())->update($code, $qty);
 
