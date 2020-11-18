@@ -72,6 +72,12 @@ class ShopProduct extends Model
      */
     public function isCollect()
     {
-        return in_array(auth('shop')->user()->getKey(), $this->collectUsers->modelKeys());
+        $user = auth('shop')->user();
+
+        if ($user) {
+            return in_array($user->getKey(), $this->collectUsers->modelKeys());
+        }
+
+        return false;
     }
 }
