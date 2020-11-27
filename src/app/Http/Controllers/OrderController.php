@@ -621,7 +621,7 @@ class OrderController extends Controller
         try {
             Storage::put('1.html', view('pdfs.order.template_pick', ['order' => $order->toArray()])->toHtml());
         } catch (\Throwable $throwable) {
-            info('保存失败');
+            info('保存失败', ['throwable' => $throwable->getMessage()]);
         }
         
         if($request->filled("require_url") && $request->require_url == 1) {
