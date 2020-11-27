@@ -109,7 +109,7 @@ class OrderController extends Controller
         $orders = $order->latest()->paginate($request->input('page_size',10));
         $result = $orders->toArray();
         foreach ($result['data'] as $key => $value) {
-            
+
             $result['data'][$key]['track_url'] = "";
             if($value['status'] >= Order::STATUS_SENDING) {
                 $result['data'][$key]['track_url'] = "https://www.kuaidi100.com/chaxun?com=".$value['express_code']."&nu=".$value['express_num'];
@@ -145,7 +145,7 @@ class OrderController extends Controller
             if(!isset($order->out_sn))
             {
                 throw new \Exception(trans("message.orderAddFailed"), 1);
-                
+
             }
             app('db')->commit();
             return formatRet(0,trans("message.orderAddSuccess"), $order->toArray());
@@ -154,7 +154,7 @@ class OrderController extends Controller
             app('log')->error('新增出库单失败',['msg'=>$e->getMessage()]);
             return formatRet(500, trans("message.orderAddFailed"));
         }
-        
+
     }
 
 //    public function destroy(BaseRequests $request,$order_id)
@@ -205,7 +205,7 @@ class OrderController extends Controller
             app('log')->error('出库拣货失败',['msg'=>$e->getMessage()]);
             return formatRet(500, trans("message.orderPickingFailed", ["message"=>$e->getMessage()]));
         }
-        
+
         return formatRet(0, trans("message.orderPickingSuccess"));
     }
 
@@ -334,7 +334,7 @@ class OrderController extends Controller
             'sub_pay'                   => 'required|numeric|min:0',
             'payment_account_number'    => 'string|max:100',
         ]);
-        
+
         $order = Order::find($id);
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
@@ -437,13 +437,13 @@ class OrderController extends Controller
         if ($order->owner_id != Auth::ownerId()){
             return formatRet(500, trans("message.noPermission"));
         }
-        
+
         $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
         $order->append(['out_sn_barcode']);
 
         // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
 
-      
+
         $templateName = "pdfs.order.template_".strtolower($template);
         if(!in_array(strtolower($template), ['out','pick','sale'])){
             $templateName = "pdfs.order.template_pick";
@@ -520,7 +520,7 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return formatRet(500,  trans("message.failed"));
         }
-        
+
     }
 
     /**
@@ -542,7 +542,7 @@ class OrderController extends Controller
         if(!$order){
             return formatRet(500, trans("message.orderNotExist"));
         }
-        
+
 
         if ($order->share_code != $request->share_code && trim($request->share_code)!=""){
             return formatRet(500, trans("message.noPermission"));
@@ -565,7 +565,7 @@ class OrderController extends Controller
 
         // $file = $order->out_sn . "_{$templateName}.pdf";
         $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName, "en"), md5($order->out_sn.$order->created_at));
-        
+
         $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
         if(!file_exists($filePath)) {
 
@@ -601,7 +601,7 @@ class OrderController extends Controller
 
         // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
 
-      
+
         $templateName = "pdfs.order.template_".strtolower($template);
         if(!in_array(strtolower($template), ['out','pick'])){
             $templateName = "pdfs.order.template_pick";
@@ -611,13 +611,19 @@ class OrderController extends Controller
 
         // $file = $order->out_sn . "_{$templateName}.pdf";
         $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName, "en"), md5($order->out_sn.$order->created_at));
-        
+
         $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
         if(!file_exists($filePath)) {
 
             $pdf->loadView($templateName, ['order' => $order->toArray()])->save($filePath);
         }
 
+        try {
+            Storage::put('1.html', view('pdfs.order.template_pick', ['order' => $order->toArray()])->toHtml());
+        } catch (\Throwable $throwable) {
+            info('保存失败');
+        }
+        
         if($request->filled("require_url") && $request->require_url == 1) {
 
             $url = asset('storage/pdfs/'.$fileName);
