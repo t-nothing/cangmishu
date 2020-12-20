@@ -12,6 +12,7 @@ use App\Models\Token;
 use App\Services\UserService;
 use App\Services\WechatOAuthService;
 use \App\Models\User;
+use ArrayAccess;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -154,10 +155,10 @@ class WebsiteAppController extends Controller
 
     /**
      * @param  User  $user
-     * @param  array  $userInfo
+     * @param  ArrayAccess $userInfo
      * @throws BusinessException
      */
-    protected function updateUserInfo(User $user, array $userInfo)
+    protected function updateUserInfo(User $user, ArrayAccess $userInfo)
     {
         $res = $user->update([
             'app_openid' =>  $userInfo['original']['openid'] ?? null,
