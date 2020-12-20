@@ -144,5 +144,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('cart',function(){
             return new CartService();
         });
+
+        if ($this->app->isLocal() || $this->app->environment('development')) {
+            $this->app->register(TelescopeServiceProvider::class);
+        }
     }
 }
