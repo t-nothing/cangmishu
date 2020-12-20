@@ -147,7 +147,7 @@ class WebsiteAppController extends Controller
                 break;
         }
 
-        $this->updateUserInfo($user, $authData['userInfo']);
+        $this->updateUserInfo($user, $authData[2]);
 
         return success(['data' => (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN)]);
     }
