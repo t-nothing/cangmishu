@@ -257,7 +257,7 @@ class CartController extends Controller
                     'key' => $this->getWhoisCart(),
                     'total' => $cart->name($this->getWhoisCart())->all()->toArray(),
                 ]);
-                
+
                 throw new \Exception("下单金额不一致", 1);
             }
 

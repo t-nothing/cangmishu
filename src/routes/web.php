@@ -49,6 +49,8 @@ Route::post('/emailCode', 'UserController@getEmailVerifyCode');
 Route::post('/smsCode', 'UserController@getSMSVerifyCode');
 Route::post('/callUser', 'UserController@callUser');
 
+Route::post('/bindAccount', 'WebsiteAppController@bindAccount');
+
 Route::post('/user/forgetPassword', 'PasswordController@store');// 忘记密码-请求重置
 Route::get('/user/resetPassword/{token_value}', [
     'as' => 'pwd-activation',

@@ -26,8 +26,6 @@ class UpdateShopRequest extends BaseRequests
      */
     public function rules()
     {
-
-
         $arr = [
             'name_cn'                   => [
                'required','string','max:100',

@@ -74,12 +74,7 @@ trait AuthMiniProgram
                 ],200);
             }
 
-            $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
-            $userId = $user->id;
-
-            $data['token'] = $token;
-            $data['modules'] = [];
-            $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+            $data = array_merge($data, $this->responseWithTokenAndUserInfo($user));
 
             return formatRet(0, '', $data);
 
@@ -182,13 +177,7 @@ trait AuthMiniProgram
                 $user->save();
             }
 
-
-            $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
-            $userId = $user->id;
-
-            $data['token'] = $token;
-            $data['modules'] = [];
-            $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+            $data = array_merge($data ?? [], $this->responseWithTokenAndUserInfo($user));
 
             return formatRet(0, '', $data);
 
@@ -229,14 +218,7 @@ trait AuthMiniProgram
                 $user = User::query()->find(421);
             }
 
-            $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
-            $userId = $user->id;
-
-            $data['token'] = $token;
-            $data['modules'] = [];
-            $data['user'] = User::with(['defaultWarehouse:id,name_cn'])
-                ->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])
-                ->find($userId);
+            $data = $this->responseWithTokenAndUserInfo($user);
 
             return formatRet(0, '', $data);
 
@@ -245,5 +227,23 @@ trait AuthMiniProgram
 
             return formatRet(500, trans("message.userNotExist"));
         }
+    }
+
+    /**
+     * @param  $user
+     * @return mixed
+     */
+    protected function responseWithTokenAndUserInfo($user)
+    {
+        $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+        $userId = $user->id;
+
+        $data['token'] = $token;
+        $data['modules'] = [];
+        $data['user'] = User::with(['defaultWarehouse:id,name_cn'])
+            ->select(['avatar', 'email', 'boss_id', 'id', 'nickname', 'default_warehouse_id'])
+            ->find($userId);
+
+        return $data;
     }
 }
