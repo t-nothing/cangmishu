@@ -17,8 +17,6 @@ class BusinessException extends Exception
      * Create a new exception instance.
      *
      * @param  string  $message
-     * @param  string  $errorBag
-     * @return void
      */
     public function __construct($message = '')
     {
