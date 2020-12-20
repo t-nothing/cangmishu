@@ -7,23 +7,12 @@ namespace App\Http\Controllers\Open\Shop;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Support\Facades\Auth;
-use Laravel\Passport\Client;
 use App\Models\ShopUser;
 use EasyWeChat\Factory;
 use App\Http\Requests\BaseRequests;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Access\AuthorizationException;
-
 
 class AuthenticateController extends  Controller
 {
-    use AuthenticatesUsers;
-
-    private $app;
-
     /**
      * 用户名即OPEN ID
      */
@@ -34,7 +23,10 @@ class AuthenticateController extends  Controller
 
     /**
      * 处理小程序的自动登陆和注册
-     * @param $oauth
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function autoLogin(BaseRequests $request)
     {
@@ -67,14 +59,12 @@ class AuthenticateController extends  Controller
         $province   = $request->province??'';
         $city       = $request->city??'';
         $gender     = $request->gender == '1' ? '1' : '2';//没传过性别的就默认女的吧，体验好些
-        $language   = $request->language??'';
-        $mobile      = $request->mobile??'';
-
+        $language = $request->language ?? '';
+        $mobile = $request->mobile ?? '';
 
         $user = ShopUser::where('weapp_openid', $openid)->first();
-        if(!$user)
-        {
 
+        if (! $user) {
             $user = new ShopUser;
             $user->weapp_openid     = $openid;
             $user->password         = $weixinSessionKey;
