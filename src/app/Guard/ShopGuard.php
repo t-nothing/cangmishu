@@ -313,18 +313,7 @@ class ShopGuard implements Guard
      */
     public function createToken(AuthenticatableContract $user, $type)
     {
-        $token = new Token;
-        $token->token_type = $type;
-        $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-        $token->expired_at = Carbon::now()->addWeek();
-        $token->owner_user_id = $user->getAuthIdentifier();
-        $token->is_valid = Token::VALID;
-
-        if ($token->save()) {
-            return $token;
-        }
-
-        return;
+        return (new TokenCreator())->create($user, $type);
     }
 
     /**
