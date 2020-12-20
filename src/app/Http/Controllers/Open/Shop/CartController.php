@@ -253,7 +253,7 @@ class CartController extends Controller
             // }
 
             if($request->verify_money != app('cart')->name($this->getWhoesCart())->total($request->id))
-            {
+            {   info(app('cart')->name($this->getWhoesCart())->total($request->id));
                 throw new \Exception("下单金额不一致", 1);
             }
 
