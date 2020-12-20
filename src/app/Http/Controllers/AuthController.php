@@ -12,11 +12,9 @@ use App\Guard\JwtGuard;
 use App\Guard\TokenCreator;
 use App\Http\Requests\BaseRequests;
 use App\Services\UserService;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Token;
 use App\Models\VerifyCode;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
@@ -24,15 +22,22 @@ class AuthController extends  Controller
 {
     use AuthMiniProgram;
 
-    public  function getSmsVerifyCode(BaseRequests $request)
+    /**
+     * 获取验证码
+     *
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function getSmsVerifyCode(BaseRequests $request)
     {
-        $this->validate($request,[
-            'mobile'        =>  ['required','mobile'],
-            'captcha_key'   =>  'required|string|min:1',
-            'captcha'       =>  'required|string'
+        $this->validate($request, [
+            'mobile' => ['required', 'mobile'],
+            'captcha_key' => 'required|string|min:1',
+            'captcha' => 'required|string',
         ]);
 
-        if($request->captcha_key != "app") {
+        if ($request->captcha_key != "app") {
             if (strtoupper(Cache::tags(['captcha'])->get($request->captcha_key)) != strtoupper($request->captcha)) {
                 return formatRet(500, trans("message.userRegisterEmailVerifyCodeFailed"));
             }
@@ -41,8 +46,9 @@ class AuthController extends  Controller
 
         $user = User::where('phone', $request->mobile)->first();
 
-        if(!$user) {
+        if (! $user) {
             Log::info('找到不用户', $request->all());
+
             return formatRet(500, trans("message.userNotExist"));
         }
 
@@ -69,7 +75,11 @@ class AuthController extends  Controller
 
     /**
      * 手机短信验证码登录
-     **/
+     *
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function smsLogin(BaseRequests $request)
     {
         $this->validate($request, [
@@ -93,20 +103,19 @@ class AuthController extends  Controller
             return formatRet(500, trans("message.userNotExist"));
         }
 
-
         Log::info('找到用户', $user->toArray());
-        $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
-        $userId = $user->id;
 
-        $data['token'] = $token;
-        $data['modules'] = [];
-        $data['user'] = User::with(['defaultWarehouse:id,name_cn'])->select(['avatar', 'email','boss_id','id', 'nickname', 'default_warehouse_id'])->find($userId);
+        $data =  $this->responseWithTokenAndUserInfo($user);
 
         return formatRet(0, '', $data);
     }
 
     /**
-     * 登入
+     * 登录
+     *
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function login(BaseRequests $request)
     {
@@ -152,6 +161,8 @@ class AuthController extends  Controller
     }
 
     /**
+     * 体验账号登录
+     *
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -186,8 +197,10 @@ class AuthController extends  Controller
 
     /**
      * 登出
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function logout(Request $request)
+    public function logout()
     {
         $guard = app('auth')->guard();
 
@@ -196,6 +209,11 @@ class AuthController extends  Controller
         return formatRet(0, '');
     }
 
+    /**
+     * 个人信息
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function me()
     {
         $user = auth('admin')->user();
