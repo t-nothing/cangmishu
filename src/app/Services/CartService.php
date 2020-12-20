@@ -59,7 +59,7 @@ class CartService
      *
      * @param  string  $name  Cart name name
      *
-     * @return Cart
+     * @return $this
      */
     public function name($name)
     {
