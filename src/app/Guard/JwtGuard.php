@@ -42,6 +42,7 @@ class JwtGuard implements Guard
      * @var string
      */
     protected $storageKey;
+    private TokenCreator $token_creator;
 
     /**
      * Create a new authentication guard.
@@ -58,6 +59,7 @@ class JwtGuard implements Guard
         $this->provider = $provider;
         $this->inputKey = $inputKey;
         $this->storageKey = $storageKey;
+        $this->token_creator = new TokenCreator();
     }
 
     /**
@@ -369,18 +371,7 @@ class JwtGuard implements Guard
      */
     public function createToken(AuthenticatableContract $user, $type)
     {
-        $token = new Token;
-        $token->token_type = $type;
-        $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-        $token->expired_at = Carbon::now()->addWeek();
-        $token->owner_user_id = $user->getAuthIdentifier();
-        $token->is_valid = Token::VALID;
-
-        if ($token->save()) {
-            return $token;
-        }
-
-        return;
+        return $this->token_creator->create($user, $type);
     }
 
     /**

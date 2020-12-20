@@ -6,17 +6,18 @@ use App\Models\Modules;
 
 class ModuleService
 {
-    public static function  getModulesByUser($user, $warehouse_id = null)
+    public static function getModulesByUser($user, $warehouse_id = null)
     {
         $modules = [];
         //判断用户是否为员工
-        if($user->boss_id){ //是员工
+        if ($user->boss_id) { //是员工
             //获得员工所在分组的权限，如果有分组的话
-            if($warehouse_id){
-               $modules =  $user->groups()->where('warehouse_id',$warehouse_id)->with(['modules'])->get()->pluck('modules')->flatten()->toArray();
+            if ($warehouse_id) {
+                $modules = $user->groups()->where('warehouse_id',
+                    $warehouse_id)->with(['modules'])->get()->pluck('modules')->flatten()->toArray();
             }
-        }else{
-           $modules = Modules::get()->toArray();
+        } else {
+            $modules = Modules::get()->toArray();
         }
 
         return $modules;

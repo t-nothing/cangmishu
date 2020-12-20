@@ -5,6 +5,7 @@
 
 namespace App\Http\Controllers\Open;
 
+use App\Guard\TokenCreator;
 use App\Http\Controllers\Controller;
 use Log;
 use App\Models\User;
@@ -169,36 +170,13 @@ class WeChatController extends Controller
                     $user = User::where('wechat_openid', $openid)->first();
                     $token = null;
 
-
-                    /**
-                     * 生成一个新的 token，token 哈希来保证唯一性。
-                     *
-                     * @param  \Illuminate\Contracts\Auth\Authenticatable $user
-                     * @return \App\Models\Token|null
-                     */
-                    $createToken = function($user, $type)
-                    {
-                        $token = new Token;
-                        $token->token_type = $type;
-                        $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-                        $token->expired_at = Carbon::now()->addWeek();
-                        $token->owner_user_id = $user->getAuthIdentifier();
-                        $token->is_valid = Token::VALID;
-
-                        if ($token->save()) {
-                            return $token;
-                        }
-
-                        return;
-                    };
-
                     if ($user) {
                         // TODO: 这里根据情况加入其它鉴权逻辑
                         \Log::info('找到用户', $user->toArray());
                         // 使用 laravel-passport 的个人访问令牌
 
 
-                        $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+                        $token = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
 
                         // 广播扫码登录的消息，以便前端处理
                         // event(new WechatScanLogined($token));
@@ -224,7 +202,7 @@ class WeChatController extends Controller
                         {
                             \Log::info('开始注册');
                             $user = app('user')->quickRegister($request);
-                            $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+                            $token = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
                             $userId = $user->id;
                         }
                         catch (\Exception $e)
