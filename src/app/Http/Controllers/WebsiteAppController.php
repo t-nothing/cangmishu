@@ -204,6 +204,6 @@ class WebsiteAppController extends Controller
             throw new BusinessException('网站应用授权失败');
         }
 
-        return ['state' => $state, 'token' => $token, 'userinfo' => $userInfo];
+        return [$state, $token, $userInfo];
     }
 }
