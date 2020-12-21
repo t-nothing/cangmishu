@@ -144,8 +144,8 @@ class WeChatController extends Controller
 
 
         $app = app($config);
-        $app->server->push(function($message) use($config, $app, $request) {
-            \Log::info('扫码登录外面', $message);
+        $app->server->push(function ($message) use ($config, $app, $request) {
+            info('扫码登录外面', $message);
 
             $str = "你好，欢迎登录仓秘书！\n您可以在微信小程序中搜索:仓秘书，可以同步使用哦！）";
 
@@ -157,19 +157,20 @@ class WeChatController extends Controller
             if (in_array(strtoupper($message['Event']??''), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
                 $openid = $message['FromUserName'];
 
-                \Log::info('扫码登录', $message);
                 $wechatUser = $app->user->get($openid);
-                \Log::info('扫码用户', $wechatUser);
+                info('扫码用户', $wechatUser);
 
                 $qrKey = $message['EventKey']??$wechatUser['qr_scene_str'];
                 $qrKey = str_replace("qrscene_", "", $qrKey);
 
                 //优先处理绑定事件
                 if ($cache = Cache::get($qrKey)) {
+                    info('当前缓存的信息', $cache);
                     if (($cache['type'] ?? '') === 'bind' && ! isset($cache['status'])) {
                         $user = User::where('wechat_openid', $openid)->first();
 
-                        if ($user && $user->id === $cache['user_id']) {
+                        //存在这个用户那就是更新标识为可以更新
+                        if ($user) {
                             $cache['status'] = 1;
                             Cache::put($qrKey, $cache, 60*5);
                             $str = '绑定成功';
@@ -182,6 +183,8 @@ class WeChatController extends Controller
 
                         return $str;
                     }
+
+                    return '当前二维码已过期，请刷新';
                 }
 
                 //再处理注册事件
@@ -194,7 +197,7 @@ class WeChatController extends Controller
 
                     if ($user) {
                         // TODO: 这里根据情况加入其它鉴权逻辑
-                        \Log::info('找到用户', $user->toArray());
+                        info('找到用户', $user->toArray());
                         // 使用 laravel-passport 的个人访问令牌
                         $token = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
                         // 广播扫码登录的消息，以便前端处理
@@ -205,7 +208,7 @@ class WeChatController extends Controller
 
                         $userId = $user->id;
                     } else {
-                        \Log::info('自动注册一个新用户');
+                        info('自动注册一个新用户');
                         //创建一个新用户
                         $request->merge([
                             'email'         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
@@ -216,17 +219,17 @@ class WeChatController extends Controller
                             'nickname'      =>  $wechatUser['nickname']??'',
                             'wechat_openid' =>  $openid,
                         ]);//合并参数
-                        \Log::info('合并注册信息');
+                        info('合并注册信息');
                         try
                         {
-                            \Log::info('开始注册');
+                            info('开始注册');
                             $user = app('user')->quickRegister($request);
                             $token = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
                             $userId = $user->id;
                         }
                         catch (\Exception $e)
                         {
-                            \Log::info($e->getMessage());
+                            info($e->getMessage());
                             // app('log')->error($e->getMessage());
                             // return formatRet(500, $e->getMessage());
                         }
@@ -243,7 +246,7 @@ class WeChatController extends Controller
                             'wechat_user'   =>  $wechatUser
                         ], 180);
 
-                    \Log::info('登录用户信息', [$qrKey]);
+                    info('登录用户信息', [$qrKey]);
 
                     return $isNewUser?$str:'欢迎使用仓秘书';
 
