@@ -172,6 +172,7 @@ class WeChatController extends Controller
                         //存在这个用户那就是更新标识为可以更新
                         if ($user) {
                             $cache['status'] = 1;
+                            $cache['user_id'] = $user->id;
                             Cache::put($qrKey, $cache, 60*5);
                             $str = '绑定成功';
                         } else {

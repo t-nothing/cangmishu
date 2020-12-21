@@ -17,6 +17,7 @@ use App\Services\WechatOfficialAccountService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 
 class WebsiteAppController extends Controller
@@ -154,6 +155,8 @@ class WebsiteAppController extends Controller
         }
 
         $cache = Cache::get($key);
+
+        info('账号绑定检查状态', [$key, $cache]);
 
         if (isset($cache['status'])) {
             if ($cache['status'] === 1) {
