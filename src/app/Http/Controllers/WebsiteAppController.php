@@ -150,7 +150,7 @@ class WebsiteAppController extends Controller
      */
     protected function getUserFromWechatAccount()
     {
-        if (! $key = cookie('BIND_KEY')) {
+        if (! $key = \request()->cookie('BIND_KEY')) {
             throw new BusinessException('请求异常');
         }
 
