@@ -152,6 +152,8 @@ class WeChatController extends Controller
             if(($message['Content']??'') == "产品") {
                 return new Image('Y2UZBJIujBqIsLIduCiNC7TFRrXq40xlonzxaJWEah8');
             }
+
+            //处理扫码和订阅事件
             if (in_array(strtoupper($message['Event']??''), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
                 $openid = $message['FromUserName'];
 
@@ -161,8 +163,28 @@ class WeChatController extends Controller
 
                 $qrKey = $message['EventKey']??$wechatUser['qr_scene_str'];
                 $qrKey = str_replace("qrscene_", "", $qrKey);
-                //如果是关注，就随机生成一个
 
+                //优先处理绑定事件
+                if ($cache = Cache::get($qrKey)) {
+                    if (($cache['type'] ?? '') === 'bind' && ! isset($cache['status'])) {
+                        $user = User::where('wechat_openid', $openid)->first();
+
+                        if ($user && $user->id === $cache['user_id']) {
+                            $cache['status'] = 1;
+                            Cache::put($qrKey, $cache, 60*5);
+                            $str = '绑定成功';
+                        } else {
+                            $cache['status'] = 0;
+                            Cache::put($qrKey, $cache, 60*5);
+
+                            $str = '绑定失败，账号可能未注册';
+                        }
+
+                        return $str;
+                    }
+                }
+
+                //再处理注册事件
                 $isNewUser = false;
                 if(!empty($qrKey) ) {
 
@@ -174,10 +196,7 @@ class WeChatController extends Controller
                         // TODO: 这里根据情况加入其它鉴权逻辑
                         \Log::info('找到用户', $user->toArray());
                         // 使用 laravel-passport 的个人访问令牌
-
-
                         $token = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
-
                         // 广播扫码登录的消息，以便前端处理
                         // event(new WechatScanLogined($token));
 

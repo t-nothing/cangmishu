@@ -8,16 +8,15 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\BusinessException;
 use App\Guard\TokenCreator;
+use App\Models\Order;
 use App\Models\Token;
 use App\Services\UserService;
 use App\Services\WechatOAuthService;
 use \App\Models\User;
-use ArrayAccess;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Ramsey\Uuid\Uuid;
 
 class WebsiteAppController extends Controller
 {
@@ -44,22 +43,7 @@ class WebsiteAppController extends Controller
         if (! $user) {
             app('log')->info('网页登录没找到用户, 新建用户');
 
-            $userService = new UserService();
-
-            $request->merge([
-                'email'     => sprintf("%s_%s@cangmishu.com", time(), $userService->getRandCode()),
-                'province'  => $userInfo['original']['province'] ?? '',
-                'country'   => $userInfo['original']['country'] ?? '',
-                'city'      => $userInfo['original']['city'] ?? '',
-                'avatar'    => $userInfo['original']['headimgurl'] ?? '',
-                'nickname'  => $userInfo['original']['nickname'] ?? '',
-                'app_openid' =>  $userInfo['original']['openid'] ?? null,
-                'union_id'  =>   $userInfo['original']['unionid'] ?? null,
-            ]);
-
-            info('创建用户的参数为:', $request->toArray());
-
-            $user = $userService->quickRegister($request);
+            $user = $this->createUser($request, $userInfo);
         }
 
         $token = auth('admin')->token($user);
@@ -100,6 +84,7 @@ class WebsiteAppController extends Controller
      * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      * @throws BusinessException
+     * @throws \Exception
      */
     public function bindAccount(Request $request)
     {
@@ -117,48 +102,84 @@ class WebsiteAppController extends Controller
         switch ($data['type']) {
             //直接使用用户名和密码登录
             case 1:
-                /** @var User $user */
-                $user = User::query()->where('email', $data['email'])->first();
-
-                if (! password_verify($data['password'], $user->password)) {
-                    throw new BusinessException('用户认证失败');
-                }
+                $user = $this->verifyUserInfoOrFail($data);
                 break;
             case 2: //扫描公众二维码登录
+                $user = $this->getUserFromWechatAccount();
+                if (! $user) {
+                    return formatRet(202, '等待微信回调', []);
+                }
                 break;
             default:
                 info('网页登录没找到用户, 新建用户');
 
-                $userService = new UserService();
-
-                $request->merge([
-                    'email'     => sprintf("%s_%s@cangmishu.com", time(), $userService->getRandCode()),
-                    'province'  => $userInfo['original']['province'] ?? '',
-                    'country'   => $userInfo['original']['country'] ?? '',
-                    'city'      => $userInfo['original']['city'] ?? '',
-                    'avatar'    => $userInfo['original']['headimgurl'] ?? '',
-                    'nickname'  => $userInfo['original']['nickname'] ?? '',
-                    'app_openid' =>  $userInfo['original']['openid'] ?? null,
-                    'union_id'  =>   $userInfo['original']['unionid'] ?? null,
-                ]);
-
-                info('创建用户的参数为:', $request->toArray());
-
-                $user = $userService->quickRegister($request);
+                $user = $this->createUser($request, $authData[2]);
                 break;
         }
 
         $this->updateUserInfo($user, $authData[2]);
 
-        return success(['data' => (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN)]);
+        $this->forgetOAuthInfoCache($data['secret']);
+
+        $data['token'] = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
+        $data['user'] = $user->only(['avatar', 'email', 'phone', 'boss_id','id', 'nickname', 'default_warehouse']);
+
+        //获取用户权限
+        $modules = app('module')->getModulesByUser($user, $user->default_warehouse_id);
+        $modules = collect($modules)->pluck('id')->values()->unique()->sort();
+        $data['modules'] = $modules;
+
+        return success($data);
+    }
+
+    /**
+     * @return Order|false|\Illuminate\Database\Eloquent\Model
+     * @throws BusinessException
+     */
+    protected function getUserFromWechatAccount()
+    {
+        if (! $key = cookie('BIND_KEY')) {
+            throw new BusinessException('请求异常');
+        }
+
+        $cache = Cache::get($key);
+
+        if (isset($cache['status'])) {
+            if ($cache['status'] === 1) {
+                return User::query()->findOrFail($cache['user_id']);
+            } elseif ($cache['status'] === 0) {
+                throw new BusinessException('当前绑定用户尚未注册');
+            }
+        } else {
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array  $data
+     * @return array
+     * @throws BusinessException
+     */
+    protected function verifyUserInfoOrFail(array $data)
+    {
+        /** @var User $user */
+        $user = User::query()->where('email', $data['email'])->first();
+
+        if (! password_verify($data['password'], $user->password)) {
+            throw new BusinessException('用户认证失败');
+        }
+
+        return $data;
     }
 
     /**
      * @param  User  $user
-     * @param  ArrayAccess $userInfo
+     * @param  \ArrayAccess $userInfo
      * @throws BusinessException
      */
-    protected function updateUserInfo(User $user, ArrayAccess $userInfo)
+    protected function updateUserInfo(User $user, \ArrayAccess $userInfo)
     {
         $res = $user->update([
             'app_openid' =>  $userInfo['original']['openid'] ?? null,
@@ -168,6 +189,15 @@ class WebsiteAppController extends Controller
         if (! $res) {
             throw new BusinessException('用户信息绑定失败');
         }
+    }
+
+    /**
+     * @param  string  $key
+     * @return bool
+     */
+    protected function forgetOAuthInfoCache(string $key)
+    {
+        return Cache::forget($key);
     }
 
     /**
@@ -206,5 +236,33 @@ class WebsiteAppController extends Controller
         }
 
         return [$state, $token, $userInfo];
+    }
+
+    /**
+     * 创建新用户
+     *
+     * @param  Request  $request
+     * @param $userInfo
+     * @return User
+     * @throws \Exception
+     */
+    protected function createUser(Request $request, $userInfo)
+    {
+        $userService = new UserService();
+
+        $request->merge([
+            'email' => sprintf("%s_%s@cangmishu.com", time(), $userService->getRandCode()),
+            'province' => $userInfo['province'] ?? '',
+            'country' => $userInfo['country'] ?? '',
+            'city' => $userInfo['city'] ?? '',
+            'avatar' => $userInfo['headimgurl'] ?? '',
+            'nickname' => $userInfo['nickname'] ?? '',
+            'app_openid' => $userInfo['openid'] ?? null,
+            'union_id' => $userInfo['unionid'] ?? null,
+        ]);
+
+        info('创建用户的参数为:', $request->toArray());
+
+        return $userService->quickRegister($request);
     }
 }
