@@ -69,8 +69,9 @@ class ProductController extends Controller
 
         $shopProduct->currency = $request->shop->currency;
         $shopProduct->is_collect = $shopProduct->isCollect();
+        $shopProduct->total_stock_num = $shopProduct->product->total_stock_num ?? 0;
 
-        unset($shopProduct['collectUsers']);
+        unset($shopProduct['collectUsers'], $shopProduct['product']);
 
         foreach ($shopProduct['specs'] as &$spec) {
             $spec['total_stock_num'] = $spec['productSpec']['total_stock_num'];
