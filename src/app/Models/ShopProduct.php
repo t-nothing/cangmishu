@@ -26,6 +26,13 @@ class ShopProduct extends Model
         return $this->hasMany('App\Models\ShopProductSpec', 'shop_product_id', 'id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
 
     /**
      * @return string

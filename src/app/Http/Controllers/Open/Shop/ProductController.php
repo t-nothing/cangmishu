@@ -60,7 +60,7 @@ class ProductController extends Controller
     {
         $id = intval($id);
         /** @var ShopProduct $shopProduct */
-        $shopProduct = ShopProduct::with(["shop", 'collectUsers'])->findOrFail($id);
+        $shopProduct = ShopProduct::with(['product:id,total_stock_num', 'shop', 'collectUsers'])->findOrFail($id);
 
         if ( !$shopProduct || !$shopProduct->shop ){
             return formatRet(404,'商品不存在', 404);
