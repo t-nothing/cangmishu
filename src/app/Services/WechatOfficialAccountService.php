@@ -76,7 +76,7 @@ class WechatOfficialAccountService
 
         // 查询 cookie，如果没有就重新生成一次
         if (! $bindKey = $request->cookie('BIND_KEY')) {
-            $bindKey = Uuid::uuid4()->getHex();
+            $bindKey = Uuid::uuid4()->getHex()->toString();
         }
 
         // 缓存微信带参二维码
