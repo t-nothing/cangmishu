@@ -6,6 +6,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Models\User;
 use EasyWeChat\Factory;
 use EasyWeChat\OfficialAccount\Application;
@@ -65,6 +66,14 @@ class WechatOfficialAccountService
      */
     public function getBindWxPic(Request $request)
     {
+        $request->validate([
+            'secret' => 'required',
+        ]);
+
+        if (! Cache::get($request->input('secret'))) {
+            throw new BusinessException('请求失败');
+        }
+
         // 查询 cookie，如果没有就重新生成一次
         if (! $bindKey = $request->cookie('BIND_KEY')) {
             $bindKey = Uuid::uuid4()->getHex();
