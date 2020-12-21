@@ -373,7 +373,7 @@ Route::group(['prefix' => 'open', 'namespace' => 'Open'], function () {
     Route::any('wechat/login', 'WeChatController@wechatLogin');
     Route::get('wechat/qr', 'WeChatController@wechatQr');
     Route::any('wechat/scan/login_callback', 'WeChatController@wechatQrCallback');
-    Route::any('wechat/{id}', 'WeChatController@serve');
+    Route::any('wechat/{type}', 'WeChatController@serve');
     Route::get('/express', 'ExpressController@list');//快递公司列表
     Route::get('captcha', 'CaptchaController@show');
     Route::post('captcha', 'CaptchaController@valid');
