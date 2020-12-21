@@ -13,6 +13,7 @@ use App\Models\Token;
 use App\Services\UserService;
 use App\Services\WechatOAuthService;
 use \App\Models\User;
+use App\Services\WechatOfficialAccountService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -130,6 +131,16 @@ class WebsiteAppController extends Controller
         $data['modules'] = $modules;
 
         return success($data);
+    }
+
+    /**
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
+    public function getBindQrCode(Request $request)
+    {
+        return (new WechatOfficialAccountService())->getBindWxPic($request);
     }
 
     /**

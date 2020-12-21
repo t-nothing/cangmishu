@@ -49,7 +49,9 @@ Route::post('/emailCode', 'UserController@getEmailVerifyCode');
 Route::post('/smsCode', 'UserController@getSMSVerifyCode');
 Route::post('/callUser', 'UserController@callUser');
 
+//绑定老账号的相关接口
 Route::post('/bindAccount', 'WebsiteAppController@bindAccount');
+Route::get('/bindQrCode', 'WebsiteAppController@getBindQrCode');
 
 Route::post('/user/forgetPassword', 'PasswordController@store');// 忘记密码-请求重置
 Route::get('/user/resetPassword/{token_value}', [
