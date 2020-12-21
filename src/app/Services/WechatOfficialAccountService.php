@@ -71,17 +71,21 @@ class WechatOfficialAccountService
         }
 
         // 缓存微信带参二维码
-        if (! $url = Cache::get($bindKey)) {
+        if (! $cache = Cache::get($bindKey)) {
             // 有效期 1 天的二维码
             $qrCode = $this->app->qrcode;
             $result = $qrCode->temporary($bindKey, 60 * 5);
             $url = $qrCode->url($result['ticket']);
 
-            Cache::put($bindKey, ['type' => 'bind', 'user_id' => auth()->id()], 60 * 5);
+            Cache::put($bindKey, ['type' => 'bind', 'url' => $url], 60 * 5);
+        } else {
+            $url = $cache['url'];
         }
 
+        info('当前绑定密钥', ['key' => $bindKey]);
+
         // 自定义参数返回给前端，前端轮询
-        return formatRet(0, __('message.success'), compact('url', 'bindKey'))
+        return formatRet(0, __('message.success'), compact('url'))
             ->cookie('BIND_KEY', $bindKey, 60 * 5);
     }
 
