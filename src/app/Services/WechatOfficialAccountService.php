@@ -56,6 +56,36 @@ class WechatOfficialAccountService
     }
 
     /**
+     * 获取二维码图片
+     *
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
+    public function getBindWxPic(Request $request)
+    {
+        // 查询 cookie，如果没有就重新生成一次
+        if (! $bindKey = $request->cookie('BIND_KEY')) {
+            $bindKey = Uuid::uuid4()->getHex();
+        }
+
+        // 缓存微信带参二维码
+        if (! $url = Cache::get($bindKey)) {
+            // 有效期 1 天的二维码
+            $qrCode = $this->app->qrcode;
+            $result = $qrCode->temporary($bindKey, 60 * 5);
+            $url = $qrCode->url($result['ticket']);
+
+            Cache::put($bindKey, ['type' => 'bind', 'user_id' => auth()->id()], 60 * 5);
+        }
+
+        // 自定义参数返回给前端，前端轮询
+        return formatRet(0, __('message.success'), compact('url', 'bindKey'))
+            ->cookie('BIND_KEY', $bindKey, 60 * 5);
+    }
+
+    /**
      * 微信消息接入（这里拆分函数处理）
      *
      * @return \Symfony\Component\HttpFoundation\Response
