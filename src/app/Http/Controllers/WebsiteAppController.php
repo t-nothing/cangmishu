@@ -177,7 +177,7 @@ class WebsiteAppController extends Controller
 
     /**
      * @param  array  $data
-     * @return array
+     * @return User
      * @throws BusinessException
      */
     protected function verifyUserInfoOrFail(array $data)
@@ -189,7 +189,7 @@ class WebsiteAppController extends Controller
             throw new BusinessException('用户认证失败');
         }
 
-        return $data;
+        return $user;
     }
 
     /**
