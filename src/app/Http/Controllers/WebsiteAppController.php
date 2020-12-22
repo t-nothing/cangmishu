@@ -73,7 +73,9 @@ class WebsiteAppController extends Controller
             $key = md5(Str::random() . Carbon::now()->unix());
 
             if (Cache::put($key, $data, 60 * 15)) {
-                return formatRet(10000, '进入绑定流程', ['secret' => $key]);
+                $redirect = sprintf('%s%s', base64_decode($state), 'bind_account');
+
+                return redirect($redirect . '?secret=' . $key, 302);
             }
         }
 
