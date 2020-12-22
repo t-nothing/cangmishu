@@ -97,6 +97,7 @@ class WebsiteAppController extends Controller
             'type' => 'required',
             'email' => 'required_if:type,1|string',
             'password' => 'required_if:type,1|string',
+            'bind_key' => 'required_if:type,2',
         ]);
 
         if (! $authData = Cache::get($data['secret'])) {
@@ -109,7 +110,7 @@ class WebsiteAppController extends Controller
                 $user = $this->verifyUserInfoOrFail($data);
                 break;
             case 2: //扫描公众二维码登录
-                $user = $this->getUserFromWechatAccount();
+                $user = $this->getUserFromWechatAccount($request->input('bind_key'));
                 if (! $user) {
                     return formatRet(202, '等待微信回调', []);
                 }
@@ -147,12 +148,13 @@ class WebsiteAppController extends Controller
     }
 
     /**
+     * @param  string  $key
      * @return Order|false|\Illuminate\Database\Eloquent\Model
      * @throws BusinessException
      */
-    protected function getUserFromWechatAccount()
+    protected function getUserFromWechatAccount(string $key)
     {
-        if (! $key = \request()->cookie('BIND_KEY')) {
+        if (! $key) {
             throw new BusinessException('请求异常');
         }
 
