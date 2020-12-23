@@ -95,8 +95,8 @@ class ProductStockService
             ->select(DB::raw('product_stock_location.*'))
             ->limit(min($amount, $totalShelfNumRecord['count']+1)) //先限制数量，这个性能不一定最佳，基本上传进来的数量都是10个以下,+1安全数量
             ->get();
-// dd(DB::getQueryLog());      
- 
+// dd(DB::getQueryLog());
+
 
         $stocks->load("location", "spec.product");
         return $stocks;
@@ -123,7 +123,6 @@ class ProductStockService
             }
 
             $lock_num = ProductStockLock::where('stock_id',$stock->stock_id)->where('product_stock_location_id', $stock->id)->where('over_time','>=',time())->sum('lock_amount');
-
             //架上的库存减锁定库存
             //use_num =实际可用库存
             $availableNum = $stock->pick_num - $lock_num;
