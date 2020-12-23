@@ -238,31 +238,20 @@ class UserController extends  Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function resetPassword(BaseRequests $request,$user_id){
+    public function resetPassword(BaseRequests $request){
         $this->validate($request, [
             'old_password' => 'required|string',
             'password' => 'required|max:255|confirmed',
             'password_confirmation' => 'required|max:255',
         ]);
 
-        info('user', ['request' => $request->all(),'user_id' => $user_id]);
+        info('user change password', ['request' => $request->all()]);
 
-        $user = User::find($user_id);
+        /** @var User $user */
+        $user = auth()->user();
 
-        if(!$user){
+        if (! $user) {
             return formatRet(500, trans("message.userNotExist"));
-        }
-
-        $auth = Auth::user();
-
-        if ($user->boss_id != 0) {
-            if ($user->boss_id != $auth->id) {
-                return formatRet(500, trans("message.noPermission"));
-            }
-        } else {
-            if ($user->id != $auth->id) {
-                return formatRet(500, trans("message.noPermission"));
-            }
         }
 
         if (! password_verify($request->password, $user->password)) {
@@ -275,7 +264,7 @@ class UserController extends  Controller
             return formatRet(500, trans("message.failed"));
         }
 
-        return formatRet(0);
+        return success();
     }
 
     /**
