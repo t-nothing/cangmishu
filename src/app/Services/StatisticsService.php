@@ -155,6 +155,7 @@ class StatisticsService
 
         $data =  Order::query()
             ->where('warehouse_id', self::$warehouseId)
+            ->whereNotIn('status', [Order::STATUS_CANCEL, Order::STATUS_DEFAULT])
             ->whereBetween('created_at', $date)
             ->selectRaw("sum(sub_total) as total, sum(sub_pay) as total_pay, count(id) as order_count")
             ->first();
@@ -178,6 +179,7 @@ class StatisticsService
 
         return Order::query()
             ->where('order.warehouse_id', self::$warehouseId)
+            ->whereNotIn('status', [Order::STATUS_CANCEL, Order::STATUS_DEFAULT])
             ->leftJoin('shop as s', 's.id', '=', 'order.shop_id')
             ->whereBetween('order.created_at', $date)
             ->selectRaw('source, sum(sub_pay) as sales')
@@ -199,6 +201,7 @@ class StatisticsService
 
         $data = Order::query()
             ->where('warehouse_id', self::$warehouseId)
+            ->whereNotIn('status', [Order::STATUS_CANCEL, Order::STATUS_DEFAULT])
             ->whereBetween('created_at', $date)
             ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, sum(sub_pay) as sales")
             ->groupBy('days')
