@@ -107,7 +107,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::put('profile/phone', 'UserController@bindPhone'); //绑定邮箱
     Route::get('phoneCode', 'UserController@getPhoneVerifyCode'); //手机验证码
 
-    Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码
+    Route::put('/user/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
     Route::post('/user/info', 'UserController@updateInfo'); //修改个人资料
     Route::post('/user/profile', 'UserController@updateProfile');   //修改个人资料
