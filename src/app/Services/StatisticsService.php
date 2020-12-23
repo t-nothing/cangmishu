@@ -536,9 +536,8 @@ class StatisticsService
             ->selectRaw('total_stock_num as stock,product.name_cn as name, photos as pictures')
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
-            ->where('total_stock_num', '<=', 'c.warning_stock')
-            ->whereRaw('c.warning_stock > 0')
-            ->orderBy('stock')
+            ->whereRaw('product.total_stock_num <= c.warning_stock and c.warning_stock >0')
+            ->orderBy('total_stock_num')
             ->get();
     }
 
