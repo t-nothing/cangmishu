@@ -47,9 +47,9 @@ class ShopProductController extends Controller
                     return $q->where('is_shelf', 1);
                 } elseif($request->shelf_status == 'off') {
                     return $q->where('is_shelf', 0);
-                } 
+                }
                 return $q;
-                
+
             })
             ->latest()->paginate($request->input('page_size',10), [
                 'shop_product.id',
@@ -81,19 +81,19 @@ class ShopProductController extends Controller
      **/
     function update(UpdateShopProductRequest $request, int $shopId, int  $id)
     {
- 
+
         app('db')->beginTransaction();
         try
         {
             $shopProduct = $request->getShopProduct();
-            
+
             $shopProduct->is_shelf      = 1;
             $shopProduct->name_cn       = $request->name_cn??"";
             $shopProduct->remark        = $request->input("name_en", $request->name_cn);
             $shopProduct->remark        = $request->remark??"";
             $shopProduct->pics          = json_encode($request->pics, true);
             $shopProduct->descs         = json_encode($request->descs, true);
-            
+
             $unshelf_count = 0;
             foreach ($request->specs as $s) {
                 $spec = ShopProductSpec::where("shop_product_id", $id)->where("id", $s["id"])->firstOrFail();
@@ -111,7 +111,7 @@ class ShopProductController extends Controller
             }
             $shopProduct->sale_price    = $request->specs[0]["sale_price"];
             $shopProduct->save();
-            
+
             app('db')->commit();
         }
         catch (\Exception $e)
@@ -161,11 +161,11 @@ class ShopProductController extends Controller
                 $shopProduct->name_en       = $productInfo["name_en"];
                 $shopProduct->is_shelf      = 1;
                 $shopProduct->category_id   = $productInfo["category_id"];
-                $shopProduct->remark        = $productInfo["remark"]??"";
+                $shopProduct->remark        = ''; //店铺备注和商品备注区分开
                 $shopProduct->sale_price    = $productInfo->specs[0]["sale_price"];
-                if(!empty($productInfo["photos"]))
-                {
-                    $shopProduct->pics          = json_encode([$productInfo["photos"]], true);
+
+                if (! empty($productInfo["photos"])) {
+                    $shopProduct->pics = json_encode([$productInfo["photos"]], true);
                 }
 
                 $shopProduct->save();
@@ -178,8 +178,6 @@ class ShopProductController extends Controller
                     $response = $app->app_code->get('pages/index/product_detail/product_detail?shop='.$shopId.'&product='.$shopProduct->id);
 
                     if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
-
-                        
                         $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id));
 
                         $url = Storage::url('weapp/'.$filename);
@@ -202,8 +200,8 @@ class ShopProductController extends Controller
                         'is_shelf'          =>  1,
                     ]);
                 }
-                
-                
+
+
                 $shopProduct->specs()->saveMany($specs);
             }
 
@@ -238,11 +236,11 @@ class ShopProductController extends Controller
                 if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
                     return formatRet(500, trans("message.noPermission"));
                 }
-                
+
                 $shopProduct->specs()->delete();
                 $shopProduct->delete();
             }
-            
+
             app('db')->commit();
 
         } catch (\Exception $e) {
@@ -257,7 +255,7 @@ class ShopProductController extends Controller
      */
     public function show(BaseRequests $request, int $shopId, int  $id)
     {
-         
+
         $shopProduct = ShopProduct::with("shop")->findOrFail($id);
 
         if ( !$shopProduct->shop || $shopProduct->shop->owner_id != Auth::id() || $shopProduct->shop->id != $shopId){
@@ -290,8 +288,8 @@ class ShopProductController extends Controller
 
         $shopProducts = ShopProduct::with("shop")->whereIn('id', $request->id)->get();
 
-        
-        
+
+
         try {
             app('db')->beginTransaction();
             foreach ($shopProducts as $key => $shopProduct) {
@@ -303,7 +301,7 @@ class ShopProductController extends Controller
                 $shopProduct->is_shelf = $request->is_shelf;
                 $shopProduct->save();
             }
-           
+
             app('db')->commit();
 
         } catch (\Exception $e) {
