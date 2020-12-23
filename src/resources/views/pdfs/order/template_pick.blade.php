@@ -67,7 +67,7 @@
 
 <body>
   <div class="container-fluid">
-    <div class="A4"> 
+    <div class="A4">
 
       <div class="qrcode">
         <img src="{{ $order['out_sn_barcode'] }}">
@@ -90,7 +90,7 @@
     $firstArr = $restArr = [];
     $line_no = 0;
     foreach ($order['order_items'] as $k => $item) {
-        
+
         foreach ($item['stocks'] as $kk => $itemLocation) {
             $itemLocation["name_cn"] = $item['name_cn'];
             $itemLocation["spec_name_cn"] = $item['spec_name_cn'];
@@ -124,7 +124,7 @@
             <?php $index++;?>
             <tr>
               <td>{{ ($index) }}</td>
-              <td><div>{{ $itemLocation['name_cn'] }}  -  {{ $itemLocation['spec_name_cn'] }}</div></td>
+              <td><div class="word-wrap:break-word;">{{ $itemLocation['name_cn'] }}  -  {{ $itemLocation['spec_name_cn'] }}</div></td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
@@ -137,7 +137,7 @@
 
       <div class="row">
         <div class="col-md-12">
-          @lang('message.orderPageRemark'): 
+          @lang('message.orderPageRemark'):
           {{ $order['remark'] }} </div>
       </div>
 <?php
@@ -145,7 +145,7 @@
     $restArrs = array_chunk($restArr, 30, true);
     if($restArrs) {
       foreach ($restArrs as $key => $restArr) {
-?>   
+?>
     <div <?php if($key<count($restArrs)){ ?> style="page-break-after:always;"<?php }?>>
     <table class="table  table-bordered text-center" >
         <thead>
@@ -164,7 +164,7 @@
             <?php $index++;?>
             <tr>
               <td>{{ ($index) }}</td>
-              <td><div>{{ $itemLocation['name_cn'] }} - {{ $itemLocation['spec_name_cn'] }}</div> </td>
+              <td><div class="word-wrap:break-word;">{{ $itemLocation['name_cn'] }} - {{ $itemLocation['spec_name_cn'] }}</div> </td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
@@ -178,7 +178,7 @@
 <?php
       }
     }
-?>  
+?>
     </div>
   </div>
 </body>
