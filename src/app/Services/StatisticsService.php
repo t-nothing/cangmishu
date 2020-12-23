@@ -240,7 +240,7 @@ class StatisticsService
 
         $stock_bad = Product::query()
             ->where('warehouse_id', self::$warehouseId)
-            ->leftJoin(Category::getIns()->getTable() . 'as c', 'c.id', '=', 'product.category_id')
+            ->leftJoin(Category::getIns()->getTable() . ' as c', 'c.id', '=', 'product.category_id')
             ->whereRaw('product.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
