@@ -493,7 +493,8 @@ class StatisticsService
 
         $stock_lack_count = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
-            ->where('total_stock_num', '<=', 0)
+            ->leftJoin(Category::getIns()->getTable() . ' as c', 'c.id', '=', 'product.category_id')
+            ->whereRaw('product.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
         $product_count = Product::query()
