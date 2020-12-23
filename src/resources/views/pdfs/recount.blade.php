@@ -62,7 +62,7 @@
 
 <body>
   <div class="container-fluid">
-    <div class="A4"> 
+    <div class="A4">
 
       <div class="qrcode">
         <img src="{{ $data['recount_no_barcode'] }}">
@@ -80,13 +80,13 @@
           <td>{{ date("Y-m-d", strtotime($data['created_at'])) }}</td>
         </tr>
         <tr>
-          <th>@lang("message.recountPageCreatedor"): </th>
+          <th>@lang("message.recountPageCreator"): </th>
           <td>{{ $data['operator_user']['nickname'] }}</td>
         </tr>
 
       </table>
       <div style="margin-top: 30px;"></div>
-      
+
     <table class="table  table-bordered text-center" >
         <thead>
           <tr>
@@ -122,7 +122,7 @@
               <td>{{ $item['stock_sku'] }}</td>
               <td>{{ $item['shelf_num_orgin'] }}</td>
               <td>{{ $item['shelf_num_now'] }}</td>
-              <td>{{ $pk }}</td> 
+              <td>{{ $pk }}</td>
               <td>{{ $pk_money  }}</td>
               <td>{{ $py }}</td>
               <td>{{ $py_money }}</td>
@@ -133,7 +133,7 @@
       </table>
       <div class="row">
         <div class="col-md-12">
-          @lang("message.recountPageRemark") : 
+          @lang("message.recountPageRemark") :
           {{ $data['remark'] }} </div>
       </div>
     </div>

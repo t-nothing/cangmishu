@@ -234,6 +234,7 @@ return [
     'recountPageInventoryLossMoney' => '盘亏金额(元)',
     'recountPageInventoryProfit' => '盘盈',
     'recountPageInventoryProfitMoney' => '盘盈金额(元)',
+    'recountPageCreator' => '创建人',
 
 
     'recountAddFailed' =>'添加盘点单信息失败',

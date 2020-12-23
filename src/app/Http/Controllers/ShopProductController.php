@@ -201,7 +201,6 @@ class ShopProductController extends Controller
                     ]);
                 }
 
-
                 $shopProduct->specs()->saveMany($specs);
             }
 

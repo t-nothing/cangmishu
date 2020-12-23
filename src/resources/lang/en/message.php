@@ -224,7 +224,7 @@ return [
     'recountPage' =>'Stock taking',
     'recountPageWarehouse' =>'Warehouse',
     'recountPageDate' =>'Date',
-    'recountPageCreatedor' => 'Prepared by',
+    'recountPageCreator' => 'Prepared by',
     'recountPageRemark' => 'Remark',
     'recountPageProductSpecName' => 'Name',
     'recountPageProductSpecSku' => 'Sku',
