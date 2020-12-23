@@ -8,6 +8,7 @@ namespace App\Services;
 
 use App\Exceptions\BusinessException;
 use App\Models\Batch;
+use App\Models\Category;
 use App\Models\Distributor;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -239,7 +240,8 @@ class StatisticsService
 
         $stock_bad = Product::query()
             ->where('warehouse_id', self::$warehouseId)
-            ->where('total_stock_num', 0)
+            ->leftJoin(Category::getIns()->getTable() . 'as c', 'c.id', '=', 'product.category_id')
+            ->where('product.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
         return [
