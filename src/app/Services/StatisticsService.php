@@ -384,10 +384,12 @@ class StatisticsService
 
         return [
             'receiver_count' => ReceiverAddress::query()
-                ->where('warehouse_id', self::$warehouseId)
+                ->where('owner_id', auth()->id())
+                //->where('warehouse_id', self::$warehouseId)
                 ->count(),
             'sender_count' => SenderAddress::query()
-                ->where('warehouse_id', self::$warehouseId)
+                ->where('owner_id', auth()->id())
+                //->where('warehouse_id', self::$warehouseId)
                 ->count(),
             'supplier_count' => Distributor::query()
                 ->where('user_id', auth()->id())
