@@ -305,35 +305,9 @@ class UserController extends  Controller
         /** @var User $user */
         $user = \auth()->user();
 
-        return success($user->only('id', 'name', 'contact_address', 'contact', 'industry'));
+        return success($user->only('id', 'avatar', 'name', 'contact_address', 'contact', 'industry'));
     }
-
-    /**
-     * @param  BaseRequests  $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function updateInfo(BaseRequests $request){
-        $data = $this->validate($request, [
-            'nickname' => 'required|string|max:80',
-            'avatar' => 'sometimes|nullable|url|max:150',
-        ]);
-
-        /** @var User $user */
-        $user = \auth()->user();
-
-        $res = $user->update([
-            'nickname' => $data['nickname'],
-            'avatar' => $data['avatar'] ?? '',
-        ]);
-
-        if (! $res) {
-            return formatRet(500, trans("message.failed"));
-        }
-
-        return formatRet(0);
-    }
-
+    
     /**
      * @param  BaseRequests  $request
      * @return \Illuminate\Http\JsonResponse
