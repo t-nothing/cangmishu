@@ -442,7 +442,7 @@ class StatisticsService
                 . now()->endOfMonth()->unix()
                 . ' then 1 else 0 end) as current_month_order_count')
             ->groupBy(['user_id', 'name'])
-            ->orderBy('order_count')
+            ->orderByDesc('order_count')
             ->limit(10)
             ->get()->map(function ($value) {
                 $value['current_month_order_count'] = (int) $value['current_month_order_count'];
