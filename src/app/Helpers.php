@@ -12,7 +12,7 @@ if (! function_exists('formatRet')) {
      * @param  int  $status
      * @param  array  $headers
      * @param  int  $options
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
      */
     function formatRet(int $code, $message = '', $data = [], $status = 200, array $headers = [], $options = 0)
     {
