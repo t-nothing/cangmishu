@@ -1,6 +1,7 @@
 <?php
 namespace  App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\ProductSpec;
@@ -220,6 +221,11 @@ class OrderService
                         ->where('relevance_code', $v['relevance_code'])
                         ->first();
                     if(!$spec) throw new \Exception("{$v['relevance_code']} 不存在", 1);
+
+                    //检查库存数
+                    if ($spec['total_stock_num'] < $v['num']) {
+                        throw new BusinessException("商品{$spec->product->name_cn}出库数量大于库存数");
+                    }
 
                     $items[] = [
                         'owner_id' => $user_id,
