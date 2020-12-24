@@ -8,6 +8,7 @@
         "php": "^7.4",
         "ext-bcmath": "*",
         "ext-json": "*",
+        "ext-openssl": "*",
         "barryvdh/laravel-cors": "^2.0",
         "barryvdh/laravel-snappy": "^0.4.4",
         "doctrine/dbal": "^2.7",
