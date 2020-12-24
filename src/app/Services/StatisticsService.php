@@ -119,6 +119,7 @@ class StatisticsService
 
         $total_order = Order::query()
             ->where('warehouse_id', self::$warehouseId)
+            ->whereNotIn('status', [Order::STATUS_CANCEL, Order::STATUS_DEFAULT])
             ->count('id');
 
         $stock_warning = Product::query()
