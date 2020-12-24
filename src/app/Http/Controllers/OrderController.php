@@ -13,6 +13,7 @@ use App\Models\OrderItem;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Rules\PageSize;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -132,18 +133,23 @@ class OrderController extends Controller
        return formatRet(0, trans("message.success"),$order);
     }
 
-
+    /**
+     * @param  CreateOrderRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws BusinessException
+     * @throws \Throwable
+     */
     public function store(CreateOrderRequest $request)
     {
         app('log')->info('新增出库单',$request->all());
+
+        $this->validateCodeDistinct($request->all());
         app('db')->beginTransaction();
         try {
-
             $request->warehouse_id = app('auth')->warehouse()->id;
 
             $order = app('order')->setSource("自建")->create($request);
-            if(!isset($order->out_sn))
-            {
+            if(! isset($order->out_sn)) {
                 throw new \Exception(trans("message.orderAddFailed"), 1);
 
             }
@@ -626,6 +632,23 @@ class OrderController extends Controller
 
         return response()->download($filePath, $fileName);
         // return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
+
+    }
+
+    /**
+     * @param  array  $data
+     * @throws BusinessException
+     */
+    protected function validateCodeDistinct(array $data)
+    {
+        $distinct = collect($data['goods_data'])
+                ->uniqueStrict(function ($value) {
+                    return $value['relevance_code'];
+                })->count() === count($data['goods_data']);
+
+        if (! $distinct) {
+            throw new BusinessException('商品规格重复了');
+        }
 
     }
 }

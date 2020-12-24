@@ -12,24 +12,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return  "upgrade success!".env('APP_ENV');
-});
+Route::get('/', 'HomeController@index');
 
 Route::get('websiteConfig', 'WebsiteAppController@info');
 Route::any('/wechatOAuth/callback', 'WebsiteAppController@callback');
-
-Route::any('test', function () {
-    return (new \App\Services\StatisticsService())::getSupplierRank();
-});
-
-Route::any('oauth', function () {
-    return (new \App\Services\WechatOAuthService())->oauth();
-});
-
-Route::any('wxPic', function () {
-    return (new \App\Services\WechatOfficialAccountService())->getWxPic(request());
-});
 
 // 用户认证
 Route::post('/expLogin', 'AuthController@expLogin');
@@ -153,7 +139,6 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/areas/{location_id}', 'WarehouseAreaController@show');
     Route::put('/areas/{areas_id}', 'WarehouseAreaController@update');
     Route::delete('/areas/{areas_id}', 'WarehouseAreaController@destroy');
-
 
     //入库单分类
     Route::get('/batchType', 'BatchTypeController@index');
