@@ -100,7 +100,7 @@ Route::middleware(['auth:admin'])->group(function () {
 
     Route::put('/user/avatar', 'UserController@updateAvatar');//修改员工头像
     Route::put('/user/profile', 'UserController@updateProfile');   //修改个人资料
-    
+
     //上传图片
     Route::post('/upload/image', 'UploadController@image');
 

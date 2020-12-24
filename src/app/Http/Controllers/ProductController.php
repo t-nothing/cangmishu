@@ -282,8 +282,11 @@ class ProductController extends Controller
         }
     }
 
-
-
+    /**
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @throws ValidationException
+     */
     public function import(BaseRequests $request)
     {
         $this->validate($request,[
@@ -371,7 +374,7 @@ class ProductController extends Controller
                         $specRow,
                         [
                             'name_cn' => 'required',
-                            'relevance_code' => 'required',
+                            'relevance_code' => 'required|string|min:3',
                         ],
                         [],
                         [
