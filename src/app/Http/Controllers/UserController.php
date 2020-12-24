@@ -307,7 +307,7 @@ class UserController extends  Controller
 
         return success($user->only('id', 'avatar', 'name', 'contact_address', 'contact', 'industry'));
     }
-    
+
     /**
      * @param  BaseRequests  $request
      * @return \Illuminate\Http\JsonResponse
