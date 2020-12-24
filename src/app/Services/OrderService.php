@@ -50,7 +50,7 @@ class OrderService
                 'shop_remark'   =>  $data->shop_remark??'',
                 'status'        =>  Order::STATUS_SENDING //配送中
             ];
-        
+
         if($onlyUpdateDb) {
             unset($arr['status']);
         }
@@ -75,12 +75,12 @@ class OrderService
             throw new \Exception("订单未找到", 1);
         }
 
-        
+
         $arr = [
                 'status'        =>  Order::STATUS_SENDING //配送中
             ];
-        
-       
+
+
         $order->update($arr);
 
         event(new OrderShipped($order));
@@ -100,11 +100,11 @@ class OrderService
             throw new \Exception("订单未找到", 1);
         }
         if($order->share_code !="") return $order->share_code;
-        
+
         $arr = [
             'share_code'    =>  md5($id.time().$order->out_sn)
             ];
-        
+
         $order->update($arr);
 
         return $arr['share_code'];
@@ -184,7 +184,7 @@ class OrderService
     {
 
         $user_id = ($userId == 0) ?Auth::ownerId():$userId;
-        
+
         try {
             $lock = Cache::lock(sprintf("orderCreateUserLockV1:%s", $user_id), 5);
             //加一个锁防止并发
@@ -194,11 +194,15 @@ class OrderService
                 if(isset($data->out_sn) && !empty($data->out_sn)) {
 
                     $out_sn = $data->out_sn;
-                    $exists = Order::where('out_sn', $out_sn)->where('warehouse_id', $data->warehouse_id)->lockForUpdate()->first();
+                    $exists = Order::query()
+                        ->where('out_sn', $out_sn)
+                        ->where('warehouse_id', $data->warehouse_id)
+                        ->lockForUpdate()
+                        ->first();
 
                     if($exists) {
                         throw new \Exception("{$out_sn} 已经存在", 1);
-                        
+
                     }
                 } else {
                     $out_sn = Order::generateOutSn();
@@ -216,7 +220,7 @@ class OrderService
                         ->where('relevance_code', $v['relevance_code'])
                         ->first();
                     if(!$spec) throw new \Exception("{$v['relevance_code']} 不存在", 1);
-                    
+
                     $items[] = [
                         'owner_id' => $user_id,
                         'warehouse_id' => $data->warehouse_id,
@@ -254,15 +258,15 @@ class OrderService
                 $order->warehouse_id   = $data->warehouse_id;
                 $order->status         = Order::STATUS_DEFAULT;
                 $order->remark         = $data->remark??'';
-                $order->sale_currency  = $data->sale_currency??'CNY'; 
+                $order->sale_currency  = $data->sale_currency??'CNY';
                 $order->source         = $this->getSource();
                 $order->sub_order_qty  = $subQty;
                 // 收件人信息
                 if(!isset($data->receiver))
                 {
                     $receiver = ReceiverAddress::find($data->receiver_id);
-                } 
-                else 
+                }
+                else
                 {
                     $receiver = $data->receiver;
                 }
@@ -294,12 +298,12 @@ class OrderService
                         $sender = SenderAddress::where("owner_id", Auth::ownerId())->find($data->sender_id);
                         if(!$sender) {
                             throw new \Exception("发件人信息不存在", 1);
-                            
+
                         }
                     }
-                    
-                } 
-                else 
+
+                }
+                else
                 {
                     $sender = $data->sender;
                 }
@@ -313,7 +317,7 @@ class OrderService
                 $order->send_phone    = $sender->phone;
                 $order->out_sn        = $out_sn;
 
-                
+
                 $order->express_num     = $data->express_num;
                 $order->shop_id         = $data->shop_id??0;
                 $order->shop_user_id    = $data->shop_user_id??0;
@@ -323,22 +327,22 @@ class OrderService
                 $order->save();
                 OrderHistory::addHistory($order, Order::STATUS_DEFAULT);
                 $order->orderItems()->createMany($items);
-                
+
                 $lock->release();
 
                 event(new OrderCreated($order));
                 return $order;
             } else {
                 throw new \Exception("锁不能释放", 1);
-                
+
             }
-        } 
+        }
         catch(\Exception $ex) {
             $lock->release();
             throw new \Exception($ex->getMessage(), 1);
         }
 
-        
+
     }
 
     /**
