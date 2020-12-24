@@ -374,9 +374,11 @@ class ProductController extends Controller
                         $specRow,
                         [
                             'name_cn' => 'required',
-                            'relevance_code' => 'required|string|min:3',
+                            'relevance_code' => 'required|regex:/^[a-zA-Z0-9_]{3,}$/',
                         ],
-                        [],
+                        [
+                            'regex' => 'SKU编码只能是字母数字下划线，长度大于3位',
+                        ],
                         [
                             'name_cn' => '规格名称',
                             'relevance_code' => '规格SKU',
