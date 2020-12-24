@@ -255,12 +255,15 @@ class OrderService
                 $order = new Order();
                 $order->owner_id       = $user_id;
                 $order->order_type     = $data->order_type;
+
                 if($data->filled('delivery_date')){
                     $order->delivery_date  = strtotime($data->delivery_date);
-                };
+                }
+
                 if($data->filled('delivery_type')){
                     $order->delivery_type  = $data->input('delivery_type');
                 }
+
                 $order->warehouse_id   = $data->warehouse_id;
                 $order->status         = Order::STATUS_DEFAULT;
                 $order->remark         = $data->remark??'';
@@ -268,12 +271,9 @@ class OrderService
                 $order->source         = $this->getSource();
                 $order->sub_order_qty  = $subQty;
                 // 收件人信息
-                if(!isset($data->receiver))
-                {
+                if (! isset($data->receiver)) {
                     $receiver = ReceiverAddress::find($data->receiver_id);
-                }
-                else
-                {
+                } else {
                     $receiver = $data->receiver;
                 }
 
@@ -340,15 +340,14 @@ class OrderService
                 return $order;
             } else {
                 throw new \Exception("锁不能释放", 1);
-
             }
-        }
-        catch(\Exception $ex) {
+        } catch (BusinessException $ex) {
+            $lock->release();
+            throw $ex;
+        } catch (\Exception $ex) {
             $lock->release();
             throw new \Exception($ex->getMessage(), 1);
         }
-
-
     }
 
     /**
