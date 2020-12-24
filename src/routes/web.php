@@ -96,9 +96,11 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::put('/user/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
     Route::post('/user/info', 'UserController@updateInfo'); //修改个人资料
-    Route::put('/user/profile', 'UserController@updateProfile');   //修改个人资料
     Route::post('/user/avatar', 'UserController@avatar');//修改员工头像
     Route::get('/user/{user_id}', 'UserController@show');//获取员工权限
+
+    Route::put('/user/profile', 'UserController@updateProfile');   //修改个人资料
+    Route::get('/user/profile', 'UserController@profile');   //个人资料
 
     //上传图片
     Route::post('/upload/image', 'UploadController@image');

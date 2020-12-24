@@ -298,6 +298,17 @@ class UserController extends  Controller
     }
 
     /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function profile()
+    {
+        /** @var User $user */
+        $user = \auth()->user();
+
+        return success($user->only('id', 'name', 'contact_address', 'contact', 'industry'));
+    }
+
+    /**
      * @param  BaseRequests  $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
