@@ -26,13 +26,18 @@
     .table-bordered td {
       border: 1px solid #000000;
     }
-    .table-bordered td div{
-      width:350px;
-      height: 22px;
-      word-break:keep-all;/* 不换行 */
-      white-space:nowrap;/* 不换行 */
-      overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
-      text-overflow:ellipsis;
+
+    .table-bordered td div {
+        width: 350px;
+        #height: 22px;
+        #word-break: keep-all; /* 不换行 */
+        #white-space: nowrap; /* 不换行 */
+        #overflow: hidden; /* 内容超出宽度时隐藏超出部分的内容 */
+        text-overflow: ellipsis;
+        height: 100%;
+        word-break: initial;
+        white-space: inherit;
+        overflow: auto;
     }
     .qrcode{
       float: right;
@@ -107,7 +112,7 @@
 
     if($firstArr) {
 ?>
-    <table class="table  table-bordered text-center" >
+    <table class="table table-bordered text-center" >
         <thead>
           <tr>
             <th>#</th>
@@ -124,7 +129,7 @@
             <?php $index++;?>
             <tr>
               <td>{{ ($index) }}</td>
-              <td><div class="word-wrap:break-word;">{{ $itemLocation['name_cn'] }}  -  {{ $itemLocation['spec_name_cn'] }}</div></td>
+              <td><div>{{ $itemLocation['name_cn'] }}  -  {{ $itemLocation['spec_name_cn'] }}</div></td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
@@ -164,7 +169,7 @@
             <?php $index++;?>
             <tr>
               <td>{{ ($index) }}</td>
-              <td><div class="word-wrap:break-word;">{{ $itemLocation['name_cn'] }} - {{ $itemLocation['spec_name_cn'] }}</div> </td>
+              <td><div>{{ $itemLocation['name_cn'] }} - {{ $itemLocation['spec_name_cn'] }}</div> </td>
               <td> {{ $itemLocation['stock_sku'] }}</td>
               <td>{{ $itemLocation['relevance_code'] }}</td>
               <td>{{ $itemLocation['warehouse_location_code'] }}</td>
