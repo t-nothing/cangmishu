@@ -93,14 +93,14 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::put('profile/phone', 'UserController@bindPhone'); //绑定邮箱
     Route::get('phoneCode', 'UserController@getPhoneVerifyCode'); //手机验证码
 
+    Route::get('/user/profile', 'UserController@profile');   //个人资料
     Route::put('/user/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
     Route::get('/user/{user_id}', 'UserController@show');//获取员工权限
 
     Route::put('/user/avatar', 'UserController@updateAvatar');//修改员工头像
     Route::put('/user/profile', 'UserController@updateProfile');   //修改个人资料
-    Route::get('/user/profile', 'UserController@profile');   //个人资料
-
+    
     //上传图片
     Route::post('/upload/image', 'UploadController@image');
 
