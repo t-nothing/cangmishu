@@ -55,8 +55,11 @@ class ShopProduct extends Model
      */
     public function scopeHasKeyword($query, $keywords)
     {
-        $query->where('shop_product.name_cn', 'like', '%' . $keywords . '%')
-            ->orWhere('shop_product.name_en', 'like', '%' . $keywords . '%');
+        $query->where('shop_product.name_cn', 'like', '%'.$keywords.'%')
+            ->orWhere('shop_product.name_en', 'like', '%'.$keywords.'%')
+            ->orWhereHas('product.specs', function ($q) use ($keywords) {
+                $q->where('relevance_code', 'like', '%'.$keywords.'%');
+            });
     }
 
     /**
