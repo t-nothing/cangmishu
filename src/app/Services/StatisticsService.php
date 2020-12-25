@@ -123,12 +123,11 @@ class StatisticsService
             ->count('id');
 
         $stock_warning = Product::query()
-            ->selectRaw('count(product.id) as count')
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
             ->where('total_stock_num', '<=', 'c.warning_stock')
             ->whereRaw('c.warning_stock > 0')
-            ->get()->sum->count;
+            ->count();
 
         $wait_shelf = Batch::query()->where('warehouse_id', self::$warehouseId)
             ->where('status', '=', Batch::STATUS_PREPARE)
