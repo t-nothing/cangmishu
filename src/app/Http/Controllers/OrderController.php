@@ -13,6 +13,7 @@ use App\Models\OrderItem;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Rules\PageSize;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -82,11 +83,11 @@ class OrderController extends Controller
             ->with('orderType')
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
-            $order->where('created_at', '>', strtotime($request->created_at_b));
+            $order->where('created_at', '>', Carbon::parse($request->created_at_b)->startOfDay()->unix());
         }
 
         if ($request->filled('created_at_e')) {
-            $order->where('created_at', '<', strtotime($request->created_at_e));
+            $order->where('created_at', '<', Carbon::parse($request->created_at_e)->endOfDay()->unix());
         }
 
         if ($request->filled('status')) {
