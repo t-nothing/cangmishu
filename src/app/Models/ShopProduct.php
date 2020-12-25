@@ -57,6 +57,7 @@ class ShopProduct extends Model
     {
         $query->where('shop_product.name_cn', 'like', '%'.$keywords.'%')
             ->orWhere('shop_product.name_en', 'like', '%'.$keywords.'%')
+            ->orWhere('product.barcode', 'like', '%'.$keywords.'%')
             ->orWhereHas('product.specs', function ($q) use ($keywords) {
                 $q->where('relevance_code', 'like', '%'.$keywords.'%');
             });
