@@ -125,7 +125,7 @@ class StatisticsService
         $stock_warning = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
-            ->where('total_stock_num', '<=', 'c.warning_stock')
+            ->whereColumn('total_stock_num', '<=', 'c.warning_stock')
             ->whereRaw('c.warning_stock > 0')
             ->count();
 
