@@ -523,14 +523,13 @@ class StatisticsService
     {
         $date = self::parseDateParams($params, true);
 
-        $data = OrderItem::query()
+        return OrderItem::query()
             ->where('warehouse_id', self::$warehouseId)
-            ->selectRaw("name_cn as name, sum(amount) as sales, pic as picture")
-            ->groupBy('name_cn')
+            ->leftJoin('product_spec as s', 's.id', '=', 'order_item.spec_id')
+            ->selectRaw("s.relevance_code, order_item.name_cn as name, sum(order_item.amount) as sales, order_item.pic as picture")
+            ->groupBy(['s.relevance_code'])
             ->orderByDesc('sales')
             ->get()->each->setAppends([]);
-
-        return $data;
     }
 
     /**
