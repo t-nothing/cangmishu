@@ -185,7 +185,7 @@ class WebsiteAppController extends Controller
         /** @var User $user */
         $user = User::query()->where('email', $data['email'])->first();
 
-        if (! password_verify($data['password'], $user->password)) {
+        if (! $user || ! password_verify($data['password'], $user->password)) {
             throw new BusinessException('用户认证失败');
         }
 
