@@ -84,7 +84,7 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store( CreateProductRequest $request)
+    public function store(CreateProductRequest $request)
     {
         app('log')->info('新增商品',$request->all());
         $specs = [];
@@ -102,7 +102,12 @@ class ProductController extends Controller
                 'warehouse_id'   => app('auth')->warehouse()->id,
                 'is_warning'     => 1
             ];
-            $exists = ProductSpec::whose(app('auth')->ownerId())->where('relevance_code', $spec['relevance_code'])->first();
+
+            $exists = ProductSpec::whose(app('auth')->ownerId())
+                ->where('warehouse_id', \auth('admin')->getWarehouseIdForRequest())
+                ->where('relevance_code', $spec['relevance_code'])
+                ->first();
+
             if ($exists) {
                 return formatRet(500, trans('message.productRelevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
             }
@@ -178,7 +183,10 @@ class ProductController extends Controller
         $product->sale_price          = $request->specs[0]['sale_price'];
         $product->purchase_price      = $request->specs[0]['purchase_price'];
         if($product->barcode != $barcode) {
-            $existsCount = Product::where("barcode", $barcode)->where("warehouse_id", app('auth')->warehouse()->id)->count();
+            $existsCount = Product::where("barcode", $barcode)
+                ->where("warehouse_id", app('auth')->warehouse()->id)
+                ->count();
+
             if($existsCount > 0) {
                 return formatRet(500, "条码已存在,请重新更换");
             }
@@ -197,7 +205,12 @@ class ProductController extends Controller
                     throw new \Exception(trans("message.productSpecNotExists"), 1);
                 }
 
-                $exists = ProductSpec::whose(Auth::ownerId())->where('relevance_code', $spec['relevance_code'])->where('id','!=', $spec['id'])->first();
+                $exists = ProductSpec::whose(Auth::ownerId())
+                    ->where('relevance_code', $spec['relevance_code'])
+                    ->where('warehouse_id', \auth('admin')->getWarehouseIdForRequest())
+                    ->where('id','!=', $spec['id'])
+                    ->first();
+
                 if ($exists) {
                     return formatRet(500, trans('message.productRelevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
                 }
@@ -448,7 +461,6 @@ class ProductController extends Controller
             app('log')->error('导入货品失败', ["msg" => $e->getMessage()]);
             return formatRet(500,"导入货品失败:".$e->getMessage());
         }
-
     }
 
     /**

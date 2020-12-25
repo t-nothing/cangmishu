@@ -43,9 +43,9 @@ class CreateProductRequest extends BaseRequests
             'specs.*.sale_price'        => 'required|numeric|min:0',
             'specs.*.purchase_price'    => 'required|numeric|min:0',
             'specs.*.relevance_code'    => [
-            'required','string','max:50','distinct',
+            'required', 'string', 'max:50', 'distinct',
                 Rule::unique('product_spec','relevance_code')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
+                    $q->where('warehouse_id', \auth('admin')->getWarehouseIdForRequest());
                 })
             ],
         ];
