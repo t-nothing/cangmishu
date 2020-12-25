@@ -267,16 +267,16 @@ class StatisticsService
     {
         $date = self::parseDateParams($params, true);
 
-        $data = ProductStock::query()
+        $data = ProductStockLog::query()
             ->where('warehouse_id', self::$warehouseId)
             ->whereBetween('created_at', $date)
-            ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, sum(stockin_num) as stock_in_num, sum(stockout_num) as stock_out_num")
+            ->selectRaw("FROM_UNIXTIME(created_at,'%Y-%m-%d') as days, sum(case when type_id = 1 then operation_num else 0 end) as stock_in_num, sum(case when type_id = 4 then operation_num else 0 end) as stock_out_num")
             ->groupBy('days')
             ->get()
             ->map(function ($order) {
                 $order->setAppends([]);
                 $order['stock_in_num'] = (int) $order['stock_in_num'];
-                $order['stock_out_num'] = (int) $order['stock_out_num'];
+                $order['stock_out_num'] = (int) -$order['stock_out_num'];
 
                 return $order;
             });
