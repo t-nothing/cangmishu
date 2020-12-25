@@ -55,7 +55,8 @@ class RecountService
 
                         $op[] = [
                             'model' =>  $stockLoation,
-                            'qty'   =>  $v["num"]
+                            'qty'   =>  $v["num"],
+                            'diff' => $v['num'] - $stockLoation->shelf_num,
                         ];
 
                         app('log')->info('库存盘点,修改库存为', [
@@ -95,7 +96,7 @@ class RecountService
 
                     ## 第二步调整库存
                     foreach ($op as $key => $v) {
-                        event(new StockLocationAdjust($v["model"], $v["qty"], [
+                        event(new StockLocationAdjust($v["model"], /*$v["qty"]*/ $v['diff'], [
                             'order_sn'  =>  $model->recount_no,
                             'remark'    =>  $data["remark"]
                         ]));
