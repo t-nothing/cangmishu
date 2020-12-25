@@ -39,7 +39,7 @@ class StatisticsService
     {
         //默认选择一个仓库
         if (! request()->filled('warehouse_id')) {
-            self::$warehouseId = auth('admin')->guard()->getWarehouseIdForRequest();
+            self::$warehouseId = auth('admin')->getWarehouseIdForRequest();
         } else {
             self::$warehouseId = intval(request()->input('warehouse_id'));
         }
