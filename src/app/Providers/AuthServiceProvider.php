@@ -5,7 +5,6 @@ namespace App\Providers;
 use Laravel\Passport\Passport;
 use Laravel\Passport\RouteRegistrar;
 use App\Guard\JwtGuard;
-use App\Guard\ShopGuard;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
