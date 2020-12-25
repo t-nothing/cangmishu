@@ -524,7 +524,7 @@ class StatisticsService
         $date = self::parseDateParams($params, true);
 
         return OrderItem::query()
-            ->where('warehouse_id', self::$warehouseId)
+            ->where('order_item.warehouse_id', self::$warehouseId)
             ->leftJoin('product_spec as s', 's.id', '=', 'order_item.spec_id')
             ->selectRaw("s.relevance_code, order_item.name_cn as name, sum(order_item.amount) as sales, order_item.pic as picture")
             ->groupBy(['s.relevance_code'])
