@@ -14,6 +14,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\ProductStockLog;
 use App\Models\ReceiverAddress;
 use App\Models\SenderAddress;
 use App\Models\Shop;
@@ -232,11 +233,17 @@ class StatisticsService
     {
         $date = self::parseDateParams($params, true);
 
-        $data = ProductStock::query()
+        $stock_out_num = ProductStockLog::query()
             ->where('warehouse_id', self::$warehouseId)
             ->whereBetween('created_at', $date)
-            ->selectRaw("sum(stockin_num) as stock_in_num, sum(stockout_num) as stock_out_num")
-            ->first();
+            ->where('type_id', ProductStockLog::TYPE_OUTPUT)
+            ->sum("operation_num");
+
+        $stock_in_num = ProductStockLog::query()
+            ->where('warehouse_id', self::$warehouseId)
+            ->whereBetween('created_at', $date)
+            ->where('type_id', ProductStockLog::TYPE_IN)
+            ->sum("operation_num");
 
         $stock_bad = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
@@ -245,8 +252,8 @@ class StatisticsService
             ->count();
 
         return [
-            'stock_in_num' =>  (int) $data['stock_in_num'] ?? 0,
-            'stock_out_num' => (int) $data['stock_out_num'] ?? 0,
+            'stock_in_num' =>  (int) $stock_in_num  ?? 0,
+            'stock_out_num' => (int) -$stock_out_num ?? 0,
             'stock_shortage' => $stock_bad,
         ];
     }
