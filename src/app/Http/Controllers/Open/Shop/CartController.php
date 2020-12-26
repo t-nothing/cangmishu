@@ -97,7 +97,7 @@ class CartController extends Controller
 
             info('查询到已有的购物车规格', $cartSpec->toArray());
 
-            if ($cartSpec->isEmpty()) {
+            if ($cartSpec->isNotEmpty()) {
                 $cartItem = $cartSpec->first();
                 if ($request['qty'] + ($cartItem['qty'] ?? 0) > $spec['productSpec']['total_stock_num']) {
                     throw new BusinessException('库存数量不足');
