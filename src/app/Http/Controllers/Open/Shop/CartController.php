@@ -4,9 +4,12 @@
  */
 
 namespace App\Http\Controllers\Open\Shop;
+use App\Exceptions\BusinessException;
 use App\Http\Requests\BaseRequests;
 use App\Http\Controllers\Controller;
+use App\Models\ProductSpec;
 use App\Rules\PageSize;
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ShopProductSpec;
 use App\Models\ReceiverAddress;
@@ -29,10 +32,9 @@ class CartController extends Controller
         return 'shopping';
     }
 
-    public function getWhoesCart()
+    public function getWhoisCart()
     {
-        $key = sprintf("%s:shop-%d:cart", $this->shopId(), Auth::user()->id);
-        return $key;
+        return sprintf("%s:shop-%d:cart", $this->shopId(), Auth::user()->id);
     }
 
     /**
@@ -88,60 +90,90 @@ class CartController extends Controller
         try
         {
             $spec->load('productSpec');
+
+            $cart = new CartService();
+
+            $cartSpec = $cart->name($this->getWhoisCart())->search(['id' => $request['spec_id']]);
+
+            info('查询到已有的购物车规格', $cartSpec->toArray());
+
+            if ($cartSpec->isNotEmpty()) {
+                $cartItem = $cartSpec->first();
+                if ($request['qty'] + ($cartItem['qty'] ?? 0) > $spec['productSpec']['total_stock_num']) {
+                    throw new BusinessException('库存数量不足');
+                }
+            }
+
             $pics = json_decode($spec->product->pics, true);
-            app('cart')->name($this->getWhoesCart())->add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, [
-                'spec'              =>  $spec->name,
-                'source'            =>  'wechat.mini_program',
-                'relevance_code'    =>  $spec->productSpec->relevance_code,
-                'pic'               =>  $pics[0]??'',
-                'currency'          =>  $request->shop->currency
+
+            $cart->name($this->getWhoisCart())
+                ->add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, [
+                    'product_id' => $spec->shop_product_id,
+                    'spec'              => $spec->name,
+                    'source'            => 'wechat.mini_program',
+                    'relevance_code'    => $spec->productSpec->relevance_code,
+                    'pic'               => $pics[0] ?? '',
+                    'currency'          => $request->shop->currency
             ]);
 
             return formatRet(200,"添加购物车成功");
-        }
-        catch(\Exception $ex)
-        {
+        } catch (BusinessException $exception) {
+            throw $exception;
+        } catch(\Exception $ex) {
 
             // print_r($ex->getMessage());
         }
 
-        
         return formatRet(500,"添加购物车失败");
-        
     }
 
     /**
      * 更新数量
-     **/
-    public function updateQty(BaseRequests $request, $id, $qty)
+     *
+     * @param  BaseRequests  $request
+     * @param $code
+     * @param $qty
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateQty(BaseRequests $request, $code, $qty)
     {
-        
+        $cart = new CartService();
+
         try
         {
+            $spec = $cart->name($this->getWhoisCart())->get($code);
+
+            $spec = ShopProductSpec::query()
+                ->with(['productSpec'])
+                ->findOrFail($spec['id']);
+
+            if ($qty > $spec['productSpec']['total_stock_num']) {
+                throw new BusinessException('库存数量不足');
+            }
 
             // $this->processFormId($request);
-            app('cart')->name($this->getWhoesCart())->update($id, $qty);
+            app('cart')->name($this->getWhoisCart())->update($code, $qty);
 
-            return formatRet(200,"更新商品成功");
-        }
-        catch(\Exception $ex)
-        {
+            return formatRet(200, "更新商品成功");
+        } catch (\Exception $ex) {
 
         }
 
-        
         return formatRet(500,"更新商品失败");
     }
 
     /**
      * 移除单个商品
-     **/
-    public function remove(BaseRequests $request, $id)
+     *
+     * @param  BaseRequests  $request
+     * @param $code
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function remove(BaseRequests $request, $code)
     {
-        
         try
         {
-            app('cart')->name($this->getWhoesCart())->remove($id);
+            app('cart')->name($this->getWhoisCart())->remove($code);
 
             return formatRet(200,"移除商品成功");
         }
@@ -150,7 +182,6 @@ class CartController extends Controller
 
         }
 
-        
         return formatRet(500,"移除商品失败");
     }
 
@@ -161,7 +192,7 @@ class CartController extends Controller
     {
         try
         {
-            app('cart')->name($this->getWhoesCart())->destroy();
+            app('cart')->name($this->getWhoisCart())->destroy();
 
             return formatRet(200,"清空购物车成功");
         }
@@ -170,7 +201,7 @@ class CartController extends Controller
 
         }
 
-        
+
         return formatRet(500,"清空购物车失败");
     }
 
@@ -184,12 +215,21 @@ class CartController extends Controller
             'token' => app('request')->header('Authorization', ''),
             'shop' => app('request')->header('Shop', ''),
         ]);
-        $items = app('cart')->name($this->getWhoesCart())->all();
-        foreach ($items as $key => $value) {
+        $items = app('cart')->name($this->getWhoisCart())->all();
+
+        $specs = ShopProductSpec::query()
+            ->with('productSpec')
+            ->whereKey(data_get($items, '*.id'))
+            ->get();
+
+        foreach ($items as $key => &$value) {
             try {
                 $tmp = $value->__raw_id;
+                $value['total_stock_num'] = data_get($specs->first(function ($v) use ($value) {
+                    return $v['id'] === $value['id'];
+                }), 'productSpec.total_stock_num');
             } catch( \ErrorException $ex) {
-                app('cart')->name($this->getWhoesCart())->remove($key);
+                app('cart')->name($this->getWhoisCart())->remove($key);
                 unset($items[$key]);
             }
         }
@@ -203,8 +243,8 @@ class CartController extends Controller
     public function count(BaseRequests $request)
     {
         return formatRet(0, '', [
-            'count'         =>  app('cart')->name($this->getWhoesCart())->count(),
-            'total'         =>  app('cart')->name($this->getWhoesCart())->total(),
+            'count'         =>  app('cart')->name($this->getWhoisCart())->count(),
+            'total'         =>  app('cart')->name($this->getWhoisCart())->total(),
         ]);
     }
 
@@ -217,7 +257,6 @@ class CartController extends Controller
         app('db')->beginTransaction();
         $outSn = "";
         try {
-
             // $this->processFormId($request);
             // if($request->filled('form_id')) {
             //     ShopWeappFormId::create([
@@ -226,17 +265,23 @@ class CartController extends Controller
             //     ]);
             // }
 
-            if($request->verify_money != app('cart')->name($this->getWhoesCart())->total($request->id))
-            {
+            $cart = new CartService();
+
+            if ($request->verify_money != $cart->name($this->getWhoisCart())->total($request->id)) {
+                info('验证价格Debug', [
+                    'key' => $this->getWhoisCart(),
+                    'total' => $cart->name($this->getWhoisCart())->all()->toArray(),
+                ]);
+
                 throw new \Exception("下单金额不一致", 1);
             }
 
-            if(0 === app('cart')->name($this->getWhoesCart())->countWithChecked($request->id))
+            if(0 === app('cart')->name($this->getWhoisCart())->countWithChecked($request->id))
             {
                 throw new \Exception("购物车不能为空", 1);
             }
 
-            $data = new BaseRequests;            
+            $data = new BaseRequests;
 
             $data->express_code  = "";
             $data->remark           = $request->input('remark', '');
@@ -276,7 +321,7 @@ class CartController extends Controller
 
 
             $orderItem = [];
-            foreach(app('cart')->name($this->getWhoesCart())->all($request->id) as $row)  {
+            foreach(app('cart')->name($this->getWhoisCart())->all($request->id) as $row)  {
                 $orderItem[] = [
                     'relevance_code'    =>  $row->relevance_code,
                     'pic'               =>  $row->pic,
@@ -285,15 +330,15 @@ class CartController extends Controller
                 ];
             }
 
-           
+
             $data->goods_data = collect($orderItem);
-            
+
             $orderResult = app('order')->setSource($request->shop->name_cn)->create($data, $request->shop->owner_id);
             app('db')->commit();
 
             $outSn =  $orderResult->out_sn;
 
-            app('cart')->name($this->getWhoesCart())->removeBy($request->id);
+            app('cart')->name($this->getWhoisCart())->removeBy($request->id);
 
             event(new CartCheckouted($orderResult));
 

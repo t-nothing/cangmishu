@@ -21,7 +21,6 @@ class Warehouse extends Model
     const AVAILABLE = 0;
     const UNAVAILABLE = 1;
 
-    public  $timestamps = true;
     protected  $fillable = ['name_cn','code','area','city','province','street','door_no','owner_id'];
     protected $guarded = [];
 
@@ -162,11 +161,11 @@ class Warehouse extends Model
         }
         catch(\Exception $ex)
         {
-            
+
         }
 
         return false;
-        
+
     }
 
     /**
@@ -191,10 +190,10 @@ class Warehouse extends Model
         }
         catch(\Exception $ex)
         {
-            
+
         }
 
         return null;
-        
+
     }
 }

@@ -26,8 +26,6 @@ class UpdateShopRequest extends BaseRequests
      */
     public function rules()
     {
-
-        
         $arr = [
             'name_cn'                   => [
                'required','string','max:100',
@@ -36,7 +34,7 @@ class UpdateShopRequest extends BaseRequests
                 })->ignore($this->route('id'))
             ],
             'logo'                      => 'present|url|max:100',
-            'banner_background'         => 'url|max:100',
+            'banner_background'         => 'url|max:150',
             'default_lang'              => 'string|in:zh-cn,english',
             'default_currency'          => 'string|in:CNY,EUR,USD',
             'email'                     => 'email|max:100',

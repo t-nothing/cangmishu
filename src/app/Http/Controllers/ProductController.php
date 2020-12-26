@@ -17,8 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Maatwebsite\Excel\Validators\ValidationException;
-use Validator;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 
 class ProductController extends Controller
@@ -56,7 +56,7 @@ class ProductController extends Controller
             } else {
                 $product = $product->hasKeyword($request->keywords);
             }
-            
+
         }
 
         if ($request->filled('show_low_stock') && $request->show_low_stock == 1) {
@@ -74,7 +74,7 @@ class ProductController extends Controller
             unset($value['category_name_cn']);
             unset($value['category_name_en']);
         }
-        
+
         return formatRet(0, '', $result);
     }
 
@@ -84,7 +84,7 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store( CreateProductRequest $request)
+    public function store(CreateProductRequest $request)
     {
         app('log')->info('新增商品',$request->all());
         $specs = [];
@@ -102,7 +102,12 @@ class ProductController extends Controller
                 'warehouse_id'   => app('auth')->warehouse()->id,
                 'is_warning'     => 1
             ];
-            $exists = ProductSpec::whose(app('auth')->ownerId())->where('relevance_code', $spec['relevance_code'])->first();
+
+            $exists = ProductSpec::whose(app('auth')->ownerId())
+                ->where('warehouse_id', \auth('admin')->getWarehouseIdForRequest())
+                ->where('relevance_code', $spec['relevance_code'])
+                ->first();
+
             if ($exists) {
                 return formatRet(500, trans('message.productRelevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
             }
@@ -120,7 +125,7 @@ class ProductController extends Controller
         if($request->category_id > 0){
             $product->category_id         = $request->category_id;
         }
-        
+
         $product->name_cn             = $request->name_cn;
         $product->name_en             = $request->input('name_en', $request->name_cn);
         $product->hs_code             = $request->hs_code;
@@ -134,7 +139,7 @@ class ProductController extends Controller
         $product->purchase_price      = $specs[0]['purchase_price'];
         $product->barcode             = $barcode;
         DB::beginTransaction();
-  
+
         try{
             $product->save();
             foreach ($specs as $k => $v) {
@@ -178,7 +183,10 @@ class ProductController extends Controller
         $product->sale_price          = $request->specs[0]['sale_price'];
         $product->purchase_price      = $request->specs[0]['purchase_price'];
         if($product->barcode != $barcode) {
-            $existsCount = Product::where("barcode", $barcode)->where("warehouse_id", app('auth')->warehouse()->id)->count();
+            $existsCount = Product::where("barcode", $barcode)
+                ->where("warehouse_id", app('auth')->warehouse()->id)
+                ->count();
+
             if($existsCount > 0) {
                 return formatRet(500, "条码已存在,请重新更换");
             }
@@ -197,7 +205,12 @@ class ProductController extends Controller
                     throw new \Exception(trans("message.productSpecNotExists"), 1);
                 }
 
-                $exists = ProductSpec::whose(Auth::ownerId())->where('relevance_code', $spec['relevance_code'])->where('id','!=', $spec['id'])->first();
+                $exists = ProductSpec::whose(Auth::ownerId())
+                    ->where('relevance_code', $spec['relevance_code'])
+                    ->where('warehouse_id', \auth('admin')->getWarehouseIdForRequest())
+                    ->where('id','!=', $spec['id'])
+                    ->first();
+
                 if ($exists) {
                     return formatRet(500, trans('message.productRelevanceCodeIsUsed',['relevance_code'=>$spec['relevance_code']]));
                 }
@@ -216,10 +229,10 @@ class ProductController extends Controller
                     'is_warning'     => 1,
                     'product_id'     => $product->id,
                 ];
-                
+
                 ProductSpec::updateOrCreate(
                     [
-                        'relevance_code'=>$spec['relevance_code'], 
+                        'relevance_code'=>$spec['relevance_code'],
                         'owner_id'      =>Auth::ownerId()
                     ],
                     $data
@@ -270,7 +283,7 @@ class ProductController extends Controller
             ShopProduct::where('product_id', $product_id)->delete();
             ShopProductSpec::where('product_id', $product_id)->delete();
             // $product->specs()->stocks()->delete();
-            
+
             $product->specs()->forceDelete();
             $product->forceDelete();
             DB::commit();
@@ -282,8 +295,11 @@ class ProductController extends Controller
         }
     }
 
-
-
+    /**
+     * @param  BaseRequests  $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @throws ValidationException
+     */
     public function import(BaseRequests $request)
     {
         $this->validate($request,[
@@ -298,18 +314,32 @@ class ProductController extends Controller
         try {
             $productImport = new ProductsImport(new CategoryService);
             $resultAll = app('excel')->toArray($productImport, $request->file('file'), 'UTF-8');
-           
-            $result = $resultAll[0];
-            // app('log')->info('result', $result);
-            
-            foreach ($result as $key => $row) {
-                // print_r($row);
 
-                $category  = Category::where('name_cn', $row['category_name'])
-                ->where('warehouse_id',app('auth')->warehouse()->id)
-                ->where('owner_id',app('auth')->ownerId())->first();
-                if(!$category) {
-                    return formatRet(0, "{$row['category_name']}分类不存在");
+            $result = collect($resultAll[0])->filter(function ($value) {
+                return $value['name_cn'] && $value['category_name'];
+            })->all();
+
+            foreach ($result as $key => $row) {
+                validator(
+                    $row,
+                    [
+                        'name_cn' => 'required',
+                        'category_name' => 'required',
+                    ],
+                    [],
+                    [
+                        'name_cn' => '商品名称',
+                        'category_name' => '商品分类',
+                    ]
+                )->validate();
+
+                $category = Category::where('name_cn', $row['category_name'])
+                    ->where('warehouse_id', app('auth')->warehouse()->id)
+                    ->where('owner_id', app('auth')->ownerId())
+                    ->first();
+
+                if(! $category) {
+                    return formatRet(422, "{$row['category_name']}分类不存在");
                 }
 
                 $product = [
@@ -336,12 +366,9 @@ class ProductController extends Controller
                 $product_purchase_price = 0;
                 $product_sale_price = 0;
                 foreach ($specs as $kk=> $spec) {
-
                     if(empty($spec[0]) && empty($spec[1])) {
                         continue;
                     }
-
-
 
                     $specRow = [
                         'name_cn'           =>  trim($spec[0]),
@@ -356,6 +383,20 @@ class ProductController extends Controller
                         'warehouse_id'      =>  app('auth')->warehouse()->id,
                     ];
 
+                    validator(
+                        $specRow,
+                        [
+                            'name_cn' => 'required',
+                            'relevance_code' => 'required|regex:/^[a-zA-Z0-9_]{3,}$/',
+                        ],
+                        [
+                            'regex' => 'SKU编码只能是字母数字下划线，长度大于3位',
+                        ],
+                        [
+                            'name_cn' => '规格名称',
+                            'relevance_code' => '规格SKU',
+                        ]
+                    )->validate();
 
                     $product_purchase_price = trim($spec[2]);
                     $product_sale_price = trim($spec[3]);
@@ -366,14 +407,14 @@ class ProductController extends Controller
                 $product['purchase_price']  = $product_purchase_price;
                 $product['sale_price']      = $product_sale_price;
 
-                
+
                 $newResult[] =  $product;
             }
 
             // app('log')->info('商品信息xxxxx', $result);
 
         } catch (ValidationException $e) {
-            $failures = $e->failures();
+            /*$failures = $e->failures();
             $error = [];
             foreach ($failures as $failure) {
                 $error[] = [
@@ -381,10 +422,11 @@ class ProductController extends Controller
                     'attribute' => $failure->attribute(),
                     'error' => $failure->errors()
                 ];
-            }
-            return formatRet(0, '导入结束,数据验证未通过', $error);
+            }*/
+            $errorMessage = array_values($e->errors())[0][0];
+            return formatRet(422, '导入结束,数据验证未通过：'. $errorMessage);
         } catch(\Exception $exception) {
-            
+
             app('log')->error('货品导入失败', ["msg" => $exception->getMessage()]);
             return formatRet(500, '导入失败');
         }
@@ -395,12 +437,12 @@ class ProductController extends Controller
 
         DB::beginTransaction();
         try{
-           
+
             $products = [];
             foreach ($newResult as $key => $product) {
-                
-                $validator = Validator::make($product, $productRequest->rules(), [], $productRequest->attributes());   
-                if ($validator->fails()) 
+
+                $validator = Validator::make($product, $productRequest->rules(), [], $productRequest->attributes());
+                if ($validator->fails())
                 {
                     throw new \Exception("第".($key+1)."行" . $validator->errors()->first(), 1);
                 }
@@ -419,7 +461,6 @@ class ProductController extends Controller
             app('log')->error('导入货品失败', ["msg" => $e->getMessage()]);
             return formatRet(500,"导入货品失败:".$e->getMessage());
         }
-
     }
 
     /**
@@ -428,7 +469,7 @@ class ProductController extends Controller
     public  function  show(BaseRequests $request,$product_id)
     {
         app('log')->error('查看详情', ["product_id" => $product_id]);
-        
+
         $product = Product::with(['category:id,name_cn', 'specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,is_warning,sale_price,purchase_price,total_stock_num'])
             ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())
@@ -454,7 +495,7 @@ class ProductController extends Controller
         $totalStockNum = Product::ofWarehouse(app('auth')->warehouse()->id)
             ->where('owner_id', app('auth')->ownerId())
             ->sum("total_stock_num");
-        
+
         return formatRet(0, "成功", [
             "count_product" =>  intval($totalCount),
             "count_stock"   =>  intval($totalStockNum),

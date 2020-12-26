@@ -43,9 +43,9 @@ class CreateProductRequest extends BaseRequests
             'specs.*.sale_price'        => 'required|numeric|min:0',
             'specs.*.purchase_price'    => 'required|numeric|min:0',
             'specs.*.relevance_code'    => [
-            'required','string','max:50','distinct',
+            'required', 'string', 'max:50', 'distinct',
                 Rule::unique('product_spec','relevance_code')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
+                    $q->where('warehouse_id', \auth('admin')->getWarehouseIdForRequest());
                 })
             ],
         ];
@@ -58,7 +58,7 @@ class CreateProductRequest extends BaseRequests
 
         return $arr;
     }
- 
+
 
     public function attributes()
     {
@@ -70,7 +70,8 @@ class CreateProductRequest extends BaseRequests
             'specs.*.gross_weight'  => trans("message.productFieldGrossWeight"),
             'specs.*.sale_price'    => trans("message.productFieldSalePrice"),
             'specs.*.purchase_price'=> trans("message.productFieldPurchasePrice"),
-            'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
+            //'specs.*.relevance_code'=> trans("message.productFieldRelevanceCode"),
+            'specs.*.relevance_code'=> __('message.recountPageProductSpecSku'),
         ];
     }
 

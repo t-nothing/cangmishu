@@ -1,11 +1,12 @@
 <?php
 return [
-    '404NotFound' => '什么也没有找到', 
+    '404NotFound' => '什么也没有找到',
     'success' =>'成功',
-    'failed' => '操作失败', 
-    'tokenInvalid' =>'无效请求', 
+    'failed' => '操作失败',
+    'tokenInvalid' =>'无效请求',
     'noPermission' =>'没有权限',
     'activeAccount'=>'用户未激活，请登陆到邮箱激活',
+    'invalidOldPassword' => '原密码验证失败',
 
     'statusBatchIn'=>'入库',
     'statusShelf'=>'上架',
@@ -83,7 +84,7 @@ return [
     'batchTypeNotExist'=>'入库分类不存在',
     'batchTypeDeleteFailed' => '删除入库单分类失败',#
     'batchTypeCannotDelete'=>'此入库单分类下存在入库单，不允许删除',
-    
+
     'productCategoryAddFailed' =>'添加货品分类失败',
     'productCategoryUpdateFailed' => '修改货品分类失败',#
     'productCategoryNotExist'=>'货品货品分类不存在',
@@ -233,7 +234,8 @@ return [
     'recountPageInventoryLossMoney' => '盘亏金额(元)',
     'recountPageInventoryProfit' => '盘盈',
     'recountPageInventoryProfitMoney' => '盘盈金额(元)',
-    
+    'recountPageCreator' => '创建人',
+
 
     'recountAddFailed' =>'添加盘点单信息失败',
     'recountUpdateFailed' => '修改盘点单地址失败',#

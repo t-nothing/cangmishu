@@ -61,16 +61,22 @@ class ProductStockController extends  Controller
             )
             // API向前兼容
             ->when($keywords = $request->input('keywords'), function ($query) use ($keywords) {
-                return $query->where('product_spec.name_cn', 'like', '%' . $keywords . '%')
-                  ->orWhere('product_spec.name_en', 'like', '%' . $keywords . '%')
-                  ->orWhere('product.hs_code', 'like', '%' . $keywords . '%')
-                  ->orWhere('product.origin', 'like', '%' . $keywords . '%');
+                return $query->where(function ($query) use ($keywords) {
+                    $query->where('product_spec.name_cn', 'like', '%'.$keywords.'%')
+                        ->orWhere('product_spec.name_en', 'like', '%'.$keywords.'%')
+                        ->orWhere('product.hs_code', 'like', '%'.$keywords.'%')
+                        ->orWhere('product.origin', 'like', '%'.$keywords.'%');
+                });
             })
             ->when($sku = $request->input('sku'), function ($query) use ($sku) {
                 $query->hasSku($sku);
             })
             ->when($product_name = $request->input('product_name'), function ($query) use ($product_name) {
-                return $query->where('product.name_cn', 'like', "%{$product_name}%")->orWhere('product.name_en', 'like', "%{$product_name}%")->orWhere('product_spec.relevance_code',  $product_name);
+                return $query->where(function ($query) use ($product_name) {
+                    $query->where('product.name_cn', 'like', "%{$product_name}%")
+                        ->orWhere('product.name_en', 'like', "%{$product_name}%")
+                        ->orWhere('product_spec.relevance_code', $product_name);
+                });
             })
             ->when($production_batch_number = $request->input('production_batch_number'), function ($query) use ($production_batch_number) {
                 $query->hasProductBatchNumber($production_batch_number);

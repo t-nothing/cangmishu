@@ -12,13 +12,20 @@ use App\Models\ShopWeappFormId;
 
 class ShopController extends Controller
 {
-
     /**
      * 店铺详细
      **/
     public function show(BaseRequests $request)
     {
-        $request->shop->setVisible(['name', 'remark', 'logo', 'banner_background', 'senderAddress','currency']);
+        $request->shop->setVisible([
+            'name',
+            'remark',
+            'logo',
+            'banner_background',
+            'senderAddress',
+            'currency',
+        ]);
+
         return formatRet(0, '', $request->shop->toArray());
     }
 

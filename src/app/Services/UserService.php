@@ -24,9 +24,11 @@ use Illuminate\Support\Facades\Mail;
 use App\Jobs\Sms;
 
 
-class UserService{
-    
-    function quickRegister(Request $request){
+class UserService
+{
+
+    function quickRegister(Request $request)
+    {
 
         #判断是不是这个值
 
@@ -52,8 +54,10 @@ class UserService{
             $nickname                   = explode("@",$email);
             $user->nickname             = $request->nickname??$nickname[0];
             $user->avatar               = $request->avatar??env("APP_URL")."/images/default_avatar.png";
-            $user->wechat_openid        = $request->wechat_openid??'';
-            $user->wechat_mini_program_open_id        = $request->wechat_mini_program_open_id??'';
+            $user->wechat_openid        = $request->wechat_openid ?? null;
+            $user->wechat_mini_program_open_id   = $request->wechat_mini_program_open_id ?? null;
+            $user->union_id = $request->union_id ?? null;
+            $user->app_openid = $request->app_openid ?? null;
             $user->save();
 
             $user->setActivated();
@@ -201,7 +205,7 @@ class UserService{
             if (!$category->save()) {
                 throw new \Exception("默认货品分类创建失败", 1);
             }
-       
+
             // $userCategory = new  UserCategoryWarning();
             // $userCategoryData = [
             //     'user_id' => $user->id,
@@ -275,28 +279,44 @@ class UserService{
     }
 
     public function getRandCode(){
-        $chars='0123456789';
-        mt_srand((double)microtime()*1000000*getmypid());
-        $CheckCode="";
-        while(strlen($CheckCode)<6)
-            $CheckCode.=substr($chars,(mt_rand()%strlen($chars)),1);
+        $chars = '0123456789';
+        mt_srand((double) microtime() * 1000000 * getmypid());
+        $CheckCode = "";
+        while (strlen($CheckCode) < 6) {
+            $CheckCode .= substr($chars, (mt_rand() % strlen($chars)), 1);
+        }
+
         return $CheckCode;
     }
 
+    /**
+     * @param $code
+     * @param $email
+     */
     public function createUserEmailVerifyCode($code ,$email)
     {
-        VerifyCode::updateOrCreate(['email' => $email], ['code' => $code,'expired_at'=>time()+5*60]);
-        $logo=env("APP_URL")."/images/logo.png";
-        $qrCode =env("APP_URL")."/images/qrCode.png";
-        $message = new VerifyCodeEmail($code,$logo,$qrCode);
+        VerifyCode::updateOrCreate(['email' => $email], ['code' => $code, 'expired_at' => time() + 5 * 60]);
+
+        $logo = config('app.url') . "/images/logo.png";
+        $qrCode = config('app.url') . "/images/qrCode.png";
+
+        $message = new VerifyCodeEmail($code, $logo, $qrCode);
         $message->onQueue('cangmishu_emails');
+
         Mail::to($email)->send($message);
     }
 
+    /**
+     * @param $code
+     * @param $mobile
+     */
     public function createUserSMSVerifyCode($code ,$mobile)
     {
-        VerifyCode::updateOrCreate(['email' => $mobile], ['code' => $code,'expired_at'=>time()+5*60]);
+        VerifyCode::updateOrCreate(
+            ['email' => $mobile],
+            ['code' => $code, 'expired_at' => time() + 5 * 60]
+        );
+
         Sms::dispatch('register', $mobile, $code)->onQueue('cangmishu_push');
     }
-
 }

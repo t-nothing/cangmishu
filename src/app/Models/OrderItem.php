@@ -57,7 +57,7 @@ class OrderItem extends Model
     }
 
     /**
-     * 一个出库商品从多个位置出现 
+     * 一个出库商品从多个位置出现
      */
     public function stocks()
     {

@@ -63,7 +63,7 @@ class Purchase extends Model
      */
     public function getPurchaseCodeBarcodeAttribute()
     {
-        return 'data:image/png;base64,' . app("DNS1D")->getBarcodePNG($this->batch_code, "C128");
+        return 'data:image/png;base64,' . app("DNS1D")->getBarcodePNG($this->batch_code, "C128B");
     }
 
     /*
