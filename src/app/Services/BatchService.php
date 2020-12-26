@@ -41,8 +41,8 @@ class BatchService
                 'status'           => Product::PRODUCT_STATUS_PREPARE,
                 'sku'	           => ProductSpec::newSku($spec),
             ];
-
-            $total_purchase_price += $v['purchase_price'];
+            //单价乘以数量
+            $total_purchase_price += $v['purchase_price'] * $v['need_num'];
         }
         $data = [
             "warehouse_id"        => $request['warehouse_id'],
