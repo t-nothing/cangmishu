@@ -41,7 +41,7 @@ class CreateOrderRequest extends BaseRequests
             ],
             'goods_data'                  => 'required|array',
             'goods_data.*.relevance_code' => [
-                'required','string','distinct',
+                'required','string',/*'distinct', @TODO: 弱类型比较可能会有问题*/
                 Rule::exists('product_spec','relevance_code')->where(function($q) use($warehouse_id){
                       $q->where('owner_id',Auth::ownerId())
                         ->where('warehouse_id',$warehouse_id);

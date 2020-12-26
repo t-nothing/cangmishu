@@ -4,6 +4,8 @@
  */
 namespace App\Rules;
 use App\Services\VerificationCode;
+use Illuminate\Support\Arr;
+
 /**
  * Class EmailVerifyCodeValidator.
  */
@@ -12,8 +14,8 @@ class EmailVerifyCode
     public function validate($attribute, $value, $parameters, $validator)
     {
 
-        $email = array_get($validator->getData(), $parameters[0], null);
-        
+        $email = Arr::get($validator->getData(), $parameters[0], null);
+
         if (app(VerificationCode::class)->validate($email, $value)) {
             // \requests()->merge(['email_code_verified' => true]);
             return true;

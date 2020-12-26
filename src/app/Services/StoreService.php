@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use App\Models\OrderItemStockLocation;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -29,7 +30,7 @@ class StoreService
     //入库
     public  function  InAndPutOn($warehouse_id,$data,$batch_id, $auto_create_location = false)
     {
- 
+
         $stocks =[];
         if (count($data) ==count($data, 1)) {
             $stocks[] = $data;
@@ -56,9 +57,9 @@ class StoreService
 
             if(count($notExistsLocations) >0) {
                 throw new LocationException($notExistsLocations);
-                
+
             }
-            
+
         }
 
 
@@ -140,8 +141,8 @@ class StoreService
             } else {
                 throw new LocationException([$code]);
             }
-            
-            
+
+
             // return eRet('货位不存在或未启用('.$code.')');
         }
         // app('log')->info('here1111');
@@ -184,7 +185,7 @@ class StoreService
         $batchProduct->batch->save();
         // 入库单信息完善
 
-        
+
         $batchProduct->stockin_num             = $data["stockin_num"];//记录已经入库数量
         $batchProduct->save();
 
@@ -205,7 +206,7 @@ class StoreService
     //拣货并出库
     public function pickAndOut($data)
     {
-   
+
         try {
             //外面有事务了
             $lock = Cache::lock(sprintf("orderpickAndOutLockV1:%s", $data["order_id"]), 10);
@@ -214,7 +215,7 @@ class StoreService
 
                 try {
                     $order = Order::lockForUpdate()->find($data["order_id"]);
-                    if(!$order) 
+                    if(!$order)
                     {
                         throw new \Exception("订单不存在", 1);
                     }
@@ -233,12 +234,12 @@ class StoreService
 
                     throw new \Exception("请稍候再试", 1);
                 }
-                
+
                 $lock->release();
             } else {
                 throw new \Exception("请稍候再试", 1);
             }
-        } 
+        }
         catch(\Exception $ex) {
             $lock->release();
             throw new \Exception($ex->getMessage(), 1);
@@ -253,7 +254,7 @@ class StoreService
         app('log')->info('开始拣货', [
             'out_sn'=> $order->out_sn
         ]);
-        $pickItemIdArr = array_pluck($pickItems, 'order_item_id');
+        $pickItemIdArr = Arr::pluck($pickItems, 'order_item_id');
         $orderItemArr = $order->orderItems->pluck('id')->toArray();
         sort($pickItemIdArr);
         sort($orderItemArr);
@@ -269,7 +270,7 @@ class StoreService
             $item = OrderItem::find($i['order_item_id']);
             if(!$item){
                 throw new \Exception("拣货数量有误,订单明细丢失", 1);
-                
+
             }
 
             if(intval($i['pick_num']) > intval($item->amount)){
@@ -282,7 +283,7 @@ class StoreService
                 continue;
             }
 
- 
+
             //如过没有记录则去数据库拿
             $stockInLocations = app('stock')->getStockByAmount($i['pick_num'], $order->owner_id, $item->relevance_code);
 
@@ -357,8 +358,8 @@ class StoreService
                     'order_sn'=>$order->out_sn
                 ]));
             }
-            
- 
+
+
         }
 
         app('log')->info('更新出库信息', [
@@ -367,7 +368,7 @@ class StoreService
             'verify_status'=>2,
             'delivery_data'=>time()
         ]);
-        
+
         $order->update([
             'status' => Order::STATUS_PICK_DONE,
             'sub_pick_num'  => $subPickNum,
@@ -378,10 +379,10 @@ class StoreService
 
         // 记录出库单拣货完成的时间
         OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-        
+
         return $pickStockResult;
 
-        
+
     }
 
     /**
@@ -396,7 +397,7 @@ class StoreService
                     'order_sn'=>$order->out_sn
                 ]));
             }
- 
+
         }
 
         $order->delivery_date = strtotime($deliveryDate." 00:00:00");

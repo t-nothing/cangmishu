@@ -45,15 +45,16 @@ class PurchaseService
             "warehouse_id"        => $request['warehouse_id'],
             "purchase_code"       => $request['purchase_code'],
             "order_invoice_number"    => $request['order_invoice_number'],
-            "distributor_id"      => $request['distributor_id']??0,
+            "distributor_id"      => $request['distributor_id'] ?? 0,
             "need_num"            => $total_num,
             "sub_total"           => $sub_total,
             "status"              => Purchase::STATUS_PREPARE,
             "created_date"        => $request['created_date'],
             "owner_id"            => Auth::ownerId(),
+            'remark'              => $request['remark'] ?? '',
         ];
 
-        
+
         $batch = Purchase::create($data);
         $batch->items()->createMany($items);
 
@@ -123,7 +124,7 @@ class PurchaseService
         $model = PurchaseItem::find($id);
 
         if(!$model) throw new Exception("Error Processing Request", 1);
-        
+
         $model->status = PurchaseItem::STATUS_ACCOMPLISH;
         $model->confirm_num = $model->need_num;
         $model->last_confirm_date = date("Y-m-d");
@@ -155,7 +156,7 @@ class PurchaseService
         $model->last_confirm_date = $data["arrived_date"];
         $model->confirm_num = $data["arrived_num"];
         $model->status = PurchaseItem::STATUS_PROCEED;
-        
+
         if($model->confirm_num >= $model->need_num)
         {
             $model->status = PurchaseItem::STATUS_ACCOMPLISH;
@@ -177,7 +178,7 @@ class PurchaseService
         $log->confirm_date = $data["arrived_date"];
         $log->owner_id = $model->owner_id;
         $log->save();
-        
+
     }
 
     /*

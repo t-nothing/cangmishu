@@ -162,6 +162,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        //App\Providers\TelescopeServiceProvider::class,
         Overtrue\LaravelWeChat\ServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
 

@@ -26,13 +26,18 @@
     .table-bordered td {
       border: 1px solid #000000;
     }
-    .table-bordered td div{
-      width:350px;
-      height: 22px;
-      word-break:keep-all;/* 不换行 */
-      white-space:nowrap;/* 不换行 */
-      overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
-      text-overflow:ellipsis;
+
+    .table-bordered td div {
+        width: 350px;
+        /*height: 22px;
+        word-break: keep-all; !* 不换行 *!
+        white-space: nowrap; !* 不换行 *!
+        overflow: hidden; !* 内容超出宽度时隐藏超出部分的内容 *!*/
+        text-overflow: ellipsis;
+        height: auto;
+        word-break: initial;
+        white-space: inherit;
+        overflow: auto;
     }
     .qrcode{
       float: right;
@@ -67,7 +72,7 @@
 
 <body>
   <div class="container-fluid">
-    <div class="A4"> 
+    <div class="A4">
 
       <div class="qrcode">
         <img src="{{ $order['out_sn_barcode'] }}">
@@ -90,7 +95,7 @@
     $firstArr = $restArr = [];
     $line_no = 0;
     foreach ($order['order_items'] as $k => $item) {
-        
+
         foreach ($item['stocks'] as $kk => $itemLocation) {
             $itemLocation["name_cn"] = $item['name_cn'];
             $itemLocation["spec_name_cn"] = $item['spec_name_cn'];
@@ -107,7 +112,7 @@
 
     if($firstArr) {
 ?>
-    <table class="table  table-bordered text-center" >
+    <table class="table table-bordered text-center" >
         <thead>
           <tr>
             <th>#</th>
@@ -137,7 +142,7 @@
 
       <div class="row">
         <div class="col-md-12">
-          @lang('message.orderPageRemark'): 
+          @lang('message.orderPageRemark'):
           {{ $order['remark'] }} </div>
       </div>
 <?php
@@ -145,7 +150,7 @@
     $restArrs = array_chunk($restArr, 30, true);
     if($restArrs) {
       foreach ($restArrs as $key => $restArr) {
-?>   
+?>
     <div <?php if($key<count($restArrs)){ ?> style="page-break-after:always;"<?php }?>>
     <table class="table  table-bordered text-center" >
         <thead>
@@ -178,7 +183,7 @@
 <?php
       }
     }
-?>  
+?>
     </div>
   </div>
 </body>

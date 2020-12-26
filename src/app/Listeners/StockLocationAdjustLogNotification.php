@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\StockLocationAdjust;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\ProductStockLog;
 
 class StockLocationAdjustLogNotification
@@ -16,7 +14,7 @@ class StockLocationAdjustLogNotification
      */
     public function __construct()
     {
-        // 
+        //
     }
 
     /**
@@ -35,7 +33,7 @@ class StockLocationAdjustLogNotification
                         ->setStockLocation($model)
                         ->setRemark($option['remark']??'')
                         ->setItemId($option['item_id']??0)
-                        ->setNum($qty ) // - ($option['origin_stock_location_shelf_num']??0)
+                        ->setNum($option['diff']) // - ($option['origin_stock_location_shelf_num']??0)
                         ->setOrderSn($option['order_sn']??'')
                         ->log();
     }

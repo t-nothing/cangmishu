@@ -20,7 +20,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
         // Horizon::routeSmsNotificationsTo('15556667777');
         // Horizon::routeMailNotificationsTo('example@example.com');
         // Horizon::routeSlackNotificationsTo('slack-webhook-url', '#channel');
-        
+
         // Horizon::night();
     }
 
@@ -35,10 +35,17 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     {
 
         Gate::define('viewHorizon', function ($user) {
+            if ($this->app->environment() === 'local'
+                || $this->app->environment() === 'development'
+                || $this->app->environment() === 'dev'
+            ) {
+                return true;
+            }
+
             session(['horizon-user' => $user->email]);
 
             $api_token = app('request')->get('api_token');
-            
+
             $ok = in_array($user->email, [
                 'hubinjie@nle-tech.com'
             ]);

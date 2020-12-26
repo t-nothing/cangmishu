@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\UserCertificationOwner;
-use App\Models\UserCertificationRenters;
-use App\Models\User;
 
 class AuthController extends Controller
 {

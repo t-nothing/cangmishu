@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'middleware' => ['web','auth:jwt'],
+    'middleware' => [],
 
     /*
     |--------------------------------------------------------------------------
@@ -146,7 +146,7 @@ return [
                 'queue' => ['cangmishu', 'cangmishu_push', 'cangmishu_emails', 'cangmishu_push_third_party'],
                 'balance' => 'simple',
                 'processes' => 10,
-                'tries' => 3, 
+                'tries' => 3,
             ],
         ],
 

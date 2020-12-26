@@ -13,6 +13,8 @@ use App\Models\OrderItem;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Rules\PageSize;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -81,11 +83,11 @@ class OrderController extends Controller
             ->with('orderType')
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
-            $order->where('created_at', '>', strtotime($request->created_at_b));
+            $order->where('created_at', '>', Carbon::parse($request->created_at_b)->startOfDay()->unix());
         }
 
         if ($request->filled('created_at_e')) {
-            $order->where('created_at', '<', strtotime($request->created_at_e));
+            $order->where('created_at', '<', Carbon::parse($request->created_at_e)->endOfDay()->unix());
         }
 
         if ($request->filled('status')) {
@@ -102,7 +104,7 @@ class OrderController extends Controller
         $order->when(
             ($request->filled('with_items') && $request->with_items),
             function($q)use($request) {
-                        $q->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic');
+                        $q->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic,relevance_code');
                     }
         );
 
@@ -132,23 +134,30 @@ class OrderController extends Controller
        return formatRet(0, trans("message.success"),$order);
     }
 
-
+    /**
+     * @param  CreateOrderRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws BusinessException
+     * @throws \Throwable
+     */
     public function store(CreateOrderRequest $request)
     {
         app('log')->info('新增出库单',$request->all());
+
+        $this->validateCodeDistinct($request->all());
         app('db')->beginTransaction();
         try {
-
             $request->warehouse_id = app('auth')->warehouse()->id;
 
             $order = app('order')->setSource("自建")->create($request);
-            if(!isset($order->out_sn))
-            {
+            if(! isset($order->out_sn)) {
                 throw new \Exception(trans("message.orderAddFailed"), 1);
 
             }
             app('db')->commit();
             return formatRet(0,trans("message.orderAddSuccess"), $order->toArray());
+        } catch (BusinessException $e) {
+            throw $e;
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('新增出库单失败',['msg'=>$e->getMessage()]);
@@ -632,6 +641,23 @@ class OrderController extends Controller
 
         return response()->download($filePath, $fileName);
         // return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
+
+    }
+
+    /**
+     * @param  array  $data
+     * @throws BusinessException
+     */
+    protected function validateCodeDistinct(array $data)
+    {
+        $distinct = collect($data['goods_data'])
+                ->uniqueStrict(function ($value) {
+                    return $value['relevance_code'];
+                })->count() === count($data['goods_data']);
+
+        if (! $distinct) {
+            throw new BusinessException('商品规格重复了');
+        }
 
     }
 }

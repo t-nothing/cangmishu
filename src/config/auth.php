@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'jwt'),
+        'guard' => env('AUTH_GUARD', 'admin'),
         'passwords' => 'users',
     ],
 
@@ -36,8 +36,8 @@ return [
     */
 
     'guards' => [
-        'jwt' => [
-            'driver' => 'jwt',
+        'admin' => [
+            'driver' => 'custom-jwt',
             'provider' => 'users',
         ],
         'web' => [
@@ -57,6 +57,10 @@ return [
             'driver' => 'third-party',
             'provider' => 'third-party',
         ],
+        'super_admin' => [
+            'driver' => 'jwt',
+            'provider' => 'super_admin',
+        ]
     ],
 
     /*
@@ -89,12 +93,10 @@ return [
             'driver' => 'eloquent',
             'model' => \App\Models\AppAccount::class,
         ],
-
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'super_admin' => [
+            'driver' => 'eloquent',
+            'model' => \App\Models\SuperAdmin::class,
+        ],
     ],
 
     /*

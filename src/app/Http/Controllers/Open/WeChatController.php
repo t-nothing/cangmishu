@@ -5,6 +5,7 @@
 
 namespace App\Http\Controllers\Open;
 
+use App\Guard\TokenCreator;
 use App\Http\Controllers\Controller;
 use Log;
 use App\Models\User;
@@ -65,7 +66,7 @@ class WeChatController extends Controller
 
 
         // exit;
-        // $url = sprintf("https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=STATE#wechat_redirect", 
+        // $url = sprintf("https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=STATE#wechat_redirect",
         //     $info['app_id'],
         //     urlencode('https://api.changmishu.com/open/wechat/scan/login_callback'),
         //     'snsapi_login'
@@ -89,16 +90,17 @@ class WeChatController extends Controller
                 unset($data['wechat_user']);
                 return formatRet(0, '扫描成功', $data);
             }
-            
+
         }
 
         return formatRet(0, '等待中...');
-        
+
     }
 
 
     public function wechatQr()
     {
+
         $wechat = app('wechat.official_account');
 
         $key = Cache::increment('CMS-WECHAT-KEY');
@@ -125,7 +127,7 @@ class WeChatController extends Controller
      */
     public function serve(BaseRequests $request, $id = 'mini_program')
     {
-        Log::info('request arrived.'); # 注意：Log 为 Laravel 组件，所以它记的日志去 Laravel 日志看，而不是 EasyWeChat 日志
+        info('request arrived.'); # 注意：Log 为 Laravel 组件，所以它记的日志去 Laravel 日志看，而不是 EasyWeChat 日志
 
         $config = sprintf("wechat.%s", $id);
         switch ($config) {
@@ -134,33 +136,59 @@ class WeChatController extends Controller
             case 'wechat.open_platform':
                 # code...
                 break;
-            
+
             default:
-                \Log::info('配置无效');
+                info('配置无效');
                 return "配置无效";
         }
 
-        
+
         $app = app($config);
-        $app->server->push(function($message) use($config, $app, $request) {
-            \Log::info('扫码登录外面', $message);
+        $app->server->push(function ($message) use ($config, $app, $request) {
+            info('扫码登录外面', $message);
 
             $str = "你好，欢迎登录仓秘书！\n您可以在微信小程序中搜索:仓秘书，可以同步使用哦！）";
 
             if(($message['Content']??'') == "产品") {
                 return new Image('Y2UZBJIujBqIsLIduCiNC7TFRrXq40xlonzxaJWEah8');
             }
+
+            //处理扫码和订阅事件
             if (in_array(strtoupper($message['Event']??''), ['SCAN', 'SUBSCRIBE']) && $config == "wechat.official_account") {
                 $openid = $message['FromUserName'];
 
-                \Log::info('扫码登录', $message);
                 $wechatUser = $app->user->get($openid);
-                \Log::info('扫码用户', $wechatUser);
+                info('扫码用户', $wechatUser);
 
                 $qrKey = $message['EventKey']??$wechatUser['qr_scene_str'];
                 $qrKey = str_replace("qrscene_", "", $qrKey);
-                //如果是关注，就随机生成一个
 
+                //优先处理绑定事件
+                if ($cache = Cache::get($qrKey)) {
+                    info('当前缓存的信息', $cache);
+                    if (($cache['type'] ?? '') === 'bind' && ! isset($cache['status'])) {
+                        $user = User::where('wechat_openid', $openid)->first();
+
+                        //存在这个用户那就是更新标识为可以更新
+                        if ($user) {
+                            $cache['status'] = 1;
+                            $cache['user_id'] = $user->id;
+                            Cache::put($qrKey, $cache, 60*5);
+                            $str = '绑定成功';
+                        } else {
+                            $cache['status'] = 0;
+                            Cache::put($qrKey, $cache, 60*5);
+
+                            $str = '绑定失败，账号可能未注册';
+                        }
+
+                        return $str;
+                    }
+
+                    return '当前二维码已过期，请刷新';
+                }
+
+                //再处理注册事件
                 $isNewUser = false;
                 if(!empty($qrKey) ) {
 
@@ -168,37 +196,11 @@ class WeChatController extends Controller
                     $user = User::where('wechat_openid', $openid)->first();
                     $token = null;
 
-
-                    /**
-                     * 生成一个新的 token，token 哈希来保证唯一性。
-                     *
-                     * @param  \Illuminate\Contracts\Auth\Authenticatable $user
-                     * @return \App\Models\Token|null
-                     */
-                    $createToken = function($user, $type)
-                    {
-                        $token = new Token;
-                        $token->token_type = $type;
-                        $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-                        $token->expired_at = Carbon::now()->addWeek();
-                        $token->owner_user_id = $user->getAuthIdentifier();
-                        $token->is_valid = Token::VALID;
-
-                        if ($token->save()) {
-                            return $token;
-                        }
-
-                        return;
-                    };
-                    
                     if ($user) {
                         // TODO: 这里根据情况加入其它鉴权逻辑
-                        \Log::info('找到用户', $user->toArray());
+                        info('找到用户', $user->toArray());
                         // 使用 laravel-passport 的个人访问令牌
-                        
-
-                        $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
-
+                        $token = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
                         // 广播扫码登录的消息，以便前端处理
                         // event(new WechatScanLogined($token));
 
@@ -207,7 +209,7 @@ class WeChatController extends Controller
 
                         $userId = $user->id;
                     } else {
-                        \Log::info('自动注册一个新用户');
+                        info('自动注册一个新用户');
                         //创建一个新用户
                         $request->merge([
                             'email'         =>  sprintf("%s_%s@cangmishu.com", time(), app('user')->getRandCode()),
@@ -218,17 +220,17 @@ class WeChatController extends Controller
                             'nickname'      =>  $wechatUser['nickname']??'',
                             'wechat_openid' =>  $openid,
                         ]);//合并参数
-                        \Log::info('合并注册信息');
-                        try 
+                        info('合并注册信息');
+                        try
                         {
-                            \Log::info('开始注册');
+                            info('开始注册');
                             $user = app('user')->quickRegister($request);
-                            $token = $createToken($user, Token::TYPE_ACCESS_TOKEN);
+                            $token = (new TokenCreator())->create($user, Token::TYPE_ACCESS_TOKEN);
                             $userId = $user->id;
-                        } 
-                        catch (\Exception $e) 
+                        }
+                        catch (\Exception $e)
                         {
-                            \Log::info($e->getMessage());
+                            info($e->getMessage());
                             // app('log')->error($e->getMessage());
                             // return formatRet(500, $e->getMessage());
                         }
@@ -245,14 +247,14 @@ class WeChatController extends Controller
                             'wechat_user'   =>  $wechatUser
                         ], 180);
 
-                    \Log::info('登录用户信息', [$qrKey]);
+                    info('登录用户信息', [$qrKey]);
 
                     return $isNewUser?$str:'欢迎使用仓秘书';
 
                 }
 
                 return $str;
-            } 
+            }
 
             return $str;
         });

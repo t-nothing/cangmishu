@@ -11,12 +11,10 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Auth\GuardHelpers;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
-use Log;
 
 class JwtGuard implements Guard
 {
@@ -42,6 +40,7 @@ class JwtGuard implements Guard
      * @var string
      */
     protected $storageKey;
+    private TokenCreator $token_creator;
 
     /**
      * Create a new authentication guard.
@@ -58,6 +57,7 @@ class JwtGuard implements Guard
         $this->provider = $provider;
         $this->inputKey = $inputKey;
         $this->storageKey = $storageKey;
+        $this->token_creator = new TokenCreator();
     }
 
     /**
@@ -182,14 +182,14 @@ class JwtGuard implements Guard
     {
         if(empty($credentials['email']))
         {
-            \Log::info('用户名、邮箱或密码不正确 A', $credentials);
+            Log::info('用户名、邮箱或密码不正确 A', $credentials);
             // eRet('用户名、邮箱或密码不正确');
             return false;
         }
 //        $user = $this->provider->retrieveByCredentials($credentials);
         $user= User::with(['defaultWarehouse:id,name_cn'])->where('phone',$credentials['email'])->orWhere('email',$credentials['email'])->first();
         if(!$user){
-            \Log::info('用户名、邮箱或密码不正确 B', $credentials);
+            Log::info('用户名、邮箱或密码不正确 B', $credentials);
             // eRet('用户名、邮箱或密码不正确');
             return false;
         }
@@ -245,6 +245,52 @@ class JwtGuard implements Guard
 
         // throw new AuthenticationException($this->sendFailedLoginResponse());
         return false;
+    }
+
+    /**
+     * @param  User  $user
+     * @return false|mixed
+     */
+    public function token(User $user)
+    {
+        if($user->isLocked()){
+            return false;
+        }
+
+        $user->last_login_at = time();
+        $user->save();
+
+        $this->setUser($user);
+
+        $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+
+        return $token['token_value'];
+    }
+
+    /**
+     * @param  int  $id
+     * @return array|false
+     */
+    public function userLogin(int $id)
+    {
+        $user = User::with(['defaultWarehouse:id,name_cn'])
+            ->whereKey($id)
+            ->first();
+
+        if(! $user || $user->isLocked()){
+            return false;
+        }
+
+        $user->last_login_at = time();
+        $user->save();
+
+        $this->setUser($user);
+
+        $token = $this->createToken($user, Token::TYPE_ACCESS_TOKEN);
+
+        return [
+            'token' => $token->toArray(),
+        ];
     }
 
     /**
@@ -323,18 +369,7 @@ class JwtGuard implements Guard
      */
     public function createToken(AuthenticatableContract $user, $type)
     {
-        $token = new Token;
-        $token->token_type = $type;
-        $token->token_value = hash_hmac('sha256', $user->getAuthIdentifier() . microtime(), config('APP_KEY'));
-        $token->expired_at = Carbon::now()->addWeek();
-        $token->owner_user_id = $user->getAuthIdentifier();
-        $token->is_valid = Token::VALID;
-
-        if ($token->save()) {
-            return $token;
-        }
-
-        return;
+        return $this->token_creator->create($user, $type);
     }
 
     /**
@@ -391,7 +426,4 @@ class JwtGuard implements Guard
 
         Mail::send($message);
     }
-
-
-
 }

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,11 +12,13 @@
 |
 */
 
-Route::get('/', function () {
-    return  "upgrade success!".env('APP_ENV');
-});
+Route::get('/', 'HomeController@index');
+
+Route::get('websiteConfig', 'WebsiteAppController@info');
+Route::any('/wechatOAuth/callback', 'WebsiteAppController@callback');
 
 // 用户认证
+Route::post('/expLogin', 'AuthController@expLogin');
 Route::post('/login', 'AuthController@login');
 Route::post('/smsLogin', 'AuthController@smsLogin');
 Route::post('/smsLoginCode', 'AuthController@getSMSVerifyCode');
@@ -32,6 +35,10 @@ Route::post('/emailCode', 'UserController@getEmailVerifyCode');
 Route::post('/smsCode', 'UserController@getSMSVerifyCode');
 Route::post('/callUser', 'UserController@callUser');
 
+//绑定老账号的相关接口
+Route::post('/bindAccount', 'WebsiteAppController@bindAccount');
+Route::get('/bindQrCode', 'WebsiteAppController@getBindQrCode');
+
 Route::post('/user/forgetPassword', 'PasswordController@store');// 忘记密码-请求重置
 Route::get('/user/resetPassword/{token_value}', [
     'as' => 'pwd-activation',
@@ -43,17 +50,56 @@ Route::post('/user/resetPassword', 'PasswordController@edit');// 忘记密码-�
 Route::get('/open/shareOrder/detail', 'OrderController@shareView');
 Route::get('/open/shareOrder/downloadPdf', 'OrderController@shareDownload');
 
-Route::middleware(['auth:jwt'])->group(function () {
+Route::middleware(['auth:admin'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
     Route::get('/home/analyzeTable', 'HomePageController@batchOrOrderCount');// 首页仓库
 
+    Route::prefix('index')->group(function () {
+        Route::get('totalData', 'HomePageController@getTotalData');
+        Route::get('salesData', 'HomePageController@getSalesData');
+        Route::get('stockData', 'HomePageController@getStockData');
+    });
 
-    Route::post('/user/{user_id}/password', 'UserController@resetPassword');// 修改密码
+    //销售
+    Route::prefix('sales')->group(function () {
+        Route::get('totalData', 'SalesDataController@getTotalData');
+        Route::get('graphData', 'HomePageController@getSalesData');
+        Route::get('detailData', 'SalesDataController@getDailyDetailData');
+    });
+
+    //客户
+    Route::prefix('customers')->group(function () {
+        Route::get('totalData', 'CustomersController@getTotalData');
+        Route::get('dailyData', 'CustomersController@getDailyData');
+        Route::get('orderRank', 'CustomersController@getOrderRank');
+        Route::get('supplierRank', 'CustomersController@getSupplierRank');
+    });
+
+    //庫存
+    Route::prefix('stocks')->group(function () {
+        Route::get('totalData', 'StockDataController@getTotalData');
+        Route::get('graphData', 'HomePageController@getStockData');
+        Route::get('salesRank', 'StockDataController@getSalesRank');
+        Route::get('warningRank', 'StockDataController@getStockWarningRank');
+    });
+
+    Route::prefix('officialAccount')->group(function () {
+        Route::get('qrCode', 'WechatOfficialAccountController@getQrCode');
+    });
+
+    Route::get('me', 'AuthController@me');
+    Route::put('profile/email', 'UserController@bindEmail'); //绑定邮箱
+    Route::put('profile/phone', 'UserController@bindPhone'); //绑定邮箱
+    Route::get('phoneCode', 'UserController@getPhoneVerifyCode'); //手机验证码
+
+    Route::get('/user/profile', 'UserController@profile');   //个人资料
+    Route::put('/user/password', 'UserController@resetPassword');// 修改密码
     Route::get('/user/{user_id}/privilege', 'UserController@privilege');//获取员工权限
-    Route::post('/user/{user_id}/info', 'UserController@updateInfo');//修改员工个人资料
-    Route::post('/user/{user_id}/avatar', 'UserController@avatar');//修改员工头像
     Route::get('/user/{user_id}', 'UserController@show');//获取员工权限
+
+    Route::put('/user/avatar', 'UserController@updateAvatar');//修改员工头像
+    Route::put('/user/profile', 'UserController@updateProfile');   //修改个人资料
 
     //上传图片
     Route::post('/upload/image', 'UploadController@image');
@@ -94,7 +140,6 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/areas/{location_id}', 'WarehouseAreaController@show');
     Route::put('/areas/{areas_id}', 'WarehouseAreaController@update');
     Route::delete('/areas/{areas_id}', 'WarehouseAreaController@destroy');
-
 
     //入库单分类
     Route::get('/batchType', 'BatchTypeController@index');
@@ -182,12 +227,12 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::put('/order/completed/{order_id}', 'OrderController@completed'); //设为签收
     Route::get('/order/pay/status', 'OrderController@payStatusList'); //支付状态列表
     Route::get('/order/pay/type', 'OrderController@payTypeList'); //支付方式列表
-    
+
     Route::get('/order/{id}/download/', 'OrderController@download');
     Route::get('/order/{id}/download/{tempate}', 'OrderController@download');
     Route::get('/order/{id}/pdf/', 'OrderController@pdf');
     Route::get('/order/{id}/pdf/{tempate}', 'OrderController@pdf');
-    
+
     //库存
     // Route::get('/stock/code', 'ProductStockController@getSkus');
     Route::get('/stock/code', 'ProductStockController@getLocations');
@@ -242,6 +287,9 @@ Route::middleware(['auth:jwt'])->group(function () {
 
 
     //店铺
+    Route::prefix('shop')->group(function () {
+        Route::get('/statistics', 'ShopController@statistics');
+    });
     Route::get('/shop', 'ShopController@index');
     Route::post('/shop', 'ShopController@store');
     Route::get('/shop/{id}', 'ShopController@show');
@@ -274,10 +322,13 @@ Route::middleware(['auth:jwt'])->group(function () {
     Route::get('/recount/{id}/download/', 'RecountController@download');
     Route::get('/recount/{id}/pdf/', 'RecountController@pdf');
 
-
+    Route::prefix('subscribeMessages')->group(function () {
+        Route::get('/{type}', 'SubscribeMessageController@info');
+        Route::put('/{type}', 'SubscribeMessageController@update');
+    });
 });
 
-$router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function(\Illuminate\Routing\Router $router) {
     // 认证、授权
     $router->post('/auth', 'AuthController@login');// 登入
 
@@ -303,13 +354,12 @@ $router->group(['prefix' => 'admin', 'namespace' => 'Admin'], function($router) 
     });
 });
 
-$router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
-
+Route::group(['prefix' => 'open', 'namespace' => 'Open'], function () {
     Route::any('wechat', 'WeChatController@serve');
     Route::any('wechat/login', 'WeChatController@wechatLogin');
     Route::get('wechat/qr', 'WeChatController@wechatQr');
     Route::any('wechat/scan/login_callback', 'WeChatController@wechatQrCallback');
-    Route::any('wechat/{id}', 'WeChatController@serve');
+    Route::any('wechat/{type}', 'WeChatController@serve');
     Route::get('/express', 'ExpressController@list');//快递公司列表
     Route::get('captcha', 'CaptchaController@show');
     Route::post('captcha', 'CaptchaController@valid');
@@ -319,9 +369,9 @@ $router->group(['prefix' => 'open', 'namespace' => 'Open'], function($router) {
 });
 
 
-$router->get('open/shop/list', 'Open\\Shop\\ShopController@index');// 店铺列表
+Route::get('open/shop/list', 'Open\\Shop\\ShopController@index');// 店铺列表
 //店铺开放型接口
-$router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware' => ['shop']], function($router) {
+Route::group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware' => ['shop']], function($router) {
 
     Route::post('/login', 'AuthenticateController@autoLogin')->name('openShopLogin');
     $router->get('/', 'ShopController@show');// 店铺详细
@@ -330,22 +380,30 @@ $router->group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middlewar
     $router->get('/products/{id}', 'ProductController@show');// 商品详细
 
     $router->group(['middleware' => [ 'auth:shop']], function($router) {
-        
         $router->get('/cart', 'CartController@list');// 购物车列表
         $router->get('/cart/count', 'CartController@count');// 购物车数量
         $router->post('/cart', 'CartController@store');// 加入购物车
-        $router->put('/cart/{id}/{qty}', 'CartController@updateQty');// 修改购物车数量
-        $router->delete('/cart/{id}', 'CartController@remove');// 删除单个购物车商品
+        $router->put('/cart/{code}/{qty}', 'CartController@updateQty');// 修改购物车数量
+        $router->delete('/cart/{code}', 'CartController@remove');// 删除单个购物车商品
         $router->delete('/cart', 'CartController@destroy');// 删除整个购物车商品
         $router->post('/cart/checkout', 'CartController@checkout');// 下单
+        //订单
+        Route::prefix('order')->group(function () {
+            Route::get('/', 'OrderController@list');// 店铺订单ID
+            Route::get('{id}', 'OrderController@show');// 店铺订单ID
+           Route::get('statusCount', 'OrderController@orderCount'); //订单数量统计
+        });
 
-        $router->get('/order', 'OrderController@list');// 店铺订单ID
-        $router->get('/order/{id}', 'OrderController@show');// 店铺订单ID
+        $router->put('/products/{id}/collect', 'ProductController@collect');// 收藏
+        $router->put('/products/{id}/unCollect', 'ProductController@unCollect');// 取消收藏
+        $router->get('/products/collections', 'ProductController@collectionList');// 商品收藏列表
+
+        Route::resource('userAddress', 'UserAddressController'); //用户地址 REST
     });
 });
 
 //API 第三方开放接口
-$router->group(['prefix' => 'open/api', 'namespace' => 'Open\\Api', 'middleware' => ['auth:third-party']], function($router) {
+Route::group(['prefix' => 'open/api', 'namespace' => 'Open\\Api', 'middleware' => ['auth:third-party']], function($router) {
 
     $router->get('/stock/spec', 'StockController@spec');// 根据SKU查询库存
     $router->get('/stock/location', 'StockController@location');// 根据货位查询库存
