@@ -90,8 +90,20 @@ class CartController extends Controller
         try
         {
             $spec->load('productSpec');
+
+            $cart = new CartService();
+
+            $cartSpec = $cart->name($this->getWhoisCart())->search(['id' => $request['spec_id']]);
+
+            info('查询到已有的购物车规格', $cartSpec->toArray());
+
+            if ($request['qty'] + ($cartSpec['qty'] ?? 0) > $spec['productSpec']['total_stock_num']) {
+                throw new BusinessException('库存数量不足');
+            }
+
             $pics = json_decode($spec->product->pics, true);
-            (new CartService())->name($this->getWhoisCart())
+
+            $cart->name($this->getWhoisCart())
                 ->add($spec->id, $spec->product->name, $request->qty, $spec->sale_price, [
                     'product_id' => $spec->shop_product_id,
                     'spec'              => $spec->name,
@@ -102,9 +114,9 @@ class CartController extends Controller
             ]);
 
             return formatRet(200,"添加购物车成功");
-        }
-        catch(\Exception $ex)
-        {
+        } catch (BusinessException $exception) {
+            throw $exception;
+        } catch(\Exception $ex) {
 
             // print_r($ex->getMessage());
         }
