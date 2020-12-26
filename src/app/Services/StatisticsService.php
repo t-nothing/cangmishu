@@ -126,8 +126,8 @@ class StatisticsService
         $stock_warning = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
-            ->whereColumn('total_stock_num', '<=', 'c.warning_stock')
-            ->whereRaw('c.warning_stock > 0')
+            ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
+            ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
         $wait_shelf = Batch::query()->where('warehouse_id', self::$warehouseId)
@@ -544,7 +544,7 @@ class StatisticsService
         self::parseDateParams($params, true);
 
         return Product::query()
-            ->selectRaw('total_stock_num as stock,product.name_cn as name, photos as pictures')
+            ->selectRaw('s.total_stock_num as stock,product.name_cn as name, product.photos as pictures')
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
