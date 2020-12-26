@@ -247,8 +247,9 @@ class StatisticsService
 
         $stock_bad = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
+            ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
             ->leftJoin(Category::getIns()->getTable() . ' as c', 'c.id', '=', 'product.category_id')
-            ->whereRaw('product.total_stock_num <= c.warning_stock and c.warning_stock >0')
+            ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
         return [
@@ -504,7 +505,8 @@ class StatisticsService
         $stock_lack_count = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin(Category::getIns()->getTable() . ' as c', 'c.id', '=', 'product.category_id')
-            ->whereRaw('product.total_stock_num <= c.warning_stock and c.warning_stock >0')
+            ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
+            ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
         $product_count = Product::query()
@@ -544,8 +546,9 @@ class StatisticsService
         return Product::query()
             ->selectRaw('total_stock_num as stock,product.name_cn as name, photos as pictures')
             ->where('product.warehouse_id', self::$warehouseId)
+            ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
-            ->whereRaw('product.total_stock_num <= c.warning_stock and c.warning_stock >0')
+            ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->orderBy('product.total_stock_num')
             ->get();
     }
