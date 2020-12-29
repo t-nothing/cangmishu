@@ -4,6 +4,7 @@
  */
 
 namespace App\Http\Controllers\Open\Shop;
+
 use App\Http\Requests\BaseRequests;
 use App\Models\ShopUser;
 use App\Rules\PageSize;
