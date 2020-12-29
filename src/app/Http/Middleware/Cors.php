@@ -3,12 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-// use Exception;
-// use Throwable;
-// use Illuminate\Contracts\Events\Dispatcher;
-// use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Http\Request;
-// use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response;
 
 class Cors

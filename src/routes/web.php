@@ -395,6 +395,7 @@ Route::group(['prefix' => 'open/shop', 'namespace' => 'Open\\Shop', 'middleware'
         //订单
         Route::prefix('order')->group(function () {
             Route::get('/', 'OrderController@list');// 店铺订单ID
+            Route::post('/', 'OrderController@store'); //直接下单
             Route::get('{id}', 'OrderController@show');// 店铺订单ID
            Route::get('statusCount', 'OrderController@orderCount'); //订单数量统计
         });
