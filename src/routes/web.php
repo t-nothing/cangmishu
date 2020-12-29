@@ -54,11 +54,16 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/home/notice', 'HomePageController@notice');// 首页通知
     Route::get('/home/analyze', 'HomePageController@analyze');// 首页仓库
     Route::get('/home/analyzeTable', 'HomePageController@batchOrOrderCount');// 首页仓库
-
+    //web端首页
     Route::prefix('index')->group(function () {
         Route::get('totalData', 'HomePageController@getTotalData');
         Route::get('salesData', 'HomePageController@getSalesData');
         Route::get('stockData', 'HomePageController@getStockData');
+    });
+
+    //小程序首页
+    Route::prefix('mini-program-index')->group(function () {
+        Route::get('statistics', 'MiniProgramIndexController@statistics');
     });
 
     //销售
