@@ -199,14 +199,14 @@ class OrderController extends Controller
             'remark'        => 'string',
         ]);
 
-        info('商品直接下单',$request->all());
+        info('商品直接下单', $request->all());
 
         app('db')->beginTransaction();
 
         try {
             $specs = ShopProductSpec::query()
                 ->with('productSpec')
-                ->whereIn('spec_id', Arr::pluck($data['spec'], '*.id'))
+                ->whereIn('spec_id', Arr::pluck($data['specs'], '*.id'))
                 ->get();
 
             if ($specs->isEmpty()) {
