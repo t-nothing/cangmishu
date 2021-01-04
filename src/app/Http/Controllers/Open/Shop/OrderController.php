@@ -214,7 +214,7 @@ class OrderController extends Controller
             }
 
             $totalPrice = $specs->sum(function ($spec) use ($data) {
-                return $spec['sale_price'] * collect($data['specs'])->firstWhere('id', $spec['spec_id'])['qty'] ?? 1;
+                return $spec['sale_price'] * collect($data['specs'])->firstWhere('id', $spec['id'])['qty'] ?? 1;
             });
 
             if ($request->verify_money != $totalPrice) {
@@ -268,7 +268,7 @@ class OrderController extends Controller
                     'relevance_code'    =>  $spec->productSpec->relevance_code,
                     'pic'               =>  $spec->productSpec->pic,
                     'num'               =>  collect($data['specs'])
-                            ->firstWhere('id', $spec['spec_id'])['qty'] ?? 1,
+                            ->firstWhere('id', $spec['id'])['qty'] ?? 1,
                     'sale_price'        =>  $spec->sale_price,
                 ];
             }
