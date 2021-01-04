@@ -10,6 +10,7 @@ use App\Models\Batch;
 use App\Models\Distributor;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ReceiverAddress;
 use App\Models\Shop;
 use App\Models\ShopSenderAddress;
 
@@ -48,7 +49,9 @@ class MiniProgramIndexController extends Controller
 
         $shop = $shops->count();
 
-        $shopUser = ShopSenderAddress::query()->whereIn('shop_id', $shops->modelKeys())->count();
+        $shopUser = ReceiverAddress::query()
+            ->where('owner_id', auth()->id())
+            ->count();
 
         $supplier = Distributor::query()
             ->where('user_id', auth()->id())
