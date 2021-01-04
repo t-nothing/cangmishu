@@ -206,7 +206,7 @@ class OrderController extends Controller
         try {
             $specs = ShopProductSpec::query()
                 ->with('productSpec')
-                ->whereIn('spec_id', array_column($data['specs'], 'id'))
+                ->whereKey(array_column($data['specs'], 'id'))
                 ->get();
 
             if ($specs->isEmpty()) {
