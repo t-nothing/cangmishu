@@ -10,6 +10,7 @@ use App\Models\Batch;
 use App\Models\ProductStock;
 use App\Models\BatchMarkLog;
 use App\Models\ProductSpec;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Exceptions\LocationException;
@@ -160,7 +161,7 @@ class BatchController extends Controller
             app('db')->rollback();
             app('log')->error('货位不存在',['msg' =>$e->getMessage()]);
             return formatRet(404, $e->getMessage(), $e->getLocations());
-        } 
+        }
         catch (\Exception $e){
             app('db')->rollback();
             app('log')->error('入库上架失败',['msg' =>$e->getMessage()]);
@@ -191,7 +192,7 @@ class BatchController extends Controller
             }
         }
 
-        
+
         app('log')->info('template', [strtolower($template)]);
         $templateName = "pdfs.batch.template_".strtolower($template);
         if(!in_array(strtolower($template), ['entry','purchase','batchno'])){
@@ -236,7 +237,7 @@ class BatchController extends Controller
         $pdf = PDF::setPaper('a4');
 
         $fileName = sprintf("%s_%s_%s.pdf", $batch->id, template_download_name($templateName, "en"), md5($batch->id.$batch->created_at));
-        
+
         $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
         if(!file_exists($filePath)) {
 
@@ -287,7 +288,7 @@ class BatchController extends Controller
         {
             $model = new ProductSpec;
             foreach ($data['batch_products'] as $k => $v) {
-            
+
                 $model->product = $v['spec']['product'];
                 $model->name_cn = $v['spec']['name_cn'];
                 $model->name_en = $v['spec']['name_en'];
@@ -295,8 +296,8 @@ class BatchController extends Controller
 
 
                 $data['batch_products'][$k]['need_production_batch_number'] = $v['spec']['product']['category']['need_production_batch_number'];
-                $data['batch_products'][$k]['need_expiration_date'] = $v['spec']['product']['category']['need_expiration_date'];
-                $data['batch_products'][$k]['need_best_before_date'] = $v['spec']['product']['category']['need_best_before_date'];
+                $data['batch_products'][$k]['need_expiration_date'] = Carbon::parse($v['spec']['product']['category']['need_expiration_date'])->toDateTimeString();
+                $data['batch_products'][$k]['need_best_before_date'] = Carbon::parse($v['spec']['product']['category']['need_best_before_date'])->toDateTimeString();
             }
         }
 
@@ -308,7 +309,7 @@ class BatchController extends Controller
      * 生成 -入库单号
      * */
     public function batchCode()
-    { 
+    {
         $warehouse_code = app('auth')->warehouse()->code;
         $batch_time = date('y').date('W').date('w');
         $batch_mark = BatchMarkLog::newMark($warehouse_code);
