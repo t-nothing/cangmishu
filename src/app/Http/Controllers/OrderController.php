@@ -627,6 +627,12 @@ class OrderController extends Controller
             $pdf->loadView($templateName, ['order' => $order->toArray()])->save($filePath);
         }
 
+        try {
+            Storage::put('1.html', view('pdfs.order.template_pick', ['order' => $order->toArray()]));
+        } catch (\Throwable $throwable) {
+            info('保存失败', ['throwable' => $throwable->getMessage()]);
+        }
+
         if($request->filled("require_url") && $request->require_url == 1) {
 
             $url = asset('storage/pdfs/'.$fileName);
