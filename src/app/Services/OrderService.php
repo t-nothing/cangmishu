@@ -296,7 +296,7 @@ class OrderService
                         $sender = new SenderAddress;
                         $sender->country    = $warehouse['country'];
                         $sender->city       = $warehouse['city'];
-                        $sender->province   = '';
+                        $sender->province   = $warehouse['province'];
                         $sender->postcode   = $warehouse['postcode'];
                         $sender->district   = $warehouse['street'];
                         $sender->address    = $warehouse['door_no'];
