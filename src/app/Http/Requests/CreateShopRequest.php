@@ -24,12 +24,12 @@ class CreateShopRequest extends BaseRequests
      */
     public function rules()
     {
-        
+
         $arr = [
             'name_cn'                   => [
                'required','string','max:100',
                 Rule::unique('shop', 'name_cn')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId())->where('deleted_at', null);
+                    $q->where('owner_id', Auth::ownerId())->where('deleted_at', null);
                 })
             ],
             'logo'                      => 'url|max:100',
