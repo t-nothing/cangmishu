@@ -293,14 +293,14 @@ class BatchController extends Controller
                 $model->name_cn = $v['spec']['name_cn'];
                 $model->name_en = $v['spec']['name_en'];
                 $data['batch_products'][$k]['spec']['product_name'] = $model->product_name;
-                $data['batch_products'][$k]['expiration_date'] = Carbon::parse(
+                $data['batch_products'][$k]['expiration_date'] = $v['expiration_date'] ? Carbon::parse(
                     $v['expiration_date'],
                     new \DateTimeZone('Asia/Shanghai')
-                )->toDateString();
-                $data['batch_products'][$k]['best_before_date'] = Carbon::parse(
+                )->toDateString() : null;
+                $data['batch_products'][$k]['best_before_date'] = $v['best_before_date'] ? Carbon::parse(
                     $v['best_before_date'],
                     new \DateTimeZone('Asia/Shanghai')
-                )->toDateString();
+                )->toDateString() : null;
 
                 $data['batch_products'][$k]['need_production_batch_number'] = $v['spec']['product']['category']['need_production_batch_number'];
                 $data['batch_products'][$k]['need_expiration_date'] = $v['spec']['product']['category']['need_expiration_date'];
