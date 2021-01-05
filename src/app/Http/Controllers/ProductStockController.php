@@ -5,14 +5,18 @@ use App\Exports\SkuExport;
 use App\Exports\StockExport;
 use App\Http\Requests\BaseRequests;
 use App\Models\Batch;
+use App\Models\Product;
 use App\Models\ProductSpec;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
+use App\Models\ProductStockLocation;
 use App\Models\WarehouseLocation;
 use App\Rules\PageSize;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Events\StockIn;
+use App\Events\StockOut;
 
 class ProductStockController extends  Controller
 {
@@ -41,21 +45,38 @@ class ProductStockController extends  Controller
         $warehouse_id = $request->input('warehouse_id');
         $option = $request->input('option');
 
-        $results = ProductSpec::with('owner:id,email', 'product.category.feature')
+
+
+        $results = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times,stock_num,id'])
+            ->leftjoin('product', 'product.id','=', 'product_spec.product_id')
+            ->leftjoin('category', 'category.id','=', 'product.category_id')
             ->ofWarehouse($warehouse_id)
-            ->where('owner_id', app('auth')->ownerId())
+            ->where('product_spec.owner_id', app('auth')->ownerId())
             ->when($relevance_code = $request->input('relevance_code'), function ($query) use ($relevance_code) {
-                $query->where('relevance_code', $relevance_code);
+                $query->where('product_spec.relevance_code', $relevance_code);
             })
+            ->when(($request->filled('show_low_stock') && $request->show_low_stock == 1), function($q) {
+                    return  $q->whereRaw('product_spec.total_stock_num <= category.warning_stock and category.warning_stock >0');
+                }
+            )
             // API向前兼容
             ->when($keywords = $request->input('keywords'), function ($query) use ($keywords) {
-                $query->hasKeyword($keywords);
+                return $query->where(function ($query) use ($keywords) {
+                    $query->where('product_spec.name_cn', 'like', '%'.$keywords.'%')
+                        ->orWhere('product_spec.name_en', 'like', '%'.$keywords.'%')
+                        ->orWhere('product.hs_code', 'like', '%'.$keywords.'%')
+                        ->orWhere('product.origin', 'like', '%'.$keywords.'%');
+                });
             })
             ->when($sku = $request->input('sku'), function ($query) use ($sku) {
                 $query->hasSku($sku);
             })
             ->when($product_name = $request->input('product_name'), function ($query) use ($product_name) {
-                $query->hasProductName($product_name);
+                return $query->where(function ($query) use ($product_name) {
+                    $query->where('product.name_cn', 'like', "%{$product_name}%")
+                        ->orWhere('product.name_en', 'like', "%{$product_name}%")
+                        ->orWhere('product_spec.relevance_code', $product_name);
+                });
             })
             ->when($production_batch_number = $request->input('production_batch_number'), function ($query) use ($production_batch_number) {
                 $query->hasProductBatchNumber($production_batch_number);
@@ -70,89 +91,29 @@ class ProductStockController extends  Controller
             ->when($option == 3, function ($query) use ($warehouse_id, $owner_id) {
                 $query->onlyToBeOnShelf($warehouse_id, $owner_id);
             })
+            ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
             // sortBy
-            ->latest()
+            ->orderBy('product_spec.created_at', 'desc')
+            ->orderBy('product_spec.id', 'desc')
             // 分页
-            ->paginate($request->input('page_size',10), [
-                'id',
-                'warehouse_id',
-                'product_id',
-                'name_cn',
-                'name_en',
-                'relevance_code',
-                'owner_id',
-            ]);
+            ->paginate($request->input('page_size',10))->toArray();
 
-        if ($results) {
-            foreach ($results as $key => $spec) {
+        $lang = app('translator')->locale()?:'cn';
+        if ($results['data']) {
+            foreach ($results['data'] as $k => &$v) {
 
-                $spec->append([
-                    'product_name',
-                    'stock_in_warehouse',// 仓库库存
-                    'stock_entrance_times',// 入库次数
-                    'stock_out_times',// 出库次数
-                    'stock_entrance_qty',// 入库数量
-                    'stock_out_qty',// 出库数量
-                ]);
-            }
-        }
-        $data = $results->toArray();
-        if ($data['data']) {
-            foreach ($data['data'] as $k => $v) {
-                $spec_id = $v['id'];
 
-                $data['data'][$k]['owner'] = $v['owner']['email'];
-
-                $stocks = ProductStock::with(['batch', 'location'])//:id,code
-                    ->withCount(['logs as edit_count' => function ($query) {
-                        $query->where('type_id', ProductStockLog::TYPE_COUNT);
-                    }])
-                    ->ofWarehouse($warehouse_id)
-                    ->whose($v['owner_id'])
-                    ->where('spec_id', $spec_id)
-                    ->enabled()
-                    ->get();
-
-                // SKU数
-                $data['data'][$k]['sku_count'] = $stocks->count();
-                $data['data'][$k]['feature_name_cn'] = $v['product']['category']['feature']['name_cn'] ?? '';
-
-                // SKU
-                $data['data'][$k]['stocks'] = [];
-
-                if ($stocks) {
-                    $skus = [];
-
-                    foreach ($stocks as $stock) {
-                        $sku = [];
-                        $s = $stock->toArray();
-
-                        $sku['stock_id']                = $s['id'];
-                        $sku['spec_id']                 = $s['spec_id'];
-                        $sku['sku']                     = $s['sku'];
-                        $sku['ean']                     = $s['ean'];
-                        $sku['production_batch_number'] = $s['production_batch_number'];
-                        $sku['expiration_date']         = $s['expiration_date'];
-                        $sku['best_before_date']        = $s['best_before_date'];
-                        $sku['stockin_num']             = $s['stockin_num'];
-                        $sku['edit_count'] = $s['edit_count'];
-                        $sku['location_code'] = isset($stock->location->code) ? $stock->location->code : '';
-                        unset($sku['spec_id']);
-                        $skus[] = $sku;
-                    }
-                    $data['data'][$k]['stocks'] = $skus;
+                $product_name_cn = sprintf("%s (%s)" , $v["origin_product_name_cn"],  $v["name_cn"]);
+                $product_name_en = sprintf("%s (%s)" , $v["origin_product_name_en"],  $v["name_en"]);
+                // $results['data'][$k]['product_name'] = $lang == 'en'?$product_name_en:$product_name_cn;
+                $results['data'][$k]['product_name'] = $product_name_cn;
+                foreach ($v['stocks'] as $key => &$value) {
+                    $value['warehouse_location_code'] = WarehouseLocation::getCode($value['warehouse_location_id']);
                 }
 
-                unset(
-                    $data['data'][$k]['warehouse_id'],
-                    $data['data'][$k]['product_id'],
-                    $data['data'][$k]['owner_id'],
-                    $data['data'][$k]['product']
-                );
             }
         }
-
-        return formatRet(0, '', $data);
+        return formatRet(0, '', $results);
     }
 
     /**
@@ -160,6 +121,7 @@ class ProductStockController extends  Controller
      */
     public function getLogsForSpec(BaseRequests $request,$spec_id)
     {
+
         $this->validate($request, [
             'page'         => 'integer|min:1',
             'page_size'    => new PageSize,
@@ -193,7 +155,7 @@ class ProductStockController extends  Controller
             $log->where('type_id', $request->type_id);
         }
 
-        $data = $log->latest()->paginate($request->input('page_size'), [
+        $data = $log->orderby('created_at', 'desc')->orderby('id', 'desc')->paginate($request->input('page_size', 10), [
             'id',
             'operation_num',
             'operator',
@@ -204,8 +166,7 @@ class ProductStockController extends  Controller
             'remark',
             'sku',
             'spec_id',
-            'spec_total_shelf_num',
-            'spec_total_stockin_num',
+            'spec_total_stock_num',
             'type_id',
             'created_at',
         ])->toArray();
@@ -252,7 +213,7 @@ class ProductStockController extends  Controller
             $log->where('type_id', $request->type_id);
         }
 
-        $data = $log->latest()->paginate($request->input('page_size'), [
+        $data = $log->latest()->paginate($request->input('page_size', 10), [
             'id',
             'operation_num',
             'operator',
@@ -263,7 +224,7 @@ class ProductStockController extends  Controller
             'remark',
             'sku',
             'sku_total_shelf_num',
-            'sku_total_stockin_num',
+            'stock_total_stock_num as sku_total_stock_num',
             'spec_id',
             'type_id',
             'created_at',
@@ -274,6 +235,7 @@ class ProductStockController extends  Controller
 
     /**
      * 导出库存
+     * 根据规格导出库存记录
      */
     public function export(BaseRequests $request)
     {
@@ -297,7 +259,7 @@ class ProductStockController extends  Controller
 
         $option = $request->input('option');
 
-        $specs = ProductSpec::with('owner:id,email,nickname', 'product.category.feature')
+        $specs = ProductSpec::with( 'product.category')
             ->ofWarehouse($warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->when($relevance_code = $request->input('relevance_code'), function ($query) use ($relevance_code) {
@@ -328,6 +290,7 @@ class ProductStockController extends  Controller
             })
             // sortBy
             ->latest()
+            ->limit(5000)//限制一下
             // 分页
             ->select(
                 'id',
@@ -336,17 +299,24 @@ class ProductStockController extends  Controller
                 'name_cn',
                 'name_en',
                 'relevance_code',
-                'owner_id'
+                'owner_id',
+                'total_stock_num',
+                'total_stockin_times',
+                'total_stockin_num',
+                'total_stockout_times',
+                'total_stockout_num'
             );
 
         $export = new StockExport();
         $export->setQuery($specs);
 
-        return app('excel')->download($export, '货品总库存'.date('Y-m-d').'.xlsx');
+        return app('excel')->download($export, trans("message.productStockExportCaption").date('Y-m-d').'.xlsx');
 
     }
 
-
+    /**
+     * 导出货品规格列表
+     */
     public function exportBySku(BaseRequests $request)
     {
         $this->validate($request, [
@@ -401,14 +371,7 @@ class ProductStockController extends  Controller
             ->latest()
             ->pluck('id')
             ->toArray();
-
-        $stocks = ProductStock::with(['batch', 'location', 'owner:id,nickname'])
-            ->withCount(['logs as edit_count' => function ($query) {
-                $query->where('type_id', ProductStockLog::TYPE_COUNT);
-            }])
-            ->doesntHave('batch', 'and', function ($query) {
-                $query->where('status', Batch::STATUS_PREPARE)->orWhere('status', Batch::STATUS_CANCEL);
-            })
+        $stocks = ProductStock::with(['locations'])
             ->ofWarehouse($warehouse_id)
             ->where('owner_id', app('auth')->ownerId())
             ->whereIn('spec_id', $spec_ids)
@@ -417,7 +380,7 @@ class ProductStockController extends  Controller
         $export = new SkuExport();
         $export->setQuery($stocks);
 
-        return app('excel')->download($export, 'SKU 库存'.date('Y-m-d').'.xlsx');
+        return app('excel')->download($export, trans("message.productSkuExportCaption").date('Y-m-d').'.xlsx');
     }
 
     /**
@@ -442,15 +405,15 @@ class ProductStockController extends  Controller
         $location = WarehouseLocation::ofWarehouse($warehouse->id)->enabled()
             ->where('code', $request->code)->first();
 
-        $stock = ProductStock::with('spec.product')
+        $stock = ProductStockLocation::with('spec.product')
             ->where('owner_id', app('auth')->ownerId())
-            ->ofWarehouse($warehouse->id)->enabled();
+            ->ofWarehouse($warehouse->id);
 
         // sku 还是 货位
         if ($location) {
             $stock->where('warehouse_location_id', $location->id);
         } else {
-            $stock->where('sku', $request->code);
+            $stock->where('sku', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code);
         }
 
         $stocks= $stock->paginate();
@@ -459,12 +422,13 @@ class ProductStockController extends  Controller
         foreach ($stocks as $s) {
             $re[] = [
                 'ean' => $s->ean,
-                'stock_id' => $s->id,
+                'id'  => $s->id,
+                'stock_id' => $s->stock_id,
                 'sku' => $s->sku,
                 'product_name' => $s->product_name,
                 'shelf_num' => $s->shelf_num,
                 'relevance_code' =>$s->relevance_code,
-                'location_code'=>$s->location->code,
+                'location_code'=>$s->location->code??'',
                 'production_batch_number'=>$s->production_batch_number,
                 'best_before_date'=>$s->best_before_date?$s->best_before_date->toDateString():"",
                 'remark'=>"",
@@ -481,7 +445,7 @@ class ProductStockController extends  Controller
         $result = $stocks->toArray();
         unset($result['data']);
         $result['data'] = $re;
-        return formatRet(0, '成功', $result);
+        return formatRet(0, '', $result);
     }
 
 
@@ -517,85 +481,91 @@ class ProductStockController extends  Controller
     }
 
     /**
-     * 库存 - 编辑
+     * 库存 - 盘点
      */
     public function update(BaseRequests $request,$stock_id)
     {
-        app('log')->info('手持端 - 库存盘点', $request->input());
+
+        app('log')->info('桌面端 - 库存编辑', $request->post());
 
         $this->validate($request, [
-            'stock_num'               => 'required|integer|min:0|max:9999',
-            'ean'                     => 'required|string|max:255',
-            'expiration_date'         => 'sometimes|date_format:Y-m-d',
-            'best_before_date'        => 'sometimes|date_format:Y-m-d',
-            'production_batch_number' => 'sometimes|string|max:255',
-            'location_code'           => 'required|string',
-            'remark'                  => 'string|max:255',
-            'warehouse_id'            =>[
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where('owner_id',Auth::ownerId())
-            ]
+            'id'                        => 'required|integer|min:1',
+            'ean'                       => 'required|string|max:255',
+            'expiration_date'           => 'date_format:Y-m-d',
+            'best_before_date'          => 'date_format:Y-m-d',
+            'production_batch_number'   => 'string|max:255',
+            'locations'                 => 'required|array',
+            'locations.*.id'            => 'required|integer|min:0',
+            'locations.*.shelf_num'     => 'required|integer|min:0',
+            'locations.*.remark'       => 'string|max:255',
         ]);
 
-        $warehouse = Auth::warehouse();
-
+        $warehouse = app('auth')->warehouse();
         $stock = ProductStock::ofWarehouse($warehouse->id)
-            ->where('owner_id',app('auth')->ownerId())
-            ->where('status', ProductStock::GOODS_STATUS_ONLINE)
-            ->findOrFail($stock_id);
+            ->when(app('auth')->isLimited(),function($q){
+                return $q->whereIn('owner_id',app('auth')->ownerId());
+            })
+            ->findOrFail($request->id);
+
 
         $category = $stock->spec->product->category;
-        if ($category) {
+        if ($category)
+        {
             $rules = [];
             $category->need_expiration_date == 1 AND
-            $rules['expiration_date'] = 'required|date_format:Y-m-d';
+                $rules['expiration_date'] = 'required|date_format:Y-m-d';
             $category->need_best_before_date == 1 AND
-            $rules['best_before_date'] = 'required|date_format:Y-m-d';
+                $rules['best_before_date'] = 'required|date_format:Y-m-d';
             $category->need_production_batch_number == 1 AND
-            $rules['production_batch_number'] = 'required|string|max:255';
+                $rules['production_batch_number'] = 'required|string|max:255';
             $rules AND
-            $this->validate($request, $rules);
-        }
-
-        $location = WarehouseLocation::ofWarehouse($warehouse->id)
-            ->enabled()
-            ->where('code', $request->location_code)
-            ->first();
-
-        if (! $location) {
-            return formatRet(500, '货位不存在或未启用');
+                $this->validate($request, $rules);
         }
 
         app('db')->beginTransaction();
         try {
-            // 原库存
-            $sku_total_shelf_num_old = ProductStock::ofWarehouse($stock->warehouse_id)
-                ->enabled()
-                ->whose($stock->owner_id)
-                ->where('sku', $stock->sku)->sum('shelf_num');
 
-            $stock->shelf_num               = $request->stock_num;
-            $stock->stockin_num             = $request->stock_num;
             $stock->ean                     = $request->ean;
-            $stock->expiration_date         = $request->input('expiration_date') ? strtotime($request->input('expiration_date')." 00:00:00"): null;
-            $stock->best_before_date        = $request->input('best_before_date') ? strtotime($request->input('best_before_date')." 00:00:00"): null;
+            $stock->expiration_date         = $request->input('expiration_date') ?: null;
+            $stock->best_before_date        = $request->input('best_before_date') ?: null;
             $stock->production_batch_number = $request->input('production_batch_number', '');
-            $stock->warehouse_location_id   = $location->id;
             $stock->save();
+            //同位货位上面的信息
+            $stock->syncLocationInfo();
 
-            // 添加入库单记录
-            $stock->addLog(ProductStockLog::TYPE_COUNT, $request->stock_num,"", $sku_total_shelf_num_old, $request->input('remark', ''));
+            $old_stock_num = $stock->stock_num;
+            $new_stock_num = 0;
+            foreach ($request->locations as $key => $location) {
+
+                $stockLocation = ProductStockLocation::ofWarehouse($warehouse->id)
+                ->where("stock_id", $request->id)
+                ->findOrFail($location["id"]);
+
+                //盘点后的库存减去盘点前的上架库存
+                $final_num = $location["shelf_num"] - $stockLocation["shelf_num"];
+
+                $stockLocation->adjustShelfNum($location["shelf_num"]);
+
+
+            }
+
+
             app('db')->commit();
+
+
         } catch (\Exception $e) {
             app('db')->rollback();
-            info('手持端 - 库存盘点', ['exception msg' => $e->getMessage()]);
+            info('桌面端 - 库存盘点', ['exception msg' => $e->getMessage()]);
 
-            return formatRet(500, '失败');
+            return formatRet(500, trans('message.failed'));
         }
+
         return formatRet(0);
     }
 
-
+    /**
+     *
+     */
     public  function  getInfoBySku(BaseRequests $request, $sku)
     {
         app('log')->info('查看库存详情', $request->input());
@@ -614,8 +584,97 @@ class ProductStockController extends  Controller
         }
         $stock->append(['need_expiration_date','need_best_before_date','need_production_batch_number','need_expiration_date_name','need_best_before_date_name','need_production_batch_number_name','product_name']);
         $stock->setHidden(['spec']);
-        return formatRet(0,'成功',$stock->toArray());
+        return formatRet(0,'',$stock->toArray());
 
+    }
+
+    public function getLocations(BaseRequests $request)
+    {
+
+        app('log')->info('查询某货位上的所有SKU',['owner_id'=>app('auth')->ownerId(),'request'=>$request->all()]);
+        $this->validate($request, [
+            'code' => 'required|string',
+            'warehouse_id'=>[
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where(function($q){
+                    $q->where('owner_id',Auth::ownerId());
+                })
+            ]
+        ]);
+
+        $warehouse = app('auth')->warehouse();
+
+        $location = WarehouseLocation::ofWarehouse($warehouse->id)->enabled()
+            ->where('code', $request->code)->first();
+
+        $stock = ProductStockLocation::with('spec.product')
+            ->where('owner_id', app('auth')->ownerId())
+            ->ofWarehouse($warehouse->id);
+
+        // sku 还是 货位
+        if ($location) {
+            $stock->where('warehouse_location_id', $location->id);
+        } else {
+            $stock->where(function ($query) use ($request) {
+                $query->orWhere('sku', $request->code)
+                    ->orWhere('ean', $request->code)
+                    ->orWhere('relevance_code', $request->code);
+            });
+            //$stock->where('sku', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code);
+        }
+
+        $stocks= $stock->paginate($request->input('page_size',100));
+
+        $arr= [];
+        foreach ($stocks as $stockLoation) {
+
+            $arr[] = [
+                    'id'                    =>  $stockLoation->id,
+                    'name_cn'               =>  $stockLoation->stock->product_name_cn,
+                    'name_en'               =>  $stockLoation->stock->product_name_en,
+                    'relevance_code'        =>  $stockLoation->stock->spec->relevance_code,
+                    'stock_sku'             =>  $stockLoation->stock->sku,
+                    'shelf_num_orgin'       =>  $stockLoation->shelf_num,
+                    'shelf_num_now'         =>  $stockLoation->shelf_num,
+                    'total_purcharse_orgin' =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'total_purcharse_now'   =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'status'                =>  1,
+                    'location_code'         =>  $stockLoation->warehouse_location_code,
+                    'location_id'           =>  $stockLoation->warehouse_location_id,
+                ];
+        }
+
+        $result = $stocks->toArray();
+        unset($result['data']);
+        $result['data'] = $arr;
+        return formatRet(0, '', $result);
+    }
+
+    /**
+     * 根据规格ID得到位置
+     *
+     */
+    public function getLocationBySpec(BaseRequests $request){
+
+        $this->validate($request, [
+            'warehouse_id'            =>[
+                'required','integer','min:1',
+                Rule::exists('warehouse','id')->where('owner_id',Auth::ownerId())
+            ],
+            'spec'      => 'required|array',
+            'spec.*' => 'required|integer|min:1',
+        ]);
+
+
+        return formatRet(0,'',app("recount")->getLocationBySpec($request->all()));
+    }
+
+
+    /**
+     * 日志类型
+     */
+    public function getLogType(){
+        return formatRet(0,'', ProductStockLog::getAllType());
     }
 
 }

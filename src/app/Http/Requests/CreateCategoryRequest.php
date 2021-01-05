@@ -24,17 +24,12 @@ class CreateCategoryRequest extends BaseRequests
      */
     public function rules()
     {
-        return [
+        $warehouse_id = app('auth')->warehouse()->id;
+        $arr = [
             'name_cn'         => [
                 'required','string','max:50',
-                Rule::unique('category')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
-                }),
-            ],
-            'name_en'         => [
-                'required','string','max:50',
-                Rule::unique('category')->where(function ($query) {
-                    return $query->where('owner_id',Auth::ownerId());
+                Rule::unique('category')->where(function ($query) use($warehouse_id) {
+                    return $query->where('owner_id',Auth::ownerId())->where('warehouse_id',$warehouse_id);
                 }),
             ],
             'is_enabled'                   => 'required|boolean',
@@ -42,6 +37,19 @@ class CreateCategoryRequest extends BaseRequests
             'need_production_batch_number' => 'required|boolean',
             'need_best_before_date'        => 'required|boolean',
         ];
+
+        if($this->isRequiredLang())
+        {
+            $arr['name_en']         = [
+                'required','string','max:50',
+                Rule::unique('category')->where(function ($query) {
+                    return $query->where('owner_id',Auth::ownerId());
+                }),
+            ];
+        }
+
+
+        return $arr;
     }
 
 }

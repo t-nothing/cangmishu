@@ -25,12 +25,6 @@ class IndexProductRequest extends BaseRequests
     public function rules()
     {
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',app('auth')->ownerId());
-                })
-            ],
             'page' => 'integer|min:1',
             'page_size' => new PageSize(),
             'category_id' =>[
@@ -41,7 +35,9 @@ class IndexProductRequest extends BaseRequests
             ],
             'updated_at_b' => 'date:Y-m-d',
             'updated_at_e' => 'date:Y-m-d',
-            'keywords' => 'sometimes|string'
+            'recount' => 'integer|min:0|max:1',
+            'keywords' => 'sometimes|string',
+            'show_low_stock' => 'sometimes|boolean',
         ];
     }
 }

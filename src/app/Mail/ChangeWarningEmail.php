@@ -32,6 +32,6 @@ class ChangeWarningEmail extends Mailable implements ShouldQueue
 
     public function build()
     {
-        return $this->subject('EU Techne商家仓库管理系统')->view('emails.changeWarningEmail');
+        return $this->subject('您的库存不足,仓秘书仓储管理系统预警')->view('emails.changeWarningEmail');
     }
 }

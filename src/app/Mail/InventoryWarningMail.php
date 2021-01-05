@@ -13,7 +13,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class InventoryWarningMail extends Mailable implements ShouldQueue
+class InventoryWarningMail extends Mailable 
 {
     use Queueable, SerializesModels;
 
@@ -37,11 +37,15 @@ class InventoryWarningMail extends Mailable implements ShouldQueue
      * @param  int $stock 出库后剩余库存
      * @return void
      */
-    public function __construct($toMail, $name, $stock)
+    public function __construct($toMail, $nick_name,$product_name,  $stock)
     {
-        $this->to($toMail)->with(compact('name', 'stock'));
 
-        app('log')->info('发送邮件 - 库存预警', compact('toMail', 'name', 'stock'));
+        $logo   =   env("APP_URL")."/images/logo.png";
+        $qrCode =   env("APP_URL")."/images/qrCode.png";
+
+        $this->to($toMail)->with(compact('nick_name', 'product_name', 'stock', 'logo', 'qrCode'));
+
+        app('log')->info('发送邮件 - 库存预警', compact('toMail', 'nick_name', 'product_name', 'stock', 'logo', 'qrCode'));
     }
 
     /**
@@ -51,7 +55,7 @@ class InventoryWarningMail extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject('库存预警')->view('emails.inventoryWarningMail');
+        return $this->subject('仓秘书库存预警提示')->view('emails.inventoryWarningMail');
     }
 
 }

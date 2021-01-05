@@ -24,15 +24,14 @@ class CreateOrderRequest extends BaseRequests
      */
     public function rules()
     {
-        $warehouse_id = $this->warehouse_id;
+        $warehouse_id = intval(app('auth')->warehouse()->id);
+        // app("log")->info("仓库和所属", [
+            // "warehouse_id"      =>  $warehouse_id,
+            // "owner_id"          =>  Auth::ownerId(),
+        // ]);
+        // app('log')->info('新增出库单',$this->all());
 
         return [
-            'warehouse_id'                => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             // 出库单数据
             'order_type'                  => [
                 'required','integer','min:1',
@@ -42,15 +41,16 @@ class CreateOrderRequest extends BaseRequests
             ],
             'goods_data'                  => 'required|array',
             'goods_data.*.relevance_code' => [
-                'required','string','distinct',
+                'required','string',/*'distinct', @TODO: 弱类型比较可能会有问题*/
                 Rule::exists('product_spec','relevance_code')->where(function($q) use($warehouse_id){
                       $q->where('owner_id',Auth::ownerId())
                         ->where('warehouse_id',$warehouse_id);
                 })
             ],
-            'goods_data.*.num'            => 'required|integer|min:1',
+            'goods_data.*.num'            => 'required|integer|min:1|max:99999',
+            'goods_data.*.sale_price'     => 'required|numeric|min:0|max:99999',
             // 快递单数据
-            'delivery_type'               => 'required|string|max:255',
+            'delivery_type'               => 'integer|min:1',
             'express_num'                 => 'string|max:255',
             'receiver_id'                 =>  [
                 'required','integer','min:1',
@@ -58,15 +58,20 @@ class CreateOrderRequest extends BaseRequests
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
-            'sender_id'                   =>  [
-                'required','integer','min:1',
-                Rule::exists('sender_address','id')->where(function($q) use($warehouse_id){
-                    $q->where('owner_id',Auth::ownerId());
-
-                })
-            ],
-            'remark' => 'string|max:255',
+            'sender_id'                   => 'integer|min:0',
+            'remark'                      => 'string|max:255',
         ];
     }
 
+    public function attributes()
+    {
+        return [
+            'order_type'                        => '出库单类型',
+            'receiver_id'                       => '收件人',
+            'sender_id'                         => '发件人',
+            'goods_data.*.num'                  => '出库数量',
+            'goods_data.*.sale_price'           => '销售价格',
+            'goods_data.*.relevance_code'       => '商品规格',
+        ];
+    }
 }

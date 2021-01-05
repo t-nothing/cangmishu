@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductSpec extends Model
 {
+    use SoftDeletes;
 	protected $table = 'product_spec';
-    protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'relevance_code', 'product_id','net_weight','gross_weight','is_warning'];
+    protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'relevance_code', 'product_id','net_weight','gross_weight','is_warning', 'sale_price', 'purchase_price'];
 
-    public   $appends= ['product_name_cn'];
+    // public   $appends= ['product_name', 'spec_name', 'stockin_num'];
 
 	/*
 	|--------------------------------------------------------------------------
@@ -24,7 +26,10 @@ class ProductSpec extends Model
 
 	public function product()
 	{
-		return $this->belongsTo('App\Models\Product', 'product_id', 'id');
+		return $this->belongsTo('App\Models\Product', 'product_id', 'id')->when(!is_null($this->warehouse_id), function($query){
+            //加一个仓库ID有索引更快
+            $query->where('warehouse_id', $this->warehouse_id);
+        });
 	}
 
 	public function stocks()
@@ -60,9 +65,10 @@ class ProductSpec extends Model
 	{
 		$name = '';
         $lang = app('translator')->locale()?:'cn';
-        if($lang == 'zh-CN'){
-            $lang='cn';
-        }
+        // if($lang == 'zh-CN'){
+        //     $lang='cn';
+        // }
+        $lang='cn';
 		if (isset($this->product)) {
 			$name = $this->product['name_'.$lang]
 				. '('
@@ -73,6 +79,19 @@ class ProductSpec extends Model
 		return $name;
 	}
 
+    /**
+     * @return string
+     */
+    public function getSpecNameAttribute()
+    {
+        $lang = app('translator')->locale()?:'cn';
+        if($lang == 'zh-CN'){
+            $lang='cn';
+        }
+        $lang='cn';
+
+        return $this->{'name_'.$lang};
+    }
 	/**
 	 * @return string
 	 */
@@ -92,181 +111,6 @@ class ProductSpec extends Model
 			? $name = $this->product['name_en'] . '(' . $this->name_en . ')'
 			: '';
 	}
-
-	/**
-	 * 某规格/某仓库/仓库库存 = 已入库上架的库存 == 已上架库存
-	 *
-	 * @return integer
-	 */
-	public function getStockInWarehouseAttribute()
-	{
-		$owner_id = $this->owner_id;
-
-		return ProductStock::ofWarehouse($this->warehouse_id)
-        		->whose($owner_id)
-                ->enabled()
-                ->where('spec_id', $this->id)
-                ->sum('stockin_num');
-	}
-
-	/**
-	 * 某规格/某仓库/已上架
-	 *
-	 * @return integer
-	 */
-//	public function getStockOnShelfAttribute()
-//	{
-//		$owner_id = $this->owner_id;
-//
-//		return ProductStock::ofWarehouse($this->warehouse_id)
-//        		->whose($owner_id)
-//                ->enabled()
-//                ->where('spec_id', $this->id)
-//                ->sum('shelf_num');
-//	}
-
-	/**
-	 * 待上架库存
-	 *
-	 * @return integer
-	 */
-//	public function getStockToBeOnShelfAttribute()
-//	{
-//		$owner_id = $this->owner_id;
-//
-//		return ProductStock::ofWarehouse($this->warehouse_id)
-//        		->whose($owner_id)
-//                ->where('spec_id', $this->id)
-//                ->where('status', ProductStock::GOODS_STATUS_PREPARE)
-//                ->whereHas('batch', function ($query) {
-//                    $query->where('status', Batch::STATUS_PROCEED);
-//                })->sum('total_stockin_num');
-//	}
-
-	/**
-	 * 入库次数
-	 *
-	 * @return integer
-	 */
-	public function getStockEntranceTimesAttribute()
-	{
-		$owner_id = $this->owner_id;
-
-		return ProductStock::ofWarehouse($this->warehouse_id)
-        		->whose($owner_id)
-                ->enabled()
-                ->where('spec_id', $this->id)
-                ->where('total_stockin_num', '>', 0)
-                ->count();
-	}
-
-	/**
-	 * 出库次数
-	 *
-	 * @return integer
-	 */
-	public function getStockOutTimesAttribute()
-	{
-		$owner_id = $this->owner_id;
-
-		return OrderItem::ofWarehouse($this->warehouse_id)
-                ->whose($owner_id)
-                ->where('relevance_code', $this->relevance_code)
-                ->whereHas('order', function ($query) {
-                    $query->where('status', '>=', Order::STATUS_PICK_DONE);
-                })->count();
-	}
-
-	/**
-	 * 入库数量
-	 *
-	 * @return integer
-	 */
-	public function getStockEntranceQtyAttribute()
-	{
-		$owner_id = $this->owner_id;
-
-		return ProductStock::ofWarehouse($this->warehouse_id)
-        		->whose($owner_id)
-                ->enabled()
-                ->where('spec_id', $this->id)
-                ->sum('total_stockin_num');
-	}
-
-	/**
-	 * 出库数量
-	 *
-	 * @return integer
-	 */
-
-	public function getStockOutQtyAttribute()
-	{
-		$owner_id = $this->owner_id;
-
-		return OrderItem::ofWarehouse($this->warehouse_id)
-        		->whose($owner_id)
-                ->where('relevance_code', $this->relevance_code)
-                ->whereHas('order', function ($query) {
-                    $query->where('status', '>=', Order::STATUS_PICK_DONE);
-                })
-                ->sum('verify_num');
-	}
-
-	/**
-	 * 锁定库存
-	 *
-	 * @return integer
-	 */
-//	public function getReservedNumAttribute()
-//    {
-//        // 特定SKU的仓库数量 = 此SKU剩余已上架数量 + 此SKU待验货数量
-//
-//    	$owner_id = $this->owner_id;
-//
-//        // 待验货数量
-//        $lock_num = OrderItem::ofWarehouse($this->warehouse_id)
-//        		->whose($owner_id)
-//                ->where('relevance_code', $this->relevance_code)
-//                ->where('pick_num',0)
-//                ->whereHas('order', function ($query) {
-//                    $query->where('status', '==', Order::STATUS_DEFAULT);
-//                })
-//                ->sum('amount');
-//
-//        return $lock_num;
-//    }
-
-    /**
-	 * 可用库存
-	 *
-	 * @return integer
-	 */
-//	public function getAvailableNumAttribute()
-//    {
-//        return max($this->stock_in_warehouse - $this->reserved_num, 0);
-//    }
-
-    /**
-     * SKU数量
-     *
-     * @return integer
-     */
-    public function getStocksCountAttribute()
-    {
-        $primaryKey = $this->primaryKey;
-        return  ProductStock::with(['batch', 'location'])
-        ->withCount(['logs as edit_count' => function ($query) {
-            $query->where('type_id', ProductStockLog::TYPE_COUNT);
-        }])
-            ->doesntHave('batch', 'and', function ($query) {
-                $query->where('status', Batch::STATUS_PREPARE)->orWhere('status', Batch::STATUS_CANCEL);
-            })
-            ->ofWarehouse($this->warehouse_id)
-            ->whose($this->owner_id)
-            ->where('spec_id', $this->$primaryKey)
-            ->where('status', '!=', ProductStock::GOODS_STATUS_OFFLINE)
-            ->count();
-    }
 
 	/*
 	|--------------------------------------------------------------------------
@@ -303,7 +147,7 @@ class ProductSpec extends Model
      */
     public function scopeOfWarehouse($query, $warehouse_id)
     {
-        return $query->where('warehouse_id', $warehouse_id);
+        return $query->where('product_spec.warehouse_id', $warehouse_id);
     }
 
     /**
@@ -313,7 +157,7 @@ class ProductSpec extends Model
      */
     public function scopeWhose($query, $user_id)
     {
-        return $query->where('owner_id', $user_id);
+        return $query->where('product_spec.owner_id', $user_id);
     }
 
 
@@ -389,23 +233,22 @@ class ProductSpec extends Model
 		});
 	}
 
-	/**
-	 * 待上架的。
-	 *
-	 * @return \Illuminate\Database\Eloquent\Builder
-	 */
-	public function scopeOnlyToBeOnShelf($query, $warehouse_id, $owner_id)
-	{
-		return $query->whereHas('stocks', function ($query) use($warehouse_id, $owner_id) {
-			$query->ofWarehouse($warehouse_id)
-                ->whose($owner_id)
-				->where('status', ProductStock::GOODS_STATUS_PREPARE)
-				->whereHas('batch', function ($query) {
-				    $query->where('status', Batch::STATUS_PROCEED)->orWhere('status', Batch::STATUS_ACCOMPLISH);
-				});
-		});
-	}
 
+    /**
+     * 得到进货价格
+     **/
+    static function getPurchasePrice($id)
+    {
+        return Self::find($id)->purchase_price??0;
+    }
+
+    /**
+     * 得到销售价格
+     **/
+    static function getSalePrice($id)
+    {
+        return Self::find($id)->sale_price??0;
+    }
 	/*
 	|--------------------------------------------------------------------------
 	| Operations
@@ -414,22 +257,22 @@ class ProductSpec extends Model
 
 	static function newSku($spec)
 	{
-	  $warehouse_code = app('auth')->warehouse()->code;
-	  $category_id    = $spec->product->category_id;
-	  $spec_id        = $spec->id;
-	  $redis_key      = 'wms_cangmishu_spec'.$spec_id;
-	  $is_exists      =  Redis::Exists($redis_key);
-	  if(!$is_exists){
-		  $sku_mark = SkuMarkLog::where('warehouse_code',$warehouse_code)->where('spec_id',$spec_id)->orderBy('id')->pluck('sku_mark')->first();
-		  $sku_mark = empty($sku_mark) ? 1 :$sku_mark;
-		  Redis::set($redis_key,$sku_mark);
-	  }
-	  $skuLog = new SkuMarkLog();
-	  $skuLog->warehouse_code = $warehouse_code;
-	  $skuLog->spec_id        = $spec_id;
-	  $skuLog->sku_mark       =  Redis::get($redis_key);
-	  $skuLog->save();
+        $warehouse_code = app('auth')->warehouse()->code;
+        $category_id    = $spec->product->category_id;
+        $spec_id        = $spec->id;
+        $redis_key      = 'wms_cangmishu_spec'.$spec_id;
+        $is_exists      =  Redis::Exists($redis_key);
+        if(!$is_exists){
+            $sku_mark = SkuMarkLog::where('warehouse_code',$warehouse_code)->where('spec_id',$spec_id)->orderBy('id', 'desc')->pluck('sku_mark')->first();
+            $sku_mark = empty($sku_mark) ? 1 :$sku_mark;
+            Redis::set($redis_key,$sku_mark+1);
+        }
+        $skuLog = new SkuMarkLog();
+        $skuLog->warehouse_code = $warehouse_code;
+        $skuLog->spec_id        = $spec_id;
+        $skuLog->sku_mark       =  Redis::get($redis_key);
+        $skuLog->save();
 
-	  return $warehouse_code. sprintf("%02x", $category_id).sprintf("%05x", $spec_id). sprintf("%04x", Redis::Incr($redis_key));
+        return $warehouse_code. sprintf("%02x", $category_id).sprintf("%05x", $spec_id). sprintf("%04x", Redis::Incr($redis_key));
 	}  
 }

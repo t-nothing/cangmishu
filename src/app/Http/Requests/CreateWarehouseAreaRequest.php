@@ -41,7 +41,7 @@ class CreateWarehouseAreaRequest extends BaseRequests
                 }),
             ],
             'code'           =>  [
-                'required', new AlphaNumDash(), 'max:255',
+                'required', 'string', 'max:255',
                 Rule::unique('warehouse_area')->where(function ($query) {
                     return $query->where('warehouse_id', $this->warehouse_id)
                         ->where('owner_id',Auth::ownerId());
@@ -49,6 +49,16 @@ class CreateWarehouseAreaRequest extends BaseRequests
             ],
             'is_enabled'     => 'required|boolean',
             'remark'         => 'string|max:255',
+        ];
+    }
+
+
+    public function attributes()
+    {
+        return [
+            'name_cn'               => trans("message.warehouseAreaFieldNameCn"),
+            'code'                  => trans("message.warehouseAreaFieldNameCode"),
+            'is_enabled'            => trans("message.warehouseAreaFieldNameIsEnabled"),
         ];
     }
 }

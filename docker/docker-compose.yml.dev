@@ -1,0 +1,81 @@
+version: '3'
+
+services:
+
+### PHP-FPM Container #######################################
+
+    cangmishu-php-fpm:
+      container_name:
+        cangmishu-php-fpm
+      build:
+        context: ./php
+      volumes:
+        - ../src:/var/www/html
+      expose:
+        - "9000"
+      depends_on:
+        - cangmishu-redis
+
+### PHP-CLI Container #######################################
+
+    cangmishu-php-cli:
+      container_name:
+        cangmishu-php-cli
+      build:
+        context: ./php_cli
+      volumes:
+        - ../src:/var/www/html
+      depends_on:
+        - cangmishu-redis
+      tty: true
+
+### Nginx Server Container ##################################
+
+    cangmishu-nginx:
+      container_name:
+        cangmishu-nginx
+      build:
+        context: ./nginx
+      volumes:
+          - ../src:/var/www/html
+          - ../static:/var/www/static
+      ports:
+          - "${NGINX_HTTP_PORT}:80"
+          - "${NGINX_HTTPS_PORT}:443"
+      depends_on:
+          - cangmishu-php-fpm 
+
+
+### Redis Container #########################################
+
+    cangmishu-redis:
+      container_name:
+        cangmishu-redis
+      image: redis:3.2.11
+      ports:
+        - "${REDIS_PORT}:6379"
+      volumes:
+        - ./data/redis:/data
+
+
+### MySQL Container #########################################
+
+    mysql:
+      image: mysql:5.7
+      volumes:
+        - ../src:/var/www/html
+        - mysql-data:/var/lib/mysql
+      ports:
+        - "${MYSQL_PORT}:3306"
+      environment:
+        - MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD}
+
+
+### Volumes Setup ###########################################
+
+volumes:
+  mysql-data:
+networks:
+  default:
+    external:
+      name: ${USER_NETWORK}

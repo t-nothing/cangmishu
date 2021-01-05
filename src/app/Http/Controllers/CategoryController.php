@@ -20,19 +20,49 @@ class CategoryController extends Controller
             'page'         => 'integer|min:1',
             'page_size'    => new PageSize(),
             'is_enabled'   => 'boolean',
+            'no_pager'     => 'boolean',
+            'no_feature'   => 'boolean',
         ]);
+        app('log')->info('拉取商品分类', $request->all());
 
-        $categories = Category::with('feature:id,name_cn,name_en')
-                    ->ofWhose(Auth::ownerId())
+        $categories = Category::ofWarehouse(app('auth')->warehouse()->id);
+
+        $categories = $categories
+                    ->where('owner_id',Auth::ownerId())
                     ->when($request->filled('is_enabled'),function($q)use($request) {
                         $q->where('is_enabled', $request->is_enabled);
                     })
-                    ->orderBy('id','ASC')
-                    ->paginate($request->input('page_size',10));
+                    ->when(!$request->filled('no_feature', 0),function($q)use($request) {
+                        $q->with('feature:id,name_cn,name_en');
+                    })
+                    ->orderBy('id','ASC');
+        //如果需要分页
+        if(!$request->filled('no_pager')) {
+            $categories = $categories->paginate($request->input('page_size',10));
+        }
+        else {        
+
+            $categories = $categories->get();
+        }
+                    
 
         return formatRet(0, '', $categories->toArray());
     }
 
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $category = Category::ofWarehouse(app('auth')->warehouse()->id)->find($id);
+        if(!$category){
+            return formatRet(500, trans("message.productCategoryNotExist"));
+        }
+        if ($category->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        return formatRet(0, '', $category->toArray());
+       
+    }
 
     public function store(CreateCategoryRequest $request)
     {
@@ -40,37 +70,29 @@ class CategoryController extends Controller
         DB::beginTransaction();
         try{
             $data = $request->all();
-            $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
+            $data["name_en"] = $request->name_cn;
+            $data = array_merge($data, ['owner_id' =>Auth::ownerId(), 'warehouse_id'=>app('auth')->warehouse()->id]);
             $category = Category::create($data);
-
-            //新增库存报警
-            $owner = User::find(Auth::ownerId());
-            $warn_stock= $owner->default_warning_stock;
-            $userCategoryData = [
-                'user_id' => Auth::ownerId(),
-                'category_id' => $category->id,
-                'warning_stock'  => $warn_stock
-            ];
-            UserCategoryWarning::create($userCategoryData);
             DB::commit();
             return formatRet(0);
         }catch (\Exception $e){
             DB::rollBack();
             app('log')->error('新增货品分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增货品分类失败");
+            return formatRet(500, trans("message.productCategoryAddFailed"));
         }
     }
 
-    public function update(UpdateCategoryRequest $request,$category_id)
+    public function update(UpdateCategoryRequest $request,$id)
     {
-        app('log')->info('编辑货品分类', ['category_id'=>$category_id]);
+        app('log')->info('编辑货品分类', ['id'=>$id]);
         try{
             $data = $request->all();
-            Category::where('id',$category_id)->update($data);
+            $data["name_en"] = $request->input('name_en', $request->name_cn);
+            $request->modelData->update($data);
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑货品分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑货品分类失败");
+            return formatRet(500, trans("message.productCategoryUpdateFailed"));
         }
     }
 
@@ -79,23 +101,23 @@ class CategoryController extends Controller
         app('log')->info('删除货品分类',['id'=>$category_id]);
         $category = Category::find($category_id);
         if(!$category){
-            return formatRet(500,"货品分类不存在");
+            return formatRet(500, trans("message.productCategoryNotExist"));
         }
         if ($category->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $product_count = $category->products()->count();
         if($product_count){
-            return formatRet(500,"该分类下存在货品，不允许删除");
+            return formatRet(500, trans("message.productCategoryCannotDelete"));
         }
         try{
-            Category::where('id',$category_id)->delete();
+            $category->delete();
             UserCategoryWarning::where('category_id',$category_id)->forceDelete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('删除货品分类失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除货品分类失败");
+            return formatRet(500, trans("productCategoryDeleteFailed"));
         }
     }
 }

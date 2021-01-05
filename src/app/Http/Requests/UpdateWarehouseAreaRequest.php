@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 
 class UpdateWarehouseAreaRequest extends BaseRequests
 {
+    var $info;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -16,8 +17,8 @@ class UpdateWarehouseAreaRequest extends BaseRequests
      */
     public function authorize()
     {
-        $type = WarehouseArea::find($this->route('areas_id'));
-        return $type && $type->owner_id == Auth::ownerId();
+        $this->info = WarehouseArea::find($this->route('areas_id'));
+        return $this->info && $this->info->owner_id == Auth::ownerId();
     }
 
     /**
@@ -31,20 +32,39 @@ class UpdateWarehouseAreaRequest extends BaseRequests
             'name_cn'         => [
                 'required','string','max:50',
                 Rule::unique('warehouse_area')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
+                    return $q->where('warehouse_id', $this->info->warehouse_id)
+                                ->where('owner_id',Auth::ownerId());
                 })->ignore($this->route('areas_id'))
 
             ],
             'code'           => [
-                'required', new AlphaNumDash(), 'max:255',
+                'required', 'string', 'max:255',
                 Rule::unique('warehouse_area')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
+                    return $q->where('warehouse_id', $this->info->warehouse_id)
+                                ->where('owner_id',Auth::ownerId());
                 })->ignore($this->route('areas_id'))
             ],
             'is_enabled'     => 'required|boolean',
             'functions'      => 'sometimes|array',
             'functions.*'    => 'sometimes|required|integer|min:1',
             'remark'         => 'string|max:255',
+        ];
+    }
+
+    // public function messages()
+    // {
+    //     return [
+    //         'warehouse_id.exists' => '仓库不存在',
+    //         'remark.required' => '备注不能为空'
+    //     ];
+    // }
+
+    public function attributes()
+    {
+        return [
+            'name_cn'               => trans("message.warehouseAreaFieldNameCn"),
+            'code'                  => trans("message.warehouseAreaFieldNameCode"),
+            'is_enabled'            => trans("message.warehouseAreaFieldNameIsEnabled"),
         ];
     }
 }

@@ -18,7 +18,7 @@ class BatchType extends Model
         'deleted_at',
     ];
 
-    protected  $fillable = ['name','is_enabled','owner_id'];
+    protected  $fillable = ['name','is_enabled','owner_id','warehouse_id'];
 
     protected  $guarded = [];
     /*

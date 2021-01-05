@@ -2,13 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\StatisticsService;
 use Illuminate\Http\Request;
 use App\Models\HomePageNotice;
 use App\Models\HomePageAnalyze;
 use App\Models\Warehouse;
+use App\Models\Batch;
+use App\Models\Order;
+use DB;
 
 class HomePageController extends Controller
 {
+    protected $service;
+
+    public function __construct(StatisticsService $service)
+    {
+        $this->service = $service;
+    }
+
     //首页通知
     public function notice()
     {
@@ -25,49 +36,82 @@ class HomePageController extends Controller
 
         //默认选择一个仓库
         if (!$request->filled('warehouse_id')) {
-            $warehouse = Warehouse::whose(app('auth')->ownerId())->latest()->first();
-            if (!$warehouse) {
-                return formatRet(0, '暂无任何数据');
-            }
-            $warehouse_id = $warehouse->id;
+
+            $warehouse_id = app('auth')->warehouseId();
         } else {
-            $warehouse_id = $request->input('warehouse_id');
+            $warehouse_id = intval($request->input('warehouse_id'));
         }
 
-        //获取这一天的数据
-        $homePageAnalyze = HomePageAnalyze::where('warehouse_id',$warehouse_id)
-            ->where('created_at', '>', strtotime(date('Y-m-d 00:00:00', time())))
-            ->first();
-
-        //获取这一月的数据
-        $analyzes = HomePageAnalyze::where('warehouse_id',$warehouse_id)->where('created_at', '>',
-            date('Y-m-1 00:00:00', time()))->get();
-
-        if (!$homePageAnalyze) {
-            $homePageAnalyze = [
-                "warehouse_id" => $warehouse_id,
-                "batch_count" => 0,
-                "order_count" => 0,
-                "batch_product_num" => 0,
-                "order_product_num" => 0,
-                "product_total" => 0,
-            ];
-        }else{
-            $homePageAnalyze = $homePageAnalyze->toArray();
+        $warehouse = Warehouse::where("owner_id", app('auth')->ownerId())->find($warehouse_id);
+        if (!$warehouse) {
+            return formatRet(0, trans("message.404NotFound"));
         }
 
-        $monthAnalyze = ['month_order_count' => 0, 'month_batch_count' => 0, 'month_product_stock' => 0];
-        if ($analyzes->toArray()) {
-            foreach ($analyzes as $k => $v) {
-                $monthAnalyze['month_order_count'] += $v['order_count'];
-                $monthAnalyze['month_batch_count'] += $v['batch_count'];
-                $monthAnalyze['month_product_stock'] += $v['product_total'];
-            }
-        }
+        $sql = "select
+(select sum(stock_num)  from `product_stock` where warehouse_id = ?) as all_count,
+(select sum(stock_num) from `product_stock` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
+(select sum(stock_num) from `product_stock` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
+(select sum(stock_num) from `product_stock` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y' ) = date_format( curdate( ) , '%y' ) ) as year_count";
+        $stock = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
 
 
-        $homePageAnalyze = array_merge($homePageAnalyze, $monthAnalyze);
+        $stock = [
+            'all_count'     =>$stock[0]->all_count??0,
+            'today_count'   =>$stock[0]->today_count??0,
+            'month_count'   =>$stock[0]->month_count??0,
+            'year_count'    =>$stock[0]->year_count??0,
+        ];
 
+        $sql = "select
+(select count(total_stock_num)  from `product` where warehouse_id = ?) as all_count,
+(select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
+(select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
+(select count(total_stock_num) from `product` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y' ) = date_format( curdate( ) , '%y' ) ) as year_count";
+        $product = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
+
+        $product = [
+            'all_count'     =>$product[0]->all_count??0,
+            'today_count'   =>$product[0]->today_count??0,
+            'month_count'   =>$product[0]->month_count??0,
+            'year_count'    =>$product[0]->year_count??0,
+        ];
+
+        $sql = "select
+(select count(id)  from `order` where warehouse_id = ?) as all_count,
+(select count(id) from `order` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m%d' ) = date_format( curdate( ) , '%y%m%d' )) as today_count,
+(select count(id) from `order` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y%m' ) = date_format( curdate( ) , '%y%m' ) ) as month_count,
+(select count(id) from `order` where warehouse_id = ? and date_format( FROM_UNIXTIME(created_at), '%y' ) = date_format( curdate( ) , '%y' ) ) as year_count";
+        $order = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
+
+        $order = [
+            'all_count'     =>$order[0]->all_count??0,
+            'today_count'   =>$order[0]->today_count??0,
+            'month_count'   =>$order[0]->month_count??0,
+            'year_count'    =>$order[0]->year_count??0,
+        ];
+
+        $sql = "select
+(select count(product.id) as count from product,category where product.category_id = category.id and  product.total_stock_num <= category.warning_stock and category.warning_stock >0 and product.warehouse_id = ?) as stock_warning,
+(select count(id) from `batch` where warehouse_id = ? and `status` = ".Batch::STATUS_PREPARE.") as unshelf,
+(select count(id) from `order` where warehouse_id = ? and `status` <= ".Order::STATUS_PICK_DONE.") as unconfirm";
+        $todo = DB::select($sql, [$warehouse_id, $warehouse_id, $warehouse_id, $warehouse_id ,$warehouse_id]);
+
+
+        $todo = [
+            'stock_warning' =>$todo[0]->stock_warning??0,
+            'unshelf'       =>$todo[0]->unshelf??0,
+            'unconfirm'     =>$todo[0]->unconfirm??0,
+        ];
+
+
+
+        $homePageAnalyze = [
+            "stock" => $stock,
+            "product" => $product,
+            "order" => $order,
+            "todo" => $todo,
+            'warehouse_id' => $warehouse_id,
+        ];
         return formatRet(0, '', $homePageAnalyze);
 
     }
@@ -86,13 +130,15 @@ class HomePageController extends Controller
 
         //默认选择一个仓库
         if (!$request->filled('warehouse_id')) {
-            $warehouse = Warehouse::where('owner_id',app('auth')->ownerId())->latest()->first();
-            if (!$warehouse) {
-                return formatRet(0, '暂无任何数据');
-            }
-            $warehouse_id = $warehouse->id;
+
+            $warehouse_id = app('auth')->warehouseId();
         } else {
-            $warehouse_id = $request->input('warehouse_id');
+            $warehouse_id = intval($request->input('warehouse_id'));
+        }
+
+        $warehouse = Warehouse::where("owner_id", app('auth')->ownerId())->find($warehouse_id);
+        if (!$warehouse) {
+            return formatRet(0, trans("message.404NotFound"));
         }
 
         $startDateTime = new \DateTime($request->start_time);
@@ -104,9 +150,10 @@ class HomePageController extends Controller
         $inputData = $this->getTotalOutputNum(strtotime($request->start_time), strtotime($request->end_time),
             $warehouse_id);
 
+
         $inputDataInfo = [];
         foreach ($inputData as $val) {
-            $inputDataInfo[$val['date_time']] = $val;
+            $inputDataInfo[$val->record_time][$val->type] = $val->count;
         }
 
         for ($k = $days; $k >= 0; $k--) {
@@ -127,18 +174,106 @@ class HomePageController extends Controller
 
     public function getTotalOutputNum($startTime, $endTime, $warehouseId)
     {
-        $data = HomePageAnalyze::getIns()
-            ->select(app("db")->raw('Date(from_unixtime(record_time)) as date_time,
-                                                sum(batch_count) as batch_count,
-                                                sum(order_count) as order_count,
-                                                sum(batch_product_num) as batch_product_num,
-                                                sum(order_product_num) as order_product_num
-                                                '))
-            ->whereBetween('record_time', [$startTime, $endTime])
-            ->where('warehouse_id', $warehouseId)
-            ->groupBy(app("db")->raw('from_unixtime(record_time)'))
-            ->get();
+
+
+
+        $sql = "
+select count(*) as count ,Date(from_unixtime(created_at))  as record_time, 'batch_count' as `type`  from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ? and `status` >1 group by record_time
+union all
+select sum(stock_num),Date(from_unixtime(created_at))  as record_time, 'batch_product_num' as `type`   from `batch` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time
+union all
+select count(*),Date(from_unixtime(created_at))  as record_time, 'order_count' as `type`   from `order` where warehouse_id = ? and created_at >= ? and created_at <= ?  group by record_time
+union all
+select sum(sub_order_qty),Date(from_unixtime(created_at)) as record_time, 'order_product_num' as `type`     from `order` where warehouse_id = ? and created_at >= ? and created_at <= ? group by record_time
+
+";
+        $data = DB::select($sql,
+            [
+                $warehouseId,
+                $startTime,
+                $endTime,
+
+                $warehouseId,
+                $startTime,
+                $endTime,
+
+                $warehouseId,
+                $startTime,
+                $endTime,
+
+                $warehouseId,
+                $startTime,
+                $endTime]);
+
+
+
+
         return $data;
     }
 
+    public function getRequestParams()
+    {
+        $days = \request()->input('days', 1);
+
+        $begin = \request()->input('begin', '');
+        $end = \request()->input('end', '');
+
+        if ($begin && $end) {
+            return [$begin, $end];
+        }
+
+        return $days;
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getTotalData()
+    {
+        return success($this->service::getIndexCountData($this->getRequestParams()));
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getSalesData()
+    {
+        $data = [
+            'total' => $this->service::getSalesTotalData($this->getRequestParams()),
+            'pie' => $this->service::getSalesDataByShop($this->getRequestParams()),
+            'daily' => $this->service::getSalesDataByDay($this->getRequestParams()),
+        ];
+
+        return success($data);
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getStockData()
+    {
+        $total = $this->service::getStockTotalData($this->getRequestParams());
+
+        $pie = [
+            [
+                'type' => '总入库',
+                'count' => $total['stock_in_num'],
+            ],
+            [
+                'type' => '总出库',
+                'count' => $total['stock_out_num'],
+            ],
+        ];
+
+        $data = [
+            'total' => $total,
+            'pie' => $pie,
+            'daily' => $this->service::getStockDataByDate($this->getRequestParams()),
+        ];
+
+        return success($data);
+    }
 }

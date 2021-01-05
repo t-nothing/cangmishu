@@ -43,8 +43,23 @@ class WarehouseAreaController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('新增仓库货区失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"新增仓库货区失败");
+            return formatRet(500, trans("message.warehouseAreaAddFailed"));
         }
+    }
+
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $area = WarehouseArea::find($id);
+        if(!$area){
+            return formatRet(500, trans("message.warehouseAreaNotExist"));
+        }
+        if ($area->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        return formatRet(0, '', $area->toArray());
+       
     }
 
     /**
@@ -59,7 +74,7 @@ class WarehouseAreaController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->error('编辑仓库货区失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑仓库货区失败");
+            return formatRet(500, trans("message.warehouseAreaUpdateFailed"));
         }
     }
 
@@ -71,17 +86,17 @@ class WarehouseAreaController extends Controller
         app('log')->info('删除仓库货区',['id'=>$warehouse_area_id]);
         $area = WarehouseArea::find($warehouse_area_id);
         if(!$area){
-            return formatRet(500,"仓库货区不存在");
+            return formatRet(500, trans("message.warehouseAreaNotExist"));
         }
         if ($area->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
         $location = $area->locations()->whereHas('stock',function($q){
             return $q->where('shelf_num','>',0);
         })->get();
         if(count($location)){
-            return formatRet(500,"此货区的货位上有库存不为0的商品，不可删除");
+            return formatRet(500,trans("message.warehouseAreaCannotDelete"));
         }
 
         try{
@@ -89,7 +104,7 @@ class WarehouseAreaController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('删除仓库货区失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除仓库货区失败");
+            return formatRet(500, trans("message.warehouseAreaDeleteFailed"));
         }
     }
 

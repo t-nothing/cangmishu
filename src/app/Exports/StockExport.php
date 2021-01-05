@@ -27,13 +27,13 @@ class StockExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSiz
     {
     	return [
             $spec->product_name_cn,
-            $spec->product_name_en,
+            // $spec->product_name_en,
             $spec->relevance_code,
-            $spec->stock_in_warehouse,
-            $spec->stock_entrance_times,
-            $spec->stock_entrance_qty,
-            $spec->stock_out_times,
-            $spec->stock_out_qty,
+            $spec->total_stock_num,
+            $spec->total_stockin_times,
+            $spec->total_stockin_num,
+            $spec->total_stockout_times,
+            $spec->total_stockout_num,
         ];
     }
 
@@ -41,7 +41,7 @@ class StockExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSiz
     {
         return [
             '货品中文名称',
-			'货品英文名称',
+			// '货品英文名称',
 			'SKU',
 			'总仓库库存',
 			'入库次数',

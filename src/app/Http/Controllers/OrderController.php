@@ -13,14 +13,19 @@ use App\Models\OrderItem;
 use App\Models\ProductStock;
 use App\Models\ProductStockLog;
 use App\Rules\PageSize;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use PDF;
+use App\Exports\OrderExport;
+use App\Events\OrderCancel;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
-
-    public function index(BaseRequests $request)
+    public function export(BaseRequests $request)
     {
         $this->validate($request, [
             'page' => 'integer|min:1',
@@ -29,15 +34,10 @@ class OrderController extends Controller
             'created_at_e' => 'date:Y-m-d',
             'status' => 'integer',
             'keywords' => 'string',
-            'delivery_date' => 'date_format:Y-m-d',
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ]
+            'delivery_date' => 'date_format:Y-m-d'
         ]);
-        $order = Order::ofWarehouse($request->warehouse_id)
+        $order = Order::ofWarehouse(app('auth')->warehouse()->id)
+            ->with(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])
             ->whose(app('auth')->ownerId());
         if ($request->filled('created_at_b')) {
             $order->where('created_at', '>', strtotime($request->created_at_b));
@@ -59,57 +59,116 @@ class OrderController extends Controller
                 [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
         });
 
-        $orders = $order->latest()->paginate($request->input('page_size',10));
+        $orders = $order->latest()->limit(5000);
 
-        foreach ($orders  as $k => $v) {
-            $sum = 0;
-            foreach ($v->orderItems as $k1 => $v1) {
-                $sum += $v1->amount;
-            }
-            $v->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num','orderItems.stock:id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
-            $v->append(['out_sn_barcode']);
+        $export = new OrderExport();
+        $export->setQuery($orders);
 
-            $v->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
-            $v->sum = $sum;
+        return app('excel')->download($export,  trans("message.orderExportCaption").date('Y-m-d').'.xlsx');
+    }
+
+    public function index(BaseRequests $request)
+    {
+        $this->validate($request, [
+            'page'          => 'integer|min:1',
+            'page_size'     => new PageSize(),
+            'created_at_b'  => 'date:Y-m-d',
+            'created_at_e'  => 'date:Y-m-d',
+            'status'        => 'integer',
+            'keywords'      => 'string',
+            'with_items'    => 'boolean',
+            'delivery_date' => 'date_format:Y-m-d'
+        ]);
+        $order = Order::ofWarehouse(app('auth')->warehouse()->id)
+            ->with('orderType')
+            ->whose(app('auth')->ownerId());
+        if ($request->filled('created_at_b')) {
+            $order->where('created_at', '>', Carbon::parse($request->created_at_b)->startOfDay()->unix());
         }
 
-        return formatRet(0, '', $orders->toArray());
+        if ($request->filled('created_at_e')) {
+            $order->where('created_at', '<', Carbon::parse($request->created_at_e)->endOfDay()->unix());
+        }
+
+        if ($request->filled('status')) {
+            $order->where('status', $request->status);
+        }
+
+        if ($request->filled('keywords')) {
+            $order->hasKeywords($request->keywords);
+        }
+        $order->when($request->filled('delivery_date'), function($query) use ($request){
+            return $query->whereBetween ("delivery_date",
+                [strtotime($request->delivery_date),strtotime($request->delivery_date ."+1 day")*1-1]);
+        });
+        $order->when(
+            ($request->filled('with_items') && $request->with_items),
+            function($q)use($request) {
+                        $q->with('orderItems:order_id,name_cn,amount,sale_price,sale_currency,spec_name_cn,pic,relevance_code');
+                    }
+        );
+
+        $orders = $order->latest()->paginate($request->input('page_size',10));
+        $result = $orders->toArray();
+        foreach ($result['data'] as $key => $value) {
+
+            $result['data'][$key]['track_url'] = "";
+            if($value['status'] >= Order::STATUS_SENDING) {
+                $result['data'][$key]['track_url'] = "https://www.kuaidi100.com/chaxun?com=".$value['express_code']."&nu=".$value['express_num'];
+            }
+        }
+        return formatRet(0, '', $result);
     }
 
     public function show(BaseRequests $request, $order_id)
     {
-        $order = Order::find($order_id);
+        $order = Order::where('owner_id',Auth::ownerId())->with(['orderItems.spec:id,total_shelf_num','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])->find($order_id);
         if(!$order){
-            return formatRet("500",'找不到该出库单');
+            return formatRet("500", trans("message.orderNotExist"));
         }
-        $order->load(['orderItems:id,name_cn,name_en,amount,relevance_code,product_stock_id,order_id,pick_num','orderItems.stock:id', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
         $order->append(['out_sn_barcode']);
 
-        $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+        // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
         $order = $order->toArray();
 
-       return formatRet(0,"成功",$order);
+       return formatRet(0, trans("message.success"),$order);
     }
 
-
+    /**
+     * @param  CreateOrderRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws BusinessException
+     * @throws \Throwable
+     */
     public function store(CreateOrderRequest $request)
     {
         app('log')->info('新增出库单',$request->all());
+
+        $this->validateCodeDistinct($request->all());
         app('db')->beginTransaction();
         try {
-            app('order')->create($request);
+            $request->warehouse_id = app('auth')->warehouse()->id;
+
+            $order = app('order')->setSource("自建")->create($request);
+            if(! isset($order->out_sn)) {
+                throw new \Exception(trans("message.orderAddFailed"), 1);
+
+            }
             app('db')->commit();
+            return formatRet(0,trans("message.orderAddSuccess"), $order->toArray());
+        } catch (BusinessException $e) {
+            throw $e;
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('新增出库单失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '出库单新增失败');
+            return formatRet(500, trans("message.orderAddFailed"));
         }
-        return formatRet(0,'出库单新增成功');
+
     }
 
 //    public function destroy(BaseRequests $request,$order_id)
 //    {
-//        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
+//        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
 //        $this->validate($request,[
 //            'warehouse_id' =>  [
 //                'required','integer','min:1',
@@ -119,12 +178,12 @@ class OrderController extends Controller
 //            ],
 //        ]);
 //
-//        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+//        $order = Order::where('warehouse_id',app('auth')->warehouse()->id)->find($order_id);
 //        if(!$order){
-//            return formatRet(500,"订单不存在");
+//            return formatRet(500, trans("message.orderNotExist"));
 //        }
 //        if ($order->owner_id != Auth::ownerId()){
-//            return formatRet(500,"没有权限");
+//            return formatRet(500, trans("message.noPermission"));
 //        }
 //        try{
 //            Order::where('id',$order_id)->delete();
@@ -139,149 +198,466 @@ class OrderController extends Controller
     public function pickAndOut(PickAndOutRequest $request)
     {
 
-        $owner_id = Auth::ownerId();
-        $order = Order::find($request->order_id);
-        $order->delivery_date = strtotime($request->delivery_date." 00:00:00");
-        $order->save();
-        $items = $request->input('items');
-        $item_in_rq = array_pluck($request->items, 'order_item_id');
+        app('log')->info('新增出库拣货单',$request->all());
+        app('db')->beginTransaction();
+        try {
+            app("store")->pickAndOut($request->all());
 
-        $item_in_db = $order->orderItems->pluck('id')->toArray();
-        sort($item_in_rq);
-        sort($item_in_db);
-        if ($item_in_rq != $item_in_db) {
-            return formatRet(500, "拣货单物品项数据有误");
-        }
 
-        $redis = app('redis.connection');
-        $pick_stock = [];
-        foreach ($items as $k=>$i){
-
-            $item = OrderItem::find($i['order_item_id']);
-
-            if($i['pick_num'] > $item->amount){
-                return formatRet(500,'拣货数量超出应捡数目');
-            }
-            $name = 'cangmishu_pick_'.$owner_id.'_'.$item->relevance_code;
-            $cache_stock = $redis->hgetall($name);
-            $cacahe_id =[];
-            $stock= "";
-            if($cache_stock){ //如果redis里有缓存
-                foreach ($cache_stock as $stock_id => $rest_num){
-                    //判断redis库存是否可用
-                    $rest_stock = ProductStock::find($stock_id);
-                    if($rest_stock->status == ProductStock::GOODS_STATUS_ONLINE){
-                        if($rest_num >= $i['pick_num'] ){ //可用库存足够
-                            $stock = $rest_stock;
-                            break;
-                        }
-                    }
-                    $cacahe_id[] = $stock_id;
-                }
+            if($request->filled('express_code') && $request->filled('express_num')) {
+                app('order')->updateExpress($request,$request->order_id, true);
             }
 
-            //如过没有记录则去数据库拿
-            if(empty($stock)){
-                $stock = app('stock')->getStockByAmount($i['pick_num'], $owner_id, $item->relevance_code, $cacahe_id);
-            }
-
-            if(empty($stock)){//库存真的不足
-                eRet($item->product_name.'库存不足');
-            }
-
-            $pick_stock[] =[
-                'item'=>$item,
-                'stock'=>$stock,
-                'pick_num' =>$i['pick_num']
-            ];
-        }
-        DB::beginTransaction();
-        $res = [];
-
-        try{
-
-            foreach ($pick_stock as $k => $v){
-
-                $v['item']->product_stock_id = $v['stock']->id;
-                $v['item']->pick_num = $v['pick_num'];
-                $v['item']->verify_num = $v['pick_num'];
-                $v['item']->save();
-                $v['stock']->decrement('shelf_num', $v['pick_num']);
-                $v['stock']->decrement('stockin_num', $v['pick_num']);
-                // 添加记录
-
-                $v['stock']->addLog(ProductStockLog::TYPE_OUTPUT, $v['pick_num'],$order->out_sn);
-                $res[]=[
-                    'owner_id'=>$v['stock']->owner_id,
-                    'relevance_code' =>$v['stock']->relevance_code,
-                    'stock_id' =>$v['stock']->id,
-                    'shelf_num' =>$v['stock']->shelf_num
-                ];
-            }
-            $order->update(['status' => Order::STATUS_PICK_DONE,'verify_status'=>2,'delivery_data'=>time()]);
-            // 记录出库单拣货完成的时间
-            OrderHistory::addHistory($order, Order::STATUS_PICK_DONE);
-            DB::commit();
-        }
-        catch (BusinessException $exception){
+            app('db')->commit();
+        } catch (\Exception $e) {
             app('db')->rollback();
-            $message = $exception->getResponse()->getData()->msg;
-            info('完成拣货失败', ['exception msg' =>$message]);
-            return formatRet(500, $message);
+            app('log')->error('出库拣货失败',['msg'=>$e->getMessage()]);
+            return formatRet(500, trans("message.orderPickingFailed", ["message"=>$e->getMessage()]));
         }
-        catch (\Exception $e){
-            DB::rollBack();
-            app('log')->error('出库失败',['msg'=>$e->getMessage()]);
-            return formatRet(500,'出库失败');
+
+        return formatRet(0, trans("message.orderPickingSuccess"));
+    }
+
+    /**
+     * 支付状态列表
+     */
+    public function payStatusList(){
+        return formatRet(
+            0,
+            trans("message.success"),
+            [
+                ['id'=> Order::ORDER_PAY_STATUS_UNPAY , 'name'=> trans("message.orderStatusUnpay")],
+                ['id'=> Order::ORDER_PAY_STATUS_REFUND , 'name'=> trans("message.orderStatusRefund")],
+                ['id'=> Order::ORDER_PAY_STAUTS_PAID , 'name'=> trans("message.orderStatusPaid")],
+            ]
+        );
+    }
+
+    /**
+     * 支付方式列表
+     */
+    public function payTypeList(){
+        return formatRet(
+            0,
+            trans("message.success"),
+            [
+                ['id'=>  Order::ORDER_PAY_TYPE_ALIPAY, 'name'=>  trans("message.orderPaymentAlipay")],
+                ['id'=>  Order::ORDER_PAY_TYPE_WECHAT, 'name'=>  trans("message.orderPaymentWechat")],
+                ['id'=>  Order::ORDER_PAY_TYPE_BANK, 'name'=> trans("message.orderPaymentBank")],
+                ['id'=>  Order::ORDER_PAY_TYPE_CASH, 'name'=>  trans("message.orderPaymentCash")],
+                ['id'=>  Order::ORDER_PAY_TYPE_OTHER, 'name'=>  trans("message.orderPaymentOther")],
+            ]
+        );
+    }
+
+    /**
+     * 订单状态列表
+     */
+    public function statusList(){
+        return formatRet(
+            0,
+            trans("message.success"),
+            [
+                ['id'=>  Order::STATUS_DEFAULT, 'name'=>  trans("message.orderStatusUnConfirm")],
+                // ['id'=>  Order::STATUS_PICKING, 'name'=>  '拣货中'],
+                // ['id'=>  Order::STATUS_PICK_DONE, 'name'=>  '已出库'],
+                ['id'=>  Order::STATUS_WAITING, 'name'=>  trans("message.orderStatusUnSend")],
+                ['id'=>  Order::STATUS_SENDING, 'name'=>  trans("message.orderStatusSending")],
+                ['id'=>  Order::STATUS_SUCCESS, 'name'=>  trans("message.orderStatusSuccess")],
+                ['id'=>  Order::STATUS_CANCEL, 'name'=>  trans("message.orderStatusCancel")],
+            ]
+        );
+    }
+
+    /**
+     * 取消订单
+     */
+    public function cancelOrder(BaseRequests $request,$order_id)
+    {
+        app('log')->info('request',$request->all());
+        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
+        // $this->validate($request,[
+        //     'warehouse_id' =>  [
+        //         'required','integer','min:1',
+        //         Rule::exists('warehouse','id')->where(function($q){
+        //             $q->where('owner_id',Auth::ownerId());
+        //         })
+        //     ],
+        // ]);
+        $order = Order::where('warehouse_id', app('auth')->warehouse()->id)->find($order_id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
         }
-        foreach ($res as $s){
-            $name = 'pick_'.$s['owner_id'].'_'.$s['relevance_code'];
-            app('log')->info('写入缓存', ['message'=> '名称'.$name.'序号'.$s['stock_id'].'数量'.$s['shelf_num']]);
-            $redis->hset($name, $s['stock_id'], $s['shelf_num']);
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
         }
-        return formatRet(0,'出库成功');
+
+        $order->load("orderItems");
+        $order->update(['status'=>Order::STATUS_CANCEL]);
+        event(new OrderCancel($order->toArray()));
+        return formatRet(0,trans("message.success"));
+    }
+
+    /**
+     * 更新运单号
+     */
+    public function updateExpress(BaseRequests $request,$id)
+    {
+        $this->validate($request,[
+            'express_code'           => 'required|string|string|max:255',
+            'express_num'            => 'required|string|max:255',
+            'shop_remark'            => 'string|max:255',
+        ]);
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+        if ($order->status < Order::STATUS_PICKING){
+            return formatRet(500, trans("message.orderOpStopByUnPick"));
+        }
+
+        try {
+            app('order')->updateExpress($request,$id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新发货信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500,  trans("message.failed"));
+        }
+        return formatRet(0,trans("message.success"));
 
     }
 
-    public function updateStatus(BaseRequests $request,$order_id)
+     /**
+     * 更新支付价格
+     */
+    public function updatePayStatus(BaseRequests $request,$id)
     {
-        app('log')->info('request',$request->all());
-        app('log')->info('取消订单',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
         $this->validate($request,[
-            'warehouse_id' =>  [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
+            'pay_status'                => 'required|integer|min:0',
+            'pay_type'                  => 'required|integer|min:1',
+            'sub_pay'                   => 'required|numeric|min:0',
+            'payment_account_number'    => 'string|max:100',
         ]);
-        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+
+        $order = Order::find($id);
         if(!$order){
-            return formatRet(500,"订单不存在");
+            return formatRet(500, trans("message.orderNotExist"));
         }
         if ($order->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500, trans("message.noPermission"));
         }
 
-        $order->update(['status'=>Order::STATUS_CANCEL]);
-        return formatRet(0,'成功');
+        try {
+            app('order')->updatePay($request,$id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500, trans("message.failed"));
+        }
+        return formatRet(0,trans("message.success"));
+    }
+
+    /**
+     * 设为签收
+     **/
+    public function completed(BaseRequests $request,$id ){
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+        try {
+            app('order')->updateRceived($request,$id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500, trans("message.failed"));
+        }
+        return formatRet(0,trans("message.success"));
     }
 
     public function  UpdateData(UpdateOrderRequest $request,$order_id )
     {
-        app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>$request->warehouse_id]);
-        $order = Order::where('warehouse_id',$request->warehouse_id)->find($order_id);
+        app('log')->info('修改出库单数据',['order_id'=>$order_id,'warehouse_id' =>app('auth')->warehouse()->id]);
+        $order = Order::where('warehouse_id',app('auth')->warehouse()->id)->find($order_id);
         if(!$order){
-            return formatRet(500,"订单不存在");
+            return formatRet(500, trans("message.orderNotExist"));
         }
         try {
             app('order')->updateData($request,$order);
             app('db')->commit();
-            return formatRet(0,'成功');
+            return formatRet(0,trans("message.success"));
         } catch (\Exception $e) {
             app('db')->rollback();
             app('log')->error('修改出库单数据失败',['msg'=>$e->getMessage()]);
-            return formatRet(500, '修改出库单数据失败');
+            return formatRet(500, trans("message.failed"));
         }
+    }
+
+    /**
+     * 更新为发货
+     */
+    public function setToSend(BaseRequests $request,$id)
+    {
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+        if ($order->status < Order::STATUS_PICKING){
+            return formatRet(500, trans("message.orderOpStopByUnPick"));
+        }
+
+        try {
+            app('order')->updateSend($id);
+            app('db')->commit();
+        } catch (\Exception $e) {
+            app('db')->rollback();
+            app('log')->error('更新发货信息失败',['msg'=>$e->getMessage()]);
+            return formatRet(500,  trans("message.failed"));
+        }
+        return formatRet(0,trans("message.success"));
+
+    }
+
+    /**
+     * 预览PDF
+     **/
+    public function pdf($id, $template = '')
+    {
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet("500", trans("message.orderNotExist"));
+        }
+
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->append(['out_sn_barcode']);
+
+        // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+
+
+        $templateName = "pdfs.order.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['out','pick','sale'])){
+            $templateName = "pdfs.order.template_pick";
+        }
+
+
+        return view($templateName, [
+            'order' => $order->toArray(),
+        ]);
+    }
+
+    /**
+     * 查看公开信息
+     **/
+    public function shareView(BaseRequests $request)
+    {
+
+        $this->validate($request,[
+            'id'            => 'required|integer|min:0',
+            'share_code'    => 'required|string|max:100|min:1',
+            'type'          => 'required|string|in:part,detail',
+            'mobile'        => 'required_if:type,detail|string',
+        ]);
+        app('log')->info('查看公开信息',$request->all());
+
+
+        $order = Order::find($request->id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->share_code != $request->share_code && trim($request->share_code)!=""){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        if($request->type == "part") {
+            $result["out_sn"]               = $order->out_sn;
+            $result["source"]               = $order->source;
+            $result["receiver_fullname"]    = $order->receiver_fullname;
+            $result["status"]               = $order->status;
+            $result["status_name"]          = $order->status_name;
+            $result["created_at"]           = date("Y-m-d H:i:s", strtotime($order->created_at));
+
+            return formatRet(0, trans("message.success"),$result);
+        }
+        if($order->receiver_phone != $request->mobile) {
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+
+        $order = $order->load(['orderItems.spec:id,total_shelf_num']);
+
+        // $order = $order->toArray();
+
+        return formatRet(0,trans("message.success"), $order->toArray());
+    }
+
+    /**
+     * 设置为公开信息
+     **/
+    public function shareOrder(BaseRequests $request,$id)
+    {
+
+        $order = Order::find($request->id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        try {
+            $shareCode = app('order')->updateToShare($id);
+            return formatRet(0,trans("message.success"), ["share_code"=>$shareCode]);
+        } catch (\Exception $e) {
+            return formatRet(500,  trans("message.failed"));
+        }
+
+    }
+
+    /**
+     * 公开信息下载PDF
+     **/
+    public function shareDownload(BaseRequests $request)
+    {
+
+        $this->validate($request,[
+            'id'            => 'required|integer|min:0',
+            'share_code'    => 'required|string|max:100|min:1',
+            'mobile'        => 'required|string',
+        ]);
+        app('log')->info('公开信息下载PDF',$request->all());
+
+        $id =  $request->id;
+
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet(500, trans("message.orderNotExist"));
+        }
+
+
+        if ($order->share_code != $request->share_code && trim($request->share_code)!=""){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        if($order->receiver_phone != $request->mobile) {
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->append(['out_sn_barcode']);
+
+        $template = "sale";
+        $templateName = "pdfs.order.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['out','pick','sale'])){
+            $templateName = "pdfs.order.template_pick";
+        }
+
+        $pdf = PDF::setPaper('a4');
+
+        // $file = $order->out_sn . "_{$templateName}.pdf";
+        $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName, "en"), md5($order->out_sn.$order->created_at));
+
+        $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
+        if(!file_exists($filePath)) {
+
+            $pdf->loadView($templateName, ['order' => $order->toArray()])->save($filePath);
+        }
+
+        if($request->filled("require_url") && $request->require_url == 1) {
+
+            $url = asset('storage/pdfs/'.$fileName);
+            return formatRet(0,trans("message.success"), ["url"=>$url]);
+        }
+
+        return response()->download($filePath, $fileName);
+    }
+
+    /**
+     * 下载PDF
+     *
+    */
+    public function download(BaseRequests $request, $id, $template = '')
+    {
+        $order = Order::find($id);
+        if(!$order){
+            return formatRet("500", trans("message.orderNotExist"));
+        }
+
+        if ($order->owner_id != Auth::ownerId()){
+            return formatRet(500, trans("message.noPermission"));
+        }
+
+        $order->load(['orderItems:id,name_cn,name_en,spec_name_cn,spec_name_en,amount,relevance_code,product_stock_id,order_id,pick_num,sale_price','orderItems.stocks:item_id,pick_num,warehouse_location_code,relevance_code,stock_sku', 'warehouse:id,name_cn', 'orderType:id,name', 'operatorUser']);
+        $order->append(['out_sn_barcode']);
+
+        // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
+
+
+        $templateName = "pdfs.order.template_".strtolower($template);
+        if(!in_array(strtolower($template), ['out','pick'])){
+            $templateName = "pdfs.order.template_pick";
+        }
+
+        $pdf = PDF::setPaper('a4');
+
+        // $file = $order->out_sn . "_{$templateName}.pdf";
+        $fileName = sprintf("%s_%s_%s.pdf", $order->out_sn, template_download_name($templateName, "en"), md5($order->out_sn.$order->created_at));
+
+        $filePath = sprintf("%s/%s", storage_path('app/public/pdfs/'), $fileName);
+        if(!file_exists($filePath)) {
+
+            $pdf->loadView($templateName, ['order' => $order->toArray()])->save($filePath);
+        }
+
+        try {
+            Storage::put('1.html', view('pdfs.order.template_pick', ['order' => $order->toArray()]));
+        } catch (\Throwable $throwable) {
+            info('保存失败', ['throwable' => $throwable->getMessage()]);
+        }
+
+        if($request->filled("require_url") && $request->require_url == 1) {
+
+            $url = asset('storage/pdfs/'.$fileName);
+            return formatRet(0,trans("message.success"), ["url"=>$url]);
+        }
+
+        return response()->download($filePath, $fileName);
+        // return $pdf->loadView($templateName, ['order' => $order->toArray()])->download($file);
+
+    }
+
+    /**
+     * @param  array  $data
+     * @throws BusinessException
+     */
+    protected function validateCodeDistinct(array $data)
+    {
+        $distinct = collect($data['goods_data'])
+                ->uniqueStrict(function ($value) {
+                    return $value['relevance_code'];
+                })->count() === count($data['goods_data']);
+
+        if (! $distinct) {
+            throw new BusinessException('商品规格重复了');
+        }
+
     }
 }

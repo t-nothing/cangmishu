@@ -26,14 +26,8 @@ class UpdateBatchRequest extends BaseRequests
      */
     public function rules()
     {
-        $warehouse_id = $this->warehouse_id;
+        $warehouse_id = app('auth')->warehouse()->id;
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'type_id' => [
                 'required','integer','min:1',
                 Rule::exists('batch_type','id')->where(function($q){
@@ -58,8 +52,8 @@ class UpdateBatchRequest extends BaseRequests
                       ->where('warehouse_id',$warehouse_id);
                 })
             ],
-            'product_stock.*.need_num'         => 'required|integer|min:1',
-            'product_stock.*.distributor_code' => ['string','max:255','distinct'],
+            'product_stock.*.need_num'         => 'required|integer|min:1|max:99999',
+            'product_stock.*.distributor_code' => ['string','max:20','distinct'],
             'product_stock.*.remark'           => 'present|string|max:255',
         ];
     }
