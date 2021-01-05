@@ -47,14 +47,16 @@ class WarehouseController extends Controller
     {
         app('log')->info('新增仓库',$request->all());
         $user_id = app('auth')->ownerId();
-        $data = $request->only('name_cn', 'area', 'city', 'street', 'door_no', 'province', 'is_enabled_lang');
-        $data = array_merge($data,['owner_id'=>$user_id, 'code'=> Warehouse::no($user_id)]);
-        try{
+        $data = $request->only('country', 'contact_number', 'name_cn', 'area', 'city', 'street', 'door_no', 'province', 'is_enabled_lang');
+        $data = array_merge($data, ['owner_id' => $user_id, 'code' => Warehouse::no($user_id)]);
+
+        try {
             Warehouse::create($data);
-        }catch(\Exception $e) {
-            app('log')->error('新增仓库失败',['msg'=>$e->getMessage()]);
+        } catch (\Exception $e) {
+            app('log')->error('新增仓库失败', ['msg' => $e->getMessage()]);
             return formatRet(500, trans("message.warehouseAddFailed"));
         }
+
         return formatRet(0, '');
     }
 
@@ -63,14 +65,27 @@ class WarehouseController extends Controller
      */
     public function update(UpdateWarehouseRequest $request,$warehouse_id)
     {
-        app('log')->info('编辑仓库',$request->all());
-        $data = $request->only('name_cn', 'area', 'city', 'street', 'door_no', 'province', 'is_enabled_lang');
-        try{
-            Warehouse::where('id',$warehouse_id)->where('owner_id', app('auth')->ownerId())->update($data);
-        }catch(\Exception $e) {
-            app('log')->error('编辑仓库失败',['msg'=>$e->getMessage()]);
+        app('log')->info('编辑仓库', $request->all());
+
+        $data = $request->only(
+            'country',
+            'contact_number',
+            'name_cn',
+            'area',
+            'city',
+            'street',
+            'door_no',
+            'province',
+            'is_enabled_lang'
+        );
+
+        try {
+            Warehouse::where('id', $warehouse_id)->where('owner_id', app('auth')->ownerId())->update($data);
+        } catch (\Exception $e) {
+            app('log')->error('编辑仓库失败', ['msg' => $e->getMessage()]);
             return formatRet(500, trans("message.warehouseUpdateFailed"));
         }
+
         return formatRet(0, '');
     }
 
