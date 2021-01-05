@@ -20,7 +20,7 @@ class Warehouse extends Model
 
     const AVAILABLE = 0;
     const UNAVAILABLE = 1;
-    
+
     protected $guarded = [];
 
     public function fromDateTime($value)
