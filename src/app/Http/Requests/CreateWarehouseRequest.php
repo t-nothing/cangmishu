@@ -26,24 +26,26 @@ class CreateWarehouseRequest extends BaseRequests
     {
         $owner_id = Auth::ownerId();
 
-         return  [
-                'name_cn' => [
-                    'required','string','max:255',
-                    Rule::unique('warehouse')->where(function($q) use ($owner_id){
-                       return  $q->where('owner_id',$owner_id);
-                    })
-                ],
-                'code' => [
-                    'required','string','max:255',
-                    Rule::unique('warehouse')->where(function($q) use ($owner_id){
-                        return $q->where('owner_id',$owner_id);
-                    })
-                ],
-                'area'     => 'required|numeric',
-                'city'     => 'sometimes|string|nullable',
-                'street'   => 'sometimes|string|nullable',
-                'door_no'  => 'sometimes|string|nullable',
-                'province' => 'sometimes|string|nullable',
-            ];
+        return [
+            'name_cn' => [
+                'required', 'string', 'max:255',
+                Rule::unique('warehouse')->where(function ($q) use ($owner_id) {
+                    return $q->where('owner_id', $owner_id);
+                })
+            ],
+            // 'code' => [
+            //     'required','string','max:255',
+            //     Rule::unique('warehouse')->where(function($q) use ($owner_id){
+            //         return $q->where('owner_id',$owner_id);
+            //     })
+            // ],
+            'area' => 'required|numeric',
+            'city' => 'sometimes|string|nullable',
+            'street' => 'sometimes|string|nullable',
+            'door_no' => 'sometimes|string|nullable',
+            'province' => 'sometimes|string|nullable',
+            'country' => 'sometimes|string|nullable',
+            'contact_number' => 'sometimes|string|nullable',
+        ];
     }
 }

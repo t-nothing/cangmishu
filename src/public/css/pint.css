@@ -1,0 +1,5 @@
+@media print {
+  section {page-break-before: always;}
+  h1 {page-break-after: always;}
+  p {page-break-inside: avoid;}
+}

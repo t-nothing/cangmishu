@@ -17,7 +17,7 @@ class Batch extends Model
     
     protected $table = 'batch';
 
-    protected  $fillable = ['type_id','warehouse_id','batch_code','plan_time','over_time','distributor_id','remark','confirmation_number','owner_id','status'];
+    protected  $fillable = ['type_id','warehouse_id','batch_code','plan_time','over_time','distributor_id','remark','confirmation_number','owner_id','status','need_num','total_purchase_price'];
 
     protected $guarded  =[];
     /**
@@ -85,7 +85,8 @@ class Batch extends Model
      */
     public function getStatusNameAttribute()
     {
-        return $this->translateStatusTo($this->status);
+        $lang = app('translator')->getLocale();
+        return $this->translateStatusTo($this->status, $lang);
     }
 
     /**
@@ -101,13 +102,9 @@ class Batch extends Model
      */
     public function getTotalNumAttribute()
     {
-        $r = [
-            'total_need_num' => 0,
-            'total_stockin_num' => 0,
-        ];
 
-        $r['total_need_num']    = $this->batchProducts->sum('need_num');
-        $r['total_stockin_num'] =  $this->batchProducts->sum('total_stockin_num');
+        $r['total_need_num']    = $this->need_num;
+        $r['total_stockin_num'] =  $this->stock_num;
 
         return $r;
     }
@@ -119,7 +116,7 @@ class Batch extends Model
     public function getTransportationTypeNameAttribute()
     {
         $k = $this->transportation_type;
-        $lang = 'cn';
+        $lang = app('translator')->getLocale();
 
         $translations = [
             Batch::TRANSPORTATION_TYPE_SHIP => [
@@ -158,7 +155,7 @@ class Batch extends Model
 
     public function batchProducts()
     {
-        return $this->hasMany('App\Models\ProductStock', 'batch_id', 'id')
+        return $this->hasMany('App\Models\BatchProduct', 'batch_id', 'id')
                     ->with('spec.product');
     }
 
@@ -256,44 +253,5 @@ class Batch extends Model
             : '';
     }
 
-    // 生成和比对SKU
-    // public static function generateSKU(ProductStock $stock)
-    // {
-    //     if (! empty($stock->sku)) {
-    //         return $stock->sku;
-    //     }
-
-    //     $batch = $stock->batch;
-
-    //     $sku = ProductSku::where('spec_id', $stock->spec->id)
-    //                      ->where('expiration_date', $stock->expiration_date)
-    //                      ->where('production_batch_number', $stock->production_batch_number)
-    //                      ->where('confirmation_number', $stock->batch->confirmation_number)
-    //                      ->value('sku');
-
-    //     if (! $sku) {
-    //         $sku = 'sku' . get_hash();
-
-    //         DB::transaction(function () use ($stock, $sku) {
-    //             $exists = ProductSku::where('sku', $sku)->first();
-
-    //             if (! $exists) {
-    //                 $productSku = ProductSku::insert([
-    //                     'sku'                      => $sku,
-    //                     'spec_id'                  => $stock->spec_id,
-    //                     'expiration_date'          => $stock->expiration_date,
-    //                     'production_batch_number'  => $stock->production_batch_number,
-    //                     'confirmation_number'      => $stock->batch->confirmation_number,
-    //                     'batch_code'               => $stock->batch->batch_code,
-    //                 ]);
-
-    //                 $stock->sku = $sku;
-    //                 $stock->save();
-    //             }
-    //         });
-    //     }
-
-    //     return false;
-    // }
 
 }

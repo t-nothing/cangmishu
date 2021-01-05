@@ -13,16 +13,19 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use App\Models\Warehouse;
 
 class BaseRequests extends  FormRequest
 {
+    var $warehouseId ;
 
-    protected function failedValidation(Validator $validator)
-    {
-        $message = collect($validator->errors()->toArray())->flatten(1)->toArray();
-        throw new HttpResponseException(response()->json(['code'=>422,'msg'=>$message[0],'data'=>null],
-            422));
-    }
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     // print_r(collect($validator->errors()->toArray())->flatten(1)->toArray());exit;
+    //     $message = collect($validator->errors()->toArray())->flatten(1)->toArray();
+    //     throw new HttpResponseException(response()->json(['code'=>422,'msg'=>$message[0],'data'=>null],
+    //         422, [], JSON_UNESCAPED_UNICODE));
+    // }
 
 
     protected function failedAuthorization()
@@ -50,4 +53,13 @@ class BaseRequests extends  FormRequest
     {
         return [];
     }
+
+    public function isRequiredLang(int $warehouseId = 0)
+    {
+        if($warehouseId == 0) {
+            $warehouseId = intval(app('auth')->warehouse()->id);
+        }
+        return   Warehouse::isEnabledLang($warehouseId);
+    }
+
 }

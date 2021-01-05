@@ -9,7 +9,7 @@ class Product extends Model
 {
     use SoftDeletes;
     protected $table = 'product';
-    protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'category_id','remark','photos'];
+    protected $fillable = ['warehouse_id', 'owner_id', 'name_cn', 'name_en', 'category_id','remark','photos', 'sale_price', 'purchase_price'];
 
     const PRODUCT_STATUS_PREPARE = 1; // 待入库的
     const PRODUCT_STATUS_ONLINE = 2; // 正常商品，可以售卖
@@ -36,6 +36,7 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo('App\Models\Category', 'category_id', 'id');
+      
     }
 
     public function specs()
@@ -61,7 +62,7 @@ class Product extends Model
      */
     public function scopeWhose($query, $user_id)
     {
-        return $query->where('owner_id', $user_id);
+        return $query->where('product.owner_id', $user_id);
     }
 
 
@@ -73,7 +74,7 @@ class Product extends Model
      */
     public function scopeOfWarehouse($query, $user_id)
     {
-        return $query->where('warehouse_id', $user_id);
+        return $query->where('product.warehouse_id', $user_id);
     }
 
     /**
@@ -88,12 +89,11 @@ class Product extends Model
              return $q->whereHas('specs',function ($qq) use ($keywords){
                         $qq->where('relevance_code', 'like','%' .$keywords . '%');
                     })
-                    ->orwhere('name_cn', 'like', '%' . $keywords . '%')
-                    ->orWhere('name_en', 'like', '%' . $keywords . '%');
+                    ->orwhere('product.name_cn', 'like', '%' . $keywords . '%')
+                    ->orWhere('product.barcode', 'like', $keywords . '%');
         });
         return $query;
     }
-
 
     static function stock($id)
     {

@@ -18,10 +18,12 @@ trait WarehouseGuardHelpers
     protected $warehouse;
 
     protected $role_id;
+
     protected  $owner_id;
 
     /**
      * Get the warehouse for the current request.
+     * @throws BusinessException
      */
     public function warehouse()
     {
@@ -29,7 +31,7 @@ trait WarehouseGuardHelpers
             return $this->warehouse;
         }
 
-        $warehouse_id = $this->getWarehouseIdForResquest();
+        $warehouse_id = $this->getWarehouseIdForRequest();
 
         $warehouse = Warehouse::find($warehouse_id);
 
@@ -42,7 +44,11 @@ trait WarehouseGuardHelpers
         throw new BusinessException('请选择仓库');
     }
 
-    public function getWarehouseIdForResquest()
+    /**
+     * @return mixed
+     * @throws BusinessException
+     */
+    public function getWarehouseIdForRequest()
     {
         $warehouse_id = $this->getRequest()->header('Warehouse');
         if (! is_null($warehouse_id)) {
@@ -74,12 +80,32 @@ trait WarehouseGuardHelpers
         return $this;
     }
 
+    /**
+     * 判断当前账户是否为员工账户
+     *
+     * @return mixed
+     */
     public function ownerId()
     {
-        //判断当前账户是否为员工账户
         $user = $this->user();
         $owner= $user->boss_id ?:$user->id;
         return $owner;
     }
 
+    /**
+     * @return int
+     */
+    public function warehouseId()
+    {
+        //判断当前账户是否为员工账户
+        return $this->user()->default_warehouse_id ?? 0;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function shopId()
+    {
+        return $this->getRequest()->header('Shop', '');
+    }
 }

@@ -52,24 +52,24 @@ class DistributorController extends Controller
                     return $query->where('user_id',Auth::ownerId());
                 }),
             ],
-            'name_en' =>[
-                'required','string','max:50',
-                Rule::unique('distributor')->where(function ($query) {
-                    return $query->where('user_id',Auth::ownerId());
-                }),
-            ],
+            // 'name_en' =>[
+            //     'required','string','max:50',
+            //     Rule::unique('distributor')->where(function ($query) {
+            //         return $query->where('user_id',Auth::ownerId());
+            //     }),
+            // ],
         ]);
 
         $distributor = new Distributor;
         $distributor->user_id = Auth::id();
         $distributor->name_cn = $request->name_cn;
-        $distributor->name_en = $request->name_en;
+        $distributor->name_en = $request->name_en??$request->name_cn;
 
         if ($distributor->save()) {
-            return formatRet(0);
+            return formatRet(0,'', $distributor->toArray());
         }
 
-        return formatRet(500, '失败');
+        return formatRet(500, trans("message.distributorAddFailed"));
     }
 
     /**
@@ -87,26 +87,26 @@ class DistributorController extends Controller
                 })
                     ->ignore($distributor_id)
             ],
-            'name_en'        =>  [
-                'required','string','max:50',
-                Rule::unique('distributor')->where(function ($query)use($distributor_id) {
-                    return $query->where('user_id',Auth::ownerId());
-                })
-                    ->ignore($distributor_id)
-            ],
+            // 'name_en'        =>  [
+            //     'required','string','max:50',
+            //     Rule::unique('distributor')->where(function ($query)use($distributor_id) {
+            //         return $query->where('user_id',Auth::ownerId());
+            //     })
+            //         ->ignore($distributor_id)
+            // ],
         ]);
 
         if (! $distributor = Distributor::find($distributor_id)) {
-            return formatRet(404, '供应商不存在', [], 404);
+            return formatRet(404, trans("message.distributorNotExist"), [], 404);
         }
 
         $distributor->name_cn = $request->name_cn;
-        $distributor->name_en = $request->name_en;
+        $distributor->name_en = $request->name_en??$request->name_cn;
 
         if ($distributor->save()) {
             return formatRet(0);
         }
-        return formatRet(500, '失败');
+        return formatRet(500, trans("message.distributorUpdateFailed"));
     }
 
     /**
@@ -117,12 +117,30 @@ class DistributorController extends Controller
     public function destroy( $distributor_id)
     {
         if (! $distributor = Distributor::whose(Auth::id())->find($distributor_id)) {
-            return formatRet(404, '供应商不存在', [], 404);
+            return formatRet(404, trans("message.distributorNotExist"), [], 404);
         }
 
         if ($distributor->delete()) {
             return formatRet(0);
         }
-        return formatRet(500, '失败');
+        return formatRet(500, trans("message.distributorDeleteFailed"));
+    }
+
+    /**
+     * 供应商 - 查看
+     *
+     * @author liusen
+     */
+    public function show( BaseRequests $request,$id)
+    {
+        $id = intval($id);
+        $distributor = Distributor::whose(Auth::id())->find($id);
+        if(!$distributor){
+            return formatRet(404, trans("message.distributorNotExist"), [], 404);
+        }
+        
+
+        return formatRet(0, '', $distributor->toArray());
+       
     }
 }

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ReceiverAddressController extends Controller
 {
+    /**
+     * 收件人列表
+     */
     public function index(BaseRequests $request)
     {
         $owner_id= Auth::ownerId();
@@ -21,6 +24,10 @@ class ReceiverAddressController extends Controller
         return  formatRet(0,'',$address->toArray());
     }
 
+
+    /**
+     * 新增收件人
+     **/
     public  function store(CreateReceiverAddressRequest $request)
     {
         app('log')->info('添加收件人地址',$request->all());
@@ -28,14 +35,17 @@ class ReceiverAddressController extends Controller
         try{
             $data = $request->all();
             $data = array_merge($data,['owner_id' =>$user_id]);
-            ReceiverAddress::create($data);
-            return formatRet(0);
+            $data = ReceiverAddress::create($data);
+            return formatRet(0, '', $data->toArray());
         }catch (\Exception $e){
             app('log')->info('仓秘书添加收件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"添加收件人信息失败");
+            return formatRet(500, trans("message.receiverAddFailed"));
         }
     }
 
+    /**
+     * 编辑收件人
+     **/
     public function update(UpdateReceiverAddressRequest $request, $address_id)
     {
         app('log')->info('编辑收件人地址',$request->all());
@@ -45,29 +55,35 @@ class ReceiverAddressController extends Controller
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('仓秘书编辑收件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"编辑收件人地址失败");
+            return formatRet(500, trans("message.receiverUpdateFailed"));
         }
     }
 
+    /**
+     * 删除
+     **/
     public function destroy($address_id)
     {
         app('log')->info('删除收件人地址',['id'=>$address_id]);
         $address = ReceiverAddress::find($address_id);
         if(!$address){
-            return formatRet(500,"收件地址不存在");
+            return formatRet(500, trans("message.receiverNotExist"));
         }
         if ($address->owner_id != Auth::ownerId()){
-            return formatRet(500,"没有权限");
+            return formatRet(500,  trans("message.noPermission"));
         }
         try{
             $address->delete();
             return formatRet(0);
         }catch (\Exception $e){
             app('log')->info('仓秘书删除收件人地址失败',['msg' =>$e->getMessage()]);
-            return formatRet(500,"删除收件人地址失败");
+            return formatRet(500, trans("message.receiverDeleteFailed"));
         }
     }
 
+    /**
+     * 显示单个收件人信息
+     **/
     public function  show(BaseRequests $request, $address_id)
     {
 
@@ -75,8 +91,8 @@ class ReceiverAddressController extends Controller
 
         $address = ReceiverAddress::where('owner_id',Auth::ownerId())->find($address_id);
         if(!$address){
-            return formatRet(500,"地址不存在");
+            return formatRet(500, trans("message.receiverNotExist"));
         }
-        return formatRet(0,"成功",$address->toArray());
+        return formatRet(0,"",$address->toArray());
     }
 }

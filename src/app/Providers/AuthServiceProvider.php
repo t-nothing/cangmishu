@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use Laravel\Passport\Passport;
+use Laravel\Passport\RouteRegistrar;
 use App\Guard\JwtGuard;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -26,10 +29,24 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Auth::extend('jwt', function ($app, $name, array $config) {
+        Auth::extend('custom-jwt', function ($app, $name, array $config) {
             // 返回一个 Illuminate\Contracts\Auth\Guard 实例...
 
             return new JwtGuard(Auth::createUserProvider($config['provider']),app('request'));
         });
+
+        Passport::routes(function (RouteRegistrar $router) {
+            config(['auth.guards.api.provider' => 'users']);
+            $router->forAccessTokens();
+        });
+
+        // accessToken有效期
+        Passport::tokensExpireIn(Carbon::now()->addDays(15));
+        // accessRefushToken有效期
+        Passport::refreshTokensExpireIn(Carbon::now()->addDays(30));
+
+
+        // Passport::routes();
+
     }
 }

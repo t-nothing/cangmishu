@@ -41,6 +41,15 @@ $app->singleton(
     App\Exceptions\Handler::class
 );
 
+$app->alias('excel', Maatwebsite\Excel\Facades\Excel::class);
+
+$app->singleton('excel', function ($app) {
+    return $app->loadComponent(
+        'excel',
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        'excel'
+    );
+});
 /*
 |--------------------------------------------------------------------------
 | Return The Application

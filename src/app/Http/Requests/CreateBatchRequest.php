@@ -24,21 +24,19 @@ class CreateBatchRequest extends BaseRequests
      */
     public function rules()
     {
-        $warehouse_id = $this->warehouse_id;
+        $warehouse_id = app('auth')->warehouse()->id;
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'type_id' => [
                 'required','integer','min:1',
                 Rule::exists('batch_type','id')->where(function($q){
                     $q->where('owner_id',Auth::ownerId());
                 })
             ],
-            'confirmation_number'              => 'string|max:255',
+            'confirmation_number'              => ['string','max:50',
+                Rule::unique('batch', 'batch_code')->where(function($q) use($warehouse_id) {
+                    $q->where('warehouse_id', $warehouse_id);
+                })
+            ],
             'distributor_id'                   =>  [
                 'integer','min:1',
                 Rule::exists('distributor','id')->where(function($q){
@@ -56,9 +54,10 @@ class CreateBatchRequest extends BaseRequests
                       ->where('warehouse_id',$warehouse_id);
                 })
             ],
-            'product_stock.*.need_num'         => 'required|integer|min:1',
-            'product_stock.*.distributor_code' => 'string|max:255|distinct',
+            'product_stock.*.need_num'         => 'required|integer|min:1|max:99999',
+            'product_stock.*.distributor_code' => 'string|max:20|distinct',
             'product_stock.*.remark'           => 'present|string|max:255',
+            'product_stock.*.purchase_price'   => 'required|numeric|min:0|max:99999',
         ];
     }
 
@@ -71,6 +70,8 @@ class CreateBatchRequest extends BaseRequests
             'type_id.exists' =>  '入库单分类不存在',
             'product_stock.*.relevance_code.exists' =>  '外部编码不存在',
             'product_stock.*.distributor_code.distinct' =>  '供货商货号重复',
+            'product_stock.*.purchase_price.required' =>  '进货价格不能为空',
+            'confirmation_number.unique' =>  '单据编号已存在',
         ];
     }
 }

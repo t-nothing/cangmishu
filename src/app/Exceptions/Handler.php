@@ -2,11 +2,11 @@
 
 namespace App\Exceptions;
 
-use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -34,36 +34,36 @@ class Handler extends ExceptionHandler
     /**
      * Report or log an exception.
      *
-     * @param  \Exception  $exception
+     * @param  Throwable  $e
      * @return void
+     * @throws Throwable
      */
-    public function report(Exception $exception)
+    public function report(Throwable  $e)
     {
-        parent::report($exception);
+        parent::report($e);
     }
 
     /**
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @param  Throwable  $e
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @throws Throwable
      */
-    public function render($request, Exception $e)
+    public function render($request, Throwable $e)
     {
         if($request->wantsJson() ||$request->expectsJson()){
             $e =  $this->prepareException($e);
             switch ($e){
+                case  $e instanceof HttpResponseException:
                 case $e instanceof  ValidationException:
-                   $re = collect($e->errors())->values()->flatten(1)->toArray();
-
+                    $re = collect($e->errors())->values()->flatten(1)->toArray();
                     return  response()->json([
                         'msg' => $re[0],
                         'status' =>422 ,
                         'data' => null,
                     ],422);
-                case  $e instanceof HttpResponseException:
-                    return $e->getResponse();
                 case  $e instanceof AuthenticationException:
                     return  response()->json([
                         'msg' =>'用户身份校验未通过',
@@ -71,6 +71,7 @@ class Handler extends ExceptionHandler
                         'data' => null,
                     ],401);
                 case   $this->isHttpException($e):
+                    // if($exception->getStatusCode() == 403 && $request->is('horizon*')) return redirect('/admin-horizon-login');
                     return  response()->json([
                         'msg' =>$e->getMessage(),
                         'status' =>$e->getStatusCode() ,

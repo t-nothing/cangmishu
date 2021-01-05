@@ -34,7 +34,9 @@ class UpdateSenderAddressRequest extends BaseRequests
             'city'     => 'required|string',
             'district' => 'required|string',
             'address'  => 'required|string',
-            'postcode' => 'string'
+            'postcode' => 'string',
+            'door_no'  => 'string',
+            'street'   => 'string'
         ];
     }
 }

@@ -3,15 +3,26 @@
 namespace App\Imports;
 
 use App\Models\Product;
-use App\Services\Service\CategoryService;
+use App\Services\CategoryService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\WithProgressBar;
+use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Validators\ValidationException;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\BeforeImport;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Illuminate\Support\Collection;
 
-class ProductsImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunkReading, WithValidation
+
+
+class ProductsImport implements ToCollection, WithEvents, withHeadingRow
 {
     protected  $categoryRepository;
     protected  $warehouseRepository;
@@ -22,41 +33,62 @@ class ProductsImport implements ToModel, WithHeadingRow, WithBatchInserts, WithC
         $this->category = $category;
     }
 
-    public function model(array $row)
+    public function registerEvents(): array
     {
-        $category_id = $this->category->getCategoryIdByNameCn($row['category']);
-        return new Product([
-            'warehouse_id' =>app('auth')->warehouse()->id,
-            'name_cn' => $row['name_cn'],
-            'name_en' => $row['name_en'],
-            'category_id' => $category_id,
-            'owner_id' =>app('auth')->ownerId(),
-        ]);
+       return [
+           BeforeImport::class => function () {
+               HeadingRowFormatter::extend('products', function ($value) {
+                   return $this->portsAfterProduct()[$value] ?? $value;
+               });
+               HeadingRowFormatter::default('products');
+           }
+       ];
     }
 
-
-    public function batchSize(): int
+    /**
+     * 商品信息
+     * @return array
+     */
+    public function portsAfterProduct()
     {
-        return 1000;
-    }
-
-    public function chunkSize(): int
-    {
-        return 1000;
-    }
-
-    public function rules(): array
-    {
-        return [
-            'category' => 'required|exists:category,name_cn',
-            'name_cn' => Rule::unique('product')->where(function ($query) {
-                $query->where('warehouse_id',app('auth')->warehouse()->id)
-                      ->where('owner_id',app('auth')->ownerId());
-            }),
-            'name_en' => 'required|string|max:255',
+        $key_arr = [
+           "规格X名称",
+           "规格XSKU",
+           "规格X进货价",
+           "规格X参考售价",
+           "规格X毛重",
         ];
+        $value_arr = [
+           'spec_name_X',
+           'spec_code_X',
+           'spec_purcharse_price_X',
+           'spec_sale_price_X',
+           'spec_weight_X',
+        ];
+        for ($i =1; $i <= 10; $i++){
+
+           $ports = array_merge($ports?? [], array_map(function ($value) use($i) {
+               return str_replace('X', $i, $value);
+           }, $key_arr));
+
+
+           $values = array_merge($values?? [], array_map(function ($value) use($i) {
+               return str_replace('X', $i, $value);
+           }, $value_arr));
+        }
+
+        $ports = collect($ports)->combine($values)->toArray();
+
+        return array_merge([
+                "商品名称"=> 'name_cn',
+                "商品分类"=> 'category_name',
+                "商品备注"=> 'remark',
+        ], $ports);
+   }
+
+    public function collection(Collection $collection)
+    {
+        return $collection;
     }
-
-
 
 }

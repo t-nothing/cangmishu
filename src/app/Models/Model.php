@@ -8,7 +8,10 @@
 
 namespace App\Models;
 
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model as Models;
+use Illuminate\Support\Arr;
+
 class Model extends  Models
 {
     protected static $_instance = [];
@@ -38,7 +41,7 @@ class Model extends  Models
 
         $attributes = $this->attributes;
 
-        if (! is_null($value = array_get($this->getCasts(), $key))) {
+        if (! is_null($value = Arr::get($this->getCasts(), $key))) {
             if (! array_key_exists($key, $attributes)) {
                 return;
             }
@@ -78,5 +81,31 @@ class Model extends  Models
             return self::$_instance[$class];
         }
         return self::$_instance[$class];
+    }
+
+    public  function ScopeOfWarehouse($query, $warehouse_id)
+    {
+        return $query->where('warehouse_id', $warehouse_id);
+    }
+
+    public  function ScopeOfShop($query, $shop_id)
+    {
+        return $query->where('shop_id', $shop_id);
+    }
+
+    public  function ScopeOfShopUser($query, $shop_id, $shop_user_id)
+    {
+        return $query->where('shop_id', $shop_id)->where('shop_user_id', $shop_user_id);
+    }
+
+    /**
+     * 为数组 / JSON 序列化准备日期。
+     *
+     * @param  \DateTimeInterface  $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format($this->dateFormat ?: 'Y-m-d H:i:s');
     }
 }

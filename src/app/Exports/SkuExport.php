@@ -26,18 +26,19 @@ class SkuExport implements FromQuery, WithMapping, WithHeadings, WithStrictNullC
      */
     public function map($stock): array
     {
+        // print_r($stock->locations->toArray());exit;
         return [
             $stock->sku,
             $stock->spec->product_name_cn,
-            $stock->spec->product_name_en,
+            // $stock->spec->product_name_en,
             $stock->relevance_code,
-            $stock->stockin_num,
+            $stock->stock_num,
             $stock->ean,
             $stock->production_batch_number,
             $stock->castsTo('expiration_date'),
             $stock->castsTo('best_before_date'),
-            $stock->location->code ?? '',
-            $stock->edit_count,
+            $stock->recount_times,
+            // $stock->locations->pluck('warehouse_location_code')->implode(','),
         ];
     }
 
@@ -46,15 +47,15 @@ class SkuExport implements FromQuery, WithMapping, WithHeadings, WithStrictNullC
         return [
             '入库批次号',
             '货品中文名称',
-            '货品英文名称',
+            // '货品英文名称',
             'SKU',
             '仓库库存',
             'EAN',
             '出产批次号',
             '保质期',
-            'BBD',
-            '位置',
+            '最佳食用期',
             '盘点次数',
+            // '位置',
         ];
     }
 }

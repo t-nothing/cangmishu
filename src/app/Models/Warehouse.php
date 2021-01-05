@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Warehouse extends Model
 {
+    use SoftDeletes;
     protected $table = 'warehouse';
 
     public $default = 0;
@@ -18,8 +21,6 @@ class Warehouse extends Model
     const AVAILABLE = 0;
     const UNAVAILABLE = 1;
 
-    public  $timestamps = true;
-    protected  $fillable = ['name_cn','code','area','city','province','street','door_no','owner_id'];
     protected $guarded = [];
 
     public function fromDateTime($value)
@@ -36,6 +37,10 @@ class Warehouse extends Model
     }
 
 
+    public function owner()
+    {
+        return $this->belongsTo('App\Models\User', 'owner_id', 'id');
+    }
 
 
     public function WarehouseArea()
@@ -142,5 +147,52 @@ class Warehouse extends Model
     public function getWarehouseFeatureAttribute()
     {
         return $this->warehouse_feature;
+    }
+
+    /**
+     * 仓库是否开启双语
+     **/
+    public static function isEnabledLang(int $id)
+    {
+        try
+        {
+            return Warehouse::find($id)->is_enabeld_lang;
+        }
+        catch(\Exception $ex)
+        {
+
+        }
+
+        return false;
+
+    }
+
+    /**
+     * 只要自己创建人不重复就行了
+     */
+    public static function no($owner_id = 0)
+    {
+        $key = "CMS-WAREHOUSE-".$owner_id;
+        $value = Cache::increment($key);
+        $code =  sprintf("W%02s", enid($value));
+        return $code;
+    }
+
+    /**
+     * 预警邮件
+     **/
+    public static function warningEmail($id)
+    {
+        try
+        {
+            return Warehouse::find($id)->warningEmail;
+        }
+        catch(\Exception $ex)
+        {
+
+        }
+
+        return null;
+
     }
 }

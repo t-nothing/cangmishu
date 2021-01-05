@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'jwt'),
+        'guard' => env('AUTH_GUARD', 'admin'),
         'passwords' => 'users',
     ],
 
@@ -36,8 +36,8 @@ return [
     */
 
     'guards' => [
-        'jwt' => [
-            'driver' => 'jwt',
+        'admin' => [
+            'driver' => 'custom-jwt',
             'provider' => 'users',
         ],
         'web' => [
@@ -46,9 +46,21 @@ return [
         ],
 
         'api' => [
-            'driver' => 'token',
+            'driver' => 'passport',
             'provider' => 'users',
         ],
+        'shop' => [
+            'driver' => 'passport',
+            'provider' => 'shop',
+        ],
+        'third-party' => [
+            'driver' => 'third-party',
+            'provider' => 'third-party',
+        ],
+        'super_admin' => [
+            'driver' => 'jwt',
+            'provider' => 'super_admin',
+        ]
     ],
 
     /*
@@ -73,11 +85,18 @@ return [
             'driver' => 'eloquent',
             'model' => \App\Models\User::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'shop' => [
+            'driver' => 'eloquent',
+            'model' => \App\Models\ShopUser::class,
+        ],
+        'third-party' => [
+            'driver' => 'eloquent',
+            'model' => \App\Models\AppAccount::class,
+        ],
+        'super_admin' => [
+            'driver' => 'eloquent',
+            'model' => \App\Models\SuperAdmin::class,
+        ],
     ],
 
     /*
@@ -98,6 +117,11 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+        'shop' => [
+            'provider' => 'shop',
             'table' => 'password_resets',
             'expire' => 60,
         ],

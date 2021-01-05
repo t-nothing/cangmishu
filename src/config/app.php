@@ -160,7 +160,11 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        //App\Providers\TelescopeServiceProvider::class,
+        Overtrue\LaravelWeChat\ServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
     ],
 
@@ -212,6 +216,9 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'PDF' => Barryvdh\Snappy\Facades\SnappyPdf::class,
         'SnappyImage' => Barryvdh\Snappy\Facades\SnappyImage::class,
+        'EasyWeChat' => Overtrue\LaravelWeChat\Facade::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+
     ],
 
 ];

@@ -8,7 +8,7 @@ class SenderAddress extends  Model
 {
     use SoftDeletes;
     protected $table ="sender_address";
-    protected  $fillable =['fullname','phone','country','province', 'city','district','address','owner_id'];
+    protected  $fillable =['fullname','phone','country','province', 'city','district','address','owner_id', 'street', 'door_no'];
     protected $guarded = [];
 
     public function owner()

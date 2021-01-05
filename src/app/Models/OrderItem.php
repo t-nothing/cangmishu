@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Models\Model;
 use App\Models\ProductStock;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderItem extends Model
 {
+    use SoftDeletes;
     protected $table = 'order_item';
 
     protected $guarded = [];
@@ -54,16 +56,17 @@ class OrderItem extends Model
         return $this->belongsTo('App\Models\Pick', 'shipment_num', 'shipment_num');
     }
 
-    public function stock()
+    /**
+     * 一个出库商品从多个位置出现
+     */
+    public function stocks()
     {
-        return $this->belongsTo('App\Models\ProductStock', 'product_stock_id', 'id');
+        return $this->hasMany('App\Models\OrderItemStockLocation', 'item_id', 'id');
     }
 
     public function spec()
     {
-        return $this->belongsTo('App\Models\ProductSpec', 'relevance_code', 'relevance_code')
-            ->where('warehouse_id', $this->warehouse_id)
-            ->where('owner_id', $this->owner_id);
+        return $this->belongsTo('App\Models\ProductSpec', 'spec_id', 'id');
     }
 
     public function feature()
@@ -87,12 +90,7 @@ class OrderItem extends Model
         if($lang == 'zh-CN'){
             $lang = 'cn';
         }
-        if (isset($this->spec, $this->spec->product)) {
-            $name = $this->spec->product['name_'.$lang].
-            '('.
-            $this->spec['name_'.$lang].
-            ')';
-        }
+        $name = sprintf("%s:%s", $this->{'name_'.$lang}, $this->{'spec_name_'.$lang});
 
         return $name;
     }
