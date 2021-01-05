@@ -76,7 +76,7 @@ class ShopController extends Controller
             $shop->is_stock_show        = 1;
             $shop->is_price_show        = 1;
             $shop->is_allow_over_order  = 1;
-            $shop->domain               = md5($data['name_cn']);
+            $shop->domain               = md5($data['name_cn']. $shop->id);
 
             $shop->save();
 
