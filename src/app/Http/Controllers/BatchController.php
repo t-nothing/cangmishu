@@ -296,11 +296,11 @@ class BatchController extends Controller
                 $data['batch_products'][$k]['expiration_date'] = Carbon::parse(
                     $v['expiration_date'],
                     new \DateTimeZone('Asia/Shanghai')
-                )->toDateTimeString();
+                )->toDateString();
                 $data['batch_products'][$k]['best_before_date'] = Carbon::parse(
                     $v['best_before_date'],
                     new \DateTimeZone('Asia/Shanghai')
-                )->toDateTimeString();
+                )->toDateString();
 
                 $data['batch_products'][$k]['need_production_batch_number'] = $v['spec']['product']['category']['need_production_batch_number'];
                 $data['batch_products'][$k]['need_expiration_date'] = $v['spec']['product']['category']['need_expiration_date'];
