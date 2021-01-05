@@ -7,6 +7,7 @@ use App\Models\OrderHistory;
 use App\Models\ProductSpec;
 use App\Models\ReceiverAddress;
 use App\Models\SenderAddress;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -290,16 +291,17 @@ class OrderService
                 if(!isset($data->sender))
                 {
                     if($data->sender_id == 0 ) {
+                        $warehouse = Warehouse::query()->findOrFail($data->warehouse_id);
 
                         $sender = new SenderAddress;
-                        $sender->country    = "";
-                        $sender->city       = "";
-                        $sender->province   = "";
-                        $sender->postcode   = "";
-                        $sender->district   = "";
-                        $sender->address    = "";
-                        $sender->fullname   = "";
-                        $sender->phone      = "";
+                        $sender->country    = $warehouse['country'];
+                        $sender->city       = $warehouse['city'];
+                        $sender->province   = '';
+                        $sender->postcode   = $warehouse['postcode'];
+                        $sender->district   = $warehouse['street'];
+                        $sender->address    = $warehouse['door_no'];
+                        $sender->fullname   = $warehouse['contact_user'];
+                        $sender->phone      = auth()->user()->phone ?? '';
                     } else {
                         $sender = SenderAddress::where("owner_id", Auth::ownerId())->find($data->sender_id);
                         if(!$sender) {
