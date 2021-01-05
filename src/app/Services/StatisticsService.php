@@ -126,7 +126,7 @@ class StatisticsService
         $stock_warning = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
-            ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
+            ->join('product_spec as s', 's.product_id', '=', 'product.id')
             ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
@@ -248,7 +248,7 @@ class StatisticsService
         $stock_bad = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
-            ->leftJoin(Category::getIns()->getTable() . ' as c', 'c.id', '=', 'product.category_id')
+            ->join(Category::getIns()->getTable() . ' as c', 'c.id', '=', 'product.category_id')
             ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
@@ -505,7 +505,7 @@ class StatisticsService
         $stock_lack_count = Product::query()
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin(Category::getIns()->getTable() . ' as c', 'c.id', '=', 'product.category_id')
-            ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
+            ->join('product_spec as s', 's.product_id', '=', 'product.id')
             ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
@@ -547,7 +547,7 @@ class StatisticsService
             ->selectRaw('s.total_stock_num as stock,product.name_cn as name, product.photos as pictures')
             ->where('product.warehouse_id', self::$warehouseId)
             ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
-            ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
+            ->join('category as c', 'c.id', '=', 'product.category_id')
             ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->orderBy('s.total_stock_num')
             ->get();
