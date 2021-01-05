@@ -10,6 +10,7 @@ use App\Models\Batch;
 use App\Models\Distributor;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductSpec;
 use App\Models\ReceiverAddress;
 use App\Models\Shop;
 use App\Models\ShopSenderAddress;
@@ -38,11 +39,11 @@ class MiniProgramIndexController extends Controller
             ->where('warehouse_id', $warehouseId)
             ->count('id');
 
-        $stock_warning = Product::query()
-            ->where('product.warehouse_id', $warehouseId)
-            ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
-            ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
-            ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
+        $stock_warning = ProductSpec::query()
+            ->where('product_spec.warehouse_id', $warehouseId)
+            ->join('product as p', 'product_spec.product_id', '=', 'p.id')
+            ->join('category as c', 'c.id', '=', 'p.category_id')
+            ->whereRaw('product_spec.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->count();
 
         $shops = Shop::query()->where('warehouse_id', $warehouseId)->select('id')->get();

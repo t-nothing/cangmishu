@@ -503,7 +503,7 @@ class StatisticsService
             ->where('warehouse_id', self::$warehouseId)
             ->sum('stock_num');
 
-        $stock_lack_count = $stock_warning = ProductSpec::query()
+        $stock_lack_count = ProductSpec::query()
             ->where('product_spec.warehouse_id', self::$warehouseId)
             ->join('product as p', 'product_spec.product_id', '=', 'p.id')
             ->join('category as c', 'c.id', '=', 'p.category_id')
