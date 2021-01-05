@@ -300,7 +300,7 @@ class OrderService
                         $sender->postcode   = $warehouse['postcode'];
                         $sender->district   = $warehouse['street'];
                         $sender->address    = $warehouse['door_no'];
-                        $sender->fullname   = $warehouse['contact_user'];
+                        $sender->fullname   = $warehouse['name_cn'];
                         $sender->phone      = auth()->user()->phone ?? '';
                     } else {
                         $sender = SenderAddress::where("owner_id", Auth::ownerId())->find($data->sender_id);
