@@ -171,8 +171,14 @@ class AuthController extends  Controller
         /** @var JwtGuard $guard */
         $guard = auth()->guard('admin');
 
-        if (! $data = $guard->userLogin(421)) {
-            return formatRet(500, $guard->sendFailedLoginResponse());
+        if (app()->environment() === 'production') {
+            if (! $data = $guard->userLogin(483)) {
+                return formatRet(500, $guard->sendFailedLoginResponse());
+            }
+        } else {
+            if (! $data = $guard->userLogin(421)) {
+                return formatRet(500, $guard->sendFailedLoginResponse());
+            }
         }
 
         $data['user'] = $guard->user();
