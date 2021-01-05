@@ -549,7 +549,7 @@ class StatisticsService
             ->leftJoin('product_spec as s', 's.product_id', '=', 'product.id')
             ->leftJoin('category as c', 'c.id', '=', 'product.category_id')
             ->whereRaw('s.total_stock_num <= c.warning_stock and c.warning_stock >0')
-            ->orderBy('product.total_stock_num')
+            ->orderBy('s.total_stock_num')
             ->get();
     }
 
