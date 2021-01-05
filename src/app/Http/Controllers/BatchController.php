@@ -11,6 +11,7 @@ use App\Models\ProductStock;
 use App\Models\BatchMarkLog;
 use App\Models\ProductSpec;
 use Carbon\Carbon;
+use Carbon\CarbonTimeZone;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Exceptions\LocationException;
@@ -292,8 +293,14 @@ class BatchController extends Controller
                 $model->name_cn = $v['spec']['name_cn'];
                 $model->name_en = $v['spec']['name_en'];
                 $data['batch_products'][$k]['spec']['product_name'] = $model->product_name;
-                $data['batch_products'][$k]['expiration_date'] = Carbon::parse($v['expiration_date'])->toDateTimeString();
-                $data['batch_products'][$k]['best_before_date'] = Carbon::parse($v['best_before_date'])->toDateTimeString();
+                $data['batch_products'][$k]['expiration_date'] = Carbon::parse(
+                    $v['expiration_date'],
+                    new \DateTimeZone('Asia/Shanghai')
+                )->toDateTimeString();
+                $data['batch_products'][$k]['best_before_date'] = Carbon::parse(
+                    $v['best_before_date'],
+                    new \DateTimeZone('Asia/Shanghai')
+                )->toDateTimeString();
 
                 $data['batch_products'][$k]['need_production_batch_number'] = $v['spec']['product']['category']['need_production_batch_number'];
                 $data['batch_products'][$k]['need_expiration_date'] = $v['spec']['product']['category']['need_expiration_date'];
