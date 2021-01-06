@@ -175,7 +175,7 @@ class ShopProductController extends Controller
                 if(!file_exists($filePath.sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id)))
                 {
                     $app = app('wechat.mini_program');
-                    $response = $app->app_code->get('pages/index/product_detail/product_detail?shop='.$shopId.'&product='.$shopProduct->id);
+                    $response = $app->app_code->get('pages/index/commodity_details/commodity_details?shop='.$shopId.'&id='.$shopProduct->id);
 
                     if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
                         $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id));
