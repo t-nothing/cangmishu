@@ -588,6 +588,9 @@ class ProductStockController extends  Controller
 
     }
 
+    /**
+     * 得到货位上面的所有库存记录
+     **/
     public function getLocations(BaseRequests $request)
     {
 
@@ -622,6 +625,50 @@ class ProductStockController extends  Controller
             });
             //$stock->where('sku', $request->code)->orWhere('ean', $request->code)->orWhere('relevance_code', $request->code);
         }
+
+        $stocks= $stock->paginate($request->input('page_size',100));
+
+        $arr= [];
+        foreach ($stocks as $stockLoation) {
+
+            $arr[] = [
+                    'id'                    =>  $stockLoation->id,
+                    'name_cn'               =>  $stockLoation->stock->product_name_cn,
+                    'name_en'               =>  $stockLoation->stock->product_name_en,
+                    'relevance_code'        =>  $stockLoation->stock->spec->relevance_code,
+                    'stock_sku'             =>  $stockLoation->stock->sku,
+                    'shelf_num_orgin'       =>  $stockLoation->shelf_num,
+                    'shelf_num_now'         =>  $stockLoation->shelf_num,
+                    'total_purcharse_orgin' =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'total_purcharse_now'   =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'status'                =>  1,
+                    'location_code'         =>  $stockLoation->warehouse_location_code,
+                    'location_id'           =>  $stockLoation->warehouse_location_id,
+                ];
+        }
+
+        $result = $stocks->toArray();
+        unset($result['data']);
+        $result['data'] = $arr;
+        return formatRet(0, '', $result);
+    }
+
+    /**
+     * 得到货位上面的所有库存记录
+     **/
+    public function getLocationsById(BaseRequests $request)
+    {
+
+        $this->validate($request, [
+            'id' => 'required|integer'
+        ]);
+
+        $stock = ProductStockLocation::with('spec.product')
+            ->where('owner_id', app('auth')->ownerId())
+            ->ofWarehouse(app('auth')->warehouse()->id);
+
+        $stock->where('warehouse_location_id', $request->id);
+       
 
         $stocks= $stock->paginate($request->input('page_size',100));
 

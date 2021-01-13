@@ -241,7 +241,8 @@ Route::middleware(['auth:admin'])->group(function () {
 
     //库存
     // Route::get('/stock/code', 'ProductStockController@getSkus');
-    Route::get('/stock/code', 'ProductStockController@getLocations');
+    Route::get('/stock/code', 'ProductStockController@getLocations');//根据货位编号拉取库存信息
+    Route::get('/stock/locations', 'ProductStockController@getLocationsById');//根据货位ID拉取库存信息
     Route::get('/stock/sku/{sku}', 'ProductStockController@getInfoBySku');
     Route::put('/stock/{stock_id}', 'ProductStockController@update');//盘点
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
