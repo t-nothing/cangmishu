@@ -40,4 +40,15 @@ class StockDataController extends Controller
     {
         return success($this->service::getStockWarningRank($this->getRequestParams()));
     }
+
+
+    /**
+     * 得到货区货位库存统计
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getLocationStockCountData()
+    {
+        return success($this->service::getLocationStockCountData($this->getRequestParams()));
+    }
 }
