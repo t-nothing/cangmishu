@@ -698,6 +698,41 @@ class ProductStockController extends  Controller
     }
 
     /**
+     * 移动货位
+     **/
+    public function moveTo(BaseRequests $request)
+    {
+        app('log')->info('移动货位',$request->all());
+        $this->validate($request, [
+            'code'              => 'required|string',
+            'id'                => 'required|array',
+            'id.*'              => 'required|integer',
+        ]);
+
+        $warehouse = app('auth')->warehouse();
+
+        $location = WarehouseLocation::ofWarehouse($warehouse->id)
+            ->where('code', $request->code)->first();
+
+        if(!$location) {
+            return formatRet(500,'货位不存在');
+        }
+
+        $stockLoations = ProductStockLocation::with('spec.product')
+            ->whereIn('id', $request->id)
+            ->ofWarehouse(app('auth')->warehouse()->id)->get();
+
+        foreach ($stocks as $stockLoation) {
+
+            app('store')->moveTo($stockLoation, $warehouse->id, $location->code);
+
+        }
+
+        
+        return formatRet(0, '', $result);
+    }
+
+    /**
      * 根据规格ID得到位置
      *
      */
