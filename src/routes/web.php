@@ -308,6 +308,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::delete('/shop/{shopId}/product/{ids}', 'ShopProductController@destroy');
     Route::get('/shop/{shopId}/product/{id}', 'ShopProductController@show');
     Route::put('/shop/{shopId}/product', 'ShopProductController@onShelf');
+    Route::put('/shop/{shopId}/product/recommended/{status}', 'ShopProductController@recommend');
 
     //默认发件人
     Route::get('/shop/{id}/sender', 'ShopController@senderShow');
