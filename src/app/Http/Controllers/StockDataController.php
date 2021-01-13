@@ -49,6 +49,23 @@ class StockDataController extends Controller
      */
     public function getLocationStockCountData()
     {
-        return success($this->service::getLocationStockCountData($this->getRequestParams()));
+        $result =  $this->service::getLocationStockCountData($this->getRequestParams());
+        $newData = [];
+        if($result) {
+
+            foreach ($result as $key => $value) {
+                if(!isset($newData[$value->area_name])) {
+                    $newData[$value->area_name]["name"] =  $value->area_name;
+                    $newData[$value->area_name]["items"][] = $value;
+                    $newData[$value->area_name]["total_shelf_num"] = $value->total_shelf_num;
+                    $newData[$value->area_name]["count_location"] = 1;
+                } else {
+                    $newData[$value->area_name]["total_shelf_num"] += $value->total_shelf_num;
+                    $newData[$value->area_name]["count_location"] ++;
+                }
+                
+            }
+        }
+        return success(array_values($newData));
     }
 }
