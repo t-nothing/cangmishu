@@ -87,6 +87,7 @@ Route::middleware(['auth:admin'])->group(function () {
         Route::get('graphData', 'HomePageController@getStockData');
         Route::get('salesRank', 'StockDataController@getSalesRank');
         Route::get('warningRank', 'StockDataController@getStockWarningRank');
+        Route::get('locationStockData', 'StockDataController@getLocationStockCountData');
     });
 
     Route::prefix('officialAccount')->group(function () {
