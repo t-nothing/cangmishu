@@ -16,8 +16,20 @@ class ReceiverAddressController extends Controller
      */
     public function index(BaseRequests $request)
     {
+        $this->validate($request, [
+            'keywords'                => 'string',
+        ]);
+        
         $owner_id= Auth::ownerId();
-        $address= ReceiverAddress::where('owner_id',$owner_id)->paginate($request->input('page_size',10));
+        $address = ReceiverAddress::where('owner_id',$owner_id)
+        ->when($request->filled('keywords'),function ($q) use ($request){
+            $keywords = trim($request->keywords);
+            return $q->where(function ($q) use ($keywords) {
+                    $q->where('fullname', 'like', '%' . $keywords . '%')
+                    ->orWhere('phone', 'like', $keywords . '%');
+                });
+        })
+        ->paginate($request->input('page_size',10));
         foreach ($address as $add){
             $add->append('full_address');
         }
