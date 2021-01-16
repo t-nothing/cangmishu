@@ -154,6 +154,7 @@ class OrderController extends Controller
                 throw new \Exception(trans("message.orderAddFailed"), 1);
 
             }
+            app('order')->updatePay($request, $order->id);
             app('db')->commit();
             return formatRet(0,trans("message.orderAddSuccess"), $order->toArray());
         } catch (BusinessException $e) {
@@ -354,9 +355,7 @@ class OrderController extends Controller
 
         try {
             app('order')->updatePay($request,$id);
-            app('db')->commit();
         } catch (\Exception $e) {
-            app('db')->rollback();
             app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
             return formatRet(500, trans("message.failed"));
         }

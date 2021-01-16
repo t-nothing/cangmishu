@@ -51,6 +51,7 @@ class CreateOrderRequest extends BaseRequests
             'goods_data.*.sale_price'     => 'required|numeric|min:0|max:99999',
             // 快递单数据
             'delivery_type'               => 'integer|min:1',
+            'delivery_date'               => 'string|date_format:Y-m-d',
             'express_num'                 => 'string|max:255',
             'receiver_id'                 =>  [
                 'required','integer','min:1',
@@ -60,6 +61,10 @@ class CreateOrderRequest extends BaseRequests
             ],
             'sender_id'                   => 'integer|min:0',
             'remark'                      => 'string|max:255',
+            'pay_status'                  => 'integer|min:0',
+            'pay_type'                    => 'integer|min:1',
+            'sub_pay'                     => 'numeric|min:0',
+            'payment_account_number'      => 'string|max:100',
         ];
     }
 
@@ -67,8 +72,12 @@ class CreateOrderRequest extends BaseRequests
     {
         return [
             'order_type'                        => '出库单类型',
+            'delivery_date'                     => '出库日期',
             'receiver_id'                       => '收件人',
             'sender_id'                         => '发件人',
+            'pay_status'                        => '支付状态',
+            'pay_type'                          => '支付类型',
+            'sub_pay'                           => '实付金额',
             'goods_data.*.num'                  => '出库数量',
             'goods_data.*.sale_price'           => '销售价格',
             'goods_data.*.relevance_code'       => '商品规格',
