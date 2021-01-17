@@ -70,14 +70,15 @@ class OrderController extends Controller
     public function index(BaseRequests $request)
     {
         $this->validate($request, [
-            'page'          => 'integer|min:1',
-            'page_size'     => new PageSize(),
-            'created_at_b'  => 'date:Y-m-d',
-            'created_at_e'  => 'date:Y-m-d',
-            'status'        => 'integer',
-            'keywords'      => 'string',
-            'with_items'    => 'boolean',
-            'delivery_date' => 'date_format:Y-m-d'
+            'page'              => 'integer|min:1',
+            'page_size'         => new PageSize(),
+            'created_at_b'      => 'date:Y-m-d',
+            'created_at_e'      => 'date:Y-m-d',
+            'status'            => 'integer',
+            'keywords'          => 'string',
+            'with_items'        => 'boolean',
+            'not_show_cancel'   =>'integer',
+            'delivery_date'     => 'date_format:Y-m-d'
         ]);
         $order = Order::ofWarehouse(app('auth')->warehouse()->id)
             ->with('orderType')
@@ -86,12 +87,16 @@ class OrderController extends Controller
             $order->where('created_at', '>', Carbon::parse($request->created_at_b)->startOfDay()->unix());
         }
 
+
         if ($request->filled('created_at_e')) {
             $order->where('created_at', '<', Carbon::parse($request->created_at_e)->endOfDay()->unix());
         }
 
         if ($request->filled('status')) {
             $order->where('status', $request->status);
+        }
+        if ($request->filled('not_show_cancel') && $request->not_show_cancel == 1) {
+            $order->where('status', '>', 0);
         }
 
         if ($request->filled('keywords')) {

@@ -28,6 +28,7 @@ class ProductStockController extends  Controller
         app('log')->info('拉取库存', $request->all());
         $this->validate($request, [
             'keywords'                => 'string',
+            'barcode'                 => 'string',
             'sku'                     => 'string',
             'relevance_code'          => 'string',
             'production_batch_number' => 'string',
@@ -44,7 +45,6 @@ class ProductStockController extends  Controller
         $owner_id = app('auth')->ownerId();
         $warehouse_id = $request->input('warehouse_id');
         $option = $request->input('option');
-
 
 
         $results = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times,stock_num,id'])
@@ -64,8 +64,15 @@ class ProductStockController extends  Controller
                 return $query->where(function ($query) use ($keywords) {
                     $query->where('product_spec.name_cn', 'like', '%'.$keywords.'%')
                         ->orWhere('product_spec.name_en', 'like', '%'.$keywords.'%')
+                        ->orWhere('product_spec.relevance_code', 'like', '%'.$keywords.'%')
+                        ->orWhere('product.barcode', 'like', '%'.$keywords.'%')
                         ->orWhere('product.hs_code', 'like', '%'.$keywords.'%')
                         ->orWhere('product.origin', 'like', '%'.$keywords.'%');
+                });
+            })->when($keywords = $request->input('barcode'), function ($query) use ($keywords) {
+                return $query->where(function ($query) use ($keywords) {
+                        $query->orWhere('product_spec.relevance_code', $keywords)
+                        ->orWhere('product.barcode', $keywords);
                 });
             })
             ->when($sku = $request->input('sku'), function ($query) use ($sku) {
@@ -91,7 +98,7 @@ class ProductStockController extends  Controller
             ->when($option == 3, function ($query) use ($warehouse_id, $owner_id) {
                 $query->onlyToBeOnShelf($warehouse_id, $owner_id);
             })
-            ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
+            ->select(['product_spec.id','product_spec.created_at','product.barcode','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
             // sortBy
             ->orderBy('product_spec.created_at', 'desc')
             ->orderBy('product_spec.id', 'desc')
