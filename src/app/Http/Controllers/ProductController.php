@@ -35,7 +35,7 @@ class ProductController extends Controller
         ->with(['specs:id,name_cn,name_en,net_weight,gross_weight,relevance_code,product_id,purchase_price,sale_price,total_stock_num'])
             ->ofWarehouse(app('auth')->warehouse()->id)
             ->where('product.owner_id',app('auth')->ownerId())
-            ->select(['product.id','product.name_cn','product.name_en','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'product.updated_at', 'product.warehouse_id','total_stock_num', 'category.name_cn as category_name_cn', 'category.name_en as category_name_en'])
+            ->select(['product.id','product.name_cn','product.name_en','product.barcode','origin','photos','purchase_price','sale_price','total_floor_num','total_lock_num','total_shelf_num','total_stockin_num','total_stockout_num','category_id', 'product.updated_at', 'product.warehouse_id','total_stock_num', 'category.name_cn as category_name_cn', 'category.name_en as category_name_en'])
             ->latest('updated_at');
         if($request->filled('category_id')){
             $product = $product->where('category_id',$request->category_id);
