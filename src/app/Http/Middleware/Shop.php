@@ -25,7 +25,7 @@ class Shop
 
     public function handle($request, Closure $next)
     {
-        $shopId = $this->getShopIdRequest($request);
+        $shopId = intval($this->getShopIdRequest($request));
 
         $shopInfo = Model::find($shopId);
 
