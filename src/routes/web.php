@@ -200,6 +200,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('/specs/import', 'ProductSpecController@import');
     Route::get('/specs', 'ProductSpecController@index');
     Route::post('/specs/locations', 'ProductStockController@getLocationBySpec');//规格找到货位
+    Route::get('/spec/{spec_id}/stocks', 'ProductStockController@specWithStocks');//根据单个规格，拉取库存明细
 
 
     //入库单
@@ -249,6 +250,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
     Route::get('/stock/spec/log/{stock_id}', 'ProductStockController@getLogsForSpec');
     Route::get('/stock', 'ProductStockController@index');
+
     Route::get('/stock/log/types', 'ProductStockController@getLogType');
     Route::get('/export/sku', 'ProductStockController@exportBySku');
     Route::get('/export/stock', 'ProductStockController@export');

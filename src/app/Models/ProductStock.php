@@ -86,7 +86,7 @@ class ProductStock extends Model
 
     public function locations()
     {
-        return $this->belongsTo('App\Models\ProductStockLocation', 'id', 'stock_id');
+        return $this->hasMany('App\Models\ProductStockLocation', 'stock_id', 'id');
     }
 
     /**
