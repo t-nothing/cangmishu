@@ -125,6 +125,20 @@ class OrderController extends Controller
         return formatRet(0, '', $result);
     }
 
+    /**
+     * 操作日志
+     */
+    public function logs(BaseRequests $request, $id)
+    {
+        
+        $id = intval($id);
+        $result = OrderHistory::ofWarehouse(app('auth')->warehouse()->id)
+            ->where("owner_id", app('auth')->ownerId())
+            ->where('order_id', $id)->get();
+        
+        return formatRet(0, '', $result);
+    }
+
     public function show(BaseRequests $request, $order_id)
     {
         $order = Order::where('owner_id',Auth::ownerId())->with(['orderItems.spec:id,total_shelf_num','warehouse:id,name_cn', 'orderType:id,name', 'operatorUser'])->find($order_id);
