@@ -240,6 +240,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/order/{id}/download/{tempate}', 'OrderController@download');
     Route::get('/order/{id}/pdf/', 'OrderController@pdf');
     Route::get('/order/{id}/pdf/{tempate}', 'OrderController@pdf');
+    Route::get('/order/{id}/logs', 'OrderController@logs');
 
     //库存
     // Route::get('/stock/code', 'ProductStockController@getSkus');
