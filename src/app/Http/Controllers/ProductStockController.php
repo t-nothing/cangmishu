@@ -34,16 +34,10 @@ class ProductStockController extends  Controller
             'production_batch_number' => 'string',
             'product_name'            => 'string',
             'option'                  => 'integer|min:1|max:3',
-            'warehouse_id'            => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',app('auth')->ownerId());
-                })
-            ]
         ]);
 
         $owner_id = app('auth')->ownerId();
-        $warehouse_id = $request->input('warehouse_id');
+        $warehouse_id = app('auth')->warehouse()->id;
         $option = $request->input('option');
 
 
@@ -124,6 +118,41 @@ class ProductStockController extends  Controller
     }
 
     /**
+     * 显示规格库存详细
+     **/
+    public function specWithStocks(BaseRequests $request,$spec_id) {
+        app('log')->info('拉取单个规格库存', $request->all());
+        $spec_id        = intval($spec_id);
+        $owner_id       = app('auth')->ownerId();
+        $warehouse_id   = app('auth')->warehouse()->id;
+
+
+        $result = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times,stock_num,id'])
+            ->leftjoin('product', 'product.id','=', 'product_spec.product_id')
+            ->leftjoin('category', 'category.id','=', 'product.category_id')
+            ->ofWarehouse($warehouse_id)
+            ->where('product_spec.owner_id', app('auth')->ownerId())
+            ->where('product_spec.id', $spec_id)
+            ->select(['product_spec.id','product_spec.created_at','product.barcode','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
+            // sortBy
+            ->first();
+
+        $lang = app('translator')->locale()?:'cn';
+        if ($result) {
+
+            $product_name_cn = sprintf("%s (%s)" , $result["origin_product_name_cn"],  $result["name_cn"]);
+            $product_name_en = sprintf("%s (%s)" , $result["origin_product_name_en"],  $result["name_en"]);
+            $result['product_name'] = $product_name_cn;
+            foreach ($result['stocks'] as $key => &$value) {
+                $value['warehouse_location_code'] = WarehouseLocation::getCode($value['warehouse_location_id']);
+                $value->load("locations");
+                // $value['checked'] = false;
+            }
+        }
+        return formatRet(0, '', $result);
+    }
+
+    /**
      * 商品规格的出入库记录
      */
     public function getLogsForSpec(BaseRequests $request,$spec_id)
@@ -134,16 +163,10 @@ class ProductStockController extends  Controller
             'page_size'    => new PageSize,
             'created_at_b' => 'date_format:Y-m-d',
             'created_at_e' => 'date_format:Y-m-d|after_or_equal:created_at_b',
-            'type_id'      => 'integer',
-            'warehouse_id'            => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',app('auth')->ownerId());
-                })
-            ]
+            'type_id'      => 'integer'
         ]);
 
-        $warehouse_id = $request->input('warehouse_id');
+        $warehouse_id = app('auth')->warehouse()->id;
 
         $log = ProductStockLog::ofWarehouse($warehouse_id)
             ->with(['operatorUser:id,nickname,email'])
