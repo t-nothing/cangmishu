@@ -192,6 +192,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::put('/products/{product_id}', 'ProductController@update');
     Route::delete('/products/{product_id}', 'ProductController@destroy');
     Route::post('/products/import', 'ProductController@import');
+    Route::get('/product/{id}/logs', 'ProductStockController@getLogsForProduct');
 
 
 
@@ -249,6 +250,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::put('/stock/{stock_id}', 'ProductStockController@update');//盘点
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
     Route::get('/stock/spec/log/{stock_id}', 'ProductStockController@getLogsForSpec');
+
     Route::get('/stock', 'ProductStockController@index');
 
     Route::get('/stock/log/types', 'ProductStockController@getLogType');

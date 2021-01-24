@@ -35,6 +35,11 @@ class ProductStockLog extends Model
         ]);
     }
 
+    public function spec()
+    {
+        return $this->belongsTo('App\Models\ProductSpec', 'spec_id', 'id');
+    }
+
 
 
     /*
