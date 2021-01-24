@@ -205,6 +205,68 @@ class ProductStockController extends  Controller
     }
 
     /**
+     * 商品所有规格的出入库记录
+     */
+    public function getLogsForProduct(BaseRequests $request,$product_id)
+    {
+
+        $product_id = intval($product_id);
+        $this->validate($request, [
+            'page'         => 'integer|min:1',
+            'page_size'    => new PageSize,
+            'created_at_b' => 'date_format:Y-m-d',
+            'created_at_e' => 'date_format:Y-m-d|after_or_equal:created_at_b',
+            'type_id'      => 'integer'
+        ]);
+
+        $warehouse_id = app('auth')->warehouse()->id;
+        $product = Product::with("specs")->ofWarehouse($warehouse_id)->where('owner_id', app('auth')->ownerId())->find($product_id);
+        if(!$product) {
+            return formatRet(500, '商品未找到');
+        }
+
+        $spec_ids = [];
+        foreach ($product->specs as $key => $spec) {
+            $spec_ids[] = $spec->id;
+        }
+
+        $log = ProductStockLog::ofWarehouse($warehouse_id)
+            ->with(['operatorUser:id,nickname,email', 'spec:id,name_cn'])
+            ->where('owner_id', app('auth')->ownerId())
+            ->whereIn('spec_id', $spec_ids);
+
+        if ($request->filled('created_at_b')) {
+            $log->where('created_at', '>', strtotime($request->created_at_b . ' 00:00:00'));
+        }
+
+        if ($request->filled('created_at_e')) {
+            $log->where('created_at', '<', strtotime($request->created_at_e . ' 23:59:59'));
+        }
+
+        if ($request->filled('type_id')) {
+            $log->where('type_id', $request->type_id);
+        }
+
+        $data = $log->orderby('created_at', 'desc')->orderby('id', 'desc')->paginate($request->input('page_size', 10), [
+            'id',
+            'operation_num',
+            'operator',
+            'order_sn',
+            'owner_id',
+            'warehouse_id',
+            'product_stock_id',
+            'remark',
+            'sku',
+            'spec_id',
+            'spec_total_stock_num',
+            'type_id',
+            'created_at',
+        ])->toArray();
+
+        return formatRet(0, '', $data);
+    }
+
+    /**
      * SKU的出库入记录
      */
     public function getLogsForSku(BaseRequests $request,$stock_id)
