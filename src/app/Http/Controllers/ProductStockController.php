@@ -752,7 +752,9 @@ class ProductStockController extends  Controller
     {
 
         $this->validate($request, [
-            'id' => 'integer'
+            'id'        => 'integer',
+            'page'      => 'integer|min:1',
+            'page_size' => new PageSize(),
         ]);
 
         $stock = ProductStockLocation::with(['spec.product'])
