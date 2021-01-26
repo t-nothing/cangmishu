@@ -567,7 +567,7 @@ class StatisticsService
         //@todo 后面有时间改成laravel格式
 
         $sql = "
-        select warehouse_location_id as id,total_shelf_num,`location`.code, `area`.name_cn as `area_name`
+        select warehouse_location_id as id,total_shelf_num,`location`.code, `location`.code as 'name',  `area`.name_cn as `area_name`
         from (
             select 
                 warehouse_location_id,sum(shelf_num) as total_shelf_num,warehouse_id 

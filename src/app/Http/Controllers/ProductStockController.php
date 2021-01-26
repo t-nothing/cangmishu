@@ -752,14 +752,22 @@ class ProductStockController extends  Controller
     {
 
         $this->validate($request, [
-            'id' => 'required|integer'
+            'id' => 'integer'
         ]);
 
-        $stock = ProductStockLocation::with('spec.product')
+        $stock = ProductStockLocation::with(['spec.product'])
             ->where('owner_id', app('auth')->ownerId())
             ->ofWarehouse(app('auth')->warehouse()->id);
 
-        $stock->where('warehouse_location_id', $request->id);
+        $stock
+            ->when(($request->filled('id') && $request->id > 0), function($q)  use($request){
+                    return  $q->where('warehouse_location_id', $request->id);
+                }
+            )
+            ->where('shelf_num', '>', 0)
+            ->orderBy('shelf_num', 'desc')
+            ->orderBy('sort_num', 'desc')
+            ->orderBy('updated_at', 'desc');
        
 
         $stocks= $stock->paginate($request->input('page_size',100));
@@ -780,6 +788,7 @@ class ProductStockController extends  Controller
                     'status'                =>  1,
                     'location_code'         =>  $stockLoation->warehouse_location_code,
                     'location_id'           =>  $stockLoation->warehouse_location_id,
+                    'updated_at'            =>  date("Y-m-d H:i:s", strtotime($stockLoation->updated_at)),
                 ];
         }
 
@@ -796,32 +805,41 @@ class ProductStockController extends  Controller
     {
         app('log')->info('移动货位',$request->all());
         $this->validate($request, [
-            'code'              => 'required|string',
-            'id'                => 'required|array',
-            'id.*'              => 'required|integer',
+            'location_id'               => 'required|integer',
+            'items'                     => 'required|array',
+            'items.*.id'                => 'required|integer',
+            'items.*.num'               => 'required|integer|min:1',
         ]);
 
         $warehouse = app('auth')->warehouse();
 
         $location = WarehouseLocation::ofWarehouse($warehouse->id)
-            ->where('code', $request->code)->first();
+            ->where('id', $request->location_id)->first();
 
         if(!$location) {
             return formatRet(500,'货位不存在');
         }
 
-        $stockLoations = ProductStockLocation::with('spec.product')
-            ->whereIn('id', $request->id)
-            ->ofWarehouse(app('auth')->warehouse()->id)->get();
+        app('db')->beginTransaction();
+        try{
 
-        foreach ($stocks as $stockLoation) {
+            foreach ($request->items as $key => $item) {
+                $stockLoation = ProductStockLocation::with('spec.product')
+                    ->where('id', $item["id"])
+                    ->ofWarehouse(app('auth')->warehouse()->id)->first();
 
-            app('store')->moveTo($stockLoation, $warehouse->id, $location->code);
+                if($item["num"] > $stockLoation->shelf_num) throw new \Exception("移动的库存数量不能大于现有库存", 1);
 
+                app('store')->moveTo($stockLoation, $warehouse->id, $location->code, $item["num"]);
+            }
+            app('db')->commit();
+
+        }catch(\Exception $ex) {
+            app('db')->rollback();
+            return formatRet(500, $ex->getMessage());
         }
-
         
-        return formatRet(0, '', $result);
+        return formatRet(0, '');
     }
 
     /**

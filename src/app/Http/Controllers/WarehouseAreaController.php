@@ -6,6 +6,8 @@ use App\Http\Requests\BaseRequests;
 use App\Http\Requests\CreateWarehouseAreaRequest;
 use App\Http\Requests\UpdateWarehouseAreaRequest;
 use App\Models\WarehouseArea;
+use App\Models\ProductStockLocation;
+
 use Illuminate\Support\Facades\Auth;
 
 class WarehouseAreaController extends Controller
@@ -28,6 +30,59 @@ class WarehouseAreaController extends Controller
             ->paginate($request->input('page_size',10));
 
         return formatRet(0, '', $features->toArray());
+    }
+
+    /**
+     * 获取货区列表
+     */
+    public function dataListWithLocationCount(BaseRequests $request)
+    {
+        $data = WarehouseArea::ofWarehouse(app('auth')->warehouse()->id)
+            ->whose(Auth::ownerId())
+            ->with(["locations:warehouse_area_id,id,code as name,capacity"])->get(["id","code","name_cn as name"]);
+        if($data) {
+            foreach ($data as $key => &$area) {
+                $total_shelf_num = 0;
+                foreach ($area->locations as $k => $location) {
+                    $location->total_shelf_num = (int)ProductStockLocation::where("warehouse_location_id", $location->id)->sum("shelf_num");
+                    $total_shelf_num += $location->total_shelf_num;
+                }
+                $area->total_shelf_num = $total_shelf_num;
+            }
+        }
+
+        return formatRet(0, '', $data);
+    }
+
+    /**
+     * 获取货区列表
+     * 方便前端显示
+     */
+    public function dataListWithLocation(BaseRequests $request)
+    {
+        $data = WarehouseArea::ofWarehouse(app('auth')->warehouse()->id)
+            ->whose(Auth::ownerId())
+            ->with(["locations:warehouse_area_id,id,code as name,capacity"])->get(["id","code","name_cn as name"]);
+        $result = [];
+        if($data) {
+            foreach ($data as $key => &$area) {
+                $locations = [];
+                foreach ($area->locations as $k => $location) {
+                    $locations[] = [
+                        'value' =>  $location["id"],
+                        'label' =>  $location["name"]
+                    ];
+                }
+
+                $result[] = [
+                    'value'     =>  $area["id"],
+                    'label'     =>  $area["name"],
+                    'children'  =>  $locations
+                ];
+            }
+        }
+
+        return formatRet(0, '', $result);
     }
 
     /**

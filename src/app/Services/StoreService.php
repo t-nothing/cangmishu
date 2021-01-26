@@ -86,13 +86,17 @@ class StoreService
 
 
     //上架
-    public  function moveTo($stockLocation, $warehouse_id, $code){
+    public  function moveTo($stockLocation, $warehouse_id, $code, $move_qty = 0){
 
         if (! $location = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $code)->where('is_enabled',1)->first()) {
-            return eRet('货位不存在或未启用('.$code.')');
+            throw new \Exception('货位不存在或未启用('.$code.')', 1);
+        }
+
+        if($move_qty == 0) {
+            $move_qty =  $stockLocation->shelf_num;
         }
         //从虚拟库存整体移动到新位置
-        $newStockLocation = $stockLocation->moveTo($stockLocation->shelf_num, $location);
+        $newStockLocation = $stockLocation->moveTo($move_qty, $location);
 
         event(new StockLocationPutOn($newStockLocation, $newStockLocation->shelf_num));
 

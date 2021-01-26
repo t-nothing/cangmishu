@@ -141,6 +141,8 @@ Route::middleware(['auth:admin'])->group(function () {
 
 
     //仓库货区
+    Route::get('/areas/count', 'WarehouseAreaController@dataListWithLocationCount');
+    Route::get('/areas/locations', 'WarehouseAreaController@dataListWithLocation');
     Route::get('/areas', 'WarehouseAreaController@index');
     Route::post('/areas', 'WarehouseAreaController@store');
     Route::get('/areas/{location_id}', 'WarehouseAreaController@show');
