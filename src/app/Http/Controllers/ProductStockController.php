@@ -772,7 +772,7 @@ class ProductStockController extends  Controller
             ->orderBy('updated_at', 'desc');
        
 
-        $stocks= $stock->paginate($request->input('page_size',100));
+        $stocks= $stock->paginate($request->input('page_size',10));
 
         $arr= [];
         foreach ($stocks as $stockLoation) {
