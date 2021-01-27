@@ -222,6 +222,7 @@ class UserService
             $distributor = new Distributor;
             $distributor->user_id = $user->id;
             $distributor->name_cn = "默认供应商";
+            $distributor->country = "中国";
             $distributor->name_en = "Default Supplier";
 //            $distributor->phone = " ";
 //            $distributor->email = " ";

@@ -752,24 +752,38 @@ class ProductStockController extends  Controller
     {
 
         $this->validate($request, [
-            'id'        => 'integer',
-            'page'      => 'integer|min:1',
-            'page_size' => new PageSize(),
+            'id'                        => 'integer',
+            'keywords'                  => 'string',
+            'page'                      => 'integer|min:1',
+            'page_size'                 => new PageSize(),
+            'not_show_zero_stock'       => 'integer'
         ]);
 
         $stock = ProductStockLocation::with(['spec.product'])
             ->where('owner_id', app('auth')->ownerId())
             ->ofWarehouse(app('auth')->warehouse()->id);
 
+        $not_show_zero_stock = $request->input('not_show_zero_stock', -1);
+
         $stock
             ->when(($request->filled('id') && $request->id > 0), function($q)  use($request){
                     return  $q->where('warehouse_location_id', $request->id);
                 }
             )
-            ->where('shelf_num', '>', 0)
-            ->orderBy('shelf_num', 'desc')
-            ->orderBy('sort_num', 'desc')
-            ->orderBy('updated_at', 'desc');
+            ->when($keywords = $request->input('keywords'), function ($query) use ($keywords) {
+                return $query->where(function ($query) use ($keywords) {
+                    $query->where('relevance_code', $keywords)
+                        ->orWhere('sku', $keywords);
+                });
+            });
+
+        if(!($not_show_zero_stock == 0)) {
+            $stock = $stock->where('shelf_num', '>', 0);
+        }
+            
+        $stock = $stock->orderBy('shelf_num', 'desc')
+                ->orderBy('sort_num', 'desc')
+                ->orderBy('updated_at', 'desc');
        
 
         $stocks= $stock->paginate($request->input('page_size',10));
