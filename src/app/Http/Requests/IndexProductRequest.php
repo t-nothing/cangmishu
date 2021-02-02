@@ -33,8 +33,8 @@ class IndexProductRequest extends BaseRequests
                     $q->where('owner_id',app('auth')->ownerId());
                 })
             ],
-            'updated_at_b' => 'date:Y-m-d',
-            'updated_at_e' => 'date:Y-m-d',
+            'created_at_b' => 'date:Y-m-d',
+            'created_at_e' => 'date:Y-m-d',
             'recount' => 'integer|min:0|max:1',
             'keywords' => 'sometimes|string',
             'show_low_stock' => 'sometimes|boolean',
