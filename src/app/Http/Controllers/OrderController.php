@@ -121,6 +121,8 @@ class OrderController extends Controller
             if($value['status'] >= Order::STATUS_SENDING) {
                 $result['data'][$key]['track_url'] = "https://www.kuaidi100.com/chaxun?com=".$value['express_code']."&nu=".$value['express_num'];
             }
+
+            $result['data'][$key]['express_name'] = app('ship')->getExpressName($value['express_code']);
         }
         return formatRet(0, '', $result);
     }
@@ -149,6 +151,7 @@ class OrderController extends Controller
 
         // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
         $order = $order->toArray();
+        $order['express_name'] = app('ship')->getExpressName($order['express_code']);
 
        return formatRet(0, trans("message.success"),$order);
     }

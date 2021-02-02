@@ -41,12 +41,12 @@ class ProductController extends Controller
             $product = $product->where('category_id',$request->category_id);
         }
 
-        if ($request->filled('updated_at_b')) {
-            $product = $product->where('updated_at', '>', strtotime($request->updated_at_b));
+        if ($request->filled('created_at_b')) {
+            $product = $product->where('created_at', '>', strtotime($request->created_at_b));
         }
 
-        if ($request->filled('updated_at_e')) {
-            $product = $product->where('updated_at', '<', strtotime($request->updated_at_e));
+        if ($request->filled('created_at_e')) {
+            $product = $product->where('created_at', '<', strtotime($request->created_at_e));
         }
 
         if ($request->filled('keywords')) {
