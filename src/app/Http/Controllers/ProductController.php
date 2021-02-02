@@ -42,11 +42,11 @@ class ProductController extends Controller
         }
 
         if ($request->filled('created_at_b')) {
-            $product = $product->where('created_at', '>', strtotime($request->created_at_b));
+            $product = $product->where('product.created_at', '>', strtotime($request->created_at_b));
         }
 
         if ($request->filled('created_at_e')) {
-            $product = $product->where('created_at', '<', strtotime($request->created_at_e));
+            $product = $product->where('product.created_at', '<', strtotime($request->created_at_e));
         }
 
         if ($request->filled('keywords')) {
