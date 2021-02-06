@@ -26,12 +26,6 @@ class CreateRecountRequest extends BaseRequests
     public function rules()
     {
         return [
-            'warehouse_id' => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',Auth::ownerId());
-                })
-            ],
             'stock'                    => 'required|array',
             'stock.*.id'               => 'required|integer|min:1',
             'stock.*.num'              => 'required|integer|min:0|max:99999',

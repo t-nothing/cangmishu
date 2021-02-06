@@ -52,18 +52,31 @@ class DistributorController extends Controller
                     return $query->where('user_id',Auth::ownerId());
                 }),
             ],
-            // 'name_en' =>[
-            //     'required','string','max:50',
-            //     Rule::unique('distributor')->where(function ($query) {
-            //         return $query->where('user_id',Auth::ownerId());
-            //     }),
-            // ],
+            'city'      => 'sometimes|string',
+            'country'   => 'sometimes|string',
+            'door_no'   => 'sometimes|string',
+            'email'     => 'sometimes|string',
+            'phone'     => 'sometimes|string',
+            'postcode'  => 'sometimes|string',
+            'street'    => 'sometimes|string',
+            'address'   => 'sometimes|string',
+            'province'   => 'sometimes|string',
+            'district'   => 'sometimes|string',
         ]);
 
         $distributor = new Distributor;
         $distributor->user_id = Auth::id();
         $distributor->name_cn = $request->name_cn;
         $distributor->name_en = $request->name_en??$request->name_cn;
+        $distributor->country      = $request->country??'中国';
+        $distributor->city      = $request->city??'';
+        $distributor->door_no   = $request->door_no??'';
+        $distributor->email   = $request->email??'';
+        $distributor->phone   = $request->phone??'';
+        $distributor->street   = $request->street??'';
+        $distributor->address   = $request->address??'';
+        $distributor->province   = $request->province??'';
+        $distributor->district   = $request->district??'';
 
         if ($distributor->save()) {
             return formatRet(0,'', $distributor->toArray());
@@ -85,23 +98,35 @@ class DistributorController extends Controller
                 Rule::unique('distributor')->where(function ($query)use($distributor_id) {
                     return $query->where('user_id',Auth::ownerId());
                 })
-                    ->ignore($distributor_id)
+                ->ignore($distributor_id)
             ],
-            // 'name_en'        =>  [
-            //     'required','string','max:50',
-            //     Rule::unique('distributor')->where(function ($query)use($distributor_id) {
-            //         return $query->where('user_id',Auth::ownerId());
-            //     })
-            //         ->ignore($distributor_id)
-            // ],
+            'city'      => 'sometimes|string',
+            'country'   => 'sometimes|string',
+            'door_no'   => 'sometimes|string',
+            'email'     => 'sometimes|string',
+            'phone'     => 'sometimes|string',
+            'postcode'  => 'sometimes|string',
+            'street'    => 'sometimes|string',
+            'address'   => 'sometimes|string',
+            'province'   => 'sometimes|string',
+            'district'   => 'sometimes|string',
         ]);
 
         if (! $distributor = Distributor::find($distributor_id)) {
             return formatRet(404, trans("message.distributorNotExist"), [], 404);
         }
 
-        $distributor->name_cn = $request->name_cn;
-        $distributor->name_en = $request->name_en??$request->name_cn;
+        $distributor->name_cn   = $request->name_cn;
+        $distributor->name_en   = $request->name_en??$request->name_cn;
+        $distributor->country      = $request->country??'中国';
+        $distributor->city      = $request->city??'';
+        $distributor->door_no   = $request->door_no??'';
+        $distributor->email   = $request->email??'';
+        $distributor->phone   = $request->phone??'';
+        $distributor->street   = $request->street??'';
+        $distributor->address   = $request->address??'';
+        $distributor->province   = $request->province??'';
+        $distributor->district   = $request->district??'';
 
         if ($distributor->save()) {
             return formatRet(0);

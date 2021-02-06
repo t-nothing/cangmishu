@@ -28,23 +28,17 @@ class ProductStockController extends  Controller
         app('log')->info('拉取库存', $request->all());
         $this->validate($request, [
             'keywords'                => 'string',
+            'barcode'                 => 'string',
             'sku'                     => 'string',
             'relevance_code'          => 'string',
             'production_batch_number' => 'string',
             'product_name'            => 'string',
             'option'                  => 'integer|min:1|max:3',
-            'warehouse_id'            => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',app('auth')->ownerId());
-                })
-            ]
         ]);
 
         $owner_id = app('auth')->ownerId();
-        $warehouse_id = $request->input('warehouse_id');
+        $warehouse_id = app('auth')->warehouse()->id;
         $option = $request->input('option');
-
 
 
         $results = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times,stock_num,id'])
@@ -64,8 +58,15 @@ class ProductStockController extends  Controller
                 return $query->where(function ($query) use ($keywords) {
                     $query->where('product_spec.name_cn', 'like', '%'.$keywords.'%')
                         ->orWhere('product_spec.name_en', 'like', '%'.$keywords.'%')
+                        ->orWhere('product_spec.relevance_code', 'like', '%'.$keywords.'%')
+                        ->orWhere('product.barcode', 'like', '%'.$keywords.'%')
                         ->orWhere('product.hs_code', 'like', '%'.$keywords.'%')
                         ->orWhere('product.origin', 'like', '%'.$keywords.'%');
+                });
+            })->when($keywords = $request->input('barcode'), function ($query) use ($keywords) {
+                return $query->where(function ($query) use ($keywords) {
+                        $query->orWhere('product_spec.relevance_code', $keywords)
+                        ->orWhere('product.barcode', $keywords);
                 });
             })
             ->when($sku = $request->input('sku'), function ($query) use ($sku) {
@@ -91,7 +92,7 @@ class ProductStockController extends  Controller
             ->when($option == 3, function ($query) use ($warehouse_id, $owner_id) {
                 $query->onlyToBeOnShelf($warehouse_id, $owner_id);
             })
-            ->select(['product_spec.id','product_spec.created_at','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
+            ->select(['product_spec.id','product_spec.created_at','product.barcode','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
             // sortBy
             ->orderBy('product_spec.created_at', 'desc')
             ->orderBy('product_spec.id', 'desc')
@@ -117,6 +118,41 @@ class ProductStockController extends  Controller
     }
 
     /**
+     * 显示规格库存详细
+     **/
+    public function specWithStocks(BaseRequests $request,$spec_id) {
+        app('log')->info('拉取单个规格库存', $request->all());
+        $spec_id        = intval($spec_id);
+        $owner_id       = app('auth')->ownerId();
+        $warehouse_id   = app('auth')->warehouse()->id;
+
+
+        $result = ProductSpec::with(['stocks:spec_id,sku,best_before_date,expiration_date,production_batch_number,ean,relevance_code,stockin_num,shelf_num,warehouse_location_id,recount_times,stock_num,id'])
+            ->leftjoin('product', 'product.id','=', 'product_spec.product_id')
+            ->leftjoin('category', 'category.id','=', 'product.category_id')
+            ->ofWarehouse($warehouse_id)
+            ->where('product_spec.owner_id', app('auth')->ownerId())
+            ->where('product_spec.id', $spec_id)
+            ->select(['product_spec.id','product_spec.created_at','product.barcode','product_spec.name_cn','product_spec.name_en','product_spec.product_id','product_spec.purchase_price','product_spec.sale_price','product_spec.total_floor_num','product_spec.total_lock_num','product_spec.total_shelf_num','product_spec.total_stockin_num','product_spec.total_stockout_num','product_spec.warehouse_id','product_spec.relevance_code','product_spec.total_stockin_times','product_spec.total_stockout_times','product_spec.total_stock_num','product.name_cn as origin_product_name_cn','product.name_cn as origin_product_name_en',])
+            // sortBy
+            ->first();
+
+        $lang = app('translator')->locale()?:'cn';
+        if ($result) {
+
+            $product_name_cn = sprintf("%s (%s)" , $result["origin_product_name_cn"],  $result["name_cn"]);
+            $product_name_en = sprintf("%s (%s)" , $result["origin_product_name_en"],  $result["name_en"]);
+            $result['product_name'] = $product_name_cn;
+            foreach ($result['stocks'] as $key => &$value) {
+                $value['warehouse_location_code'] = WarehouseLocation::getCode($value['warehouse_location_id']);
+                $value->load("locations");
+                // $value['checked'] = false;
+            }
+        }
+        return formatRet(0, '', $result);
+    }
+
+    /**
      * 商品规格的出入库记录
      */
     public function getLogsForSpec(BaseRequests $request,$spec_id)
@@ -127,21 +163,77 @@ class ProductStockController extends  Controller
             'page_size'    => new PageSize,
             'created_at_b' => 'date_format:Y-m-d',
             'created_at_e' => 'date_format:Y-m-d|after_or_equal:created_at_b',
-            'type_id'      => 'integer',
-            'warehouse_id'            => [
-                'required','integer','min:1',
-                Rule::exists('warehouse','id')->where(function($q){
-                    $q->where('owner_id',app('auth')->ownerId());
-                })
-            ]
+            'type_id'      => 'integer'
         ]);
 
-        $warehouse_id = $request->input('warehouse_id');
+        $warehouse_id = app('auth')->warehouse()->id;
 
         $log = ProductStockLog::ofWarehouse($warehouse_id)
             ->with(['operatorUser:id,nickname,email'])
             ->where('owner_id', app('auth')->ownerId())
             ->where('spec_id', $spec_id);
+
+        if ($request->filled('created_at_b')) {
+            $log->where('created_at', '>', strtotime($request->created_at_b . ' 00:00:00'));
+        }
+
+        if ($request->filled('created_at_e')) {
+            $log->where('created_at', '<', strtotime($request->created_at_e . ' 23:59:59'));
+        }
+
+        if ($request->filled('type_id')) {
+            $log->where('type_id', $request->type_id);
+        }
+
+        $data = $log->orderby('created_at', 'desc')->orderby('id', 'desc')->paginate($request->input('page_size', 10), [
+            'id',
+            'operation_num',
+            'operator',
+            'order_sn',
+            'owner_id',
+            'warehouse_id',
+            'product_stock_id',
+            'remark',
+            'sku',
+            'spec_id',
+            'spec_total_stock_num',
+            'type_id',
+            'created_at',
+        ])->toArray();
+
+        return formatRet(0, '', $data);
+    }
+
+    /**
+     * 商品所有规格的出入库记录
+     */
+    public function getLogsForProduct(BaseRequests $request,$product_id)
+    {
+
+        $product_id = intval($product_id);
+        $this->validate($request, [
+            'page'         => 'integer|min:1',
+            'page_size'    => new PageSize,
+            'created_at_b' => 'date_format:Y-m-d',
+            'created_at_e' => 'date_format:Y-m-d|after_or_equal:created_at_b',
+            'type_id'      => 'integer'
+        ]);
+
+        $warehouse_id = app('auth')->warehouse()->id;
+        $product = Product::with("specs")->ofWarehouse($warehouse_id)->where('owner_id', app('auth')->ownerId())->find($product_id);
+        if(!$product) {
+            return formatRet(500, '商品未找到');
+        }
+
+        $spec_ids = [];
+        foreach ($product->specs as $key => $spec) {
+            $spec_ids[] = $spec->id;
+        }
+
+        $log = ProductStockLog::ofWarehouse($warehouse_id)
+            ->with(['operatorUser:id,nickname,email', 'spec:id,name_cn'])
+            ->where('owner_id', app('auth')->ownerId())
+            ->whereIn('spec_id', $spec_ids);
 
         if ($request->filled('created_at_b')) {
             $log->where('created_at', '>', strtotime($request->created_at_b . ' 00:00:00'));
@@ -588,6 +680,9 @@ class ProductStockController extends  Controller
 
     }
 
+    /**
+     * 得到货位上面的所有库存记录
+     **/
     public function getLocations(BaseRequests $request)
     {
 
@@ -648,6 +743,119 @@ class ProductStockController extends  Controller
         unset($result['data']);
         $result['data'] = $arr;
         return formatRet(0, '', $result);
+    }
+
+    /**
+     * 得到货位上面的所有库存记录
+     **/
+    public function getLocationsById(BaseRequests $request)
+    {
+
+        $this->validate($request, [
+            'id'                        => 'integer',
+            'keywords'                  => 'string',
+            'page'                      => 'integer|min:1',
+            'page_size'                 => new PageSize(),
+            'not_show_zero_stock'       => 'integer'
+        ]);
+
+        $stock = ProductStockLocation::with(['spec.product'])
+            ->where('owner_id', app('auth')->ownerId())
+            ->ofWarehouse(app('auth')->warehouse()->id);
+
+        $not_show_zero_stock = $request->input('not_show_zero_stock', -1);
+
+        $stock
+            ->when(($request->filled('id') && $request->id > 0), function($q)  use($request){
+                    return  $q->where('warehouse_location_id', $request->id);
+                }
+            )
+            ->when($keywords = $request->input('keywords'), function ($query) use ($keywords) {
+                return $query->where(function ($query) use ($keywords) {
+                    $query->where('relevance_code', $keywords)
+                        ->orWhere('sku', $keywords);
+                });
+            });
+
+        if(!($not_show_zero_stock == 0)) {
+            $stock = $stock->where('shelf_num', '>', 0);
+        }
+            
+        $stock = $stock->orderBy('shelf_num', 'desc')
+                ->orderBy('sort_num', 'desc')
+                ->orderBy('updated_at', 'desc');
+       
+
+        $stocks= $stock->paginate($request->input('page_size',10));
+
+        $arr= [];
+        foreach ($stocks as $stockLoation) {
+
+            $arr[] = [
+                    'id'                    =>  $stockLoation->id,
+                    'name_cn'               =>  $stockLoation->stock->product_name_cn,
+                    'name_en'               =>  $stockLoation->stock->product_name_en,
+                    'relevance_code'        =>  $stockLoation->stock->spec->relevance_code,
+                    'stock_sku'             =>  $stockLoation->stock->sku,
+                    'shelf_num_orgin'       =>  $stockLoation->shelf_num,
+                    'shelf_num_now'         =>  $stockLoation->shelf_num,
+                    'total_purcharse_orgin' =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'total_purcharse_now'   =>  $stockLoation->stock->purchase_price * $stockLoation->shelf_num,
+                    'status'                =>  1,
+                    'location_code'         =>  $stockLoation->warehouse_location_code,
+                    'location_id'           =>  $stockLoation->warehouse_location_id,
+                    'updated_at'            =>  date("Y-m-d H:i:s", strtotime($stockLoation->updated_at)),
+                ];
+        }
+
+        $result = $stocks->toArray();
+        unset($result['data']);
+        $result['data'] = $arr;
+        return formatRet(0, '', $result);
+    }
+
+    /**
+     * 移动货位
+     **/
+    public function moveTo(BaseRequests $request)
+    {
+        app('log')->info('移动货位',$request->all());
+        $this->validate($request, [
+            'location_id'               => 'required|integer',
+            'items'                     => 'required|array',
+            'items.*.id'                => 'required|integer',
+            'items.*.num'               => 'required|integer|min:1',
+        ]);
+
+        $warehouse = app('auth')->warehouse();
+
+        $location = WarehouseLocation::ofWarehouse($warehouse->id)
+            ->where('id', $request->location_id)->first();
+
+        if(!$location) {
+            return formatRet(500,'货位不存在');
+        }
+
+        app('db')->beginTransaction();
+        try{
+
+            foreach ($request->items as $key => $item) {
+                $stockLoation = ProductStockLocation::with('spec.product')
+                    ->where('id', $item["id"])
+                    ->ofWarehouse(app('auth')->warehouse()->id)->first();
+
+                if($item["num"] > $stockLoation->shelf_num) throw new \Exception("移动的库存数量不能大于现有库存", 1);
+
+                app('store')->moveTo($stockLoation, $warehouse->id, $location->code, $item["num"]);
+            }
+            app('db')->commit();
+
+        }catch(\Exception $ex) {
+            app('db')->rollback();
+            return formatRet(500, $ex->getMessage());
+        }
+        
+        return formatRet(0, '');
     }
 
     /**

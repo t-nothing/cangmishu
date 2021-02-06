@@ -70,14 +70,15 @@ class OrderController extends Controller
     public function index(BaseRequests $request)
     {
         $this->validate($request, [
-            'page'          => 'integer|min:1',
-            'page_size'     => new PageSize(),
-            'created_at_b'  => 'date:Y-m-d',
-            'created_at_e'  => 'date:Y-m-d',
-            'status'        => 'integer',
-            'keywords'      => 'string',
-            'with_items'    => 'boolean',
-            'delivery_date' => 'date_format:Y-m-d'
+            'page'              => 'integer|min:1',
+            'page_size'         => new PageSize(),
+            'created_at_b'      => 'date:Y-m-d',
+            'created_at_e'      => 'date:Y-m-d',
+            'status'            => 'integer',
+            'keywords'          => 'string',
+            'with_items'        => 'boolean',
+            'not_show_cancel'   =>'integer',
+            'delivery_date'     => 'date_format:Y-m-d'
         ]);
         $order = Order::ofWarehouse(app('auth')->warehouse()->id)
             ->with('orderType')
@@ -86,12 +87,16 @@ class OrderController extends Controller
             $order->where('created_at', '>', Carbon::parse($request->created_at_b)->startOfDay()->unix());
         }
 
+
         if ($request->filled('created_at_e')) {
             $order->where('created_at', '<', Carbon::parse($request->created_at_e)->endOfDay()->unix());
         }
 
         if ($request->filled('status')) {
             $order->where('status', $request->status);
+        }
+        if ($request->filled('not_show_cancel') && $request->not_show_cancel == 1) {
+            $order->where('status', '>', 0);
         }
 
         if ($request->filled('keywords')) {
@@ -116,7 +121,23 @@ class OrderController extends Controller
             if($value['status'] >= Order::STATUS_SENDING) {
                 $result['data'][$key]['track_url'] = "https://www.kuaidi100.com/chaxun?com=".$value['express_code']."&nu=".$value['express_num'];
             }
+
+            $result['data'][$key]['express_name'] = app('ship')->getExpressName($value['express_code']);
         }
+        return formatRet(0, '', $result);
+    }
+
+    /**
+     * 操作日志
+     */
+    public function logs(BaseRequests $request, $id)
+    {
+        
+        $id = intval($id);
+        $result = OrderHistory::ofWarehouse(app('auth')->warehouse()->id)
+            ->where("owner_id", app('auth')->ownerId())
+            ->where('order_id', $id)->get();
+        
         return formatRet(0, '', $result);
     }
 
@@ -130,6 +151,7 @@ class OrderController extends Controller
 
         // $order->setHidden(['receiver_email,receiver_country','receiver_province','receiver_city','receiver_postcode','receiver_district','receiver_address','send_country','send_province','send_city','send_postcode','send_district','send_address','is_tobacco','mask_code','updated_at','line_name','line_id']);
         $order = $order->toArray();
+        $order['express_name'] = app('ship')->getExpressName($order['express_code']);
 
        return formatRet(0, trans("message.success"),$order);
     }
@@ -154,6 +176,7 @@ class OrderController extends Controller
                 throw new \Exception(trans("message.orderAddFailed"), 1);
 
             }
+            app('order')->updatePay($request, $order->id);
             app('db')->commit();
             return formatRet(0,trans("message.orderAddSuccess"), $order->toArray());
         } catch (BusinessException $e) {
@@ -354,9 +377,7 @@ class OrderController extends Controller
 
         try {
             app('order')->updatePay($request,$id);
-            app('db')->commit();
         } catch (\Exception $e) {
-            app('db')->rollback();
             app('log')->error('更新支付信息失败',['msg'=>$e->getMessage()]);
             return formatRet(500, trans("message.failed"));
         }
