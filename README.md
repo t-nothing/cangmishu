@@ -25,8 +25,9 @@
 ### 开放API接口
 可与ERPOMSTMS 数据对接与集成
 
+![WEB端](https://www.cangmishu.com/image/index/index-pc.png)  
+![小程序端](https://www.cangmishu.com/image/index/index-mini.png)  
+![订货端](https://www.cangmishu.com/image/index/index-minimall.png)
 
-### Commands
+[项目介绍网站](https://www.cangmishu.com/)    
 
-php artisan queue:work redis --queue=emails
-php artisan queue:work redis --queue=wms2
