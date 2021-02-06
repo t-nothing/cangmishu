@@ -43,4 +43,4 @@
 
 ### 相关连接
 [仓秘书官网网站](https://www.cangmishu.com/)    
-[恩尔伊科技](https://www.nle-tech.com/)     
+[恩尔伊科技](http://www.nle-tech.com/)     
