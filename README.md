@@ -1,5 +1,7 @@
-# 仓秘书免费开源WMS仓库管理系统+开源订货订单管理系统
+# 仓秘书是一套免费轻量级开源WMS仓库管理系统+开源订货订单管理系统
+
 前端采用Vue.js 小程序采用Taro，后端采用PHP+Docker+Laravel 8.0
+
 支持前后端分离，支持Docker容器化，支持小程序，支持平台化，具有一定商业化的竞争力
 
 开源目的：
@@ -35,5 +37,10 @@
 ![小程序端](https://www.cangmishu.com/image/index/index-mini.png)  
 ![订货端](https://www.cangmishu.com/image/index/index-minimall.png)
 
-[项目介绍网站](https://www.cangmishu.com/)    
+### 配置开源网址
 
+[仓秘书用户界面开源网址](https://github.com/nletech/cangmishu-user)     
+
+### 相关连接
+[仓秘书官网网站](https://www.cangmishu.com/)    
+[恩尔伊科技](https://www.nle-tech.com/)     
