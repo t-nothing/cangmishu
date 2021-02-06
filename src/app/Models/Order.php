@@ -77,6 +77,11 @@ class Order extends Model
         return $this->hasMany('App\Models\OrderItem', 'order_id', 'id');
     }
 
+    public function orderLogs()
+    {
+        return $this->hasMany('App\Models\OrderHistory', 'order_id', 'id');
+    }
+
     public function owner()
     {
         return $this->belongsTo('App\Models\User', 'owner_id', 'id');

@@ -22,14 +22,16 @@ class ShopProductController extends Controller
      */
     public function index(BaseRequests $request, int $shopId)
     {
-        app('log')->info('店铺商品列表',$request->all());
+        info('店铺商品列表',$request->all());
+
         $this->validate($request,[
             'created_at_b'      => 'date_format:Y-m-d',
             'created_at_e'      => 'date_format:Y-m-d|after_or_equal:created_at_b',
             'keywords'          => 'string|max:255',
-            'shelf_status'      =>  'string|in:on,off'
+            'shelf_status'      => 'string|in:on,off'
         ]);
-        $batchs =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
+
+        $batchs = ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
             ->with("specs")
             ->where('shop_id', $shopId)
             ->where('owner_id',Auth::ownerId())
@@ -62,11 +64,11 @@ class ShopProductController extends Controller
                 'shop_product.created_at',
                 'shop_product.updated_at',
                 'shop_product.weapp_qrcode',
+                'shop_product.is_recommended',
             ]);
 
             $re = $batchs->toArray();
 
-//
             $data = collect($re['data'])->map(function($v){
                 $v['pics'] = json_decode($v['pics'], true);
                 unset($v['batch_products']);
@@ -175,7 +177,7 @@ class ShopProductController extends Controller
                 if(!file_exists($filePath.sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id)))
                 {
                     $app = app('wechat.mini_program');
-                    $response = $app->app_code->get('pages/index/product_detail/product_detail?shop='.$shopId.'&product='.$shopProduct->id);
+                    $response = $app->app_code->get('pages/index/commodity_details/commodity_details?shop='.$shopId.'&id='.$shopProduct->id);
 
                     if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
                         $filename = $response->saveAs($filePath, sprintf("%s-%s.png", $request->modelData->domain, $shopProduct->id));
@@ -287,8 +289,6 @@ class ShopProductController extends Controller
 
         $shopProducts = ShopProduct::with("shop")->whereIn('id', $request->id)->get();
 
-
-
         try {
             app('db')->beginTransaction();
             foreach ($shopProducts as $key => $shopProduct) {
@@ -310,5 +310,17 @@ class ShopProductController extends Controller
         return formatRet(0);
     }
 
+    /**
+     * @param  BaseRequests  $request
+     * @param  int  $status
+     * @return bool
+     */
+    public function recommend(BaseRequests $request, int $status)
+    {
+        $data = $request->validate(['ids' => 'required', 'array']);
 
+        ShopProduct::query()->whereKey($data['ids'])->update(['is_recommended' => $status]);
+
+        return true;
+    }
 }

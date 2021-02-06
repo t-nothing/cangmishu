@@ -87,6 +87,7 @@ Route::middleware(['auth:admin'])->group(function () {
         Route::get('graphData', 'HomePageController@getStockData');
         Route::get('salesRank', 'StockDataController@getSalesRank');
         Route::get('warningRank', 'StockDataController@getStockWarningRank');
+        Route::get('locationStockData', 'StockDataController@getLocationStockCountData');
     });
 
     Route::prefix('officialAccount')->group(function () {
@@ -140,6 +141,8 @@ Route::middleware(['auth:admin'])->group(function () {
 
 
     //仓库货区
+    Route::get('/areas/count', 'WarehouseAreaController@dataListWithLocationCount');
+    Route::get('/areas/locations', 'WarehouseAreaController@dataListWithLocation');
     Route::get('/areas', 'WarehouseAreaController@index');
     Route::post('/areas', 'WarehouseAreaController@store');
     Route::get('/areas/{location_id}', 'WarehouseAreaController@show');
@@ -191,6 +194,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::put('/products/{product_id}', 'ProductController@update');
     Route::delete('/products/{product_id}', 'ProductController@destroy');
     Route::post('/products/import', 'ProductController@import');
+    Route::get('/product/{id}/logs', 'ProductStockController@getLogsForProduct');
 
 
 
@@ -199,6 +203,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('/specs/import', 'ProductSpecController@import');
     Route::get('/specs', 'ProductSpecController@index');
     Route::post('/specs/locations', 'ProductStockController@getLocationBySpec');//规格找到货位
+    Route::get('/spec/{spec_id}/stocks', 'ProductStockController@specWithStocks');//根据单个规格，拉取库存明细
 
 
     //入库单
@@ -237,15 +242,20 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/order/{id}/download/{tempate}', 'OrderController@download');
     Route::get('/order/{id}/pdf/', 'OrderController@pdf');
     Route::get('/order/{id}/pdf/{tempate}', 'OrderController@pdf');
+    Route::get('/order/{id}/logs', 'OrderController@logs');
 
     //库存
     // Route::get('/stock/code', 'ProductStockController@getSkus');
-    Route::get('/stock/code', 'ProductStockController@getLocations');
+    Route::get('/stock/code', 'ProductStockController@getLocations');//根据货位编号拉取库存信息
+    Route::get('/stock/locations', 'ProductStockController@getLocationsById');//根据货位ID拉取库存信息
+    Route::post('/stock/moveLocation', 'ProductStockController@moveTo');//根据货位ID移动货位
     Route::get('/stock/sku/{sku}', 'ProductStockController@getInfoBySku');
     Route::put('/stock/{stock_id}', 'ProductStockController@update');//盘点
     Route::get('/stock/sku/log/{stock_id}', 'ProductStockController@getLogsForSku');
     Route::get('/stock/spec/log/{stock_id}', 'ProductStockController@getLogsForSpec');
+
     Route::get('/stock', 'ProductStockController@index');
+
     Route::get('/stock/log/types', 'ProductStockController@getLogType');
     Route::get('/export/sku', 'ProductStockController@exportBySku');
     Route::get('/export/stock', 'ProductStockController@export');
@@ -308,6 +318,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::delete('/shop/{shopId}/product/{ids}', 'ShopProductController@destroy');
     Route::get('/shop/{shopId}/product/{id}', 'ShopProductController@show');
     Route::put('/shop/{shopId}/product', 'ShopProductController@onShelf');
+    Route::put('/shop/{shopId}/product/recommended/{status}', 'ShopProductController@recommend');
 
     //默认发件人
     Route::get('/shop/{id}/sender', 'ShopController@senderShow');

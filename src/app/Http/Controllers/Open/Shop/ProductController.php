@@ -19,26 +19,37 @@ class ProductController extends Controller
 {
     /**
      * 商品首页
-     **/
+     *
+     * @param  BaseRequests  $request
+     * @param  int  $catId
+     * @return JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function list(BaseRequests $request,  $catId = 0)
     {
         $this->validate($request, [
-            'page'         => 'integer|min:1',
-            'page_size'    => new PageSize(),
+            'page' => 'integer|min:1',
+            'page_size' => new PageSize(),
+            'recommended' => 'integer',
         ]);
 
         $catId = intval($catId);
-        $dataList =   ShopProduct::leftJoin('product', 'shop_product.product_id', '=', 'product.id')
+
+        $dataList = ShopProduct::query()
+            ->leftJoin('product', 'shop_product.product_id', '=', 'product.id')
             ->with(['specs', 'specs.productSpec'])
-            ->when($catId, function($q) use($catId) {
+            ->when($catId, function ($q) use ($catId) {
                 return $q->where('product.category_id', $catId);
             })
             ->where('shop_id', $request->shop->id)
             ->where('shop_product.is_shelf', 1)
-            ->when($request->filled('keywords'),function ($q) use ($request) {
+            ->when($request->filled('keywords'), function ($q) use ($request) {
                 return $q->hasKeyword($request->input('keywords'));
             })
-            ->latest()->paginate($request->input('page_size',10), [
+            ->when($request->input('recommended') == 1, function ($q) use ($request) {
+                return $q->where('is_recommended', 1);
+            })
+            ->latest()->paginate($request->input('page_size', 10), [
                 'shop_product.id',
                 'product.name_cn',
                 'product.name_en',
@@ -47,6 +58,7 @@ class ProductController extends Controller
                 'shop_product.is_shelf',
                 'shop_product.pics',
                 'shop_product.remark',
+                'shop_product.is_recommended',
                 'shop_product.created_at',
                 'shop_product.updated_at',
             ]);

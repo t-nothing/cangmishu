@@ -24,6 +24,7 @@ use App\Models\ShopUser;
 use App\Models\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StatisticsService
 {
@@ -552,6 +553,32 @@ class StatisticsService
             ->whereRaw('product_spec.total_stock_num <= c.warning_stock and c.warning_stock >0')
             ->orderBy('product_spec.total_stock_num')
             ->get();
+    }
+
+    /**
+     * 得到货区货位库存统计
+     * @param $params
+     * @return array
+     * @throws BusinessException
+     */
+    public static function getLocationStockCountData($params)
+    {
+        self::parseDateParams($params);
+        //@todo 后面有时间改成laravel格式
+
+        $sql = "
+        select warehouse_location_id as id,total_shelf_num,`location`.code, `location`.code as 'name',  `area`.name_cn as `area_name`
+        from (
+            select 
+                warehouse_location_id,sum(shelf_num) as total_shelf_num,warehouse_id 
+            from 
+                product_stock_location
+            where warehouse_id = ?
+            group by warehouse_location_id,warehouse_id
+        ) as t,warehouse_location as `location`, warehouse_area as `area`
+        where `location`.warehouse_area_id = `area`.id and t.warehouse_location_id = `location`.id order by `area`.name_cn, `location`.code";
+
+        return DB::select($sql, [self::$warehouseId]);
     }
 
     /**

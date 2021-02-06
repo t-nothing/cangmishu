@@ -59,6 +59,7 @@ class RecountController extends Controller
        app('log')->info('新增盘点单', $request->all());
         try{
             $data = $request->all();
+            $data['warehouse_id'] = app('auth')->warehouse()->id;
             $data = array_merge($data, ['owner_id' =>Auth::ownerId()]);
             app('recount')->create($data);
             return formatRet(0);

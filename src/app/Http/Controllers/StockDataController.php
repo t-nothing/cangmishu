@@ -40,4 +40,32 @@ class StockDataController extends Controller
     {
         return success($this->service::getStockWarningRank($this->getRequestParams()));
     }
+
+
+    /**
+     * 得到货区货位库存统计
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Exceptions\BusinessException
+     */
+    public function getLocationStockCountData()
+    {
+        $result =  $this->service::getLocationStockCountData($this->getRequestParams());
+        $newData = [];
+        if($result) {
+
+            foreach ($result as $key => $value) {
+                if(!isset($newData[$value->area_name])) {
+                    $newData[$value->area_name]["name"] =  $value->area_name;
+                    $newData[$value->area_name]["items"][] = $value;
+                    $newData[$value->area_name]["total_shelf_num"] = $value->total_shelf_num;
+                    $newData[$value->area_name]["count_location"] = 1;
+                } else {
+                    $newData[$value->area_name]["total_shelf_num"] += $value->total_shelf_num;
+                    $newData[$value->area_name]["count_location"] ++;
+                }
+                
+            }
+        }
+        return success(array_values($newData));
+    }
 }

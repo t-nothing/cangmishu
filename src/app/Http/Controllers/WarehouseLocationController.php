@@ -99,4 +99,11 @@ class WarehouseLocationController extends Controller
             return formatRet(500, trans("message.warehouseLocationDeleteFailed"));
         }
     }
+
+    /**
+     *
+     **/
+    public function count() {
+
+    }
 }
