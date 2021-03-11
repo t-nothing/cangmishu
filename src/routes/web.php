@@ -207,6 +207,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('/specs/stocks/upload', 'ProductStockImportController@upload');//库存导入
     Route::post('/specs/stocks/check', 'ProductStockImportController@check');//库存检查
     Route::post('/specs/stocks/import', 'ProductStockImportController@import');//库存导入并上架
+    Route::get('/specs/stocks/template', 'ProductStockImportController@template');//库存导入并上架
 
 
     //入库单

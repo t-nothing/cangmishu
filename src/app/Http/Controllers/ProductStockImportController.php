@@ -85,6 +85,18 @@ class ProductStockImportController extends  Controller
     }
 
     /**
+     * 模板下载
+     */
+    public function template(BaseRequests $request) {
+
+        return formatRet(0, '', [
+            'url'   =>  asset('template/库存导入模板.xlsx'),
+            'date'  =>  '2021-03-11'
+        ]);
+
+    }
+
+    /**
      * 检查内容
      **/
     public function check(BaseRequests $request) {
