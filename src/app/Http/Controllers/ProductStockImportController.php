@@ -37,11 +37,7 @@ class ProductStockImportController extends  Controller
         app('log')->info('检查库存导入', $request->all());
 
         $this->validate($request,[
-            'file' =>'required|file',
-            'warehouse_id' => [
-                'required','min:1',
-                Rule::exists('warehouse','id')->where('owner_id',app('auth')->ownerId())
-            ]
+            'file' =>'required|file'
         ]);
 
         $newResult = [];
