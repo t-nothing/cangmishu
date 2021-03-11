@@ -64,6 +64,7 @@ class CreateBatchRequest extends BaseRequests
             'product_stock.*.need_num'         => 'required|integer|min:1|max:99999',
             'product_stock.*.distributor_code' => 'string|max:20|distinct',
             'product_stock.*.remark'           => 'present|string|max:255',
+            'product_stock.*.location_code'    => 'present|string|max:255',//推荐货位
             'product_stock.*.purchase_price'   => 'required|numeric|min:0|max:99999',
         ];
     }

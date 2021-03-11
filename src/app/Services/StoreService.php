@@ -56,7 +56,7 @@ class StoreService
         //如果不是自动创建货位，就判断一下
         if(!$auto_create_location) {
             $notExistsLocations  = [];
-            foreach ($stocks as $key => $item) {
+            foreach ($stocks as $key => &$item) {
 
                 $count = WarehouseLocation::ofWarehouse($warehouse_id)->where('code', $item['code'])->where('is_enabled',1)->count();
 
@@ -179,7 +179,8 @@ class StoreService
         $batchProduct->best_before_date        = isset($data['best_before_date']) && !empty($data['best_before_date'])?strtotime($data['best_before_date']." 00:00:00"): null;
         $batchProduct->production_batch_number = $data['production_batch_number']??'';
         $batchProduct->remark                  = $data['remark']??"";
-
+        $batchProduct->warehouse_location_id   = $location->id;
+        $batchProduct->location_code           = $location->code;
         app('log')->info('here');
         // 添加入库单记录
         $productStock = $batchProduct->setStockQty($data["stockin_num"])
