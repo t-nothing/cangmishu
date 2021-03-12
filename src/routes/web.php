@@ -204,6 +204,10 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/specs', 'ProductSpecController@index');
     Route::post('/specs/locations', 'ProductStockController@getLocationBySpec');//规格找到货位
     Route::get('/spec/{spec_id}/stocks', 'ProductStockController@specWithStocks');//根据单个规格，拉取库存明细
+    Route::post('/specs/stocks/upload', 'ProductStockImportController@upload');//库存导入
+    Route::post('/specs/stocks/check', 'ProductStockImportController@check');//库存检查
+    Route::post('/specs/stocks/import', 'ProductStockImportController@import');//库存导入并上架
+    Route::get('/specs/stocks/template', 'ProductStockImportController@template');//库存导入并上架
 
 
     //入库单
@@ -217,7 +221,6 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('/batch/{batch_id}/pdf/', 'BatchController@pdf');
     Route::get('/batch/{batch_id}/pdf/{tempate}', 'BatchController@pdf');
     Route::post('/batchCode', 'BatchController@batchCode');
-
 
     //出库单
     Route::get('/order', 'OrderController@index');

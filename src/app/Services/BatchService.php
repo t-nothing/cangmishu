@@ -46,6 +46,7 @@ class BatchService
                 'distributor_id'   => isset($request['distributor_id'])?$request['distributor_id']:0,
                 'distributor_code' => isset($v['distributor_code'])?$v['distributor_code']:"",
                 'warehouse_id'     => $request['warehouse_id'],
+                'location_code'     => isset($v['location_code'])?$v['location_code']:"",
                 'status'           => Product::PRODUCT_STATUS_PREPARE,
                 'sku'	           => ProductSpec::newSku($spec),
             ];
