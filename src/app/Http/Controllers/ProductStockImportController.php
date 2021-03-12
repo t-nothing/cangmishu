@@ -120,7 +120,7 @@ class ProductStockImportController extends  Controller
         }
 
         //再判断货位存不存在
-        if (!$request->allow_not_exists && ! $location = WarehouseLocation::where('owner_id', app('auth')->ownerId())->where("warehouse_id", app('auth')->warehouse()->id)->where('code', $request->location_code)->first()) {
+        if (!($request->allow_not_exists??1) && ! $location = WarehouseLocation::where('owner_id', app('auth')->ownerId())->where("warehouse_id", app('auth')->warehouse()->id)->where('code', $request->location_code)->first()) {
             return formatRet(500, trans("message.warehouseLocationNotExist"), [ "col" => 4 ], 500);
         }
 
