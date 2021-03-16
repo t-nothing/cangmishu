@@ -448,6 +448,7 @@ class StatisticsService
         $data = ShopUser::query()
             ->join('order as o', 'o.shop_user_id', '=', 'shop_user.id')
             ->whereRaw('o.status > ' . Order::STATUS_DEFAULT)
+            ->where('o.warehouse_id', self::$warehouseId)
             ->selectRaw('shop_user.id as user_id,
             shop_user.avatar_url as avatar,
             shop_user.nick_name as name, count(o.id) as order_count,
