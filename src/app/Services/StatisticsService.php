@@ -537,6 +537,7 @@ class StatisticsService
             ->selectRaw("s.relevance_code, order_item.name_cn as name, sum(order_item.amount) as sales, order_item.pic as picture")
             ->groupBy(['s.relevance_code'])
             ->orderByDesc('sales')
+            ->limit(20)
             ->get()->each->setAppends([]);
     }
 
